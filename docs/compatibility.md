@@ -37,6 +37,12 @@ Session actions use tools already present in the validated CachyOS environment:
 
 The session locker itself remains an external session responsibility until Lumina's secure-lock roadmap item is implemented.
 
+## Multi-output validation
+
+Per-output surface selection, exclusive overlay coordination, and fallback from an unavailable output name were validated on the active `DP-1` output. The bar, wallpaper, and overlay delegates all derive their geometry from `Quickshell.screens`.
+
+Disconnect handling is implemented for active overlays, notification popups, calendars, and persisted wallpaper mappings. A native hotplug transition across two physical outputs remains an explicit compatibility follow-up.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.

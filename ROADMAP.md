@@ -64,7 +64,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Wallpaper picker and per-output wallpaper state.
 - [x] Advanced Niri actions and layout controls.
 - [x] Session menu.
-- [ ] Improved multi-output handling.
+- [x] Improved multi-output handling.
 - [x] Configuration persistence and migration.
 
 ## 0.5 — Public Beta
@@ -108,15 +108,15 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## Current sprint
 
-### Sprint 2 — Niri state
+### Sprint 4 — Interactive and desktop alpha
 
-The current sprint delivers the reactive compositor-state vertical slice:
+This sprint delivers the 0.3 and 0.4 desktop surfaces:
 
-1. Event-stream connection and safe event reduction.
-2. Workspace, window, overview, and output state.
-3. Workspace and overview actions behind `NiriService`.
-4. Per-output active-window information.
-5. Column and tile position indicator.
+1. Unified application, window, and shell-action search.
+2. Notification daemon, popup queue, history, and Do Not Disturb.
+3. Persistent per-output wallpapers and wallpaper-derived colors.
+4. Advanced Niri layout actions and confirmed session controls.
+5. Coordinated overlays with output fallback and disconnect handling.
 
 ### Acceptance criteria
 
@@ -129,16 +129,12 @@ The current sprint delivers the reactive compositor-state vertical slice:
 - Opening and closing the overview updates the bar state.
 - Disconnecting and reconnecting the event stream does not leave stale state.
 - No visual component invokes `niri msg` directly.
+- Only one full-screen interactive overlay is active at a time.
+- An unavailable target output falls back to a connected output.
 
-## Next sprint
+## Open follow-ups
 
-### Sprint 3 — Complete the 0.1 bar
-
-After Sprint 2 native validation:
-
-1. [x] Clock interaction and calendar popup.
-2. [x] System tray integration.
-3. [x] Stronger action error reporting.
-4. [ ] Event-reduction and reconnection tests.
-5. [ ] Multi-output interaction refinements.
-6. [ ] Project license selection.
+1. [ ] Complete the 0.2 daily controls.
+2. [ ] Add event-reduction and reconnection tests.
+3. [ ] Validate overlay hotplug behavior with two physical outputs.
+4. [ ] Select the project license.

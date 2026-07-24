@@ -133,6 +133,14 @@ Advanced layout requests remain typed methods on `NiriService`. The session surf
 
 The `session` IPC target can open the menu and describe the resolved command without executing it. This provides a safe diagnostics path for session integration.
 
+## Multi-output surfaces
+
+`OverlayStore` is the process-wide coordinator for launcher, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
+
+Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; and persisted wallpaper assignments remain available for a later reconnect.
+
+Each module still creates one lightweight surface delegate per connected screen. The coordinator only makes the selected delegate visible, preserving independent per-output geometry without duplicating service state.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
@@ -164,7 +172,8 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 ## Next increment
 
-The remaining 0.1 bar work is:
+The next open implementation areas are:
 
+- 0.2 daily controls;
 - tests for event reduction and reconnection;
-- multi-output interaction refinement.
+- physical two-output hotplug validation.

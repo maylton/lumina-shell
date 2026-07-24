@@ -2,7 +2,7 @@
 
 Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell and QML and guided by Material 3 Expressive design principles.
 
-> Status: early foundation. The repository currently contains only the first runnable shell skeleton and project documentation.
+> Status: interactive desktop alpha. The 0.3 and 0.4 shell surfaces are implemented; daily controls from 0.2 remain open.
 
 ## Goals
 
@@ -33,18 +33,19 @@ cd lumina-shell
 qs -p .
 ```
 
-The foundation build opens a top panel on every detected output and displays a clock. It intentionally does not start Niri IPC integration yet; that is the next development increment.
+The shell opens a top panel and wallpaper surface on every detected output. It includes reactive Niri state, launcher search, notifications, calendar and tray widgets, per-output wallpapers, dynamic color, layout actions, and confirmed session controls.
 
 ## Development status
 
-Current milestone: **0.1 — Niri Foundation**
+Current completed milestones: **0.3 — Interactive Alpha** and **0.4 — Desktop Alpha**
 
-First implementation sequence:
+The current implementation includes:
 
-1. Establish a runnable and modular Quickshell base.
-2. Add a typed, event-driven Niri service.
-3. Display workspaces and the focused window.
-4. Introduce the first reusable Material Expressive components.
+1. A typed, event-driven Niri service and reactive compositor stores.
+2. Per-output bars, wallpapers, and coordinated interactive overlays.
+3. Application, window, and shell-action search.
+4. Notification history, Do Not Disturb, and wallpaper-derived colors.
+5. Advanced layout actions and confirmed session controls.
 
 See [ROADMAP.md](ROADMAP.md) for the complete plan and [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
@@ -55,7 +56,8 @@ lumina-shell/
 ├── shell.qml
 ├── design/
 ├── modules/
-│   └── bar/
+├── services/
+├── stores/
 ├── docs/
 ├── scripts/
 └── ROADMAP.md
