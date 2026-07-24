@@ -2,4 +2,13 @@ module qs.modules.control
 ControlButton 1.0 ControlButton.qml
 ControlCenter 1.0 ControlCenter.qml
 ControlSlider 1.0 ControlSlider.qml
+DashboardAction 1.0 DashboardAction.qml
+DashboardCalendar 1.0 DashboardCalendar.qml
+DashboardCard 1.0 DashboardCard.qml
+DashboardControls 1.0 DashboardControls.qml
+DashboardHeader 1.0 DashboardHeader.qml
+DashboardMedia 1.0 DashboardMedia.qml
+DashboardNotifications 1.0 DashboardNotifications.qml
+DashboardOverview 1.0 DashboardOverview.qml
+DashboardStatus 1.0 DashboardStatus.qml
 QuickToggle 1.0 QuickToggle.qml

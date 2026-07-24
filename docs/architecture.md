@@ -125,7 +125,9 @@ Every service exposes a read-only `status` IPC operation for diagnostics. Visual
 
 `OsdStore` reduces volume, microphone, brightness, session-lock, and explicit lock-key events into one timed presentation state. The OSD resolves the focused Niri output, never requests keyboard focus, and closes if that output disappears. The `osd` IPC target allows compositor key bindings to publish lock-key state without embedding input-device assumptions in the shell.
 
-The Material control center combines service state without duplicating ownership. Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same service methods used by IPC. `ControlCenterStore` participates in `OverlayStore`, so it cannot compete with launcher, notification, wallpaper, or session surfaces for keyboard focus.
+The Material control center is a centered desktop dashboard with a responsive three-column composition. Its dashboard tab combines the active workspace and output, clock, daily controls, notification history, media, connectivity, power, and calendar. A dedicated notifications tab expands history without creating a second service owner. The presentation is split into focused `Dashboard*` components while service and store boundaries remain unchanged.
+
+Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same typed service methods used by IPC. `ControlCenterStore` owns the selected dashboard tab and uptime presentation and participates in `OverlayStore`, so the dashboard cannot compete with launcher, notification, wallpaper, settings, or session surfaces for keyboard focus.
 
 ## Graphical settings
 

@@ -22,22 +22,34 @@ qs ipc -p /path/to/lumina-shell call launcher toggle DP-1
 
 Replace `DP-1` with the output reported by `niri msg outputs`. An unavailable name falls back to a connected output.
 
-## Quick settings
+## Control center
 
-The status/volume chip opens the control center. It provides:
+The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab provides:
 
+- the active workspace, output, time, date, and system uptime;
 - output and microphone levels;
 - display brightness when a backlight exists;
+- notification history and Do Not Disturb;
 - MPRIS media controls;
 - Wi-Fi and Bluetooth state;
-- Do Not Disturb and dynamic color;
-- battery state and power profiles.
+- battery state and power profiles;
+- an inline calendar.
+
+The **Notifications** tab expands notification history while keeping the daily controls and system status available. The header contains shortcuts for refreshing Niri output state, opening settings and session controls, toggling connectivity, Do Not Disturb, dynamic color, and closing the dashboard.
 
 Hardware controls degrade to an unavailable state instead of preventing the shell from starting.
 
+The control center can also be opened and switched through IPC:
+
+```bash
+qs ipc -p /path/to/lumina-shell call control open DP-1
+qs ipc -p /path/to/lumina-shell call control tab notifications
+qs ipc -p /path/to/lumina-shell call control close
+```
+
 ## Graphical settings
 
-Choose **Open Lumina settings** at the bottom of quick settings. The settings surface controls:
+Choose the settings action in the control-center header. The settings surface controls:
 
 - wallpaper-derived dynamic color;
 - detailed or compact Niri status in the bar;
