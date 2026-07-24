@@ -302,6 +302,29 @@ Singleton {
         Qt.callLater(startNextAction)
     }
 
+    function focusWindow(windowId) {
+        const id = Number(windowId)
+
+        if (!isFinite(id))
+            return
+
+        if (demoMode) {
+            WindowStore.focus(id)
+            completeDemoAction("focus-window", "Focus window")
+            return
+        }
+
+        enqueueAction(
+            "focus-window",
+            "Focus window " + id,
+            [
+                "focus-window",
+                "--id",
+                String(id)
+            ]
+        )
+    }
+
     function focusWorkspace(workspace) {
         if (!workspace)
             return

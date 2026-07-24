@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.design
 import qs.modules.bar.widgets
+import qs.modules.launcher
 import qs.services.niri
 import qs.stores.niri
 
@@ -94,6 +95,11 @@ Scope {
                         }
 
                         spacing: root.luminaDesign.spacing.small
+
+                        LauncherButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            outputName: panel.outputName
+                        }
 
                         Rectangle {
                             id: overviewButton
