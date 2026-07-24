@@ -59,6 +59,8 @@ QtObject {
             barHeight: 48,
             calendarWidth: 336,
             chipHeight: 30,
+            controlCenterHeight: 742,
+            controlCenterWidth: 460,
             dayCell: 40,
             launcherHeight: 620,
             launcherIcon: 34,

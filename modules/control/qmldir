@@ -1,0 +1,5 @@
+module qs.modules.control
+ControlButton 1.0 ControlButton.qml
+ControlCenter 1.0 ControlCenter.qml
+ControlSlider 1.0 ControlSlider.qml
+QuickToggle 1.0 QuickToggle.qml

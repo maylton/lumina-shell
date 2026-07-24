@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.design
 import qs.modules.bar.widgets
+import qs.modules.control
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.session
@@ -366,6 +367,11 @@ Scope {
 
                         TrayWidget {
                             anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        ControlButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            outputName: panel.outputName
                         }
 
                         NotificationButton {

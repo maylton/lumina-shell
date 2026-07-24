@@ -3,6 +3,7 @@
 import Quickshell
 import qs.services
 import qs.modules.bar
+import qs.modules.control
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.osd
@@ -14,6 +15,7 @@ ShellRoot {
     Wallpaper {}
     WallpaperPicker {}
     Bar {}
+    ControlCenter {}
     Launcher {}
     NotificationPopups {}
     NotificationCenter {}
