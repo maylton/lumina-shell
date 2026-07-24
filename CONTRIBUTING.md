@@ -27,12 +27,32 @@ Suggested branch prefixes:
 - Design every panel with multi-monitor behavior in mind.
 - Ensure keyboard focus is visible whenever a component can receive focus.
 
+## QML tooling
+
+Create the local QML language-server file next to `shell.qml`:
+
+```bash
+touch .qmlls.ini
+qs -p .
+```
+
+Quickshell manages the contents of `.qmlls.ini` for the current machine. The file is intentionally ignored by Git.
+
+Use `qmlls` through the editor for project-aware diagnostics. A standalone `qmllint` invocation may not resolve Quickshell root-relative `qs.*` imports or `PanelWindow`, so runtime validation remains required.
+
 ## Manual validation
 
-Before requesting review:
+On a Wayland development host:
 
 ```bash
 ./scripts/check-environment.sh
+qs -p .
+```
+
+Inside the clean Niri test session:
+
+```bash
+./scripts/check-environment.sh --require-niri
 qs -p .
 ```
 
