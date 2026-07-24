@@ -25,6 +25,23 @@ Rectangle {
         : sessionMouse.containsMouse
             ? 1.03
             : 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
+
+    Accessible.role: Accessible.Button
+    Accessible.name: "Open session and layout controls"
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: root.activate()
+
+    function activate() {
+        if (expanded) {
+            SessionService.cancel()
+            SessionMenuStore.close()
+        } else {
+            SessionMenuStore.openFor(outputName)
+        }
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -57,13 +74,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            if (root.expanded) {
-                SessionService.cancel()
-                SessionMenuStore.close()
-            } else {
-                SessionMenuStore.openFor(root.outputName)
-            }
-        }
+        onClicked: root.activate()
     }
 }

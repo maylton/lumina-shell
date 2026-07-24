@@ -16,15 +16,35 @@ Rectangle {
     readonly property var luminaDesign: Theme.luminaTokens
 
     implicitHeight: 82
+    activeFocusOnTab: true
     radius: root.luminaDesign.shape.large
     color: actionMouse.containsMouse
         ? destructive
             ? Qt.rgba(1, 0.35, 0.32, 0.18)
             : root.luminaDesign.color.accentContainer
         : root.luminaDesign.color.surfaceMuted
-    border.width: destructive ? 1 : 0
-    border.color: root.luminaDesign.color.urgent
+    border.width: activeFocus ? 2 : destructive ? 1 : 0
+    border.color: activeFocus
+        ? root.luminaDesign.color.primary
+        : root.luminaDesign.color.urgent
     scale: actionMouse.pressed ? 0.97 : 1.0
+
+    Accessible.role: Accessible.Button
+    Accessible.name: title
+    Accessible.description: description
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: root.activated()
+
+    Keys.onSpacePressed: event => {
+        root.activated()
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        root.activated()
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -93,6 +113,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.activated()
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.activated()
+        }
     }
 }

@@ -23,6 +23,12 @@ Rectangle {
         ? root.luminaDesign.color.accentContainer
         : "transparent"
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: String(result.title || "")
+    Accessible.description: String(result.subtitle || "")
+    Accessible.selected: selected
+    Accessible.onPressAction: root.activated()
+
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.fast

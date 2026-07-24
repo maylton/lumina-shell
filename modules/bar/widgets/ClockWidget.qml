@@ -26,6 +26,15 @@ Rectangle {
     color: expanded || clockMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : "transparent"
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
+
+    Accessible.role: Accessible.Button
+    Accessible.name: "Open calendar"
+    Accessible.description: CalendarStore.formattedTime
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: CalendarStore.toggle(root.outputName)
 
     Behavior on color {
         ColorAnimation {

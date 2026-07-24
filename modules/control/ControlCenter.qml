@@ -152,12 +152,29 @@ Scope {
                                 width: 34
                                 height: 34
                                 radius: root.luminaDesign.shape.full
+                                activeFocusOnTab: true
                                 color: closeMouse.containsMouse
                                     ? root.luminaDesign.color.accentContainer
                                     : root.luminaDesign.color.surfaceMuted
+                                border.width: activeFocus ? 2 : 0
+                                border.color: root.luminaDesign.color.primary
 
                                 Accessible.role: Accessible.Button
                                 Accessible.name: "Close quick settings"
+                                Accessible.focusable: true
+                                Accessible.focused: activeFocus
+                                Accessible.onPressAction:
+                                    ControlCenterStore.close()
+
+                                Keys.onSpacePressed: event => {
+                                    ControlCenterStore.close()
+                                    event.accepted = true
+                                }
+
+                                Keys.onReturnPressed: event => {
+                                    ControlCenterStore.close()
+                                    event.accepted = true
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -172,7 +189,12 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: ControlCenterStore.close()
+                                    onClicked: {
+                                        parent.forceActiveFocus(
+                                            Qt.MouseFocusReason
+                                        )
+                                        ControlCenterStore.close()
+                                    }
                                 }
                             }
                         }
@@ -281,15 +303,49 @@ Scope {
 
                                             width: 28
                                             height: 28
+                                            activeFocusOnTab:
+                                                modelData.enabled
                                             radius: root.luminaDesign.shape.full
                                             opacity: modelData.enabled ? 1 : 0.4
                                             color: mediaMouse.containsMouse
                                                 ? root.luminaDesign.color.accentContainer
                                                 : "transparent"
+                                            border.width: activeFocus ? 2 : 0
+                                            border.color:
+                                                root.luminaDesign.color.primary
 
                                             Accessible.role: Accessible.Button
                                             Accessible.name:
                                                 "Media " + modelData.action
+                                            Accessible.focusable:
+                                                modelData.enabled
+                                            Accessible.focused: activeFocus
+                                            Accessible.onPressAction:
+                                                mediaAction.invoke()
+
+                                            function invoke() {
+                                                switch (modelData.action) {
+                                                case "previous":
+                                                    MediaService.previous()
+                                                    break
+                                                case "next":
+                                                    MediaService.next()
+                                                    break
+                                                default:
+                                                    MediaService.toggle()
+                                                    break
+                                                }
+                                            }
+
+                                            Keys.onSpacePressed: event => {
+                                                mediaAction.invoke()
+                                                event.accepted = true
+                                            }
+
+                                            Keys.onReturnPressed: event => {
+                                                mediaAction.invoke()
+                                                event.accepted = true
+                                            }
 
                                             Text {
                                                 anchors.centerIn: parent
@@ -309,19 +365,10 @@ Scope {
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
-                                                    switch (
-                                                        mediaAction.modelData.action
-                                                    ) {
-                                                    case "previous":
-                                                        MediaService.previous()
-                                                        break
-                                                    case "next":
-                                                        MediaService.next()
-                                                        break
-                                                    default:
-                                                        MediaService.toggle()
-                                                        break
-                                                    }
+                                                    mediaAction.forceActiveFocus(
+                                                        Qt.MouseFocusReason
+                                                    )
+                                                    mediaAction.invoke()
                                                 }
                                             }
                                         }
@@ -497,6 +544,7 @@ Scope {
                                                 - parent.spacing * 2
                                         ) / 3
                                         height: 38
+                                        activeFocusOnTab: available
                                         radius: selected
                                             ? root.luminaDesign.shape.full
                                             : root.luminaDesign.shape.medium
@@ -504,11 +552,30 @@ Scope {
                                         color: selected
                                             ? root.luminaDesign.color.accentContainer
                                             : root.luminaDesign.color.surfaceMuted
+                                        border.width: activeFocus ? 2 : 0
+                                        border.color:
+                                            root.luminaDesign.color.primary
 
                                         Accessible.role: Accessible.RadioButton
                                         Accessible.name:
                                             modelData.label + " power profile"
                                         Accessible.checked: selected
+                                        Accessible.focusable: available
+                                        Accessible.focused: activeFocus
+                                        Accessible.onPressAction:
+                                            PowerService.setProfile(
+                                                modelData.id
+                                            )
+
+                                        Keys.onSpacePressed: event => {
+                                            PowerService.setProfile(modelData.id)
+                                            event.accepted = true
+                                        }
+
+                                        Keys.onReturnPressed: event => {
+                                            PowerService.setProfile(modelData.id)
+                                            event.accepted = true
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
@@ -526,9 +593,14 @@ Scope {
                                             anchors.fill: parent
                                             enabled: profileButton.available
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: PowerService.setProfile(
-                                                profileButton.modelData.id
-                                            )
+                                            onClicked: {
+                                                profileButton.forceActiveFocus(
+                                                    Qt.MouseFocusReason
+                                                )
+                                                PowerService.setProfile(
+                                                    profileButton.modelData.id
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -539,12 +611,34 @@ Scope {
                             width: parent.width
                             height: 42
                             radius: root.luminaDesign.shape.full
+                            activeFocusOnTab: true
                             color: settingsMouse.containsMouse
                                 ? root.luminaDesign.color.primary
                                 : root.luminaDesign.color.accentContainer
+                            border.width: activeFocus ? 2 : 0
+                            border.color: root.luminaDesign.color.primary
 
                             Accessible.role: Accessible.Button
                             Accessible.name: "Open Lumina settings"
+                            Accessible.focusable: true
+                            Accessible.focused: activeFocus
+                            Accessible.onPressAction: SettingsStore.openFor(
+                                controlWindow.outputName
+                            )
+
+                            Keys.onSpacePressed: event => {
+                                SettingsStore.openFor(
+                                    controlWindow.outputName
+                                )
+                                event.accepted = true
+                            }
+
+                            Keys.onReturnPressed: event => {
+                                SettingsStore.openFor(
+                                    controlWindow.outputName
+                                )
+                                event.accepted = true
+                            }
 
                             Text {
                                 anchors.centerIn: parent
@@ -562,9 +656,14 @@ Scope {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: SettingsStore.openFor(
-                                    controlWindow.outputName
-                                )
+                                onClicked: {
+                                    parent.forceActiveFocus(
+                                        Qt.MouseFocusReason
+                                    )
+                                    SettingsStore.openFor(
+                                        controlWindow.outputName
+                                    )
+                                }
                             }
                         }
                     }

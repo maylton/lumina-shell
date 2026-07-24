@@ -25,6 +25,9 @@ Rectangle {
             ? 1.03
             : 1.0
     opacity: enabled ? 1.0 : 0.48
+    activeFocusOnTab: enabled
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
     color: selected
         ? luminaDesign.color.accentContainer
         : buttonMouse.pressed
@@ -32,6 +35,22 @@ Rectangle {
             : buttonMouse.containsMouse
                 ? luminaDesign.color.surfaceMuted
                 : "transparent"
+
+    Accessible.role: Accessible.Button
+    Accessible.name: label
+    Accessible.focusable: enabled
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: root.clicked()
+
+    Keys.onSpacePressed: event => {
+        root.clicked()
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        root.clicked()
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -72,6 +91,9 @@ Rectangle {
         enabled: root.enabled
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.clicked()
+        }
     }
 }

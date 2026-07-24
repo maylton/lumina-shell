@@ -33,6 +33,10 @@ Rectangle {
         : root.luminaDesign.color.outline
     scale: cardMouse.pressed ? 0.99 : 1.0
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: String(entry.summary || "Notification")
+    Accessible.description: String(entry.body || "")
+
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.fast
@@ -159,10 +163,40 @@ Rectangle {
 
                         width: actionLabel.implicitWidth + 16
                         height: 26
+                        activeFocusOnTab: true
                         radius: root.luminaDesign.shape.full
                         color: actionMouse.containsMouse
                             ? root.luminaDesign.color.accentContainer
                             : root.luminaDesign.color.surfaceMuted
+                        border.width: activeFocus ? 2 : 0
+                        border.color: root.luminaDesign.color.primary
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name:
+                            String(modelData.text || "Open")
+                        Accessible.focusable: true
+                        Accessible.focused: activeFocus
+                        Accessible.onPressAction:
+                            NotificationService.invokeAction(
+                                root.entry,
+                                modelData
+                            )
+
+                        Keys.onSpacePressed: event => {
+                            NotificationService.invokeAction(
+                                root.entry,
+                                modelData
+                            )
+                            event.accepted = true
+                        }
+
+                        Keys.onReturnPressed: event => {
+                            NotificationService.invokeAction(
+                                root.entry,
+                                modelData
+                            )
+                            event.accepted = true
+                        }
 
                         Text {
                             id: actionLabel
@@ -182,10 +216,15 @@ Rectangle {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: NotificationService.invokeAction(
-                                root.entry,
-                                actionButton.modelData
-                            )
+                            onClicked: {
+                                actionButton.forceActiveFocus(
+                                    Qt.MouseFocusReason
+                                )
+                                NotificationService.invokeAction(
+                                    root.entry,
+                                    actionButton.modelData
+                                )
+                            }
                         }
                     }
                 }
@@ -197,10 +236,30 @@ Rectangle {
 
             width: 26
             height: 26
+            activeFocusOnTab: true
             radius: root.luminaDesign.shape.full
             color: closeMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
                 : "transparent"
+            border.width: activeFocus ? 2 : 0
+            border.color: root.luminaDesign.color.primary
+
+            Accessible.role: Accessible.Button
+            Accessible.name: "Dismiss notification"
+            Accessible.focusable: true
+            Accessible.focused: activeFocus
+            Accessible.onPressAction:
+                NotificationService.dismissNotification(root.entry)
+
+            Keys.onSpacePressed: event => {
+                NotificationService.dismissNotification(root.entry)
+                event.accepted = true
+            }
+
+            Keys.onReturnPressed: event => {
+                NotificationService.dismissNotification(root.entry)
+                event.accepted = true
+            }
 
             Text {
                 anchors.centerIn: parent
@@ -217,7 +276,10 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: NotificationService.dismissNotification(root.entry)
+                onClicked: {
+                    closeButton.forceActiveFocus(Qt.MouseFocusReason)
+                    NotificationService.dismissNotification(root.entry)
+                }
             }
         }
     }

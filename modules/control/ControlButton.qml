@@ -26,6 +26,9 @@ Rectangle {
         : controlMouse.containsMouse
             ? 1.03
             : 1
+    activeFocusOnTab: true
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Button
     Accessible.name: "Open quick settings"
@@ -33,6 +36,20 @@ Rectangle {
         + ", volume "
         + Math.round(AudioService.outputVolume * 100)
         + " percent"
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction:
+        ControlCenterStore.toggle(root.outputName)
+
+    Keys.onSpacePressed: event => {
+        ControlCenterStore.toggle(root.outputName)
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        ControlCenterStore.toggle(root.outputName)
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -85,6 +102,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: ControlCenterStore.toggle(root.outputName)
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            ControlCenterStore.toggle(root.outputName)
+        }
     }
 }

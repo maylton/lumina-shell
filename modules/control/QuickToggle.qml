@@ -25,11 +25,27 @@ Rectangle {
         : luminaDesign.color.surfaceMuted
     opacity: available ? 1 : 0.5
     scale: toggleMouse.pressed ? 0.97 : 1
+    activeFocusOnTab: available
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.CheckBox
     Accessible.name: title
     Accessible.description: detail
     Accessible.checked: checked
+    Accessible.focusable: available
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: root.toggled()
+
+    Keys.onSpacePressed: event => {
+        root.toggled()
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        root.toggled()
+        event.accepted = true
+    }
 
     Behavior on radius {
         NumberAnimation {
@@ -98,6 +114,9 @@ Rectangle {
         cursorShape: root.available
             ? Qt.PointingHandCursor
             : Qt.ForbiddenCursor
-        onClicked: root.toggled()
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.toggled()
+        }
     }
 }

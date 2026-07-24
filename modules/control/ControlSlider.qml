@@ -36,10 +36,29 @@ Rectangle {
     radius: luminaDesign.shape.large
     color: luminaDesign.color.surfaceMuted
     opacity: available ? 1 : 0.55
+    activeFocusOnTab: available
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Slider
     Accessible.name: title
     Accessible.description: detail
+    Accessible.focusable: available
+    Accessible.focused: activeFocus
+    Accessible.onIncreaseAction:
+        root.valueRequested(Math.min(1, root.clampedValue + 0.05))
+    Accessible.onDecreaseAction:
+        root.valueRequested(Math.max(0, root.clampedValue - 0.05))
+
+    Keys.onLeftPressed: event => {
+        root.valueRequested(Math.max(0, root.clampedValue - 0.05))
+        event.accepted = true
+    }
+
+    Keys.onRightPressed: event => {
+        root.valueRequested(Math.min(1, root.clampedValue + 0.05))
+        event.accepted = true
+    }
 
     Row {
         anchors {
@@ -120,7 +139,10 @@ Rectangle {
 
             enabled: root.available
             cursorShape: Qt.PointingHandCursor
-            onPressed: mouse => root.requestAt(mouse.x)
+            onPressed: mouse => {
+                root.forceActiveFocus(Qt.MouseFocusReason)
+                root.requestAt(mouse.x)
+            }
             onPositionChanged: mouse => {
                 if (pressed)
                     root.requestAt(mouse.x)

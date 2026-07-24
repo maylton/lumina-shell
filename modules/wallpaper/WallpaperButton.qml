@@ -24,6 +24,15 @@ Rectangle {
         : wallpaperMouse.containsMouse
             ? 1.03
             : 1.0
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
+
+    Accessible.role: Accessible.Button
+    Accessible.name: "Open wallpaper picker"
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction:
+        WallpaperService.togglePicker(root.outputName)
 
     Behavior on color {
         ColorAnimation {

@@ -162,12 +162,29 @@ Scope {
                                 width: 34
                                 height: 34
                                 radius: root.luminaDesign.shape.full
+                                activeFocusOnTab: true
                                 color: settingsCloseMouse.containsMouse
                                     ? root.luminaDesign.color.accentContainer
                                     : root.luminaDesign.color.surfaceMuted
+                                border.width: activeFocus ? 2 : 0
+                                border.color: root.luminaDesign.color.primary
 
                                 Accessible.role: Accessible.Button
                                 Accessible.name: "Close settings"
+                                Accessible.focusable: true
+                                Accessible.focused: activeFocus
+                                Accessible.onPressAction:
+                                    SettingsStore.close()
+
+                                Keys.onSpacePressed: event => {
+                                    SettingsStore.close()
+                                    event.accepted = true
+                                }
+
+                                Keys.onReturnPressed: event => {
+                                    SettingsStore.close()
+                                    event.accepted = true
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -182,7 +199,12 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: SettingsStore.close()
+                                    onClicked: {
+                                        parent.forceActiveFocus(
+                                            Qt.MouseFocusReason
+                                        )
+                                        SettingsStore.close()
+                                    }
                                 }
                             }
                         }
@@ -295,17 +317,41 @@ Scope {
                                                 - parent.spacing * 2
                                         ) / 3
                                         height: 38
+                                        activeFocusOnTab: true
                                         radius: selected
                                             ? root.luminaDesign.shape.full
                                             : root.luminaDesign.shape.medium
                                         color: selected
                                             ? root.luminaDesign.color.accentContainer
                                             : root.luminaDesign.color.surfaceMuted
+                                        border.width: activeFocus ? 2 : 0
+                                        border.color:
+                                            root.luminaDesign.color.primary
 
                                         Accessible.role: Accessible.RadioButton
                                         Accessible.name:
                                             modelData.label + " OSD duration"
                                         Accessible.checked: selected
+                                        Accessible.focusable: true
+                                        Accessible.focused: activeFocus
+                                        Accessible.onPressAction:
+                                            ConfigStore.setOsdDuration(
+                                                modelData.value
+                                            )
+
+                                        Keys.onSpacePressed: event => {
+                                            ConfigStore.setOsdDuration(
+                                                modelData.value
+                                            )
+                                            event.accepted = true
+                                        }
+
+                                        Keys.onReturnPressed: event => {
+                                            ConfigStore.setOsdDuration(
+                                                modelData.value
+                                            )
+                                            event.accepted = true
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
@@ -322,10 +368,14 @@ Scope {
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked:
+                                            onClicked: {
+                                                durationButton.forceActiveFocus(
+                                                    Qt.MouseFocusReason
+                                                )
                                                 ConfigStore.setOsdDuration(
                                                     durationButton.modelData.value
                                                 )
+                                            }
                                         }
                                     }
                                 }
@@ -379,6 +429,7 @@ Scope {
                                         selectedTextColor:
                                             root.luminaDesign.color.onAccentContainer
                                         clip: true
+                                        activeFocusOnTab: true
                                         font.pixelSize:
                                             root.luminaDesign.typography.bodyMedium
                                         onTextEdited:
@@ -395,13 +446,37 @@ Scope {
                                     width: 66
                                     height: 42
                                     radius: root.luminaDesign.shape.full
+                                    activeFocusOnTab: true
                                     color: saveDirectoryMouse.containsMouse
                                         ? root.luminaDesign.color.primary
                                         : root.luminaDesign.color.accentContainer
+                                    border.width: activeFocus ? 2 : 0
+                                    border.color:
+                                        root.luminaDesign.color.primary
 
                                     Accessible.role: Accessible.Button
                                     Accessible.name:
                                         "Save wallpaper directory"
+                                    Accessible.focusable: true
+                                    Accessible.focused: activeFocus
+                                    Accessible.onPressAction:
+                                        WallpaperService.setWallpaperDirectory(
+                                            settingsWindow.directoryDraft
+                                        )
+
+                                    Keys.onSpacePressed: event => {
+                                        WallpaperService.setWallpaperDirectory(
+                                            settingsWindow.directoryDraft
+                                        )
+                                        event.accepted = true
+                                    }
+
+                                    Keys.onReturnPressed: event => {
+                                        WallpaperService.setWallpaperDirectory(
+                                            settingsWindow.directoryDraft
+                                        )
+                                        event.accepted = true
+                                    }
 
                                     Text {
                                         anchors.centerIn: parent
@@ -419,10 +494,14 @@ Scope {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked:
+                                        onClicked: {
+                                            parent.forceActiveFocus(
+                                                Qt.MouseFocusReason
+                                            )
                                             WallpaperService.setWallpaperDirectory(
                                                 settingsWindow.directoryDraft
                                             )
+                                        }
                                     }
                                 }
                             }
@@ -479,13 +558,14 @@ Scope {
                         Rectangle {
                             width: parent.width
                             height: 52
+                            activeFocusOnTab: true
                             radius: SettingsStore.resetConfirmation
                                 ? root.luminaDesign.shape.extraLarge
                                 : root.luminaDesign.shape.large
                             color: SettingsStore.resetConfirmation
                                 ? Qt.rgba(1, 0.35, 0.32, 0.18)
                                 : root.luminaDesign.color.surfaceMuted
-                            border.width: 1
+                            border.width: activeFocus ? 2 : 1
                             border.color: SettingsStore.resetConfirmation
                                 ? root.luminaDesign.color.urgent
                                 : root.luminaDesign.color.outline
@@ -494,6 +574,32 @@ Scope {
                             Accessible.name: SettingsStore.resetConfirmation
                                 ? "Confirm reset settings"
                                 : "Reset settings"
+                            Accessible.focusable: true
+                            Accessible.focused: activeFocus
+                            Accessible.onPressAction: {
+                                if (SettingsStore.resetConfirmation)
+                                    SettingsStore.confirmReset()
+                                else
+                                    SettingsStore.requestReset()
+                            }
+
+                            Keys.onSpacePressed: event => {
+                                if (SettingsStore.resetConfirmation)
+                                    SettingsStore.confirmReset()
+                                else
+                                    SettingsStore.requestReset()
+
+                                event.accepted = true
+                            }
+
+                            Keys.onReturnPressed: event => {
+                                if (SettingsStore.resetConfirmation)
+                                    SettingsStore.confirmReset()
+                                else
+                                    SettingsStore.requestReset()
+
+                                event.accepted = true
+                            }
 
                             Text {
                                 anchors.centerIn: parent
@@ -513,6 +619,10 @@ Scope {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                    parent.forceActiveFocus(
+                                        Qt.MouseFocusReason
+                                    )
+
                                     if (SettingsStore.resetConfirmation)
                                         SettingsStore.confirmReset()
                                     else

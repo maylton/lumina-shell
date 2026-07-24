@@ -24,6 +24,14 @@ Rectangle {
     color: expanded || launcherMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : luminaDesign.color.surfaceMuted
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
+
+    Accessible.role: Accessible.Button
+    Accessible.name: "Open application launcher"
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: LauncherStore.toggle(root.outputName)
 
     Behavior on color {
         ColorAnimation {
