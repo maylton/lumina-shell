@@ -4,16 +4,16 @@ import QtQuick
 import Quickshell
 
 Singleton {
-    readonly property color surfaceBase: "#111318"
-    readonly property color surfaceContainer: "#1D2026"
-    readonly property color surfaceMuted: "#292C33"
-    readonly property color onSurface: "#E2E2E9"
-    readonly property color textMuted: "#C3C6CF"
-    readonly property color primary: "#ADC6FF"
-    readonly property color accentContainer: "#294777"
-    readonly property color onAccentContainer: "#D7E3FF"
-    readonly property color outline: "#8E9099"
-    readonly property color urgent: "#FFB4AB"
+    readonly property color surfaceBaseColor: "#111318"
+    readonly property color surfaceContainerColor: "#1D2026"
+    readonly property color surfaceMutedColor: "#292C33"
+    readonly property color onSurfaceColor: "#E2E2E9"
+    readonly property color textMutedColor: "#C3C6CF"
+    readonly property color primaryColor: "#ADC6FF"
+    readonly property color accentContainerColor: "#294777"
+    readonly property color onAccentContainerColor: "#D7E3FF"
+    readonly property color outlineColor: "#8E9099"
+    readonly property color urgentColor: "#FFB4AB"
 
     readonly property int barHeight: 48
     readonly property int radiusSmall: 10
