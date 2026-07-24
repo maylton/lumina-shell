@@ -1,0 +1,2 @@
+module qs.modules.bar.widgets
+ClockWidget 1.0 ClockWidget.qml

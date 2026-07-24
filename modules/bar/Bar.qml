@@ -4,18 +4,43 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.design
+import qs.modules.bar.widgets
+import qs.modules.calendar
 import qs.services.niri
 import qs.stores.niri
+import qs.stores.time
 
 Scope {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
-    property string formattedTime: Qt.formatDateTime(clock.date, "HH:mm")
+    property var calendarAnchor: null
 
-    SystemClock {
-        id: clock
-        precision: SystemClock.Minutes
+    function toggleCalendar(anchorItem, outputName) {
+        if (CalendarStore.isOpenFor(outputName)) {
+            CalendarStore.close()
+            calendarAnchor = null
+            return
+        }
+
+        if (CalendarStore.open) {
+            CalendarStore.close()
+            calendarAnchor = null
+
+            Qt.callLater(function() {
+                root.calendarAnchor = anchorItem
+                CalendarStore.openFor(outputName)
+            })
+            return
+        }
+
+        calendarAnchor = anchorItem
+        CalendarStore.openFor(outputName)
+    }
+
+    CalendarPopup {
+        anchorItem: root.calendarAnchor
+        onDismissed: root.calendarAnchor = null
     }
 
     Variants {
@@ -344,12 +369,14 @@ Scope {
                             }
                         }
 
-                        Text {
+                        ClockWidget {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: root.formattedTime
-                            color: root.luminaDesign.color.onSurface
-                            font.pixelSize: root.luminaDesign.typography.titleMedium
-                            font.weight: Font.DemiBold
+                            outputName: panel.outputName.length > 0
+                                ? panel.outputName
+                                : "screen"
+                            onToggleRequested: (anchorItem, outputName) => {
+                                root.toggleCalendar(anchorItem, outputName)
+                            }
                         }
                     }
                 }
