@@ -17,17 +17,7 @@ Singleton {
         return null
     }
 
-    readonly property string focusedLabel: {
-        const workspace = focusedWorkspace
-
-        if (!workspace)
-            return "—"
-
-        if (workspace.name)
-            return String(workspace.name)
-
-        return String(workspace.idx)
-    }
+    readonly property string focusedLabel: labelFor(focusedWorkspace)
 
     function cloneObject(source) {
         const result = {}
@@ -41,22 +31,44 @@ Singleton {
         return result
     }
 
+    function labelFor(workspace) {
+        if (!workspace)
+            return "—"
+
+        if (workspace.name)
+            return String(workspace.name)
+
+        return String(workspace.idx)
+    }
+
     function replace(items) {
         workspaces = items ? items.slice() : []
     }
 
     function forOutput(outputName) {
-        if (!outputName)
-            return workspaces
-
         const matches = []
 
         for (var i = 0; i < workspaces.length; ++i) {
-            if (workspaces[i].output === outputName)
+            if (!outputName || workspaces[i].output === outputName)
                 matches.push(workspaces[i])
         }
 
-        return matches.length > 0 ? matches : workspaces
+        matches.sort(function(left, right) {
+            return Number(left.idx) - Number(right.idx)
+        })
+
+        return matches
+    }
+
+    function activeForOutput(outputName) {
+        const candidates = forOutput(outputName)
+
+        for (var i = 0; i < candidates.length; ++i) {
+            if (candidates[i].is_active)
+                return candidates[i]
+        }
+
+        return null
     }
 
     function activate(id, focused) {
