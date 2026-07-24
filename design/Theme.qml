@@ -1,24 +1,28 @@
 pragma Singleton
 
-import QtQuick
+import QtQml
 
 QtObject {
-    readonly property color surfaceBaseColor: "#111318"
-    readonly property color surfaceContainerColor: "#1D2026"
-    readonly property color surfaceMutedColor: "#292C33"
-    readonly property color onSurfaceColor: "#E2E2E9"
-    readonly property color textMutedColor: "#C3C6CF"
-    readonly property color primaryColor: "#ADC6FF"
-    readonly property color accentContainerColor: "#294777"
-    readonly property color onAccentContainerColor: "#D7E3FF"
-    readonly property color outlineColor: "#8E9099"
-    readonly property color urgentColor: "#FFB4AB"
+    readonly property var luminaColors: ({
+        surfaceBase: "#111318",
+        surfaceContainer: "#1D2026",
+        surfaceMuted: "#292C33",
+        onSurface: "#E2E2E9",
+        textMuted: "#C3C6CF",
+        primary: "#ADC6FF",
+        accentContainer: "#294777",
+        onAccentContainer: "#D7E3FF",
+        outline: "#8E9099",
+        urgent: "#FFB4AB"
+    })
 
-    readonly property int barHeight: 48
-    readonly property int radiusSmall: 10
-    readonly property int radiusMedium: 14
-    readonly property int radiusLarge: 22
-    readonly property int spacingSmall: 6
-    readonly property int spacingMedium: 10
-    readonly property int spacingLarge: 14
+    readonly property var luminaMetrics: ({
+        barHeight: 48,
+        radiusSmall: 10,
+        radiusMedium: 14,
+        radiusLarge: 22,
+        spacingSmall: 6,
+        spacingMedium: 10,
+        spacingLarge: 14
+    })
 }
