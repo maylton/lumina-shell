@@ -18,6 +18,7 @@ Singleton {
 
     property bool receivedInitialState: false
     property bool overviewOpen: false
+    property bool outputRefreshPending: false
     property string status: demoMode ? "demo" : "connecting"
     property string lastError: ""
     property string lastEventType: ""
@@ -27,7 +28,9 @@ Singleton {
     function initialize() {
         if (available) {
             startStream()
+            requestOutputRefresh()
         } else {
+            OutputStore.loadDemo()
             WorkspaceStore.loadDemo()
             WindowStore.loadDemo()
             status = "demo"
@@ -41,6 +44,63 @@ Singleton {
         status = "connecting"
         lastError = ""
         eventStream.running = true
+    }
+
+    function requestOutputRefresh() {
+        if (!available)
+            return
+
+        if (outputSnapshot.running) {
+            outputRefreshPending = true
+            return
+        }
+
+        outputRefreshTimer.restart()
+    }
+
+    function refreshOutputs() {
+        if (!available)
+            return
+
+        if (outputSnapshot.running) {
+            outputRefreshPending = true
+            return
+        }
+
+        outputRefreshPending = false
+        outputSnapshot.exec(["niri", "msg", "--json", "outputs"])
+    }
+
+    function handleOutputsSnapshot(rawText) {
+        const text = String(rawText).trim()
+
+        if (!text)
+            return
+
+        var parsed
+
+        try {
+            parsed = JSON.parse(text)
+        } catch (error) {
+            lastError = "Invalid Niri outputs JSON: " + error
+            console.warn("Lumina Niri outputs:", lastError, text)
+            return
+        }
+
+        var outputMap = parsed
+
+        if (parsed && parsed.Ok && parsed.Ok.Outputs)
+            outputMap = parsed.Ok.Outputs
+        else if (parsed && parsed.Outputs)
+            outputMap = parsed.Outputs
+
+        if (!outputMap || Array.isArray(outputMap) || typeof outputMap !== "object") {
+            lastError = "Niri outputs response did not contain an output map"
+            console.warn("Lumina Niri outputs:", lastError)
+            return
+        }
+
+        OutputStore.replaceMap(outputMap)
     }
 
     function handleLine(rawLine) {
@@ -107,8 +167,11 @@ Singleton {
             overviewOpen = Boolean(payload.is_open)
             break
         case "ConfigLoaded":
-            if (payload.failed)
+            if (payload.failed) {
                 lastError = "Niri reported a failed configuration reload"
+            } else {
+                requestOutputRefresh()
+            }
             break
         default:
             break
@@ -180,6 +243,14 @@ Singleton {
 
     Component.onCompleted: initialize()
 
+    Connections {
+        target: Quickshell
+
+        function onScreensChanged() {
+            root.requestOutputRefresh()
+        }
+    }
+
     Process {
         id: eventStream
 
@@ -204,6 +275,7 @@ Singleton {
         onStarted: {
             root.status = "connected"
             root.lastError = ""
+            root.requestOutputRefresh()
         }
 
         onExited: (exitCode, exitStatus) => {
@@ -214,6 +286,32 @@ Singleton {
                 reconnectTimer.restart()
             } else {
                 root.status = "demo"
+            }
+        }
+    }
+
+    Process {
+        id: outputSnapshot
+
+        stdout: StdioCollector {
+            onStreamFinished: root.handleOutputsSnapshot(text)
+        }
+
+        stderr: SplitParser {
+            onRead: line => {
+                const message = String(line).trim()
+
+                if (message) {
+                    root.lastError = message
+                    console.warn("Lumina Niri outputs:", message)
+                }
+            }
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            if (root.outputRefreshPending) {
+                root.outputRefreshPending = false
+                outputRefreshTimer.restart()
             }
         }
     }
@@ -238,5 +336,12 @@ Singleton {
         interval: 1500
         repeat: false
         onTriggered: root.startStream()
+    }
+
+    Timer {
+        id: outputRefreshTimer
+        interval: 150
+        repeat: false
+        onTriggered: root.refreshOutputs()
     }
 }
