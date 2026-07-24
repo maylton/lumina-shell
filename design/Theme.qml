@@ -1,8 +1,32 @@
 pragma Singleton
 
-import QtQml
+import QtQuick
 
 QtObject {
+    id: root
+
+    property color primaryColor: "#ADC6FF"
+    property color accentContainerColor: "#294777"
+    property color accentForegroundColor: "#D7E3FF"
+    property color outlineColor: "#8E9099"
+    property bool dynamicPaletteActive: false
+
+    function applyDynamicPalette(primary, accentContainer, outline) {
+        primaryColor = primary
+        accentContainerColor = accentContainer
+        accentForegroundColor = "#F4F7FF"
+        outlineColor = outline
+        dynamicPaletteActive = true
+    }
+
+    function resetPalette() {
+        primaryColor = "#ADC6FF"
+        accentContainerColor = "#294777"
+        accentForegroundColor = "#D7E3FF"
+        outlineColor = "#8E9099"
+        dynamicPaletteActive = false
+    }
+
     readonly property var luminaTokens: ({
         color: {
             surfaceBase: "#111318",
@@ -11,10 +35,10 @@ QtObject {
             scrim: "#B3111318",
             onSurface: "#E2E2E9",
             textMuted: "#C3C6CF",
-            primary: "#ADC6FF",
-            accentContainer: "#294777",
-            onAccentContainer: "#D7E3FF",
-            outline: "#8E9099",
+            primary: root.primaryColor,
+            accentContainer: root.accentContainerColor,
+            onAccentContainer: root.accentForegroundColor,
+            outline: root.outlineColor,
             urgent: "#FFB4AB"
         },
         shape: {

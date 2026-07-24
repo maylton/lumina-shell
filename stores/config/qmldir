@@ -1,0 +1,2 @@
+module qs.stores.config
+singleton ConfigStore 1.0 ConfigStore.qml

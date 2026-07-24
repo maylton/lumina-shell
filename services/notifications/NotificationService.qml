@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import qs.stores.config
 import qs.stores.niri
 
 Singleton {
@@ -10,6 +11,7 @@ Singleton {
 
     readonly property int historyLimit: 50
     readonly property int popupLimit: 3
+    readonly property bool doNotDisturb: ConfigStore.doNotDisturb
     readonly property int unreadCount: {
         var count = 0
 
@@ -23,7 +25,6 @@ Singleton {
 
     property var history: []
     property var popupEntries: []
-    property bool doNotDisturb: false
     property string popupOutputName: ""
     property string centerOutputName: ""
     property int generation: 0
@@ -261,9 +262,9 @@ Singleton {
     }
 
     function setDoNotDisturb(enabled) {
-        doNotDisturb = Boolean(enabled)
+        ConfigStore.setDoNotDisturb(enabled)
 
-        if (doNotDisturb)
+        if (Boolean(enabled))
             popupEntries = []
     }
 
