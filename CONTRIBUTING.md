@@ -1,6 +1,6 @@
 # Contributing to Lumina Shell
 
-Lumina Shell is at an early architectural stage. Contributions should remain small, reviewable, and aligned with the current roadmap.
+Lumina Shell is in its public-beta hardening stage. Contributions should remain small, reviewable, and aligned with the current roadmap.
 
 ## Workflow
 
@@ -52,7 +52,7 @@ qs -p .
 Inside the clean Niri test session:
 
 ```bash
-./scripts/check-environment.sh --require-niri
+./scripts/check-environment.sh --require-niri --require-daily
 qs -p .
 ```
 
@@ -62,7 +62,21 @@ Confirm that:
 - one bar appears on each output;
 - the bar reserves its configured height;
 - the clock updates;
+- launcher, control center, settings, notifications, wallpaper, and session surfaces remain mutually exclusive;
+- Tab, Enter, Space, arrow keys, and Escape work on affected controls;
+- unavailable optional hardware renders a clear fallback;
 - stopping Quickshell removes all shell surfaces cleanly.
+
+For installation changes, validate both dry-run and an isolated target:
+
+```bash
+./scripts/install.sh --target /safe/temporary/path --dry-run
+./scripts/install.sh --target /safe/temporary/path
+./scripts/uninstall.sh --target /safe/temporary/path --dry-run
+./scripts/uninstall.sh --target /safe/temporary/path
+```
+
+Never run uninstall validation against a real user configuration.
 
 ## License note
 

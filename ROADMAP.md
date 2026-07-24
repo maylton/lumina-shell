@@ -69,12 +69,12 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## 0.5 — Public Beta
 
-- [ ] Graphical settings.
-- [ ] Installation and uninstall scripts.
-- [ ] Environment diagnostics.
-- [ ] Accessibility baseline.
-- [ ] User and contributor documentation.
-- [ ] Recovery from invalid configuration.
+- [x] Graphical settings.
+- [x] Installation and uninstall scripts.
+- [x] Environment diagnostics.
+- [x] Accessibility baseline.
+- [x] User and contributor documentation.
+- [x] Recovery from invalid configuration.
 
 ## 0.7 — Extended Beta
 
@@ -108,15 +108,16 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## Current sprint
 
-### Sprint 5 — Daily controls
+### Sprint 6 — Public beta
 
-This sprint completes the 0.2 daily controls:
+This sprint completes the 0.5 public-beta foundation:
 
-1. Native PipeWire audio and microphone state.
-2. Optional backlight control and UPower battery/profile state.
-3. Native MPRIS media controls.
-4. Native NetworkManager and BlueZ status.
-5. Per-output OSDs and a coordinated Material control center.
+1. Graphical configuration with schema v3 persistence.
+2. Automatic backup and recovery for invalid configuration.
+3. Safe managed installation and removal.
+4. Native environment and service diagnostics.
+5. Keyboard, focus, and assistive-technology metadata baseline.
+6. User, installation, compatibility, and contributor documentation.
 
 ### Acceptance criteria
 
@@ -133,11 +134,14 @@ This sprint completes the 0.2 daily controls:
 - An unavailable target output falls back to a connected output.
 - Missing batteries or backlights degrade to an unavailable state.
 - Daily-control IPC status endpoints reflect the native services.
+- Invalid JSON is preserved before defaults are restored.
+- Install and uninstall scripts reject unsafe or unmanaged targets.
+- Primary exclusive surfaces support keyboard dismissal and traversal.
 
 ## Open follow-ups
 
-1. [ ] Complete the 0.5 public-beta work.
-2. [ ] Add event-reduction and reconnection tests.
-3. [ ] Validate backlight and battery behavior on a laptop.
-4. [ ] Validate overlay hotplug behavior with two physical outputs.
-5. [ ] Select the project license.
+1. [ ] Add event-reduction and reconnection tests.
+2. [ ] Validate backlight and battery behavior on a laptop.
+3. [ ] Validate overlay hotplug behavior with two physical outputs.
+4. [ ] Select the project license.
+5. [ ] Begin the 0.7 extended-beta work.

@@ -20,3 +20,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - NetworkManager and BlueZ connectivity status.
 - Volume, microphone, brightness, and lock-state OSDs.
 - Material Expressive per-output control center.
+- Graphical settings for appearance, OSD, notifications, and wallpapers.
+- Schema v3 persistence with invalid-JSON backup and recovery.
+- Safe managed install and uninstall scripts.
+- Expanded Niri and daily-service environment diagnostics.
+- Keyboard navigation and Qt accessibility metadata baseline.
+- Installation, user, accessibility, and contributor documentation.

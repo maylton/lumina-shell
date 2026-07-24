@@ -51,6 +51,14 @@ This host has no laptop battery or `backlight` class device. Both capabilities c
 
 The `noctalia-qs 0.0.12` networking model does not type the active wired device in `Networking.devices`. Lumina therefore uses the native global connectivity state as the wired fallback when no Wi-Fi network is active.
 
+## Configuration recovery
+
+Schema v3 migration and malformed-JSON recovery were validated with an isolated `LUMINA_STATE_PATH`. The invalid source was preserved at the adjacent `.invalid` path before defaults were written atomically.
+
+## Accessibility validation
+
+Primary controls expose Qt accessibility metadata and keyboard actions. Runtime surface traversal was validated without QML errors. A screen-reader-specific pass and laptop keyboard/backlight pass remain compatibility follow-ups.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.

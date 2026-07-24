@@ -127,13 +127,19 @@ Every service exposes a read-only `status` IPC operation for diagnostics. Visual
 
 The Material control center combines service state without duplicating ownership. Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same service methods used by IPC. `ControlCenterStore` participates in `OverlayStore`, so it cannot compete with launcher, notification, wallpaper, or session surfaces for keyboard focus.
 
+## Graphical settings
+
+The settings surface edits only typed `ConfigStore`, notification, and wallpaper service methods. It exposes appearance, OSD, notification, and wallpaper preferences, plus a two-step reset action and configuration-health card. Settings use the same overlay coordinator and per-output fallback as other exclusive surfaces.
+
 ## Persistent configuration
 
-`ConfigStore` persists user state through an atomic Quickshell `FileView` and `JsonAdapter`. The schema currently stores Do Not Disturb, wallpaper assignments, the wallpaper directory, and dynamic-theme preference.
+`ConfigStore` persists user state through an atomic Quickshell `FileView` and `JsonAdapter`. The schema stores Do Not Disturb, wallpaper assignments, wallpaper directory, dynamic-theme, OSD, and bar-detail preferences.
 
-The default path is `Quickshell.stateDir/lumina-state.json`. `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2 migrates the original single-string wallpaper shape into a default wallpaper plus a per-output map, repairs invalid maps, and supplies the default CachyOS wallpaper directory.
+The default path is `Quickshell.stateDir/lumina-state.json`. `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2 migrated the original single-string wallpaper shape into a default wallpaper plus a per-output map. Schema v3 adds OSD and bar-detail preferences while retaining the previous state.
 
 Writes are debounced and only occur after initialization, so loading and migration cannot overlap or continuously rewrite the file.
+
+Before accepting loaded state, `ConfigStore` parses the original JSON independently of `JsonAdapter`. Invalid JSON is copied to the adjacent `.invalid` path, replaced atomically with defaults, and surfaced through graphical settings and the `config status` IPC operation.
 
 ## Wallpaper and dynamic color
 
@@ -153,7 +159,7 @@ The `session` IPC target can open the menu and describe the resolved command wit
 
 ## Multi-output surfaces
 
-`OverlayStore` is the process-wide coordinator for launcher, control center, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
+`OverlayStore` is the process-wide coordinator for launcher, control center, settings, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
 
 Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; and persisted wallpaper assignments remain available for a later reconnect.
 
@@ -192,7 +198,7 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 The next open implementation areas are:
 
-- 0.5 public-beta features;
 - tests for event reduction and reconnection;
 - laptop backlight and battery validation;
-- physical two-output hotplug validation.
+- physical two-output hotplug validation;
+- 0.7 extended-beta features.
