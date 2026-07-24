@@ -1,9 +1,8 @@
 pragma Singleton
 
-import QtQuick
-import Quickshell
+import QtQml
 
-Singleton {
+QtObject {
     readonly property color surfaceBaseColor: "#111318"
     readonly property color surfaceContainerColor: "#1D2026"
     readonly property color surfaceMutedColor: "#292C33"
