@@ -28,6 +28,8 @@ Singleton {
     property int visibleYear: currentDate.getFullYear()
     property int visibleMonth: currentDate.getMonth()
     property string selectedDateKey: todayKey
+    property string recentlyDismissedOutput: ""
+    property double recentlyDismissedAt: 0
 
     function dateKey(value) {
         if (!value)
@@ -90,6 +92,30 @@ Singleton {
 
         goToToday()
         activeOutputName = name
+    }
+
+    function toggle(outputName) {
+        const name = String(outputName)
+        const dismissedRecently = recentlyDismissedOutput === name
+            && Date.now() - recentlyDismissedAt < 250
+
+        if (!isOpenFor(name) && dismissedRecently)
+            return
+
+        if (isOpenFor(name))
+            close()
+        else
+            openFor(name)
+    }
+
+    function dismiss(outputName) {
+        const name = String(outputName)
+
+        if (activeOutputName === name)
+            activeOutputName = ""
+
+        recentlyDismissedOutput = name
+        recentlyDismissedAt = Date.now()
     }
 
     function close() {

@@ -2,14 +2,13 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.modules.calendar
 import qs.stores.time
 
 Rectangle {
     id: root
 
     required property string outputName
-
-    signal toggleRequested(Item anchorItem, string outputName)
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: CalendarStore.isOpenFor(outputName)
@@ -66,6 +65,11 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.toggleRequested(root, root.outputName)
+        onClicked: CalendarStore.toggle(root.outputName)
+    }
+
+    CalendarPopup {
+        anchorItem: root
+        outputName: root.outputName
     }
 }

@@ -5,43 +5,13 @@ import Quickshell
 import Quickshell.Wayland
 import qs.design
 import qs.modules.bar.widgets
-import qs.modules.calendar
 import qs.services.niri
 import qs.stores.niri
-import qs.stores.time
 
 Scope {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
-    property var calendarAnchor: null
-
-    function toggleCalendar(anchorItem, outputName) {
-        if (CalendarStore.isOpenFor(outputName)) {
-            CalendarStore.close()
-            calendarAnchor = null
-            return
-        }
-
-        if (CalendarStore.open) {
-            CalendarStore.close()
-            calendarAnchor = null
-
-            Qt.callLater(function() {
-                root.calendarAnchor = anchorItem
-                CalendarStore.openFor(outputName)
-            })
-            return
-        }
-
-        calendarAnchor = anchorItem
-        CalendarStore.openFor(outputName)
-    }
-
-    CalendarPopup {
-        anchorItem: root.calendarAnchor
-        onDismissed: root.calendarAnchor = null
-    }
 
     Variants {
         model: Quickshell.screens
@@ -378,9 +348,6 @@ Scope {
                             outputName: panel.outputName.length > 0
                                 ? panel.outputName
                                 : "screen"
-                            onToggleRequested: (anchorItem, outputName) => {
-                                root.toggleCalendar(anchorItem, outputName)
-                            }
                         }
                     }
                 }

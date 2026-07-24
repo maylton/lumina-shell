@@ -8,9 +8,8 @@ import qs.stores.time
 PopupWindow {
     id: root
 
-    property var anchorItem: null
-
-    signal dismissed
+    required property Item anchorItem
+    required property string outputName
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property real dayCellSize: Math.max(
@@ -19,7 +18,7 @@ PopupWindow {
             - luminaDesign.spacing.extraSmall * 6) / 7
     )
 
-    visible: CalendarStore.open && anchorItem !== null
+    visible: CalendarStore.isOpenFor(outputName) && anchorItem !== null
     implicitWidth: luminaDesign.size.calendarWidth
     implicitHeight: calendarContent.implicitHeight + luminaDesign.spacing.large * 2
     color: "transparent"
@@ -31,10 +30,7 @@ PopupWindow {
     anchor.margins.top: luminaDesign.spacing.small
     anchor.adjustment: PopupAdjustment.All
 
-    onClosed: {
-        CalendarStore.close()
-        dismissed()
-    }
+    onClosed: CalendarStore.dismiss(outputName)
 
     Rectangle {
         id: calendarSurface
