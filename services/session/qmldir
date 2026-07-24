@@ -1,0 +1,2 @@
+module qs.services.session
+singleton SessionService 1.0 SessionService.qml

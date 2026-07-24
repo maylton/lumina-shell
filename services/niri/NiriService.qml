@@ -302,6 +302,15 @@ Singleton {
         Qt.callLater(startNextAction)
     }
 
+    function performAction(actionName, actionLabel, actionArguments) {
+        if (demoMode) {
+            completeDemoAction(actionName, actionLabel)
+            return
+        }
+
+        enqueueAction(actionName, actionLabel, actionArguments)
+    }
+
     function focusWindow(windowId) {
         const id = Number(windowId)
 
@@ -368,6 +377,97 @@ Singleton {
             "Toggle overview",
             [
                 "toggle-overview"
+            ]
+        )
+    }
+
+    function closeFocusedWindow() {
+        performAction(
+            "close-window",
+            "Close focused window",
+            ["close-window"]
+        )
+    }
+
+    function toggleFullscreen() {
+        performAction(
+            "fullscreen-window",
+            "Toggle fullscreen",
+            ["fullscreen-window"]
+        )
+    }
+
+    function toggleFloating() {
+        performAction(
+            "toggle-window-floating",
+            "Toggle floating",
+            ["toggle-window-floating"]
+        )
+    }
+
+    function focusColumnLeft() {
+        performAction(
+            "focus-column-left",
+            "Focus column left",
+            ["focus-column-left"]
+        )
+    }
+
+    function focusColumnRight() {
+        performAction(
+            "focus-column-right",
+            "Focus column right",
+            ["focus-column-right"]
+        )
+    }
+
+    function moveColumnLeft() {
+        performAction(
+            "move-column-left",
+            "Move column left",
+            ["move-column-left"]
+        )
+    }
+
+    function moveColumnRight() {
+        performAction(
+            "move-column-right",
+            "Move column right",
+            ["move-column-right"]
+        )
+    }
+
+    function centerColumn() {
+        performAction(
+            "center-column",
+            "Center column",
+            ["center-column"]
+        )
+    }
+
+    function switchPresetColumnWidth() {
+        performAction(
+            "switch-preset-column-width",
+            "Switch preset column width",
+            ["switch-preset-column-width"]
+        )
+    }
+
+    function toggleTabbedDisplay() {
+        performAction(
+            "toggle-column-tabbed-display",
+            "Toggle tabbed display",
+            ["toggle-column-tabbed-display"]
+        )
+    }
+
+    function quitSession() {
+        performAction(
+            "quit",
+            "Exit Niri session",
+            [
+                "quit",
+                "--skip-confirmation"
             ]
         )
     }

@@ -1,0 +1,2 @@
+module qs.stores.session
+singleton SessionMenuStore 1.0 SessionMenuStore.qml

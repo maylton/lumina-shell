@@ -67,6 +67,8 @@ QtObject {
             notificationCenterWidth: 430,
             notificationIcon: 38,
             notificationWidth: 390,
+            sessionMenuHeight: 620,
+            sessionMenuWidth: 720,
             statusDot: 8,
             trayIcon: 18,
             wallpaperPickerHeight: 650,

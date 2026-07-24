@@ -4,6 +4,7 @@ import Quickshell
 import qs.modules.bar
 import qs.modules.launcher
 import qs.modules.notifications
+import qs.modules.session
 import qs.modules.wallpaper
 
 ShellRoot {
@@ -13,4 +14,5 @@ ShellRoot {
     Launcher {}
     NotificationPopups {}
     NotificationCenter {}
+    SessionMenu {}
 }

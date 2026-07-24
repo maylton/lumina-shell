@@ -7,6 +7,7 @@ import qs.design
 import qs.modules.bar.widgets
 import qs.modules.launcher
 import qs.modules.notifications
+import qs.modules.session
 import qs.modules.wallpaper
 import qs.services.niri
 import qs.stores.niri
@@ -373,6 +374,11 @@ Scope {
                         }
 
                         WallpaperButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            outputName: panel.outputName
+                        }
+
+                        SessionButton {
                             anchors.verticalCenter: parent.verticalCenter
                             outputName: panel.outputName
                         }

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.services.niri
 import qs.stores.niri
+import qs.stores.session
 
 Singleton {
     id: root
@@ -123,6 +124,42 @@ Singleton {
                 title: "Toggle overview",
                 subtitle: "Niri shell action",
                 icon: "view-grid-symbolic"
+            },
+            {
+                id: "focus-column-left",
+                title: "Focus column left",
+                subtitle: "Niri layout action",
+                icon: "go-previous-symbolic"
+            },
+            {
+                id: "focus-column-right",
+                title: "Focus column right",
+                subtitle: "Niri layout action",
+                icon: "go-next-symbolic"
+            },
+            {
+                id: "center-column",
+                title: "Center current column",
+                subtitle: "Niri layout action",
+                icon: "object-align-horizontal-center-symbolic"
+            },
+            {
+                id: "toggle-floating",
+                title: "Toggle floating window",
+                subtitle: "Niri layout action",
+                icon: "window-duplicate-symbolic"
+            },
+            {
+                id: "toggle-fullscreen",
+                title: "Toggle fullscreen",
+                subtitle: "Niri layout action",
+                icon: "view-fullscreen-symbolic"
+            },
+            {
+                id: "session-menu",
+                title: "Open session menu",
+                subtitle: "Lock, suspend, log out, or power controls",
+                icon: "system-shutdown-symbolic"
             }
         ]
 
@@ -226,15 +263,40 @@ Singleton {
         if (!result)
             return
 
+        const outputName = activeOutputName
+
         close()
 
         if (result.kind === "application" && result.entry) {
             result.entry.execute()
         } else if (result.kind === "window") {
             NiriService.focusWindow(result.windowId)
-        } else if (result.kind === "action"
-            && result.actionId === "toggle-overview") {
-            NiriService.toggleOverview()
+        } else if (result.kind === "action") {
+            switch (String(result.actionId)) {
+            case "toggle-overview":
+                NiriService.toggleOverview()
+                break
+            case "focus-column-left":
+                NiriService.focusColumnLeft()
+                break
+            case "focus-column-right":
+                NiriService.focusColumnRight()
+                break
+            case "center-column":
+                NiriService.centerColumn()
+                break
+            case "toggle-floating":
+                NiriService.toggleFloating()
+                break
+            case "toggle-fullscreen":
+                NiriService.toggleFullscreen()
+                break
+            case "session-menu":
+                SessionMenuStore.openFor(outputName)
+                break
+            default:
+                break
+            }
         }
     }
 
