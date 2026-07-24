@@ -18,14 +18,12 @@ Rectangle {
 
     implicitWidth: wide ? Math.max(86, actionLabel.implicitWidth + 30) : 42
     implicitHeight: 42
-    radius: checked
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.medium
+    radius: luminaDesign.shape.full
     color: checked
         ? luminaDesign.color.accentContainer
         : actionMouse.containsMouse || activeFocus
-            ? luminaDesign.color.surfaceMuted
-            : "transparent"
+            ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.12)
+            : luminaDesign.color.surfaceMuted
     opacity: available ? 1 : 0.45
     scale: actionMouse.pressed ? 0.94 : 1
     activeFocusOnTab: available
@@ -57,23 +55,18 @@ Rectangle {
         }
     }
 
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
-        }
-    }
-
     Row {
         anchors.centerIn: parent
         spacing: root.luminaDesign.spacing.small
 
         Text {
+            width: root.wide ? 16 : 18
+            horizontalAlignment: Text.AlignHCenter
             text: root.symbol
             color: root.checked
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
-            font.pixelSize: root.wide ? 14 : 18
+            font.pixelSize: 16
             font.weight: Font.DemiBold
         }
 

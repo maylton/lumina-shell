@@ -54,7 +54,7 @@ Item {
             }
 
             Text {
-                text: "Uptime " + ControlCenterStore.uptimeLabel
+                text: "Desktop dashboard"
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }

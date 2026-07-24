@@ -75,7 +75,7 @@ Rectangle {
             color: root.checked
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.primary
-            font.pixelSize: 20
+            font.pixelSize: 18
             font.weight: Font.DemiBold
         }
 

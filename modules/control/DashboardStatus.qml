@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.connectivity
-import qs.services.power
+import qs.stores.control
 
 DashboardCard {
     id: root
@@ -73,19 +73,12 @@ DashboardCard {
             Repeater {
                 model: [
                     {
-                        label: PowerService.profileName,
-                        value: "Power"
+                        label: ControlCenterStore.uptimeLabel,
+                        value: "Uptime"
                     },
                     {
-                        label: PowerService.batteryAvailable
-                            ? PowerService.batteryPercentage + "%"
-                            : "AC",
-                        value: "Energy"
-                    },
-                    {
-                        label:
-                            ConnectivityService.bluetoothConnectedCount,
-                        value: "Devices"
+                        label: ConnectivityService.bluetoothConnectedCount,
+                        value: "Connected devices"
                     }
                 ]
 
@@ -94,7 +87,7 @@ DashboardCard {
 
                     required property var modelData
 
-                    width: (parent.width - parent.spacing * 2) / 3
+                    width: (parent.width - parent.spacing) / 2
                     height: 44
                     radius: root.luminaDesign.shape.medium
                     color: root.luminaDesign.color.surfaceMuted

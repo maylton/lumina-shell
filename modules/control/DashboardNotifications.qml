@@ -29,9 +29,8 @@ DashboardCard {
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
-                    - dndAction.width
                     - clearAction.width
-                    - parent.spacing * 2
+                    - parent.spacing
                 spacing: 1
 
                 Text {
@@ -58,22 +57,10 @@ DashboardCard {
             }
 
             DashboardAction {
-                id: dndAction
-
-                wide: !root.compact
-                symbol: "◐"
-                label: NotificationService.doNotDisturb
-                    ? "Silent"
-                    : "Alerts"
-                checked: NotificationService.doNotDisturb
-                onActivated: NotificationService.toggleDoNotDisturb()
-            }
-
-            DashboardAction {
                 id: clearAction
 
                 wide: !root.compact
-                symbol: "≡"
+                symbol: "⌫"
                 label: "Clear"
                 available: NotificationService.history.length > 0
                 onActivated: NotificationService.clearHistory()
@@ -104,11 +91,20 @@ DashboardCard {
                 visible: NotificationService.history.length === 0
                 spacing: root.luminaDesign.spacing.medium
 
-                Text {
+                Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: NotificationService.doNotDisturb ? "◐" : "♧"
-                    color: root.luminaDesign.color.textMuted
-                    font.pixelSize: 42
+                    width: 52
+                    height: 52
+                    radius: root.luminaDesign.shape.full
+                    color: root.luminaDesign.color.surfaceMuted
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: NotificationService.doNotDisturb ? "◐" : "✓"
+                        color: root.luminaDesign.color.primary
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
+                    }
                 }
 
                 Text {

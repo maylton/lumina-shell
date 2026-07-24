@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import qs.design
 import qs.services.notifications
 import qs.stores.control
+import qs.stores.time
 
 Scope {
     id: root
@@ -85,8 +86,10 @@ Scope {
                     : WlrKeyboardFocus.None
 
                 onCenterVisibleChanged: {
-                    if (centerVisible)
+                    if (centerVisible) {
                         NotificationService.markAllRead()
+                        CalendarStore.goToToday()
+                    }
                 }
 
                 FocusScope {
@@ -364,7 +367,7 @@ Scope {
                                                 top: parent.top
                                             }
 
-                                            height: parent.height * 0.29
+                                            height: parent.height * 0.24
                                         }
 
                                         DashboardStatus {

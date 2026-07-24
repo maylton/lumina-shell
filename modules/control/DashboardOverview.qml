@@ -73,8 +73,6 @@ Item {
                 text: activeWorkspace
                     ? "Workspace "
                         + WorkspaceStore.labelFor(activeWorkspace)
-                        + " · "
-                        + outputName
                     : outputName
                 color: root.luminaDesign.color.textMuted
                 elide: Text.ElideRight

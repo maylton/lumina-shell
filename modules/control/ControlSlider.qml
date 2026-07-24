@@ -74,7 +74,7 @@ Rectangle {
             color: root.available
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.textMuted
-            font.pixelSize: 18
+            font.pixelSize: 16
             font.weight: Font.DemiBold
         }
 
