@@ -27,6 +27,16 @@ Only one process can own `org.freedesktop.Notifications` in a user session. When
 
 Lumina's daemon, popup queue, history, actions, and Do Not Disturb behavior were validated on an isolated session bus so the normal Noctalia session did not need to be interrupted.
 
+## Session controls
+
+Session actions use tools already present in the validated CachyOS environment:
+
+- `loginctl lock-session` for lock requests;
+- `systemctl suspend`, `reboot`, and `poweroff` for system state;
+- Niri's `quit --skip-confirmation` action after Lumina's own confirmation.
+
+The session locker itself remains an external session responsibility until Lumina's secure-lock roadmap item is implemented.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.

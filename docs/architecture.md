@@ -125,6 +125,14 @@ Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service 
 
 The wallpaper picker uses Qt's `FolderListModel` with image-only filters. It targets the output from which it was opened, previews the configured directory without copying files, and persists paths containing spaces or URL encoding through the same service boundary.
 
+## Layout and session controls
+
+Advanced layout requests remain typed methods on `NiriService`. The session surface exposes focus, move, center, width, floating, fullscreen, and tabbed-column operations without placing Niri commands in QML visual components. A subset is also available through launcher action results.
+
+`SessionService` owns lock, suspend, logout, restart, and power-off execution. Every session operation enters an explicit confirmation state before execution. Logout is submitted through `NiriService.quitSession()`; the remaining operations use argument-array `loginctl` or `systemctl` processes and report their exit state.
+
+The `session` IPC target can open the menu and describe the resolved command without executing it. This provides a safe diagnostics path for session integration.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
