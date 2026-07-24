@@ -20,24 +20,24 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Add a runnable Quickshell entry point.
 - [x] Add the first multi-output top bar.
 - [x] Add minimal design tokens.
-- [ ] Validate the foundation on CachyOS with Niri.
-- [ ] Record the supported Quickshell and Niri versions.
+- [x] Validate the foundation on CachyOS with Niri.
+- [x] Record the supported Quickshell and Niri versions.
 - [ ] Select and add the project license.
 
 ### Niri IPC
 
-- [ ] Connect to `$NIRI_SOCKET`.
-- [ ] Consume the JSON event stream.
-- [ ] Maintain reactive output, workspace, window, and overview state.
+- [x] Connect to `$NIRI_SOCKET`.
+- [x] Consume the JSON event stream.
+- [ ] Maintain reactive output, workspace, window, and overview state. Output implementation is awaiting native validation.
 - [ ] Reconnect safely after compositor or socket interruption.
-- [ ] Expose compositor actions through `NiriService`.
+- [x] Expose compositor actions through `NiriService`.
 
 ### First bar widgets
 
-- [ ] Active workspace indicator.
-- [ ] Focused window title and app ID.
-- [ ] Overview button.
-- [ ] Column position indicator.
+- [x] Active workspace indicator.
+- [x] Focused window title and app ID.
+- [x] Overview button.
+- [ ] Column position indicator. Implementation is awaiting native validation.
 - [ ] Clock and calendar popup.
 - [ ] System tray.
 
@@ -108,32 +108,37 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## Current sprint
 
-### Sprint 1 — Runnable foundation
+### Sprint 2 — Niri state
 
-The first pull request must deliver the smallest runnable vertical slice:
+The current sprint delivers the reactive compositor-state vertical slice:
 
-1. `ShellRoot` entry point.
-2. Root-relative QML modules.
-3. One top-layer bar per output.
-4. A system clock.
-5. Minimal theme tokens.
-6. Environment diagnostics.
-7. Architecture and contribution documentation.
+1. Event-stream connection and safe event reduction.
+2. Workspace, window, overview, and output state.
+3. Workspace and overview actions behind `NiriService`.
+4. Per-output active-window information.
+5. Column and tile position indicator.
 
 ### Acceptance criteria
 
 - `qs -p .` starts without a fatal QML error.
-- One bar appears on each output.
-- The bar reserves its height and remains above Niri's overview.
-- The clock updates.
-- Stopping Quickshell removes all Lumina surfaces.
-- No visual component invokes `niri msg` or other system commands directly.
+- The bar shows the workspaces belonging to each output.
+- Workspace clicks switch to the requested workspace.
+- Window title and app ID update when the active window changes.
+- The column indicator updates when focus moves between columns or stacked tiles.
+- Output name, resolution, and scale match `niri msg --json outputs`.
+- Opening and closing the overview updates the bar state.
+- Disconnecting and reconnecting the event stream does not leave stale state.
+- No visual component invokes `niri msg` directly.
 
 ## Next sprint
 
-### Sprint 2 — Niri state
+### Sprint 3 — Complete the 0.1 bar
 
-- Implement the event-stream connection.
-- Add output, workspace, window, and overview stores.
-- Display the active workspace and focused window in the bar.
-- Add basic actions for switching workspaces and opening the overview.
+After Sprint 2 native validation:
+
+1. Clock interaction and calendar popup.
+2. System tray integration.
+3. Stronger action error reporting.
+4. Event-reduction and reconnection tests.
+5. Multi-output interaction refinements.
+6. Project license selection.
