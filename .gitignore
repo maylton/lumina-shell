@@ -1,0 +1,28 @@
+# Quickshell / QML tooling
+.qmlls.ini
+*.qmlc
+*.jsc
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Logs and runtime files
+*.log
+*.pid
+
+# Build outputs
+build/
+dist/
+result
+
+# OS files
+.DS_Store
+Thumbs.db
