@@ -43,6 +43,14 @@ Per-output surface selection, exclusive overlay coordination, and fallback from 
 
 Disconnect handling is implemented for active overlays, notification popups, calendars, and persisted wallpaper mappings. A native hotplug transition across two physical outputs remains an explicit compatibility follow-up.
 
+## Daily controls
+
+The validated desktop exposes PipeWire output and input devices, the power-profiles daemon, a wired NetworkManager connection, a Wi-Fi adapter, a BlueZ adapter, and an MPRIS Chrome player. Lumina reads and controls these through the corresponding native Quickshell APIs.
+
+This host has no laptop battery or `backlight` class device. Both capabilities correctly render as unavailable; physical percentage changes and charging transitions remain laptop validation follow-ups. `BrightnessService` restricts `brightnessctl` to the `backlight` class so keyboard LEDs can never be mistaken for a display.
+
+The `noctalia-qs 0.0.12` networking model does not type the active wired device in `Networking.devices`. Lumina therefore uses the native global connectivity state as the wired fallback when no Wi-Fi network is active.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.

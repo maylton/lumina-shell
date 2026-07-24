@@ -109,6 +109,24 @@ The service provides:
 
 Do Not Disturb suppresses new popup surfaces without discarding history. The notification center and popups each create a surface only on the selected output, and visual components call service methods instead of owning the D-Bus integration.
 
+## Daily-control services
+
+Daily hardware state is split into typed singleton services:
+
+- `AudioService` binds the current PipeWire sink and source through `PwObjectTracker`, then exposes volume and mute operations.
+- `BrightnessService` contains the optional `brightnessctl --class=backlight` process boundary. Systems without a backlight remain usable and report the capability as unavailable.
+- `PowerService` consumes native UPower battery state and the power-profiles daemon.
+- `MediaService` selects the currently playing MPRIS client, falling back to the first available player.
+- `ConnectivityService` consumes the native NetworkManager and BlueZ models for network, Wi-Fi, adapter, and connected-device status.
+
+Every service exposes a read-only `status` IPC operation for diagnostics. Visual components only call typed service methods and never execute the underlying system tools.
+
+## OSD and control center
+
+`OsdStore` reduces volume, microphone, brightness, session-lock, and explicit lock-key events into one timed presentation state. The OSD resolves the focused Niri output, never requests keyboard focus, and closes if that output disappears. The `osd` IPC target allows compositor key bindings to publish lock-key state without embedding input-device assumptions in the shell.
+
+The Material control center combines service state without duplicating ownership. Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same service methods used by IPC. `ControlCenterStore` participates in `OverlayStore`, so it cannot compete with launcher, notification, wallpaper, or session surfaces for keyboard focus.
+
 ## Persistent configuration
 
 `ConfigStore` persists user state through an atomic Quickshell `FileView` and `JsonAdapter`. The schema currently stores Do Not Disturb, wallpaper assignments, the wallpaper directory, and dynamic-theme preference.
@@ -135,7 +153,7 @@ The `session` IPC target can open the menu and describe the resolved command wit
 
 ## Multi-output surfaces
 
-`OverlayStore` is the process-wide coordinator for launcher, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
+`OverlayStore` is the process-wide coordinator for launcher, control center, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
 
 Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; and persisted wallpaper assignments remain available for a later reconnect.
 
@@ -174,6 +192,7 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 The next open implementation areas are:
 
-- 0.2 daily controls;
+- 0.5 public-beta features;
 - tests for event reduction and reconnection;
+- laptop backlight and battery validation;
 - physical two-output hotplug validation.

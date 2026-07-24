@@ -43,13 +43,13 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## 0.2 — Daily Controls
 
-- [ ] Audio and microphone service.
-- [ ] Brightness service.
-- [ ] Battery and power profile service.
-- [ ] MPRIS media service.
-- [ ] Volume, brightness, and lock-state OSDs.
-- [ ] Material Expressive control center.
-- [ ] Wi-Fi and Bluetooth status.
+- [x] Audio and microphone service.
+- [x] Brightness service.
+- [x] Battery and power profile service.
+- [x] MPRIS media service.
+- [x] Volume, brightness, and lock-state OSDs.
+- [x] Material Expressive control center.
+- [x] Wi-Fi and Bluetooth status.
 
 ## 0.3 — Interactive Alpha
 
@@ -108,15 +108,15 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## Current sprint
 
-### Sprint 4 — Interactive and desktop alpha
+### Sprint 5 — Daily controls
 
-This sprint delivers the 0.3 and 0.4 desktop surfaces:
+This sprint completes the 0.2 daily controls:
 
-1. Unified application, window, and shell-action search.
-2. Notification daemon, popup queue, history, and Do Not Disturb.
-3. Persistent per-output wallpapers and wallpaper-derived colors.
-4. Advanced Niri layout actions and confirmed session controls.
-5. Coordinated overlays with output fallback and disconnect handling.
+1. Native PipeWire audio and microphone state.
+2. Optional backlight control and UPower battery/profile state.
+3. Native MPRIS media controls.
+4. Native NetworkManager and BlueZ status.
+5. Per-output OSDs and a coordinated Material control center.
 
 ### Acceptance criteria
 
@@ -131,10 +131,13 @@ This sprint delivers the 0.3 and 0.4 desktop surfaces:
 - No visual component invokes `niri msg` directly.
 - Only one full-screen interactive overlay is active at a time.
 - An unavailable target output falls back to a connected output.
+- Missing batteries or backlights degrade to an unavailable state.
+- Daily-control IPC status endpoints reflect the native services.
 
 ## Open follow-ups
 
-1. [ ] Complete the 0.2 daily controls.
+1. [ ] Complete the 0.5 public-beta work.
 2. [ ] Add event-reduction and reconnection tests.
-3. [ ] Validate overlay hotplug behavior with two physical outputs.
-4. [ ] Select the project license.
+3. [ ] Validate backlight and battery behavior on a laptop.
+4. [ ] Validate overlay hotplug behavior with two physical outputs.
+5. [ ] Select the project license.

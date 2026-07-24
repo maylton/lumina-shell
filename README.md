@@ -2,7 +2,7 @@
 
 Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell and QML and guided by Material 3 Expressive design principles.
 
-> Status: interactive desktop alpha. The 0.3 and 0.4 shell surfaces are implemented; daily controls from 0.2 remain open.
+> Status: desktop alpha. The 0.2, 0.3, and 0.4 shell milestones are implemented; public-beta hardening is in progress.
 
 ## Goals
 
@@ -33,11 +33,11 @@ cd lumina-shell
 qs -p .
 ```
 
-The shell opens a top panel and wallpaper surface on every detected output. It includes reactive Niri state, launcher search, notifications, calendar and tray widgets, per-output wallpapers, dynamic color, layout actions, and confirmed session controls.
+The shell opens a top panel and wallpaper surface on every detected output. It includes reactive Niri state, launcher search, notifications, calendar and tray widgets, daily controls, per-output wallpapers, dynamic color, layout actions, and confirmed session controls.
 
 ## Development status
 
-Current completed milestones: **0.3 — Interactive Alpha** and **0.4 — Desktop Alpha**
+Current completed milestones: **0.2 — Daily Controls**, **0.3 — Interactive Alpha**, and **0.4 — Desktop Alpha**
 
 The current implementation includes:
 
@@ -46,6 +46,8 @@ The current implementation includes:
 3. Application, window, and shell-action search.
 4. Notification history, Do Not Disturb, and wallpaper-derived colors.
 5. Advanced layout actions and confirmed session controls.
+6. PipeWire, MPRIS, UPower, NetworkManager, and BlueZ daily controls.
+7. Per-output OSDs and a Material Expressive control center.
 
 See [ROADMAP.md](ROADMAP.md) for the complete plan and [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
