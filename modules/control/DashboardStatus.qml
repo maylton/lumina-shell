@@ -8,7 +8,7 @@ import qs.stores.control
 DashboardCard {
     id: root
 
-    accessibleName: "Connectivity and power"
+    accessibleName: "Connectivity and system status"
 
     Column {
         anchors {
@@ -22,22 +22,11 @@ DashboardCard {
             width: parent.width
 
             Text {
-                width: parent.width / 2
+                width: parent.width
                 text: "System status"
                 color: root.luminaDesign.color.onSurface
                 font.pixelSize: root.luminaDesign.typography.titleMedium
                 font.weight: Font.Bold
-            }
-
-            Text {
-                width: parent.width / 2
-                horizontalAlignment: Text.AlignRight
-                text: ConnectivityService.networkSummary
-                color: ConnectivityService.networkSummary === "Offline"
-                    ? root.luminaDesign.color.urgent
-                    : root.luminaDesign.color.primary
-                font.pixelSize: root.luminaDesign.typography.labelMedium
-                font.weight: Font.DemiBold
             }
         }
 
@@ -73,12 +62,19 @@ DashboardCard {
             Repeater {
                 model: [
                     {
+                        label: ConnectivityService.networkSummary,
+                        value: "Connection",
+                        connection: true
+                    },
+                    {
                         label: ControlCenterStore.uptimeLabel,
-                        value: "Uptime"
+                        value: "Uptime",
+                        connection: false
                     },
                     {
                         label: ConnectivityService.bluetoothConnectedCount,
-                        value: "Connected devices"
+                        value: "Connected devices",
+                        connection: false
                     }
                 ]
 
@@ -87,7 +83,7 @@ DashboardCard {
 
                     required property var modelData
 
-                    width: (parent.width - parent.spacing) / 2
+                    width: (parent.width - parent.spacing * 2) / 3
                     height: 44
                     radius: root.luminaDesign.shape.medium
                     color: root.luminaDesign.color.surfaceMuted
@@ -99,7 +95,12 @@ DashboardCard {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: statusMetric.modelData.label
-                            color: root.luminaDesign.color.onSurface
+                            color: statusMetric.modelData.connection
+                                ? ConnectivityService.networkSummary
+                                    === "Offline"
+                                    ? root.luminaDesign.color.urgent
+                                    : root.luminaDesign.color.primary
+                                : root.luminaDesign.color.onSurface
                             font.pixelSize:
                                 root.luminaDesign.typography.labelMedium
                             font.weight: Font.DemiBold
