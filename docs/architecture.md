@@ -109,6 +109,20 @@ The service provides:
 
 Do Not Disturb suppresses new popup surfaces without discarding history. The notification center and popups each create a surface only on the selected output, and visual components call service methods instead of owning the D-Bus integration.
 
+## Persistent configuration
+
+`ConfigStore` persists user state through an atomic Quickshell `FileView` and `JsonAdapter`. The schema currently stores Do Not Disturb, wallpaper assignments, the wallpaper directory, and dynamic-theme preference.
+
+The default path is `Quickshell.stateDir/lumina-state.json`. `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2 migrates the original single-string wallpaper shape into a default wallpaper plus a per-output map, repairs invalid maps, and supplies the default CachyOS wallpaper directory.
+
+Writes are debounced and only occur after initialization, so loading and migration cannot overlap or continuously rewrite the file.
+
+## Wallpaper and dynamic color
+
+Lumina owns one background-layer wallpaper surface per output. `WallpaperService` resolves a per-output assignment with a shared default fallback and exposes typed setters plus a `wallpaper` IPC target.
+
+Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service scores quantized colors for saturation and mid-tone contrast, then updates semantic primary, accent-container, foreground, and outline roles in `Theme`. Disabling dynamic color restores the static Lumina palette immediately.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
