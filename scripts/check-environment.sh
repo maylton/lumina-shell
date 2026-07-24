@@ -2,27 +2,40 @@
 set -uo pipefail
 
 require_niri=false
+require_daily=false
 failures=0
 warnings=0
 
 usage() {
     cat <<'EOF'
-Usage: ./scripts/check-environment.sh [--require-niri]
+Usage: ./scripts/check-environment.sh [--require-niri] [--require-daily]
 
 By default, validates the host development environment.
 Use --require-niri inside the Niri test session to require Niri and its IPC socket.
+Use --require-daily to require the daily-control D-Bus services.
 EOF
 }
 
-if [[ "${1:-}" == "--require-niri" ]]; then
-    require_niri=true
-    shift
-fi
-
-if (( $# > 0 )); then
-    usage >&2
-    exit 2
-fi
+while (( $# > 0 )); do
+    case "$1" in
+        --require-niri)
+            require_niri=true
+            shift
+            ;;
+        --require-daily)
+            require_daily=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
 
 check_required_command() {
     local command_name="$1"
@@ -45,6 +58,49 @@ check_optional_command() {
     fi
 }
 
+check_system_service() {
+    local service_name="$1"
+    local label="$2"
+    local required="$3"
+
+    if ! command -v busctl >/dev/null 2>&1; then
+        printf 'INFO %-12s busctl unavailable; service not checked\n' "${label}"
+        return
+    fi
+
+    if busctl --system --no-pager --no-legend list 2>/dev/null \
+        | awk '{ print $1 }' \
+        | grep -Fqx -- "${service_name}"; then
+        printf 'OK   %-12s %s\n' "${label}" "${service_name}"
+    elif "${required}"; then
+        printf 'MISS %-12s %s is unavailable\n' "${label}" "${service_name}"
+        failures=$((failures + 1))
+    else
+        printf 'INFO %-12s %s is unavailable (optional)\n' "${label}" "${service_name}"
+    fi
+}
+
+check_pipewire() {
+    local required="$1"
+
+    if ! command -v wpctl >/dev/null 2>&1; then
+        if "${required}"; then
+            printf 'MISS %-12s wpctl is unavailable\n' PipeWire
+            failures=$((failures + 1))
+        fi
+        return
+    fi
+
+    if wpctl status >/dev/null 2>&1; then
+        printf 'OK   %-12s PipeWire socket is responding\n' PipeWire
+    elif "${required}"; then
+        printf 'MISS %-12s PipeWire socket is unavailable\n' PipeWire
+        failures=$((failures + 1))
+    else
+        printf 'INFO %-12s PipeWire socket is unavailable (optional)\n' PipeWire
+    fi
+}
+
 printf 'Lumina Shell environment check\n\n'
 check_required_command qs
 check_optional_command qmllint
@@ -53,6 +109,12 @@ if "$require_niri"; then
     check_required_command niri
 else
     check_optional_command niri
+fi
+
+printf '\nRuntime versions\n'
+printf 'qs:   %s\n' "$(qs --version 2>/dev/null || printf 'unknown')"
+if command -v niri >/dev/null 2>&1; then
+    printf 'niri: %s\n' "$(niri --version 2>/dev/null || printf 'unknown')"
 fi
 
 printf '\nSession variables\n'
@@ -74,6 +136,31 @@ elif "$require_niri"; then
     failures=$((failures + 1))
 else
     printf 'INFO Niri IPC socket is unavailable, which is expected outside Niri.\n'
+fi
+
+printf '\nDaily-control integrations\n'
+check_optional_command brightnessctl
+check_optional_command powerprofilesctl
+check_optional_command wpctl
+check_optional_command nmcli
+check_optional_command bluetoothctl
+
+check_pipewire "$require_daily"
+check_system_service org.freedesktop.UPower UPower "$require_daily"
+check_system_service net.hadess.PowerProfiles PowerProfiles "$require_daily"
+check_system_service org.freedesktop.NetworkManager NetworkManager "$require_daily"
+check_system_service org.bluez BlueZ "$require_daily"
+
+if compgen -G '/sys/class/backlight/*' >/dev/null; then
+    printf 'OK   %-12s a display backlight is available\n' Backlight
+else
+    printf 'INFO %-12s no display backlight found (desktop-safe fallback)\n' Backlight
+fi
+
+if compgen -G '/sys/class/power_supply/BAT*' >/dev/null; then
+    printf 'OK   %-12s a laptop battery is available\n' Battery
+else
+    printf 'INFO %-12s no laptop battery found (desktop-safe fallback)\n' Battery
 fi
 
 printf '\n'
