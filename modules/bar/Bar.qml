@@ -10,8 +10,7 @@ import qs.stores.niri
 Scope {
     id: root
 
-    readonly property var colors: Theme.luminaColors
-    readonly property var metrics: Theme.luminaMetrics
+    readonly property var luminaDesign: Theme.luminaTokens
     property string formattedTime: Qt.formatDateTime(clock.date, "HH:mm")
 
     SystemClock {
@@ -35,8 +34,8 @@ Scope {
                     : WorkspaceStore.forOutput(outputName)
 
                 screen: modelData
-                implicitHeight: root.metrics.barHeight
-                exclusiveZone: root.metrics.barHeight
+                implicitHeight: root.luminaDesign.size.barHeight
+                exclusiveZone: root.luminaDesign.size.barHeight
                 color: "transparent"
                 focusable: false
 
@@ -57,40 +56,67 @@ Scope {
                         margins: 5
                     }
 
-                    radius: root.metrics.radiusLarge
-                    color: root.colors.surfaceContainer
+                    radius: root.luminaDesign.shape.large
+                    color: root.luminaDesign.color.surfaceContainer
                     border.width: 1
-                    border.color: root.colors.outline
+                    border.color: root.luminaDesign.color.outline
 
                     Row {
                         id: leftArea
 
                         anchors {
                             left: parent.left
-                            leftMargin: root.metrics.spacingMedium
+                            leftMargin: root.luminaDesign.spacing.medium
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: root.metrics.spacingSmall
+                        spacing: root.luminaDesign.spacing.small
 
                         Rectangle {
                             id: overviewButton
 
                             width: overviewLabel.implicitWidth + 20
-                            height: 30
-                            radius: root.metrics.radiusMedium
+                            height: root.luminaDesign.size.chipHeight
+                            radius: NiriService.overviewOpen
+                                ? root.luminaDesign.shape.full
+                                : root.luminaDesign.shape.medium
+                            scale: overviewMouse.pressed
+                                ? 0.94
+                                : overviewMouse.containsMouse
+                                    ? 1.03
+                                    : 1.0
                             color: NiriService.overviewOpen || overviewMouse.containsMouse
-                                ? root.colors.accentContainer
-                                : root.colors.surfaceMuted
+                                ? root.luminaDesign.color.accentContainer
+                                : root.luminaDesign.color.surfaceMuted
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: root.luminaDesign.motion.fast
+                                }
+                            }
+
+                            Behavior on radius {
+                                NumberAnimation {
+                                    duration: root.luminaDesign.motion.medium
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: root.luminaDesign.motion.fast
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
 
                             Text {
                                 id: overviewLabel
                                 anchors.centerIn: parent
                                 text: NiriService.overviewOpen ? "Close overview" : "Overview"
                                 color: NiriService.overviewOpen
-                                    ? root.colors.onAccentContainer
-                                    : root.colors.onSurface
-                                font.pixelSize: 12
+                                    ? root.luminaDesign.color.onAccentContainer
+                                    : root.luminaDesign.color.onSurface
+                                font.pixelSize: root.luminaDesign.typography.labelMedium
                                 font.weight: Font.DemiBold
                             }
 
@@ -112,26 +138,55 @@ Scope {
                                 required property var modelData
 
                                 width: workspaceLabel.implicitWidth + 18
-                                height: 30
-                                radius: root.metrics.radiusMedium
-                                color: modelData.is_focused || workspaceMouse.containsMouse
-                                    ? root.colors.accentContainer
+                                height: root.luminaDesign.size.chipHeight
+                                radius: modelData.is_focused
+                                    ? root.luminaDesign.shape.full
                                     : modelData.is_active
-                                        ? root.colors.surfaceMuted
+                                        ? root.luminaDesign.shape.large
+                                        : root.luminaDesign.shape.small
+                                scale: workspaceMouse.pressed
+                                    ? 0.92
+                                    : workspaceMouse.containsMouse
+                                        ? 1.04
+                                        : 1.0
+                                color: modelData.is_focused || workspaceMouse.containsMouse
+                                    ? root.luminaDesign.color.accentContainer
+                                    : modelData.is_active
+                                        ? root.luminaDesign.color.surfaceMuted
                                         : "transparent"
                                 border.width: modelData.is_urgent ? 1 : 0
-                                border.color: root.colors.urgent
+                                border.color: root.luminaDesign.color.urgent
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: root.luminaDesign.motion.fast
+                                    }
+                                }
+
+                                Behavior on radius {
+                                    NumberAnimation {
+                                        duration: root.luminaDesign.motion.medium
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                Behavior on scale {
+                                    NumberAnimation {
+                                        duration: root.luminaDesign.motion.fast
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
 
                                 Text {
                                     id: workspaceLabel
                                     anchors.centerIn: parent
                                     text: WorkspaceStore.labelFor(workspaceChip.modelData)
                                     color: workspaceChip.modelData.is_focused
-                                        ? root.colors.onAccentContainer
+                                        ? root.luminaDesign.color.onAccentContainer
                                         : workspaceChip.modelData.is_urgent
-                                            ? root.colors.urgent
-                                            : root.colors.textMuted
-                                    font.pixelSize: 12
+                                            ? root.luminaDesign.color.urgent
+                                            : root.luminaDesign.color.textMuted
+                                    font.pixelSize: root.luminaDesign.typography.labelMedium
                                     font.weight: workspaceChip.modelData.is_active
                                         ? Font.DemiBold
                                         : Font.Medium
@@ -162,9 +217,9 @@ Scope {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedTitle
-                            color: root.colors.onSurface
+                            color: root.luminaDesign.color.onSurface
                             elide: Text.ElideRight
-                            font.pixelSize: 13
+                            font.pixelSize: root.luminaDesign.typography.bodyMedium
                             font.weight: Font.DemiBold
                         }
 
@@ -173,9 +228,9 @@ Scope {
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedAppId
                             visible: text.length > 0
-                            color: root.colors.textMuted
+                            color: root.luminaDesign.color.textMuted
                             elide: Text.ElideRight
-                            font.pixelSize: 10
+                            font.pixelSize: root.luminaDesign.typography.labelSmall
                         }
                     }
 
@@ -184,26 +239,32 @@ Scope {
 
                         anchors {
                             right: parent.right
-                            rightMargin: root.metrics.spacingLarge
+                            rightMargin: root.luminaDesign.spacing.large
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: root.metrics.spacingMedium
+                        spacing: root.luminaDesign.spacing.medium
 
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: root.metrics.spacingSmall
+                            spacing: root.luminaDesign.spacing.small
 
                             Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: 8
-                                height: 8
-                                radius: 4
+                                width: root.luminaDesign.size.statusDot
+                                height: root.luminaDesign.size.statusDot
+                                radius: width / 2
                                 color: NiriService.connected
-                                    ? root.colors.primary
+                                    ? root.luminaDesign.color.primary
                                     : NiriService.demoMode
-                                        ? root.colors.outline
-                                        : root.colors.urgent
+                                        ? root.luminaDesign.color.outline
+                                        : root.luminaDesign.color.urgent
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: root.luminaDesign.motion.medium
+                                    }
+                                }
                             }
 
                             Text {
@@ -213,8 +274,8 @@ Scope {
                                     : NiriService.connected
                                         ? "Niri"
                                         : "Connecting"
-                                color: root.colors.textMuted
-                                font.pixelSize: 11
+                                color: root.luminaDesign.color.textMuted
+                                font.pixelSize: root.luminaDesign.typography.labelSmall
                                 font.weight: Font.Medium
                             }
                         }
@@ -222,8 +283,8 @@ Scope {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: root.formattedTime
-                            color: root.colors.onSurface
-                            font.pixelSize: 14
+                            color: root.luminaDesign.color.onSurface
+                            font.pixelSize: root.luminaDesign.typography.titleMedium
                             font.weight: Font.DemiBold
                         }
                     }
