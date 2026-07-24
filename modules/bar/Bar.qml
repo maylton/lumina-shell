@@ -10,6 +10,8 @@ import qs.stores.niri
 Scope {
     id: root
 
+    readonly property var colors: Theme.luminaColors
+    readonly property var metrics: Theme.luminaMetrics
     property string formattedTime: Qt.formatDateTime(clock.date, "HH:mm")
 
     SystemClock {
@@ -33,8 +35,8 @@ Scope {
                     : WorkspaceStore.forOutput(outputName)
 
                 screen: modelData
-                implicitHeight: Theme.barHeight
-                exclusiveZone: Theme.barHeight
+                implicitHeight: root.metrics.barHeight
+                exclusiveZone: root.metrics.barHeight
                 color: "transparent"
                 focusable: false
 
@@ -55,39 +57,39 @@ Scope {
                         margins: 5
                     }
 
-                    radius: Theme.radiusLarge
-                    color: Theme.surfaceContainerColor
+                    radius: root.metrics.radiusLarge
+                    color: root.colors.surfaceContainer
                     border.width: 1
-                    border.color: Theme.outlineColor
+                    border.color: root.colors.outline
 
                     Row {
                         id: leftArea
 
                         anchors {
                             left: parent.left
-                            leftMargin: Theme.spacingMedium
+                            leftMargin: root.metrics.spacingMedium
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: Theme.spacingSmall
+                        spacing: root.metrics.spacingSmall
 
                         Rectangle {
                             id: overviewButton
 
                             width: overviewLabel.implicitWidth + 20
                             height: 30
-                            radius: Theme.radiusMedium
+                            radius: root.metrics.radiusMedium
                             color: NiriService.overviewOpen || overviewMouse.containsMouse
-                                ? Theme.accentContainerColor
-                                : Theme.surfaceMutedColor
+                                ? root.colors.accentContainer
+                                : root.colors.surfaceMuted
 
                             Text {
                                 id: overviewLabel
                                 anchors.centerIn: parent
                                 text: NiriService.overviewOpen ? "Close overview" : "Overview"
                                 color: NiriService.overviewOpen
-                                    ? Theme.onAccentContainerColor
-                                    : Theme.onSurfaceColor
+                                    ? root.colors.onAccentContainer
+                                    : root.colors.onSurface
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                             }
@@ -111,24 +113,24 @@ Scope {
 
                                 width: workspaceLabel.implicitWidth + 18
                                 height: 30
-                                radius: Theme.radiusMedium
+                                radius: root.metrics.radiusMedium
                                 color: modelData.is_focused || workspaceMouse.containsMouse
-                                    ? Theme.accentContainerColor
+                                    ? root.colors.accentContainer
                                     : modelData.is_active
-                                        ? Theme.surfaceMutedColor
+                                        ? root.colors.surfaceMuted
                                         : "transparent"
                                 border.width: modelData.is_urgent ? 1 : 0
-                                border.color: Theme.urgentColor
+                                border.color: root.colors.urgent
 
                                 Text {
                                     id: workspaceLabel
                                     anchors.centerIn: parent
                                     text: WorkspaceStore.labelFor(workspaceChip.modelData)
                                     color: workspaceChip.modelData.is_focused
-                                        ? Theme.onAccentContainerColor
+                                        ? root.colors.onAccentContainer
                                         : workspaceChip.modelData.is_urgent
-                                            ? Theme.urgentColor
-                                            : Theme.textMutedColor
+                                            ? root.colors.urgent
+                                            : root.colors.textMuted
                                     font.pixelSize: 12
                                     font.weight: workspaceChip.modelData.is_active
                                         ? Font.DemiBold
@@ -160,7 +162,7 @@ Scope {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedTitle
-                            color: Theme.onSurfaceColor
+                            color: root.colors.onSurface
                             elide: Text.ElideRight
                             font.pixelSize: 13
                             font.weight: Font.DemiBold
@@ -171,7 +173,7 @@ Scope {
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedAppId
                             visible: text.length > 0
-                            color: Theme.textMutedColor
+                            color: root.colors.textMuted
                             elide: Text.ElideRight
                             font.pixelSize: 10
                         }
@@ -182,15 +184,15 @@ Scope {
 
                         anchors {
                             right: parent.right
-                            rightMargin: Theme.spacingLarge
+                            rightMargin: root.metrics.spacingLarge
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: Theme.spacingMedium
+                        spacing: root.metrics.spacingMedium
 
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: Theme.spacingSmall
+                            spacing: root.metrics.spacingSmall
 
                             Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -198,10 +200,10 @@ Scope {
                                 height: 8
                                 radius: 4
                                 color: NiriService.connected
-                                    ? Theme.primaryColor
+                                    ? root.colors.primary
                                     : NiriService.demoMode
-                                        ? Theme.outlineColor
-                                        : Theme.urgentColor
+                                        ? root.colors.outline
+                                        : root.colors.urgent
                             }
 
                             Text {
@@ -211,7 +213,7 @@ Scope {
                                     : NiriService.connected
                                         ? "Niri"
                                         : "Connecting"
-                                color: Theme.textMutedColor
+                                color: root.colors.textMuted
                                 font.pixelSize: 11
                                 font.weight: Font.Medium
                             }
@@ -220,7 +222,7 @@ Scope {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: root.formattedTime
-                            color: Theme.onSurfaceColor
+                            color: root.colors.onSurface
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
                         }
