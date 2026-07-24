@@ -1,0 +1,3 @@
+module qs.stores.niri
+singleton WorkspaceStore 1.0 WorkspaceStore.qml
+singleton WindowStore 1.0 WindowStore.qml
