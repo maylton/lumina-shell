@@ -23,6 +23,10 @@ Scope {
             WallpaperService.setDynamicTheme(enabled)
         }
 
+        function picker(outputName: string): void {
+            WallpaperService.togglePicker(outputName)
+        }
+
         function status(outputName: string): string {
             return JSON.stringify({
                 output: WallpaperService.resolvedOutputName(outputName),

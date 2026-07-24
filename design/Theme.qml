@@ -68,7 +68,9 @@ QtObject {
             notificationIcon: 38,
             notificationWidth: 390,
             statusDot: 8,
-            trayIcon: 18
+            trayIcon: 18,
+            wallpaperPickerHeight: 650,
+            wallpaperPickerWidth: 780
         },
         typography: {
             labelSmall: 10,

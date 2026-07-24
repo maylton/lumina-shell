@@ -8,6 +8,7 @@ import qs.modules.wallpaper
 
 ShellRoot {
     Wallpaper {}
+    WallpaperPicker {}
     Bar {}
     Launcher {}
     NotificationPopups {}
