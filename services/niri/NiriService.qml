@@ -15,6 +15,10 @@ Singleton {
     readonly property bool available: socketPath.length > 0
     readonly property bool demoMode: !available
     readonly property bool connected: eventStream.running && receivedInitialState
+    readonly property bool actionRunning: actionProcess.running
+    readonly property bool actionFailed: actionStatus === "failed"
+    readonly property int pendingActionCount: actionQueue.length
+        + (activeActionName.length > 0 ? 1 : 0)
 
     property bool receivedInitialState: false
     property bool overviewOpen: false
@@ -22,8 +26,19 @@ Singleton {
     property string status: demoMode ? "demo" : "connecting"
     property string lastError: ""
     property string lastEventType: ""
+    property string actionStatus: "idle"
+    property string activeActionName: ""
+    property string activeActionLabel: ""
+    property string lastActionName: ""
+    property string lastActionLabel: ""
+    property string lastActionError: ""
+    property string actionStdout: ""
+    property string actionStderr: ""
+    property bool actionFeedbackVisible: false
+    property var actionQueue: []
 
     signal eventReceived(string eventType)
+    signal actionFinished(string actionName, bool succeeded, string message)
 
     function initialize() {
         if (available) {
@@ -200,45 +215,138 @@ Singleton {
         return ""
     }
 
+    function appendProcessOutput(currentText, rawText) {
+        const text = String(rawText).trim()
+
+        if (!text)
+            return currentText
+
+        return currentText.length > 0 ? currentText + "\n" + text : text
+    }
+
+    function reportActionFailure(actionName, actionLabel, message) {
+        const errorMessage = String(message).trim()
+            || "Niri action failed without an error message"
+
+        actionStatus = "failed"
+        lastActionName = String(actionName)
+        lastActionLabel = String(actionLabel)
+        lastActionError = errorMessage
+        lastError = errorMessage
+        actionFeedbackVisible = true
+        actionFeedbackTimer.restart()
+        actionFinished(lastActionName, false, errorMessage)
+        console.warn("Lumina Niri action:", lastActionLabel + ":", errorMessage)
+    }
+
+    function reportActionSuccess(actionName, actionLabel, message) {
+        actionStatus = "succeeded"
+        lastActionName = String(actionName)
+        lastActionLabel = String(actionLabel)
+        actionFinished(lastActionName, true, String(message).trim())
+    }
+
+    function completeDemoAction(actionName, actionLabel) {
+        reportActionSuccess(actionName, actionLabel, "Demo action completed")
+    }
+
+    function enqueueAction(actionName, actionLabel, actionArguments) {
+        actionQueue = actionQueue.concat([{
+            name: String(actionName),
+            label: String(actionLabel),
+            args: actionArguments
+        }])
+
+        if (!actionProcess.running && !activeActionName)
+            Qt.callLater(startNextAction)
+    }
+
+    function startNextAction() {
+        if (actionProcess.running || activeActionName || actionQueue.length === 0)
+            return
+
+        const request = actionQueue[0]
+
+        actionQueue = actionQueue.slice(1)
+        activeActionName = request.name
+        activeActionLabel = request.label
+        actionStdout = ""
+        actionStderr = ""
+        actionStatus = "running"
+        actionProcess.exec([
+            "niri",
+            "msg",
+            "action"
+        ].concat(request.args))
+    }
+
+    function finishAction(exitCode) {
+        const actionName = activeActionName
+        const actionLabel = activeActionLabel
+        const outputMessage = actionStdout.trim()
+        const errorMessage = actionStderr.trim()
+
+        activeActionName = ""
+        activeActionLabel = ""
+
+        if (exitCode === 0) {
+            reportActionSuccess(actionName, actionLabel, outputMessage)
+        } else {
+            reportActionFailure(
+                actionName,
+                actionLabel,
+                errorMessage || "Niri action exited with code " + exitCode
+            )
+        }
+
+        Qt.callLater(startNextAction)
+    }
+
     function focusWorkspace(workspace) {
         if (!workspace)
             return
 
         if (demoMode) {
             WorkspaceStore.activate(workspace.id, true)
+            completeDemoAction("focus-workspace", "Switch workspace")
             return
         }
 
         const reference = workspaceReference(workspace)
 
         if (!reference) {
-            lastError = "Workspace has no valid Niri reference"
-            console.warn("Lumina Niri action:", lastError)
+            reportActionFailure(
+                "focus-workspace",
+                "Switch workspace",
+                "Workspace has no valid Niri reference"
+            )
             return
         }
 
-        lastError = ""
-        actionProcess.exec([
-            "niri",
-            "msg",
-            "action",
+        enqueueAction(
             "focus-workspace",
-            reference
-        ])
+            "Switch to workspace " + reference,
+            [
+                "focus-workspace",
+                reference
+            ]
+        )
     }
 
     function toggleOverview() {
         if (demoMode) {
             overviewOpen = !overviewOpen
+            completeDemoAction("toggle-overview", "Toggle overview")
             return
         }
 
-        actionProcess.exec([
-            "niri",
-            "msg",
-            "action",
-            "toggle-overview"
-        ])
+        enqueueAction(
+            "toggle-overview",
+            "Toggle overview",
+            [
+                "toggle-overview"
+            ]
+        )
     }
 
     Component.onCompleted: initialize()
@@ -319,16 +427,25 @@ Singleton {
     Process {
         id: actionProcess
 
-        stderr: SplitParser {
+        stdout: SplitParser {
             onRead: line => {
-                const message = String(line).trim()
-
-                if (message) {
-                    root.lastError = message
-                    console.warn("Lumina Niri action:", message)
-                }
+                root.actionStdout = root.appendProcessOutput(
+                    root.actionStdout,
+                    line
+                )
             }
         }
+
+        stderr: SplitParser {
+            onRead: line => {
+                root.actionStderr = root.appendProcessOutput(
+                    root.actionStderr,
+                    line
+                )
+            }
+        }
+
+        onExited: (exitCode, exitStatus) => root.finishAction(exitCode)
     }
 
     Timer {
@@ -343,5 +460,12 @@ Singleton {
         interval: 150
         repeat: false
         onTriggered: root.refreshOutputs()
+    }
+
+    Timer {
+        id: actionFeedbackTimer
+        interval: 6000
+        repeat: false
+        onTriggered: root.actionFeedbackVisible = false
     }
 }

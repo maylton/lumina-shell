@@ -35,6 +35,8 @@ Scope {
                 readonly property var activeWindow: activeWorkspace
                     ? WindowStore.byId(activeWorkspace.active_window_id)
                     : WindowStore.focusedWindow
+                readonly property bool showActionError: NiriService.actionFeedbackVisible
+                    && NiriService.lastActionError.length > 0
                 readonly property string activeWindowTitle: WindowStore.titleFor(activeWindow)
                 readonly property string activeWindowAppId: WindowStore.appIdFor(activeWindow)
                 readonly property string columnLabel: WindowStore.columnLabelFor(activeWindow)
@@ -306,7 +308,9 @@ Scope {
                                     width: root.luminaDesign.size.statusDot
                                     height: root.luminaDesign.size.statusDot
                                     radius: width / 2
-                                    color: NiriService.connected
+                                    color: panel.showActionError
+                                        ? root.luminaDesign.color.urgent
+                                        : NiriService.connected
                                         ? root.luminaDesign.color.primary
                                         : NiriService.demoMode
                                             ? root.luminaDesign.color.outline
@@ -321,20 +325,32 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: NiriService.demoMode
-                                        ? "Demo"
-                                        : NiriService.connected
-                                            ? "Niri"
-                                            : "Connecting"
-                                    color: root.luminaDesign.color.textMuted
+                                    text: panel.showActionError
+                                        ? "Niri action failed"
+                                        : NiriService.actionRunning
+                                            ? "Niri · Working"
+                                            : NiriService.demoMode
+                                                ? "Demo"
+                                                : NiriService.connected
+                                                    ? "Niri"
+                                                    : "Connecting"
+                                    color: panel.showActionError
+                                        ? root.luminaDesign.color.urgent
+                                        : root.luminaDesign.color.textMuted
                                     font.pixelSize: root.luminaDesign.typography.labelSmall
                                     font.weight: Font.Medium
                                 }
                             }
 
                             Text {
-                                text: panel.outputSummary
-                                color: root.luminaDesign.color.textMuted
+                                width: Math.min(implicitWidth, 240)
+                                text: panel.showActionError
+                                    ? NiriService.lastActionError
+                                    : panel.outputSummary
+                                color: panel.showActionError
+                                    ? root.luminaDesign.color.urgent
+                                    : root.luminaDesign.color.textMuted
+                                elide: Text.ElideRight
                                 font.pixelSize: root.luminaDesign.typography.labelSmall
                             }
                         }
