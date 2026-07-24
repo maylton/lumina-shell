@@ -95,6 +95,20 @@ qs ipc -p /home/maylton/Development/lumina-shell call launcher toggle DP-1
 
 Application launches use the native `DesktopEntry.execute()` method. Window and shell results call typed `NiriService` functions.
 
+## Notifications
+
+`NotificationService` owns Quickshell's native `NotificationServer` and retains at most 50 tracked notification generations. Incoming notifications are reduced into immutable history entries while retaining the original object only for lifecycle and action calls.
+
+The service provides:
+
+- a three-item popup queue on the focused output;
+- bounded timeouts with longer visibility for critical notifications;
+- replacement handling without stale close events affecting newer generations;
+- action invocation and client-visible dismiss/expire reasons;
+- unread state, bounded history, clearing, and Do Not Disturb.
+
+Do Not Disturb suppresses new popup surfaces without discarding history. The notification center and popups each create a surface only on the selected output, and visual components call service methods instead of owning the D-Bus integration.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.

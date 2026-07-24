@@ -21,6 +21,12 @@ The `noctalia-qs 0.0.12` StatusNotifierItem API exposes dynamic items, activatio
 
 Nested entries are presented as expandable sections inside the same popup instead of separate cascading windows. This avoids extra Wayland popup surfaces while preserving access to submenu actions.
 
+## Notification service ownership
+
+Only one process can own `org.freedesktop.Notifications` in a user session. When Noctalia is already running its notification daemon, Lumina logs the Quickshell registration warning and waits for the D-Bus name to become available. It does not terminate or replace the existing daemon.
+
+Lumina's daemon, popup queue, history, actions, and Do Not Disturb behavior were validated on an isolated session bus so the normal Noctalia session did not need to be interrupted.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.
