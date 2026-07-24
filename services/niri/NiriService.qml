@@ -124,6 +124,19 @@ Singleton {
         }
     }
 
+    function workspaceReference(workspace) {
+        if (!workspace)
+            return ""
+
+        if (workspace.name && String(workspace.name).length > 0)
+            return String(workspace.name)
+
+        if (workspace.idx !== undefined && workspace.idx !== null)
+            return String(workspace.idx)
+
+        return ""
+    }
+
     function focusWorkspace(workspace) {
         if (!workspace)
             return
@@ -133,13 +146,21 @@ Singleton {
             return
         }
 
+        const reference = workspaceReference(workspace)
+
+        if (!reference) {
+            lastError = "Workspace has no valid Niri reference"
+            console.warn("Lumina Niri action:", lastError)
+            return
+        }
+
+        lastError = ""
         actionProcess.exec([
             "niri",
             "msg",
             "action",
             "focus-workspace",
-            "--id",
-            String(workspace.id)
+            reference
         ])
     }
 
