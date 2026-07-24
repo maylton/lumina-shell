@@ -123,6 +123,8 @@ Lumina owns one background-layer wallpaper surface per output. `WallpaperService
 
 Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service scores quantized colors for saturation and mid-tone contrast, then updates semantic primary, accent-container, foreground, and outline roles in `Theme`. Disabling dynamic color restores the static Lumina palette immediately.
 
+The wallpaper picker uses Qt's `FolderListModel` with image-only filters. It targets the output from which it was opened, previews the configured directory without copying files, and persists paths containing spaces or URL encoding through the same service boundary.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
