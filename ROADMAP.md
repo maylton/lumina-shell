@@ -39,7 +39,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Overview button.
 - [x] Column position indicator.
 - [x] Clock and calendar popup.
-- [ ] System tray.
+- [ ] System tray. Implementation is awaiting native validation.
 
 ## 0.2 — Daily Controls
 

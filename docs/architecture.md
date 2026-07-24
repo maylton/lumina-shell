@@ -22,7 +22,7 @@ The Niri state increment introduces:
 - reactive output, workspace, and window stores;
 - overview and workspace actions exposed through the service API;
 - a demo fallback when `$NIRI_SOCKET` is unavailable;
-- workspace, focused-window, output, column-position, connection, overview, and clock widgets in the bar.
+- workspace, focused-window, output, column-position, connection, overview, clock, calendar, and system-tray widgets in the bar.
 
 The Niri event stream supplies a complete initial state followed by incremental updates. Unknown events are ignored so newer Niri versions can add event variants without breaking the shell.
 
@@ -57,6 +57,12 @@ The event-stream process is persistent and read-only. Output snapshots and compo
 
 When the event stream exits unexpectedly, Lumina waits briefly and reconnects. The bar exposes connecting, connected, and demo states without blocking the UI.
 
+## System tray
+
+Lumina consumes Quickshell's shared `SystemTray.items` object model and creates one visual view per output. Registration and item state remain process-global, so adding more bars does not create duplicate activation or menu actions.
+
+Each tray item owns its hover, pressed, attention, tooltip, activation, secondary activation, scrolling, and menu behavior. `QsMenuOpener` exposes DBus menu entries to a Lumina-styled popup with separators, selection controls, disabled states, and nested entries.
+
 ## Design system
 
 Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
@@ -88,10 +94,8 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 ## Next increment
 
-After native validation of output and column state, the remaining 0.1 bar work is:
+After native validation of the system tray, the remaining 0.1 bar work is:
 
-- clock and calendar popup;
-- system tray;
 - stronger action error reporting;
 - tests for event reduction and reconnection;
 - multi-output interaction refinement.

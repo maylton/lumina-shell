@@ -34,7 +34,8 @@ QtObject {
             calendarWidth: 336,
             chipHeight: 30,
             dayCell: 40,
-            statusDot: 8
+            statusDot: 8,
+            trayIcon: 18
         },
         typography: {
             labelSmall: 10,

@@ -15,6 +15,12 @@ Validated on 2026-07-24:
 
 The runnable foundation was also exercised with standard Quickshell `0.3.0` on a KDE Wayland development host. Native Niri behavior remains the release gate for compositor integrations.
 
+## System tray menus
+
+The `noctalia-qs 0.0.12` StatusNotifierItem API exposes dynamic items, activation, scrolling, tooltips, and DBus menus. Lumina renders menu entries through the fork's `QsMenuOpener` API so buttons, tooltips, and menus share the same design tokens.
+
+Nested entries are presented as expandable sections inside the same popup instead of separate cascading windows. This avoids extra Wayland popup surfaces while preserving access to submenu actions.
+
 ## Compatibility policy
 
 - The JSON IPC is treated as append-only: unknown fields and event variants must be ignored gracefully.

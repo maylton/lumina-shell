@@ -369,6 +369,10 @@ Scope {
                             }
                         }
 
+                        TrayWidget {
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
                         ClockWidget {
                             anchors.verticalCenter: parent.verticalCenter
                             outputName: panel.outputName.length > 0

@@ -1,2 +1,7 @@
 module qs.modules.bar.widgets
 ClockWidget 1.0 ClockWidget.qml
+TrayItem 1.0 TrayItem.qml
+TrayMenu 1.0 TrayMenu.qml
+TrayMenuEntry 1.0 TrayMenuEntry.qml
+TrayTooltip 1.0 TrayTooltip.qml
+TrayWidget 1.0 TrayWidget.qml
