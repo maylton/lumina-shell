@@ -1,0 +1,2 @@
+module qs.services.power
+singleton PowerService 1.0 PowerService.qml
