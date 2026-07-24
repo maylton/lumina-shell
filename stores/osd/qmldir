@@ -1,0 +1,2 @@
+module qs.stores.osd
+singleton OsdStore 1.0 OsdStore.qml

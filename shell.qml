@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.bar
 import qs.modules.launcher
 import qs.modules.notifications
+import qs.modules.osd
 import qs.modules.session
 import qs.modules.wallpaper
 
@@ -16,5 +17,6 @@ ShellRoot {
     Launcher {}
     NotificationPopups {}
     NotificationCenter {}
+    Osd {}
     SessionMenu {}
 }
