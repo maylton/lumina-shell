@@ -42,6 +42,22 @@ The event-stream process is persistent and read-only. Compositor actions use a s
 
 When the event stream exits unexpectedly, Lumina waits briefly and reconnects. The bar exposes connecting, connected, and demo states without blocking the UI.
 
+## Design system
+
+Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
+
+Design values are exposed through the single `Theme.luminaTokens` namespace:
+
+- semantic color roles rather than component-specific hex values;
+- contrasting shape tokens for resting, active, and focused surfaces;
+- shared spacing and sizing scales;
+- typography roles for labels, body text, and titles;
+- motion durations used consistently by interactive components.
+
+The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
+
+Other Quickshell desktops, including Sleex, are useful architectural references for modular widgets and centralized adaptive theming. Lumina does not inherit their compositor assumptions or visual identity: it remains Niri-first and develops its own Material Expressive component language.
+
 ## Layer policy
 
 - Bar: `Top`
