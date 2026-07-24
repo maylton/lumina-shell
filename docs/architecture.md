@@ -22,7 +22,7 @@ The Niri state increment introduces:
 - reactive output, workspace, and window stores;
 - queued overview and workspace actions with reactive completion state;
 - a demo fallback when `$NIRI_SOCKET` is unavailable;
-- workspace, focused-window, output, column-position, connection, overview, clock, calendar, and system-tray widgets in the bar.
+- workspace, focused-window, output, column-position, connection, overview, clock, calendar, launcher, and system-tray widgets in the bar.
 
 The Niri event stream supplies a complete initial state followed by incremental updates. Unknown events are ignored so newer Niri versions can add event variants without breaking the shell.
 
@@ -76,6 +76,24 @@ The bar presents failures through the Niri status indicator for six seconds. A l
 Lumina consumes Quickshell's shared `SystemTray.items` object model and creates one visual view per output. Registration and item state remain process-global, so adding more bars does not create duplicate activation or menu actions.
 
 Each tray item owns its hover, pressed, attention, tooltip, activation, secondary activation, scrolling, and menu behavior. `QsMenuOpener` exposes DBus menu entries to a Lumina-styled popup with separators, selection controls, disabled states, and nested entries.
+
+## Launcher and search providers
+
+`LauncherStore` owns the launcher query, selection, active output, and ranked results. It combines three event-driven sources:
+
+- `DesktopEntries.applications` for installed applications;
+- `WindowStore.windows` for currently open Niri windows;
+- typed shell actions exposed by `NiriService`.
+
+The launcher creates one overlay surface per screen but makes only the requested output visible. It takes exclusive keyboard focus while open, supports arrow-key navigation, and releases the surface after launching or closing.
+
+The `launcher` IPC target allows Niri key bindings to open the surface without routing commands through visual components:
+
+```bash
+qs ipc -p /home/maylton/Development/lumina-shell call launcher toggle DP-1
+```
+
+Application launches use the native `DesktopEntry.execute()` method. Window and shell results call typed `NiriService` functions.
 
 ## Design system
 

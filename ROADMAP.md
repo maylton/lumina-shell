@@ -53,8 +53,8 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ## 0.3 — Interactive Alpha
 
-- [ ] Application launcher.
-- [ ] Window and shell-action search providers.
+- [x] Application launcher.
+- [x] Window and shell-action search providers.
 - [ ] Notification daemon and popups.
 - [ ] Notification history and Do Not Disturb.
 - [ ] Dynamic theme generation from wallpaper.
