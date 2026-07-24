@@ -2,13 +2,16 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.stores.shell
 
 Singleton {
     id: root
 
     readonly property bool open: activeOutputName.length > 0
-
-    property string activeOutputName: ""
+    readonly property string activeOutputName:
+        OverlayStore.activeSurface === "session"
+            ? OverlayStore.activeOutputName
+            : ""
 
     function defaultOutputName() {
         const screens = Quickshell.screens || []
@@ -29,11 +32,11 @@ Singleton {
     }
 
     function openFor(outputName) {
-        activeOutputName = resolvedOutputName(outputName)
+        OverlayStore.openFor("session", resolvedOutputName(outputName))
     }
 
     function close() {
-        activeOutputName = ""
+        OverlayStore.close("session")
     }
 
     function toggle(outputName) {

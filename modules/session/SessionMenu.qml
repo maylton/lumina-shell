@@ -8,6 +8,7 @@ import qs.design
 import qs.services.niri
 import qs.services.session
 import qs.stores.session
+import qs.stores.shell
 
 Scope {
     id: root
@@ -138,6 +139,15 @@ Scope {
             break
         default:
             break
+        }
+    }
+
+    Connections {
+        target: OverlayStore
+
+        function onActiveSurfaceChanged() {
+            if (OverlayStore.activeSurface !== "session")
+                SessionService.cancel()
         }
     }
 

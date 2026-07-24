@@ -5,16 +5,20 @@ import Quickshell
 import qs.services.niri
 import qs.stores.niri
 import qs.stores.session
+import qs.stores.shell
 
 Singleton {
     id: root
 
     readonly property bool open: activeOutputName.length > 0
+    readonly property string activeOutputName:
+        OverlayStore.activeSurface === "launcher"
+            ? OverlayStore.activeOutputName
+            : ""
     readonly property var applications: DesktopEntries.applications.values
     readonly property var windows: WindowStore.windows
     readonly property var results: buildResults(query, applications, windows)
 
-    property string activeOutputName: ""
     property string query: ""
     property int selectedIndex: 0
 
@@ -222,11 +226,11 @@ Singleton {
 
         query = ""
         selectedIndex = 0
-        activeOutputName = targetOutput
+        OverlayStore.openFor("launcher", targetOutput)
     }
 
     function close() {
-        activeOutputName = ""
+        OverlayStore.close("launcher")
         query = ""
         selectedIndex = 0
     }
@@ -234,10 +238,12 @@ Singleton {
     function toggle(outputName) {
         const targetOutput = resolvedOutputName(outputName)
 
-        if (open && activeOutputName === targetOutput)
+        if (open && activeOutputName === targetOutput) {
             close()
-        else
-            openFor(targetOutput)
+            return
+        }
+
+        openFor(targetOutput)
     }
 
     function setQuery(value) {
@@ -305,5 +311,16 @@ Singleton {
             return
 
         execute(results[Math.min(selectedIndex, results.length - 1)])
+    }
+
+    Connections {
+        target: OverlayStore
+
+        function onActiveSurfaceChanged() {
+            if (OverlayStore.activeSurface !== "launcher") {
+                root.query = ""
+                root.selectedIndex = 0
+            }
+        }
     }
 }

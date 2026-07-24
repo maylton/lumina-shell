@@ -5,6 +5,7 @@ import Quickshell
 import qs.design
 import qs.stores.config
 import qs.stores.niri
+import qs.stores.shell
 
 Singleton {
     id: root
@@ -16,8 +17,10 @@ Singleton {
     readonly property string themeOutputName: focusedOutputName()
     readonly property string themeWallpaper: wallpaperFor(themeOutputName)
     readonly property string themeSource: urlForPath(themeWallpaper)
-
-    property string pickerOutputName: ""
+    readonly property string pickerOutputName:
+        OverlayStore.activeSurface === "wallpaper"
+            ? OverlayStore.activeOutputName
+            : ""
 
     function cloneMap(source) {
         const result = {}
@@ -35,8 +38,11 @@ Singleton {
         const workspaces = WorkspaceStore.workspaces || []
 
         for (var i = 0; i < workspaces.length; ++i) {
-            if (workspaces[i].is_focused && workspaces[i].output)
+            if (workspaces[i].is_focused
+                && workspaces[i].output
+                && outputExists(workspaces[i].output)) {
                 return String(workspaces[i].output)
+            }
         }
 
         const screens = Quickshell.screens || []
@@ -99,7 +105,7 @@ Singleton {
 
         next[name] = value
         ConfigStore.setWallpapers(next)
-        pickerOutputName = ""
+        closePicker()
     }
 
     function setDefaultWallpaper(path) {
@@ -117,11 +123,14 @@ Singleton {
     }
 
     function openPicker(outputName) {
-        pickerOutputName = resolvedOutputName(outputName)
+        OverlayStore.openFor(
+            "wallpaper",
+            resolvedOutputName(outputName)
+        )
     }
 
     function closePicker() {
-        pickerOutputName = ""
+        OverlayStore.close("wallpaper")
     }
 
     function togglePicker(outputName) {

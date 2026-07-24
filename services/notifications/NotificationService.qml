@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.Notifications
 import qs.stores.config
 import qs.stores.niri
+import qs.stores.shell
 
 Singleton {
     id: root
@@ -12,6 +13,10 @@ Singleton {
     readonly property int historyLimit: 50
     readonly property int popupLimit: 3
     readonly property bool doNotDisturb: ConfigStore.doNotDisturb
+    readonly property string centerOutputName:
+        OverlayStore.activeSurface === "notifications"
+            ? OverlayStore.activeOutputName
+            : ""
     readonly property int unreadCount: {
         var count = 0
 
@@ -26,7 +31,6 @@ Singleton {
     property var history: []
     property var popupEntries: []
     property string popupOutputName: ""
-    property string centerOutputName: ""
     property int generation: 0
 
     signal received(var entry)
@@ -244,12 +248,15 @@ Singleton {
     }
 
     function openCenter(outputName) {
-        centerOutputName = resolvedOutputName(outputName)
+        OverlayStore.openFor(
+            "notifications",
+            resolvedOutputName(outputName)
+        )
         markAllRead()
     }
 
     function closeCenter() {
-        centerOutputName = ""
+        OverlayStore.close("notifications")
     }
 
     function toggleCenter(outputName) {
@@ -300,6 +307,17 @@ Singleton {
 
         onNotification: notification => {
             root.receiveNotification(notification)
+        }
+    }
+
+    Connections {
+        target: Quickshell
+
+        function onScreensChanged() {
+            if (root.popupEntries.length > 0
+                && !root.outputExists(root.popupOutputName)) {
+                root.popupOutputName = root.defaultOutputName()
+            }
         }
     }
 }

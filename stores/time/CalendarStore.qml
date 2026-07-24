@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQml
 import Quickshell
+import qs.stores.shell
 
 Singleton {
     id: root
@@ -84,6 +85,18 @@ Singleton {
         return open && activeOutputName === String(outputName)
     }
 
+    function outputExists(outputName) {
+        const name = String(outputName || "")
+        const screens = Quickshell.screens || []
+
+        for (var i = 0; i < screens.length; ++i) {
+            if (String(screens[i].name || "") === name)
+                return true
+        }
+
+        return false
+    }
+
     function openFor(outputName) {
         const name = String(outputName)
 
@@ -147,5 +160,23 @@ Singleton {
     SystemClock {
         id: systemClock
         precision: SystemClock.Minutes
+    }
+
+    Connections {
+        target: Quickshell
+
+        function onScreensChanged() {
+            if (root.open && !root.outputExists(root.activeOutputName))
+                root.close()
+        }
+    }
+
+    Connections {
+        target: OverlayStore
+
+        function onActiveSurfaceChanged() {
+            if (OverlayStore.open)
+                root.close()
+        }
     }
 }
