@@ -29,9 +29,35 @@ Scope {
                 readonly property string outputName: modelData && modelData.name
                     ? String(modelData.name)
                     : ""
+                readonly property string storeOutputName: NiriService.demoMode
+                    ? "demo"
+                    : outputName
+                readonly property var niriOutput: OutputStore.byName(storeOutputName)
                 readonly property var visibleWorkspaces: NiriService.demoMode
                     ? WorkspaceStore.workspaces
                     : WorkspaceStore.forOutput(outputName)
+                readonly property var activeWorkspace: WorkspaceStore.activeForOutput(storeOutputName)
+                readonly property var activeWindow: activeWorkspace
+                    ? WindowStore.byId(activeWorkspace.active_window_id)
+                    : WindowStore.focusedWindow
+                readonly property string activeWindowTitle: WindowStore.titleFor(activeWindow)
+                readonly property string activeWindowAppId: WindowStore.appIdFor(activeWindow)
+                readonly property string columnLabel: WindowStore.columnLabelFor(activeWindow)
+                readonly property string outputSummary: {
+                    const name = outputName || (niriOutput ? String(niriOutput.name) : "Output")
+
+                    if (!niriOutput)
+                        return name
+
+                    const resolution = OutputStore.resolutionLabel(niriOutput)
+                    const scale = OutputStore.scaleLabel(niriOutput)
+                    var summary = name + " · " + resolution
+
+                    if (scale)
+                        summary += " · " + scale
+
+                    return summary
+                }
 
                 screen: modelData
                 implicitHeight: root.luminaDesign.size.barHeight
@@ -216,7 +242,7 @@ Scope {
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
-                            text: WindowStore.focusedTitle
+                            text: panel.activeWindowTitle
                             color: root.luminaDesign.color.onSurface
                             elide: Text.ElideRight
                             font.pixelSize: root.luminaDesign.typography.bodyMedium
@@ -226,7 +252,7 @@ Scope {
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
-                            text: WindowStore.focusedAppId
+                            text: panel.activeWindowAppId
                             visible: text.length > 0
                             color: root.luminaDesign.color.textMuted
                             elide: Text.ElideRight
@@ -245,38 +271,76 @@ Scope {
 
                         spacing: root.luminaDesign.spacing.medium
 
-                        Row {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: root.luminaDesign.spacing.small
+                        Rectangle {
+                            id: columnChip
 
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: root.luminaDesign.size.statusDot
-                                height: root.luminaDesign.size.statusDot
-                                radius: width / 2
-                                color: NiriService.connected
-                                    ? root.luminaDesign.color.primary
-                                    : NiriService.demoMode
-                                        ? root.luminaDesign.color.outline
-                                        : root.luminaDesign.color.urgent
+                            visible: panel.columnLabel.length > 0
+                            width: visible ? columnLabelText.implicitWidth + 18 : 0
+                            height: root.luminaDesign.size.chipHeight
+                            radius: root.luminaDesign.shape.full
+                            color: root.luminaDesign.color.surfaceMuted
+                            border.width: 1
+                            border.color: root.luminaDesign.color.outline
 
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: root.luminaDesign.motion.medium
-                                    }
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: root.luminaDesign.motion.medium
+                                    easing.type: Easing.OutCubic
                                 }
                             }
 
                             Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: NiriService.demoMode
-                                    ? "Demo"
-                                    : NiriService.connected
-                                        ? "Niri"
-                                        : "Connecting"
+                                id: columnLabelText
+                                anchors.centerIn: parent
+                                text: panel.columnLabel
+                                color: root.luminaDesign.color.onSurface
+                                font.pixelSize: root.luminaDesign.typography.labelSmall
+                                font.weight: Font.DemiBold
+                            }
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 0
+
+                            Row {
+                                spacing: root.luminaDesign.spacing.small
+
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: root.luminaDesign.size.statusDot
+                                    height: root.luminaDesign.size.statusDot
+                                    radius: width / 2
+                                    color: NiriService.connected
+                                        ? root.luminaDesign.color.primary
+                                        : NiriService.demoMode
+                                            ? root.luminaDesign.color.outline
+                                            : root.luminaDesign.color.urgent
+
+                                    Behavior on color {
+                                        ColorAnimation {
+                                            duration: root.luminaDesign.motion.medium
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: NiriService.demoMode
+                                        ? "Demo"
+                                        : NiriService.connected
+                                            ? "Niri"
+                                            : "Connecting"
+                                    color: root.luminaDesign.color.textMuted
+                                    font.pixelSize: root.luminaDesign.typography.labelSmall
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            Text {
+                                text: panel.outputSummary
                                 color: root.luminaDesign.color.textMuted
                                 font.pixelSize: root.luminaDesign.typography.labelSmall
-                                font.weight: Font.Medium
                             }
                         }
 
