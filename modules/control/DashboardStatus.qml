@@ -38,6 +38,11 @@ DashboardCard {
                 width: (parent.width - parent.spacing) / 2
                 title: "Wi-Fi"
                 detail: ConnectivityService.wifiName
+                iconName: ConnectivityService.wifiConnected
+                    ? "network-wireless-signal-excellent-symbolic"
+                    : ConnectivityService.wifiEnabled
+                        ? "network-wireless-symbolic"
+                        : "network-wireless-disabled-symbolic"
                 symbol: "◉"
                 checked: ConnectivityService.wifiEnabled
                 available: ConnectivityService.wifiAvailable
@@ -48,6 +53,9 @@ DashboardCard {
                 width: (parent.width - parent.spacing) / 2
                 title: "Bluetooth"
                 detail: ConnectivityService.bluetoothSummary
+                iconName: ConnectivityService.bluetoothEnabled
+                    ? "bluetooth-active-symbolic"
+                    : "bluetooth-disabled-symbolic"
                 symbol: "ᛒ"
                 checked: ConnectivityService.bluetoothEnabled
                 available: ConnectivityService.bluetoothAvailable

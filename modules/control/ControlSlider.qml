@@ -7,7 +7,8 @@ Rectangle {
     id: root
 
     required property string title
-    required property string symbol
+    property string iconName: ""
+    property string symbol: ""
     property string detail: ""
     property real value: 0
     property bool available: true
@@ -68,14 +69,15 @@ Rectangle {
             margins: root.luminaDesign.spacing.large
         }
 
-        Text {
+        DashboardIcon {
             width: 28
-            text: root.symbol
-            color: root.available
+            height: 18
+            iconName: root.iconName
+            fallbackSymbol: root.symbol
+            iconColor: root.available
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.textMuted
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
+            iconSize: 16
         }
 
         Text {

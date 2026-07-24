@@ -115,6 +115,7 @@ DashboardCard {
             spacing: root.luminaDesign.spacing.medium
 
             DashboardAction {
+                iconName: "media-skip-backward-symbolic"
                 symbol: "‹"
                 label: "Previous track"
                 available: MediaService.available
@@ -124,6 +125,9 @@ DashboardCard {
             }
 
             DashboardAction {
+                iconName: MediaService.playing
+                    ? "media-playback-pause-symbolic"
+                    : "media-playback-start-symbolic"
                 symbol: MediaService.playing ? "Ⅱ" : "▶"
                 label: MediaService.playing ? "Pause" : "Play"
                 checked: MediaService.playing
@@ -134,6 +138,7 @@ DashboardCard {
             }
 
             DashboardAction {
+                iconName: "media-skip-forward-symbolic"
                 symbol: "›"
                 label: "Next track"
                 available: MediaService.available

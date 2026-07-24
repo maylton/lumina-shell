@@ -70,24 +70,32 @@ Item {
         spacing: root.luminaDesign.spacing.small
 
         DashboardAction {
+            iconName: "view-refresh-symbolic"
             symbol: "↻"
             label: "Refresh Niri outputs"
             onActivated: NiriService.requestOutputRefresh()
         }
 
         DashboardAction {
+            iconName: "preferences-system-symbolic"
             symbol: "⚙"
             label: "Open Lumina settings"
             onActivated: SettingsStore.openFor(root.outputName)
         }
 
         DashboardAction {
+            iconName: "system-shutdown-symbolic"
             symbol: "⏻"
             label: "Open session controls"
             onActivated: SessionMenuStore.openFor(root.outputName)
         }
 
         DashboardAction {
+            iconName: ConnectivityService.wifiConnected
+                ? "network-wireless-signal-excellent-symbolic"
+                : ConnectivityService.wifiEnabled
+                    ? "network-wireless-symbolic"
+                    : "network-wireless-disabled-symbolic"
             symbol: "◉"
             label: "Wi-Fi"
             checked: ConnectivityService.wifiEnabled
@@ -96,6 +104,9 @@ Item {
         }
 
         DashboardAction {
+            iconName: ConnectivityService.bluetoothEnabled
+                ? "bluetooth-active-symbolic"
+                : "bluetooth-disabled-symbolic"
             symbol: "ᛒ"
             label: "Bluetooth"
             checked: ConnectivityService.bluetoothEnabled
@@ -104,6 +115,7 @@ Item {
         }
 
         DashboardAction {
+            iconName: "notifications-disabled-symbolic"
             symbol: "◐"
             label: "Do Not Disturb"
             checked: NotificationService.doNotDisturb
@@ -111,6 +123,7 @@ Item {
         }
 
         DashboardAction {
+            iconName: "preferences-color-symbolic"
             symbol: "✦"
             label: "Dynamic color"
             checked: WallpaperService.dynamicThemeEnabled
@@ -120,6 +133,7 @@ Item {
         }
 
         DashboardAction {
+            iconName: "window-close-symbolic"
             symbol: "×"
             label: "Close control center"
             onActivated: ControlCenterStore.close()

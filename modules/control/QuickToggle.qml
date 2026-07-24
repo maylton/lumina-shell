@@ -8,7 +8,8 @@ Rectangle {
 
     required property string title
     required property string detail
-    required property string symbol
+    property string iconName: ""
+    property string symbol: ""
     property bool checked: false
     property bool available: true
 
@@ -68,15 +69,16 @@ Rectangle {
 
         spacing: root.luminaDesign.spacing.medium
 
-        Text {
+        DashboardIcon {
             anchors.verticalCenter: parent.verticalCenter
             width: 30
-            text: root.symbol
-            color: root.checked
+            height: 22
+            iconName: root.iconName
+            fallbackSymbol: root.symbol
+            iconColor: root.checked
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.primary
-            font.pixelSize: 18
-            font.weight: Font.DemiBold
+            iconSize: 18
         }
 
         Column {

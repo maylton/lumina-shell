@@ -161,11 +161,14 @@ Scope {
                                 model: [
                                     {
                                         id: "home",
+                                        iconName: "view-grid-symbolic",
                                         symbol: "✦",
                                         label: "Dashboard"
                                     },
                                     {
                                         id: "notifications",
+                                        iconName:
+                                            "preferences-system-notifications-symbolic",
                                         symbol: "☷",
                                         label: "Notifications"
                                     }
@@ -217,13 +220,17 @@ Scope {
                                         spacing:
                                             root.luminaDesign.spacing.small
 
-                                        Text {
-                                            text: tabButton.modelData.symbol
-                                            color: tabButton.selected
+                                        DashboardIcon {
+                                            width: 16
+                                            height: 16
+                                            iconName:
+                                                tabButton.modelData.iconName
+                                            fallbackSymbol:
+                                                tabButton.modelData.symbol
+                                            iconColor: tabButton.selected
                                                 ? root.luminaDesign.color.primary
                                                 : root.luminaDesign.color.textMuted
-                                            font.pixelSize: 16
-                                            font.weight: Font.Bold
+                                            iconSize: 16
                                         }
 
                                         Text {

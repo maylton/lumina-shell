@@ -60,6 +60,7 @@ DashboardCard {
                 id: clearAction
 
                 wide: !root.compact
+                iconName: "edit-clear-all-symbolic"
                 symbol: "⌫"
                 label: "Clear"
                 available: NotificationService.history.length > 0
@@ -98,12 +99,17 @@ DashboardCard {
                     radius: root.luminaDesign.shape.full
                     color: root.luminaDesign.color.surfaceMuted
 
-                    Text {
+                    DashboardIcon {
                         anchors.centerIn: parent
-                        text: NotificationService.doNotDisturb ? "◐" : "✓"
-                        color: root.luminaDesign.color.primary
-                        font.pixelSize: 22
-                        font.weight: Font.Bold
+                        width: 22
+                        height: 22
+                        iconName: NotificationService.doNotDisturb
+                            ? "notifications-disabled-symbolic"
+                            : "preferences-system-notifications-symbolic"
+                        fallbackSymbol:
+                            NotificationService.doNotDisturb ? "◐" : "✓"
+                        iconColor: root.luminaDesign.color.primary
+                        iconSize: 22
                     }
                 }
 

@@ -53,6 +53,9 @@ DashboardCard {
                 spacing: root.luminaDesign.spacing.extraSmall
 
                 DashboardAction {
+                    iconName: AudioService.outputMuted
+                        ? "audio-volume-muted-symbolic"
+                        : "audio-volume-high-symbolic"
                     symbol: AudioService.outputMuted ? "×" : "♪"
                     label: "Toggle output mute"
                     checked: AudioService.outputMuted
@@ -61,6 +64,9 @@ DashboardCard {
                 }
 
                 DashboardAction {
+                    iconName: AudioService.inputMuted
+                        ? "microphone-sensitivity-muted-symbolic"
+                        : "audio-input-microphone-symbolic"
                     symbol: AudioService.inputMuted ? "×" : "●"
                     label: "Toggle microphone mute"
                     checked: AudioService.inputMuted
@@ -73,6 +79,9 @@ DashboardCard {
         ControlSlider {
             width: parent.width
             height: 60
+            iconName: AudioService.outputMuted
+                ? "audio-volume-muted-symbolic"
+                : "audio-volume-high-symbolic"
             title: AudioService.outputMuted
                 ? "Output muted"
                 : "Output volume"
@@ -89,6 +98,9 @@ DashboardCard {
         ControlSlider {
             width: parent.width
             height: 60
+            iconName: AudioService.inputMuted
+                ? "microphone-sensitivity-muted-symbolic"
+                : "audio-input-microphone-symbolic"
             title: AudioService.inputMuted
                 ? "Microphone muted"
                 : "Microphone"
@@ -105,6 +117,7 @@ DashboardCard {
         ControlSlider {
             width: parent.width
             height: 60
+            iconName: "display-brightness-symbolic"
             title: "Brightness"
             symbol: "☀"
             detail: BrightnessService.available
@@ -151,6 +164,9 @@ DashboardCard {
 
                     width: (parent.width - parent.spacing * 2) / 3
                     wide: true
+                    iconName: "power-profile-"
+                        + modelData.id
+                        + "-symbolic"
                     symbol: modelData.id === "power-saver"
                         ? "◔"
                         : modelData.id === "performance"

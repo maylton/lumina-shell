@@ -6,8 +6,9 @@ import qs.design
 Rectangle {
     id: root
 
-    required property string symbol
     required property string label
+    property string iconName: ""
+    property string symbol: ""
     property bool checked: false
     property bool available: true
     property bool wide: false
@@ -59,15 +60,15 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.luminaDesign.spacing.small
 
-        Text {
+        DashboardIcon {
             width: root.wide ? 16 : 18
-            horizontalAlignment: Text.AlignHCenter
-            text: root.symbol
-            color: root.checked
+            height: width
+            iconName: root.iconName
+            fallbackSymbol: root.symbol
+            iconColor: root.checked
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
+            iconSize: 16
         }
 
         Text {
