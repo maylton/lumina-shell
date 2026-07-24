@@ -56,9 +56,9 @@ Scope {
                     }
 
                     radius: Theme.radiusLarge
-                    color: Theme.surfaceContainer
+                    color: Theme.surfaceContainerColor
                     border.width: 1
-                    border.color: Theme.outline
+                    border.color: Theme.outlineColor
 
                     Row {
                         id: leftArea
@@ -78,16 +78,16 @@ Scope {
                             height: 30
                             radius: Theme.radiusMedium
                             color: NiriService.overviewOpen || overviewMouse.containsMouse
-                                ? Theme.accentContainer
-                                : Theme.surfaceMuted
+                                ? Theme.accentContainerColor
+                                : Theme.surfaceMutedColor
 
                             Text {
                                 id: overviewLabel
                                 anchors.centerIn: parent
                                 text: NiriService.overviewOpen ? "Close overview" : "Overview"
                                 color: NiriService.overviewOpen
-                                    ? Theme.onAccentContainer
-                                    : Theme.onSurface
+                                    ? Theme.onAccentContainerColor
+                                    : Theme.onSurfaceColor
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                             }
@@ -113,22 +113,22 @@ Scope {
                                 height: 30
                                 radius: Theme.radiusMedium
                                 color: modelData.is_focused || workspaceMouse.containsMouse
-                                    ? Theme.accentContainer
+                                    ? Theme.accentContainerColor
                                     : modelData.is_active
-                                        ? Theme.surfaceMuted
+                                        ? Theme.surfaceMutedColor
                                         : "transparent"
                                 border.width: modelData.is_urgent ? 1 : 0
-                                border.color: Theme.urgent
+                                border.color: Theme.urgentColor
 
                                 Text {
                                     id: workspaceLabel
                                     anchors.centerIn: parent
                                     text: WorkspaceStore.labelFor(workspaceChip.modelData)
                                     color: workspaceChip.modelData.is_focused
-                                        ? Theme.onAccentContainer
+                                        ? Theme.onAccentContainerColor
                                         : workspaceChip.modelData.is_urgent
-                                            ? Theme.urgent
-                                            : Theme.textMuted
+                                            ? Theme.urgentColor
+                                            : Theme.textMutedColor
                                     font.pixelSize: 12
                                     font.weight: workspaceChip.modelData.is_active
                                         ? Font.DemiBold
@@ -160,7 +160,7 @@ Scope {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedTitle
-                            color: Theme.onSurface
+                            color: Theme.onSurfaceColor
                             elide: Text.ElideRight
                             font.pixelSize: 13
                             font.weight: Font.DemiBold
@@ -171,7 +171,7 @@ Scope {
                             horizontalAlignment: Text.AlignHCenter
                             text: WindowStore.focusedAppId
                             visible: text.length > 0
-                            color: Theme.textMuted
+                            color: Theme.textMutedColor
                             elide: Text.ElideRight
                             font.pixelSize: 10
                         }
@@ -198,10 +198,10 @@ Scope {
                                 height: 8
                                 radius: 4
                                 color: NiriService.connected
-                                    ? Theme.primary
+                                    ? Theme.primaryColor
                                     : NiriService.demoMode
-                                        ? Theme.outline
-                                        : Theme.urgent
+                                        ? Theme.outlineColor
+                                        : Theme.urgentColor
                             }
 
                             Text {
@@ -211,7 +211,7 @@ Scope {
                                     : NiriService.connected
                                         ? "Niri"
                                         : "Connecting"
-                                color: Theme.textMuted
+                                color: Theme.textMutedColor
                                 font.pixelSize: 11
                                 font.weight: Font.Medium
                             }
@@ -220,7 +220,7 @@ Scope {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: root.formattedTime
-                            color: Theme.onSurface
+                            color: Theme.onSurfaceColor
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
                         }
