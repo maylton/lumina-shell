@@ -28,7 +28,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 - [x] Connect to `$NIRI_SOCKET`.
 - [x] Consume the JSON event stream.
-- [ ] Maintain reactive output, workspace, window, and overview state. Output implementation is awaiting native validation.
+- [x] Maintain reactive output, workspace, window, and overview state.
 - [ ] Reconnect safely after compositor or socket interruption.
 - [x] Expose compositor actions through `NiriService`.
 
@@ -37,7 +37,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Active workspace indicator.
 - [x] Focused window title and app ID.
 - [x] Overview button.
-- [ ] Column position indicator. Implementation is awaiting native validation.
+- [x] Column position indicator.
 - [ ] Clock and calendar popup.
 - [ ] System tray.
 
