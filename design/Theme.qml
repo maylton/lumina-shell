@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 
 Singleton {
-    readonly property color surface: "#111318"
+    readonly property color surfaceBase: "#111318"
     readonly property color surfaceContainer: "#1D2026"
     readonly property color onSurface: "#E2E2E9"
     readonly property color primary: "#ADC6FF"
