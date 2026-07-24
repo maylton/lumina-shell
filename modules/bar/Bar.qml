@@ -11,6 +11,7 @@ import qs.modules.notifications
 import qs.modules.session
 import qs.modules.wallpaper
 import qs.services.niri
+import qs.stores.config
 import qs.stores.niri
 
 Scope {
@@ -308,6 +309,7 @@ Scope {
 
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
+                            visible: ConfigStore.showStatusDetails
                             spacing: 0
 
                             Row {

@@ -6,6 +6,7 @@ import Quickshell.Io
 import qs.services.audio
 import qs.services.brightness
 import qs.services.session
+import qs.stores.config
 import qs.stores.niri
 
 Singleton {
@@ -59,7 +60,7 @@ Singleton {
             ? String(requestedOutput)
             : focusedOutputName()
 
-        if (!targetOutput)
+        if (!targetOutput || !ConfigStore.osdEnabled)
             return
 
         kind = String(osdKind || "")
@@ -177,7 +178,7 @@ Singleton {
     Timer {
         id: hideTimer
 
-        interval: 1800
+        interval: ConfigStore.osdDuration
         repeat: false
         onTriggered: root.visible = false
     }

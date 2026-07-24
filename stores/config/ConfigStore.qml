@@ -7,7 +7,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property int currentSchemaVersion: 2
+    readonly property int currentSchemaVersion: 3
     readonly property string statePath: {
         const overridePath = Quickshell.env("LUMINA_STATE_PATH")
 
@@ -22,8 +22,13 @@ Singleton {
     property alias wallpapers: stateAdapter.wallpapers
     property alias defaultWallpaper: stateAdapter.defaultWallpaper
     property alias wallpaperDirectory: stateAdapter.wallpaperDirectory
+    property alias osdEnabled: stateAdapter.osdEnabled
+    property alias osdDuration: stateAdapter.osdDuration
+    property alias showStatusDetails: stateAdapter.showStatusDetails
     property bool initialized: false
     property string lastError: ""
+    property bool recoveredInvalidConfiguration: false
+    readonly property string recoveryBackupPath: statePath + ".invalid"
 
     function cloneMap(source) {
         const result = {}
@@ -57,6 +62,12 @@ Singleton {
             changed = true
         }
 
+        if (stateAdapter.osdDuration < 800
+            || stateAdapter.osdDuration > 5000) {
+            stateAdapter.osdDuration = 1800
+            changed = true
+        }
+
         if (stateAdapter.schemaVersion !== currentSchemaVersion) {
             stateAdapter.schemaVersion = currentSchemaVersion
             changed = true
@@ -69,6 +80,21 @@ Singleton {
     function finishLoad() {
         initialized = true
         migrate()
+    }
+
+    function validateLoadedState() {
+        const rawText = stateFile.text()
+
+        if (String(rawText || "").trim()) {
+            try {
+                JSON.parse(rawText)
+            } catch (error) {
+                recoverInvalidConfiguration("Invalid JSON: " + error)
+                return
+            }
+        }
+
+        finishLoad()
     }
 
     function scheduleSave() {
@@ -101,6 +127,66 @@ Singleton {
         scheduleSave()
     }
 
+    function setOsdEnabled(enabled) {
+        stateAdapter.osdEnabled = Boolean(enabled)
+        scheduleSave()
+    }
+
+    function setOsdDuration(value) {
+        stateAdapter.osdDuration = Math.max(
+            800,
+            Math.min(5000, Math.round(Number(value) || 1800))
+        )
+        scheduleSave()
+    }
+
+    function setShowStatusDetails(enabled) {
+        stateAdapter.showStatusDetails = Boolean(enabled)
+        scheduleSave()
+    }
+
+    function applyDefaults() {
+        stateAdapter.schemaVersion = currentSchemaVersion
+        stateAdapter.doNotDisturb = false
+        stateAdapter.dynamicTheme = true
+        stateAdapter.wallpapers = {}
+        stateAdapter.defaultWallpaper =
+            "/usr/share/wallpapers/cachyos-wallpapers/Abstract.png"
+        stateAdapter.wallpaperDirectory =
+            "/usr/share/wallpapers/cachyos-wallpapers"
+        stateAdapter.osdEnabled = true
+        stateAdapter.osdDuration = 1800
+        stateAdapter.showStatusDetails = true
+    }
+
+    function reset() {
+        applyDefaults()
+        scheduleSave()
+    }
+
+    function recoverInvalidConfiguration(error) {
+        const rawText = stateFile.text()
+        const errorText = typeof error === "string"
+            ? error
+            : FileViewError.toString(error)
+
+        if (rawText)
+            recoveryFile.setText(rawText)
+
+        applyDefaults()
+        initialized = true
+        recoveredInvalidConfiguration = true
+        lastError = "Invalid configuration recovered: "
+            + errorText
+        saveTimer.restart()
+        console.warn(
+            "Lumina configuration:",
+            lastError,
+            "Backup:",
+            recoveryBackupPath
+        )
+    }
+
     FileView {
         id: stateFile
 
@@ -121,14 +207,17 @@ Singleton {
                 "/usr/share/wallpapers/cachyos-wallpapers/Abstract.png"
             property string wallpaperDirectory:
                 "/usr/share/wallpapers/cachyos-wallpapers"
+            property bool osdEnabled: true
+            property int osdDuration: 1800
+            property bool showStatusDetails: true
         }
 
-        onLoaded: root.finishLoad()
+        onLoaded: root.validateLoadedState()
 
         onLoadFailed: error => {
             if (error !== FileViewError.FileNotFound) {
-                root.lastError = "Failed to load state: "
-                    + FileViewError.toString(error)
+                root.recoverInvalidConfiguration(error)
+                return
             }
 
             root.finishLoad()
@@ -140,7 +229,18 @@ Singleton {
             console.warn("Lumina configuration:", root.lastError)
         }
 
-        onSaved: root.lastError = ""
+        onSaved: {
+            if (!root.recoveredInvalidConfiguration)
+                root.lastError = ""
+        }
+    }
+
+    FileView {
+        id: recoveryFile
+
+        path: root.recoveryBackupPath
+        atomicWrites: true
+        printErrors: false
     }
 
     Timer {
@@ -149,5 +249,44 @@ Singleton {
         interval: 120
         repeat: false
         onTriggered: stateFile.writeAdapter()
+    }
+
+    IpcHandler {
+        target: "config"
+
+        function reset(): void {
+            root.reset()
+        }
+
+        function osd(enabled: bool): void {
+            root.setOsdEnabled(enabled)
+        }
+
+        function osdDuration(milliseconds: int): void {
+            root.setOsdDuration(milliseconds)
+        }
+
+        function statusDetails(enabled: bool): void {
+            root.setShowStatusDetails(enabled)
+        }
+
+        function status(): string {
+            return JSON.stringify({
+                schemaVersion: root.schemaVersion,
+                path: root.statePath,
+                initialized: root.initialized,
+                recovered: root.recoveredInvalidConfiguration,
+                recoveryBackupPath: root.recoveredInvalidConfiguration
+                    ? root.recoveryBackupPath
+                    : "",
+                lastError: root.lastError,
+                doNotDisturb: root.doNotDisturb,
+                dynamicTheme: root.dynamicTheme,
+                osdEnabled: root.osdEnabled,
+                osdDuration: root.osdDuration,
+                showStatusDetails: root.showStatusDetails,
+                wallpaperDirectory: root.wallpaperDirectory
+            })
+        }
     }
 }

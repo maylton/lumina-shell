@@ -13,6 +13,7 @@ import qs.services.notifications
 import qs.services.power
 import qs.services.wallpaper
 import qs.stores.control
+import qs.stores.settings
 
 Scope {
     id: root
@@ -531,6 +532,39 @@ Scope {
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 42
+                            radius: root.luminaDesign.shape.full
+                            color: settingsMouse.containsMouse
+                                ? root.luminaDesign.color.primary
+                                : root.luminaDesign.color.accentContainer
+
+                            Accessible.role: Accessible.Button
+                            Accessible.name: "Open Lumina settings"
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "Open Lumina settings"
+                                color:
+                                    root.luminaDesign.color.onAccentContainer
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.Bold
+                            }
+
+                            MouseArea {
+                                id: settingsMouse
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: SettingsStore.openFor(
+                                    controlWindow.outputName
+                                )
                             }
                         }
                     }
