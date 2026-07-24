@@ -20,7 +20,7 @@ The Niri state increment introduces:
 - newline-delimited JSON parsing through Quickshell `SplitParser`;
 - automatic reconnection when the event-stream process stops;
 - reactive output, workspace, and window stores;
-- overview and workspace actions exposed through the service API;
+- queued overview and workspace actions with reactive completion state;
 - a demo fallback when `$NIRI_SOCKET` is unavailable;
 - workspace, focused-window, output, column-position, connection, overview, clock, calendar, and system-tray widgets in the bar.
 
@@ -56,6 +56,20 @@ Niri window state includes `layout.pos_in_scrolling_layout`, a 1-based pair cont
 The event-stream process is persistent and read-only. Output snapshots and compositor actions use separate short-lived `Process` objects, because an IPC connection that has entered event-stream mode cannot also accept regular requests.
 
 When the event stream exits unexpectedly, Lumina waits briefly and reconnects. The bar exposes connecting, connected, and demo states without blocking the UI.
+
+### Niri action lifecycle
+
+Visual components submit typed requests to `NiriService`; they never start command processes themselves. The service serializes requests so rapid workspace or overview clicks cannot replace a process that is still running.
+
+For each action, the service:
+
+- exposes `running`, `succeeded`, or `failed` state;
+- captures standard output and standard error;
+- treats the process exit code as the source of truth;
+- emits a completion signal with the action name and message;
+- retains the most recent action error for diagnostics.
+
+The bar presents failures through the Niri status indicator for six seconds. A later successful queued action does not erase an earlier failure before that feedback interval expires.
 
 ## System tray
 
@@ -94,8 +108,7 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 ## Next increment
 
-After native validation of the system tray, the remaining 0.1 bar work is:
+The remaining 0.1 bar work is:
 
-- stronger action error reporting;
 - tests for event reduction and reconnection;
 - multi-output interaction refinement.

@@ -136,9 +136,9 @@ The current sprint delivers the reactive compositor-state vertical slice:
 
 After Sprint 2 native validation:
 
-1. Clock interaction and calendar popup.
-2. System tray integration.
-3. Stronger action error reporting.
-4. Event-reduction and reconnection tests.
-5. Multi-output interaction refinements.
-6. Project license selection.
+1. [x] Clock interaction and calendar popup.
+2. [x] System tray integration.
+3. [x] Stronger action error reporting.
+4. [ ] Event-reduction and reconnection tests.
+5. [ ] Multi-output interaction refinements.
+6. [ ] Project license selection.
