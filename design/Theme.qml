@@ -40,6 +40,9 @@ QtObject {
             launcherIcon: 34,
             launcherRowHeight: 58,
             launcherWidth: 680,
+            notificationCenterWidth: 430,
+            notificationIcon: 38,
+            notificationWidth: 390,
             statusDot: 8,
             trayIcon: 18
         },

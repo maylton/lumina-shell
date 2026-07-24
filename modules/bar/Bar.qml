@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs.design
 import qs.modules.bar.widgets
 import qs.modules.launcher
+import qs.modules.notifications
 import qs.services.niri
 import qs.stores.niri
 
@@ -363,6 +364,11 @@ Scope {
 
                         TrayWidget {
                             anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        NotificationButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            outputName: panel.outputName
                         }
 
                         ClockWidget {
