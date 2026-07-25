@@ -1,0 +1,14 @@
+// Optional normal/live blur profile for Lumina's bar.
+//
+// Include this file from the main Niri config only when live window content
+// behind the bar is preferred over Niri's more efficient xray default.
+// Lumina still decides whether Blur or Frosted glass requests the effect.
+layer-rule {
+    match namespace="^lumina-bar$"
+
+    background-effect {
+        xray false
+        noise 0.015
+        saturation 1.1
+    }
+}

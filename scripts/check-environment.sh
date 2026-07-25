@@ -101,6 +101,51 @@ check_pipewire() {
     fi
 }
 
+check_background_blur_support() {
+    local qmltypes_file=""
+    local candidate=""
+    local niri_version=""
+
+    for candidate in \
+        /usr/lib/qt6/qml/Quickshell/Wayland/_BackgroundEffect/quickshell-wayland-background-effect.qmltypes \
+        /usr/lib64/qt6/qml/Quickshell/Wayland/_BackgroundEffect/quickshell-wayland-background-effect.qmltypes; do
+        if [[ -f "${candidate}" ]]; then
+            qmltypes_file="${candidate}"
+            break
+        fi
+    done
+
+    if [[ -n "${qmltypes_file}" ]] \
+        && grep -Fq 'name: "blurRegion"' "${qmltypes_file}"; then
+        printf 'OK   %-12s Quickshell exposes a shaped blur-region request\n' \
+            'Blur API'
+    else
+        printf 'INFO %-12s shaped BackgroundEffect API was not detected\n' \
+            'Blur API'
+    fi
+
+    if command -v niri >/dev/null 2>&1; then
+        niri_version="$(
+            niri --version 2>/dev/null \
+                | grep -Eo '[0-9]+\.[0-9]+' \
+                | head -n 1
+        )"
+
+        if [[ -n "${niri_version}" ]] \
+            && printf '%s\n%s\n' 26.04 "${niri_version}" \
+                | sort -V -C; then
+            printf 'OK   %-12s Niri %s includes ext-background-effect\n' \
+                'Compositor' "${niri_version}"
+        else
+            printf 'INFO %-12s Niri 26.04+ is required for native blur\n' \
+                'Compositor'
+        fi
+    fi
+
+    printf 'INFO %-12s API presence does not prove the effect is enabled\n' \
+        'Blur state'
+}
+
 printf 'Lumina Shell environment check\n\n'
 check_required_command qs
 check_optional_command qmllint
@@ -137,6 +182,9 @@ elif "$require_niri"; then
 else
     printf 'INFO Niri IPC socket is unavailable, which is expected outside Niri.\n'
 fi
+
+printf '\nBackground blur integration\n'
+check_background_blur_support
 
 printf '\nDaily-control integrations\n'
 check_optional_command brightnessctl
