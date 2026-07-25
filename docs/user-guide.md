@@ -3,262 +3,182 @@
 ## Bar
 
 Lumina creates one instance of **Lumina's Material Expressive bar** for each
-connected output. Its default 56-pixel, edge-to-edge tonal surface places
-launcher, overview, transforming workspaces, and localized date/time on the
-left; a temporary Niri context capsule in the center; and tray, notifications,
-live system status, and the user avatar on the right. The avatar is the
-personal entry point for the Dashboard and its session actions.
+connected output. Its default 56-pixel, edge-to-edge surface places launcher,
+overview, workspaces, and localized date/time on the left; temporary Niri
+context in the center; and tray, notifications, system status, and the account
+avatar on the right. The avatar opens the Dashboard and its session actions.
 
 The focused workspace expands into an accent pill. Other active workspaces
-retain a quiet compact pill, while inactive workspaces recede to lightweight
-markers without reducing their keyboard or pointer target. The clock is the
-primary date/time element and the date uses a secondary text role.
-
-The system-status cluster can group network, volume, and battery into one
-pill, or display them individually. Missing hardware is omitted. Clicking the
-cluster opens the existing Dashboard rather than another popup. Wallpaper and
-session actions remain in the Dashboard by default, but can be enabled on the
-bar. On laptops, battery level uses a rounded horizontal indicator inspired by
-Android's system icon: the charge is conveyed by fill and color, never by text
-inside the shape. Its widget settings can hide text, show the percentage beside
-the icon, or show the current power state instead. Charging adds an external
-bolt, while a low non-charging battery uses the urgent color role.
+remain compact, while inactive workspaces recede without reducing their pointer
+or keyboard target. Context is event-driven and independent per output.
 
 The Bar settings page controls:
 
-- a Solid, Translucent, Blur, Frosted Glass, or Transparent bar background
-  and independent background-tint opacity;
-- top or bottom position, edge-to-edge or floating geometry, 40–80 pixel
-  height, margin, spacing, and compact mode;
-- automatic content scaling from the selected height or a manual 80–140%
-  scale;
-- active widgets grouped as Left, Center, and Right, with reorder, remove, and
-  an Add widgets menu in every region that shows only available removed
-  widgets and reports when all regional widgets are active;
-- one gear per active widget, opening an internal settings dialog with a
-  reset scoped to that widget;
-- individual backgrounds and labels, workspace label/marker styles,
-  inline/stacked localized date and time, context fields and timeout, tray
-  mode/count, notification badges/DND state, service-backed status text modes,
-  avatar presentation, and optional action labels.
+- Solid, Translucent, Blur, Frosted Glass, or Transparent background;
+- independent tint opacity;
+- top or bottom position;
+- edge-to-edge or floating geometry;
+- 40–80 pixel height, margins, spacing, and compact mode;
+- automatic height-derived content scale or manual 80–140% scale;
+- active widgets under Left, Center, and Right;
+- per-widget backgrounds, labels, text modes, and presentation settings.
 
-Automatic scaling uses 56 pixels as its 100% reference and proportionally
-updates widget surfaces, icons, text, workspace shapes, padding, gaps, badges,
-and pointer targets using the direct `height ÷ 56` ratio. The 40–80 pixel
-height range therefore maps to approximately 71–143%. Compact mode further
-reduces density without ignoring the chosen height or scale; a 30-pixel
-interaction floor applies only at the smallest combinations.
+Only Blur and Frosted Glass request Niri's native shaped blur. Translucent uses
+client alpha without compositor blur. All modes reserve desktop work area, and
+the wallpaper continues beneath the bar's reserved strip.
 
-Bar background tint opacity is separate from **Appearance → Transparency**. The
-Appearance controls continue to affect Dashboard, Settings, and other shell
-surfaces, while **Bar → Surface → Background tint opacity** changes only the
-client-owned bar tint:
+On laptops, battery level uses a rounded proportional indicator with optional
+percentage or power-state text beside it. Missing batteries and backlights are
+omitted or shown as unavailable instead of preventing the shell from starting.
 
-- **Solid:** opaque tonal background without compositor blur;
-- **Translucent:** transparent tonal surface without blur;
-- **Blur:** clean live background blur with a neutral protection layer;
-- **Frosted glass:** blur with richer tint, highlight, and subtle texture;
-- **Transparent:** no bar background, border, or divider.
-
-Only Blur and Frosted Glass request Niri's native blur, bounded to the visible
-bar. Translucent is the readable alpha-only fallback style and never requests
-blur. The compositor controls blur intensity; Lumina does not provide a fake
-radius or pass-count control. If the effect is disabled externally, Blur and
-Frosted retain enough client tint and contrast protection to remain readable,
-although the runtime cannot confirm that fallback condition automatically.
-
-All five modes reserve desktop work area, so tiled windows do not appear
-behind bar controls. Lumina's wallpaper continues beneath the reserved strip,
-allowing Transparent to reveal it without exposing a second bar surface.
-Schema-6 `translucent` values migrate to Blur to preserve their historical
-behavior; selecting Translucent now uses the new no-blur semantics.
-
-When automatic content scaling is enabled, Settings shows the calculated
-effective percentage as a read-only value. Disabling it exposes the manual
-slider in five-percent steps from 80% through 140%, with 100% as the reference.
-
-Context is event-driven and independent per output. In Contextual mode, a
-window, app ID, column, workspace, or action-error change reveals the capsule
-for the configured duration. Narrow layouts first remove secondary text and
-optional actions; the central context derives its maximum width from the
-smaller side clearance, so it elides or recedes instead of overlapping either
-cluster.
-
-Network and volume labels can be disabled independently while retaining their
-icons, live state, Dashboard action, tooltip, and accessible description.
-Responsive compact layouts may hide these labels regardless of the preference.
-
-Lumina resolves the profile image from the system account first, followed by
-`~/.face`, `~/.face.icon`, and the custom image selected under **Settings →
-Dashboard → Personal identity**. Missing or unreadable sources are skipped
-without displaying a broken image. If no image is available—or profile
-pictures are disabled—the avatar shows the detected account initials, with
-the Lumina initial as the final fallback. The same identity is reused by the
-Dashboard welcome card.
-
-Removing a widget never deletes its settings. It appears only in **Add
-widgets** for its supported side and returns at the end of that side when
-added. Reordering considers only active widgets, so hidden entries cannot make
-the arrows appear to skip. Workspaces always retain focused and active state
-surfaces even when the optional strip background is disabled.
-
-
-### Shell surface styles
+## Shell surface styles
 
 Appearance offers **Solid**, **Blur**, and **Frosted Glass** for primary shell
-panels independently of the bar. Blur uses a clean bounded compositor request
-with neutral tint and contrast protection. Frosted Glass adds a richer tint,
-directional highlight, and subtle static texture. The tint-opacity control does
-not change compositor blur radius or passes.
-
-Dashboard/Settings, Launcher, Notification Center, Wallpaper Picker, Session
-Menu, and OSD use the shared style. Their cards, text, icons, and controls remain
-opaque. Heads-up notification cards stay opaque for urgency and readability,
-while calendar and tray popups continue to follow the bar's independent visual
-policy.
+panels independently of the bar. Dashboard/Settings, Launcher, Notification
+Center, Wallpaper Picker, Session Menu, and OSD use the shared policy. Cards,
+text, icons, and controls remain opaque. Heads-up notification cards remain
+opaque, while calendar and tray popups follow the bar's visual policy.
 
 ## Launcher
 
-Open **Apps** from the bar and type to search:
-
-- installed desktop applications;
-- open Niri windows;
-- layout and shell actions.
-
-Use the arrow keys to move, Enter to activate, and Escape to close.
-
-The launcher can also be opened from a Niri key binding:
+Open **Apps** from the bar and type to search installed applications, open Niri
+windows, layout actions, and shell actions. Use the arrow keys to move, Enter to
+activate, and Escape to close.
 
 ```bash
 qs ipc -p /path/to/lumina-shell call launcher toggle DP-1
 ```
 
-Replace `DP-1` with the output reported by `niri msg outputs`. An unavailable name falls back to a connected output.
+Replace `DP-1` with an output reported by `niri msg outputs`. An unavailable
+name falls back to a connected output.
 
-## Control center
+## Dashboard
 
-The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab provides:
+The status cluster or account avatar opens the unified control center. The
+**Dashboard** tab provides:
 
-- the detected user, Linux distribution, time, date, and system uptime;
-- current weather and the day's temperature range;
-- output and microphone levels;
-- display brightness when a backlight exists;
+- detected account identity and Linux distribution;
+- localized time and date;
+- weather and the current day's temperature range;
+- audio, microphone, brightness, and power-profile controls;
 - notification history and Do Not Disturb;
-- MPRIS media controls with automatic playing, paused, and idle detection;
-- Wi-Fi and Bluetooth state;
-- battery state and power profiles;
+- MPRIS media controls;
+- Wi-Fi, wired, and Bluetooth status;
+- battery and uptime information;
 - an inline calendar.
 
-The **Settings** tab contains persistent shell configuration in a fixed
-category sidebar and independently scrollable content area. Recent
-notifications remain in the Dashboard so daily actions do not require
-switching context. The header contains shortcuts for settings, session
-controls, Do Not Disturb, and closing the dashboard.
+The header contains shortcuts for Settings, session controls, Do Not Disturb,
+and closing the overlay. Dashboard and Settings share the same overlay, output
+selection, services, and stores.
 
-Hardware controls degrade to an unavailable state instead of preventing the shell from starting.
+## Weather
 
-Weather data comes from Open-Meteo. Lumina uses the city represented by the system timezone by default. To select a more precise place, start the shell with a city, postal code, or place name:
+Weather is configured under **Settings → Weather**.
+
+**Show weather** controls both presentation and background activity. When it is
+disabled, Lumina hides the Dashboard weather block and stops location and
+forecast requests.
+
+Automatic mode estimates city, region, latitude, and longitude from the current
+public IP address. Lumina does not save the IP. It caches only the resolved
+city, region, coordinates, and timestamp for 24 hours. VPNs, proxies, mobile
+networks, and corporate gateways may report a nearby city or an exit location.
+
+Manual mode accepts a city or recognizable place name. The page also provides
+15, 30, 60, and 120 minute refresh intervals and an immediate **Refresh**
+action. The development override remains available:
 
 ```bash
 LUMINA_WEATHER_LOCATION="Fortaleza" qs -p .
 ```
 
-The integration refreshes every 30 minutes and remains unavailable without affecting the rest of the shell when the network or location lookup fails.
-
-The control center can also be opened and switched through IPC:
-
-```bash
-qs ipc -p /path/to/lumina-shell call control open DP-1
-qs ipc -p /path/to/lumina-shell call control page settings
-qs ipc -p /path/to/lumina-shell call control close
-```
+Detailed behavior and privacy notes are in [weather.md](weather.md).
 
 ## Graphical settings
 
-Choose the settings action in the control-center header. Dashboard and
-settings are two views of the same overlay, so they cannot compete for the
-active output or keyboard focus. The nine categories are:
+Choose the settings action in the control-center header. The sidebar contains
+eleven categories:
 
-- **Appearance:** theme mode, dynamic palette, wallpaper, shell surface
-  style, motion, shape, and density;
-- **Bar:** global surface/scale/geometry followed by active Left, Center, and
-  Right widgets with individual configuration dialogs;
-- **Dashboard:** opening behavior, density, and visible cards;
-- **Behavior:** outside-click dismissal, output fallback, destructive-action
-  confirmation, and reduced motion;
+- **Appearance:** theme, dynamic palette, wallpaper, shell surfaces, motion,
+  shape, and density;
+- **Bar:** surface, scale, geometry, active widgets, and widget settings;
+- **Dashboard:** opening behavior, density, identity, and visible cards;
+- **Weather:** visibility, automatic or manual location, and refresh interval;
+- **Connectivity:** Wi-Fi, wired profiles, and Bluetooth devices;
+- **Behavior:** outside-click dismissal, output fallback, confirmation, and
+  reduced motion;
 - **Notifications:** DND, popup placement, timing, limits, images, and history;
 - **OSD:** visibility, position, timing, size, values, and event types;
 - **Session:** visible actions and confirmation policy;
-- **System:** live integration state, diagnostics, configuration, and recovery;
-- **About:** local version, license, documentation, and credits.
+- **System:** integration state, diagnostics, configuration, and recovery;
+- **About:** version, license, documentation, and credits.
 
-`Edit config` and its folder action use the system default application.
-Category reset is immediate; restoring everything requires a second
-confirmation. The page header reports `Saved`, `Saving…`, or
-`Could not save`.
+The page header reports `Saved`, `Saving…`, or `Could not save`. Central shell
+settings use debounced schema-v8 persistence. Weather mode, manual city, and
+refresh interval use their own feature-scoped state file so location settings
+can evolve independently of the shell schema.
 
 Settings can open directly on an output and category:
 
 ```bash
 qs ipc -p /path/to/lumina-shell call settings open DP-1
-qs ipc -p /path/to/lumina-shell call settings openCategory osd DP-1
-qs ipc -p /path/to/lumina-shell call settings category wallpaper
+qs ipc -p /path/to/lumina-shell call settings openCategory weather DP-1
+qs ipc -p /path/to/lumina-shell call settings openCategory connectivity DP-1
+qs ipc -p /path/to/lumina-shell call settings category osd
 ```
 
-Available category identifiers are `appearance`, `bar`, `dashboard`,
-`behavior`, `notifications`, `osd`, `session`, `system`, and `about`.
-`wallpaper` remains a compatibility alias for `appearance`. Closing and
-reopening follows the configured memory policy; explicit IPC calls can select
-the page and category.
+Available category identifiers are `appearance`, `bar`, `dashboard`, `weather`,
+`connectivity`, `behavior`, `notifications`, `osd`, `session`, `system`, and
+`about`. `wallpaper` remains a compatibility alias for `appearance`.
 
-Schema 8 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 3, 4, 5, 6, and 7 files migrate in place. Existing
-global transparency initializes the independent bar mode during schema-5
-migration without changing the global preference. Schema-6 widget preferences
-become individual settings without losing visibility or order. Retired
-layout-selection, single-order, and widget-specific fields are removed on the
-next save.
-Invalid JSON is still copied to the adjacent `.invalid` backup before defaults
-are restored.
+## Connectivity
 
-Appearance provides complete Light and Dark tonal schemes. Light uses bright
-layered surfaces with dark foregrounds rather than inverting the Dark theme.
-Wallpaper palettes generate coordinated variants for both modes, so switching
-Light/Dark is immediate and keeps the selected palette profile. Auto currently
-uses the documented Dark fallback on the validated Quickshell runtime.
+Connectivity is configured under **Settings → Connectivity**.
 
-The mode can also be changed through IPC:
+### Wi-Fi
 
-```bash
-qs ipc -p /path/to/lumina-shell call config theme light
-qs ipc -p /path/to/lumina-shell call config theme dark
-qs ipc -p /path/to/lumina-shell call config theme auto
-```
+The page can enable or disable Wi-Fi, scan nearby networks, connect or
+disconnect, manage autoconnect for saved profiles, and forget inactive saved
+profiles. Open networks connect directly. Protected networks open a password
+dialog.
+
+Passwords are never written to `ConfigStore` or returned by the connectivity
+status endpoint. Lumina writes the password to a temporary cache file, changes
+it to mode `0600`, passes it to NetworkManager with `passwd-file`, and clears
+and removes the file after the attempt.
+
+The initial implementation targets open and personal WPA-PSK networks.
+Enterprise 802.1X, certificates, hotspot creation, and VPN editing remain
+outside the first management pass.
+
+### Wired network
+
+Existing NetworkManager Ethernet profiles can be connected, disconnected, and
+configured for automatic connection. Advanced IP, DNS, route, VLAN, bridge,
+bond, and MTU editing remains delegated to dedicated NetworkManager tools.
+
+### Bluetooth
+
+The page can enable the adapter, run a bounded discovery session, list devices,
+pair, connect, disconnect, and remove an inactive paired device. Pairing modes
+that require a graphical agent or confirmation code depend on the system's
+active Bluetooth agent.
+
+Detailed limits and diagnostics are in [connectivity.md](connectivity.md).
 
 ## Notifications
 
-The bell button opens notification history and keeps the unread count in a
-compact badge. A crossed bell indicates Do Not Disturb, which suppresses popup
-surfaces while preserving history.
-
-The notification center grows from a compact empty state to a bounded,
-scrollable history surface. Recent items use contained cards, while urgency
-and unread state remain visible without turning the whole panel into an alert.
-
-Only one process can own `org.freedesktop.Notifications`. If Noctalia already owns it, Lumina waits without replacing or terminating Noctalia. Stop the other notification daemon before testing Lumina as the active daemon.
+The notification button opens history and shows unread state. Do Not Disturb
+suppresses popup surfaces while preserving history. Only one process can own
+`org.freedesktop.Notifications`; stop another active notification daemon before
+testing Lumina as the owner.
 
 ## Wallpapers and color
 
-The **Wall** chip opens the image picker on the selected output. Wallpaper
-paths are persisted independently per output with a shared default fallback.
-Dynamic color samples the focused output wallpaper and updates semantic Lumina
-colors. The Appearance page offers Auto, Content, Expressive, Fidelity, Fruit
-Salad, Monochrome, Neutral, Rainbow, and Tonal Spot profiles. Auto chooses a
-profile from the saturation of the extracted wallpaper color. Each profile
-also derives low-chroma tonal surfaces, so the bar, dashboard, settings, and
-other overlays share the wallpaper hue while maintaining readable contrast.
-
-The profile can also be changed through IPC:
+The wallpaper action opens the image picker for the selected output. Paths are
+persisted independently per output with a shared fallback. Dynamic color stores
+coordinated Light and Dark variants and supports Auto, Content, Expressive,
+Fidelity, Fruit Salad, Monochrome, Neutral, Rainbow, and Tonal Spot profiles.
 
 ```bash
 qs ipc -p /path/to/lumina-shell call wallpaper palette expressive
@@ -267,24 +187,20 @@ qs ipc -p /path/to/lumina-shell call wallpaper status DP-1
 
 ## Layout and session
 
-The **Session** chip contains typed Niri layout actions and lock, suspend,
-logout, restart, and power-off requests. Confirmation for destructive actions
-is configurable; lock and suspend are submitted directly. Secure locking
-remains the responsibility of the configured external locker.
+The Session surface contains typed Niri layout actions and lock, suspend,
+logout, restart, and power-off requests. Destructive confirmations are
+configurable. Secure locking remains the responsibility of the configured
+external locker.
 
 ## OSD integration
 
-Lumina shows OSDs for changes performed through its audio and brightness services:
+Lumina shows OSDs for audio, microphone, brightness, power, and published lock
+state. Example IPC calls:
 
 ```bash
 qs ipc -p /path/to/lumina-shell call audio outputStep 5
 qs ipc -p /path/to/lumina-shell call audio outputMute
 qs ipc -p /path/to/lumina-shell call brightness step 5
-```
-
-Compositor bindings can publish lock-key state:
-
-```bash
 qs ipc -p /path/to/lumina-shell call osd lock CapsLock true DP-1
 ```
 
@@ -299,6 +215,7 @@ qs ipc -p /path/to/lumina-shell call power status
 qs ipc -p /path/to/lumina-shell call media status
 qs ipc -p /path/to/lumina-shell call niri status
 qs ipc -p /path/to/lumina-shell call connectivity status
+qs ipc -p /path/to/lumina-shell call connectivity-manager status
 qs ipc -p /path/to/lumina-shell call weather status
 qs ipc -p /path/to/lumina-shell call launcher status
 qs ipc -p /path/to/lumina-shell call config status
@@ -306,4 +223,5 @@ qs ipc -p /path/to/lumina-shell call diagnostics status
 qs ipc -p /path/to/lumina-shell call configFile status
 ```
 
-Known portal and notification-name warnings are documented in [compatibility.md](compatibility.md).
+Known portal and notification-name warnings are documented in
+[compatibility.md](compatibility.md).
