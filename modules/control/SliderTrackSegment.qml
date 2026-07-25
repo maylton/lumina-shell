@@ -31,6 +31,11 @@ Item {
 
     opacity: segmentColor.a
 
+    // Composite the two contour pieces before an unavailable parent reduces
+    // opacity, preventing their overlap from becoming a visible alpha seam.
+    layer.enabled: true
+    layer.smooth: true
+
     Rectangle {
         anchors.fill: parent
         radius: root.outerRadius
