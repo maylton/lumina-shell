@@ -16,7 +16,7 @@ SettingsRow {
 
     controlWidth: 220
     Accessible.role: Accessible.Slider
-    Accessible.value: valueLabel
+    Accessible.description: description + ". Current value " + valueLabel
 
     function clampValue(candidate) {
         return Math.max(from, Math.min(to, candidate))

@@ -13,7 +13,8 @@ SettingsRow {
 
     controlWidth: 170
     Accessible.role: Accessible.ComboBox
-    Accessible.value: currentLabel()
+    Accessible.description:
+        description + ". Current value " + currentLabel()
 
     function currentIndex() {
         for (var i = 0; i < options.length; ++i) {

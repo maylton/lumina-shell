@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control.settings
+import qs.modules.control.settings.pages
 import qs.stores.control
 
 FocusScope {
@@ -221,8 +222,9 @@ FocusScope {
             width: parent.width - 252 - parent.spacing
             height: parent.height
 
-            AppearanceSettings {
+            AppearancePage {
                 anchors.fill: parent
+                outputName: root.outputName
                 visible:
                     ControlCenterStore.settingsCategory
                         === "appearance"

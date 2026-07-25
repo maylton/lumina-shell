@@ -90,6 +90,8 @@ Rectangle {
                     model: 4
 
                     Rectangle {
+                        required property int index
+
                         width: 20 + index * 5
                         height: 10
                         radius: 5

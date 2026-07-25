@@ -1,64 +1,108 @@
 pragma Singleton
 
 import QtQuick
+import qs.stores.config
 
 QtObject {
     id: root
 
-    property color primaryColor: "#ADC6FF"
-    property color accentContainerColor: "#294777"
-    property color accentForegroundColor: "#D7E3FF"
-    property color outlineColor: "#8E9099"
+    readonly property bool lightMode: ConfigStore.themeMode === "light"
+    readonly property bool automaticMode:
+        ConfigStore.themeMode === "auto"
+    readonly property real surfaceAlpha:
+        ConfigStore.transparencyEnabled
+            ? ConfigStore.surfaceOpacity
+            : 1
+    readonly property real motionScale:
+        !ConfigStore.animationsEnabled
+            ? 0
+            : ConfigStore.reduceMotion
+                ? 0.08
+                : ConfigStore.animationScale
+                    * ConfigStore.behaviorTransitionScale
+    readonly property real radiusScale:
+        ConfigStore.cornerRadiusScale
+
+    property color primaryColor: lightMode ? "#305EA8" : "#ADC6FF"
+    property color accentContainerColor:
+        lightMode ? "#D7E3FF" : "#294777"
+    property color accentForegroundColor:
+        lightMode ? "#102F5C" : "#D7E3FF"
+    property color outlineColor:
+        lightMode ? "#74777F" : "#8E9099"
     property bool dynamicPaletteActive: false
+
+    function withAlpha(colorValue, opacityValue) {
+        return Qt.rgba(
+            colorValue.r,
+            colorValue.g,
+            colorValue.b,
+            opacityValue
+        )
+    }
 
     function applyDynamicPalette(primary, accentContainer, outline) {
         primaryColor = primary
         accentContainerColor = accentContainer
-        accentForegroundColor = "#F4F7FF"
+        accentForegroundColor = lightMode ? "#102030" : "#F4F7FF"
         outlineColor = outline
         dynamicPaletteActive = true
     }
 
     function resetPalette() {
-        primaryColor = "#ADC6FF"
-        accentContainerColor = "#294777"
-        accentForegroundColor = "#D7E3FF"
-        outlineColor = "#8E9099"
+        primaryColor = lightMode ? "#305EA8" : "#ADC6FF"
+        accentContainerColor = lightMode ? "#D7E3FF" : "#294777"
+        accentForegroundColor = lightMode ? "#102F5C" : "#D7E3FF"
+        outlineColor = lightMode ? "#74777F" : "#8E9099"
         dynamicPaletteActive = false
+    }
+
+    onLightModeChanged: {
+        if (!dynamicPaletteActive)
+            resetPalette()
     }
 
     readonly property var luminaTokens: ({
         color: {
-            surfaceBase: "#111318",
-            surfaceContainer: "#1D2026",
-            surfaceMuted: "#292C33",
-            scrim: "#B3111318",
-            onSurface: "#E2E2E9",
-            textMuted: "#C3C6CF",
+            surfaceBase: root.withAlpha(
+                root.lightMode ? "#F8F9FF" : "#111318",
+                root.surfaceAlpha
+            ),
+            surfaceContainer: root.withAlpha(
+                root.lightMode ? "#EFF0F7" : "#1D2026",
+                root.surfaceAlpha
+            ),
+            surfaceMuted: root.withAlpha(
+                root.lightMode ? "#E2E3EA" : "#292C33",
+                Math.max(0.78, root.surfaceAlpha)
+            ),
+            scrim: root.lightMode ? "#8F111318" : "#B3111318",
+            onSurface: root.lightMode ? "#1A1B20" : "#E2E2E9",
+            textMuted: root.lightMode ? "#44474F" : "#C3C6CF",
             primary: root.primaryColor,
             accentContainer: root.accentContainerColor,
             onAccentContainer: root.accentForegroundColor,
             outline: root.outlineColor,
-            urgent: "#FFB4AB"
+            urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB"
         },
         shape: {
-            small: 10,
-            medium: 14,
-            large: 22,
-            extraLarge: 30,
+            small: Math.round(10 * root.radiusScale),
+            medium: Math.round(14 * root.radiusScale),
+            large: Math.round(22 * root.radiusScale),
+            extraLarge: Math.round(30 * root.radiusScale),
             full: 999
         },
         spacing: {
             extraSmall: 4,
-            small: 6,
-            medium: 10,
-            large: 14,
-            extraLarge: 18
+            small: ConfigStore.compactMode ? 4 : 6,
+            medium: ConfigStore.compactMode ? 8 : 10,
+            large: ConfigStore.compactMode ? 11 : 14,
+            extraLarge: ConfigStore.compactMode ? 14 : 18
         },
         size: {
-            barHeight: 48,
+            barHeight: ConfigStore.barHeight,
             calendarWidth: 336,
-            chipHeight: 30,
+            chipHeight: ConfigStore.compactMode ? 28 : 30,
             controlCenterHeight: 900,
             controlCenterWidth: 1480,
             dayCell: 40,
@@ -84,9 +128,9 @@ QtObject {
             titleLarge: 20
         },
         motion: {
-            fast: 120,
-            medium: 220,
-            slow: 380
+            fast: Math.max(1, Math.round(120 * root.motionScale)),
+            medium: Math.max(1, Math.round(220 * root.motionScale)),
+            slow: Math.max(1, Math.round(380 * root.motionScale))
         }
     })
 }

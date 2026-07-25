@@ -213,6 +213,17 @@ Singleton {
             Theme.resetPalette()
     }
 
+    Connections {
+        target: ConfigStore
+
+        function onThemeModeChanged() {
+            if (root.dynamicThemeEnabled)
+                root.applyColors(wallpaperColors.colors)
+            else
+                Theme.resetPalette()
+        }
+    }
+
     ColorQuantizer {
         id: wallpaperColors
 
