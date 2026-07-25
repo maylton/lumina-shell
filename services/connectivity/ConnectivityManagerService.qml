@@ -17,8 +17,9 @@ Singleton {
         || bluetoothScanProcess.running
     readonly property string secretPath:
         Quickshell.cacheDir + "/lumina-network-secret"
+    readonly property bool active: activeSection.length > 0
 
-    property bool active: false
+    property string activeSection: ""
     property var wifiNetworks: []
     property var networkProfiles: []
     property var networkDevices: []
@@ -31,17 +32,32 @@ Singleton {
     property bool pendingWifiSaved: false
     property bool clearSecretAfterAction: false
 
-    function setActive(value) {
-        const nextActive = Boolean(value)
+    function normalizedSection(value) {
+        const requested = String(value || "")
+        return ["wifi", "wired", "bluetooth", "all"].indexOf(requested) >= 0
+            ? requested
+            : ""
+    }
 
-        if (active === nextActive) {
-            if (nextActive)
+    function sectionAllows(section) {
+        return activeSection === "all" || activeSection === section
+    }
+
+    function setActive(value) {
+        setActiveSection(Boolean(value) ? (activeSection || "all") : "")
+    }
+
+    function setActiveSection(value) {
+        const nextSection = normalizedSection(value)
+
+        if (activeSection === nextSection) {
+            if (nextSection)
                 refreshAll()
             return
         }
 
-        active = nextActive
-        if (active)
+        activeSection = nextSection
+        if (activeSection)
             refreshAll()
     }
 
@@ -94,10 +110,7 @@ Singleton {
         return null
     }
 
-    function refreshNetwork() {
-        if (!active)
-            return
-
+    function refreshNetworkMetadata() {
         if (!deviceListProcess.running) {
             deviceListProcess.exec([
                 "nmcli", "-t", "--escape", "yes",
@@ -113,6 +126,13 @@ Singleton {
                 "connection", "show"
             ])
         }
+    }
+
+    function refreshWifi() {
+        if (!sectionAllows("wifi"))
+            return
+
+        refreshNetworkMetadata()
 
         if (ConnectivityService.wifiEnabled && !wifiListProcess.running) {
             wifiListProcess.exec([
@@ -125,8 +145,22 @@ Singleton {
         }
     }
 
+    function refreshWired() {
+        if (!sectionAllows("wired"))
+            return
+
+        refreshNetworkMetadata()
+    }
+
+    function refreshNetwork() {
+        if (sectionAllows("wifi"))
+            refreshWifi()
+        if (sectionAllows("wired"))
+            refreshWired()
+    }
+
     function refreshBluetooth() {
-        if (!active)
+        if (!sectionAllows("bluetooth"))
             return
 
         if (!bluetoothAllProcess.running)
@@ -155,8 +189,16 @@ Singleton {
         if (!active)
             return
 
-        refreshNetwork()
-        refreshBluetooth()
+        if (activeSection === "wifi") {
+            refreshWifi()
+        } else if (activeSection === "wired") {
+            refreshWired()
+        } else if (activeSection === "bluetooth") {
+            refreshBluetooth()
+        } else if (activeSection === "all") {
+            refreshWifi()
+            refreshBluetooth()
+        }
     }
 
     function runAction(label, command, clearSecret) {
@@ -389,12 +431,12 @@ Singleton {
         target: ConnectivityService
 
         function onWifiEnabledChanged() {
-            if (root.active)
-                root.refreshNetwork()
+            if (root.sectionAllows("wifi"))
+                root.refreshWifi()
         }
 
         function onBluetoothEnabledChanged() {
-            if (root.active)
+            if (root.sectionAllows("bluetooth"))
                 root.refreshBluetooth()
         }
     }
@@ -468,7 +510,7 @@ Singleton {
             root.busyAction = ""
             if (exitCode !== 0)
                 root.lastError = String(wifiScanError.text || "").trim()
-            root.refreshNetwork()
+            root.refreshWifi()
         }
     }
 
@@ -505,7 +547,7 @@ Singleton {
             root.lastError = exitCode === 0
                 ? ""
                 : String(wifiSecretError.text || "").trim()
-            root.refreshNetwork()
+            root.refreshWifi()
         }
     }
 
@@ -577,12 +619,13 @@ Singleton {
         target: "connectivity-manager"
 
         function refresh(): void {
-            root.setActive(true)
+            root.refreshAll()
         }
 
         function status(): string {
             return JSON.stringify({
                 active: root.active,
+                activeSection: root.activeSection,
                 busy: root.busy,
                 action: root.busyAction,
                 wifiNetworks: root.wifiNetworks,
