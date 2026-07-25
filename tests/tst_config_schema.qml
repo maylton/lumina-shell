@@ -5,13 +5,14 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema5ExpressiveBar() {
+    function test_defaultsUseSchema5Bar() {
         const state = ConfigSchema.defaults()
 
         compare(state.schemaVersion, 5)
         compare(state.themeMode, "auto")
         compare(state.paletteStyle, "auto")
-        compare(state.barVisualStyle, "expressive")
+        verify(state.barVisualStyle === undefined)
+        verify(state.barWidgetOrder === undefined)
         compare(state.barSurfaceMode, "edge-to-edge")
         compare(state.barContextMode, "contextual")
         compare(state.barStatusLayout, "grouped")
@@ -46,7 +47,7 @@ TestCase {
         compare(migrated.paletteStyle, "auto")
     }
 
-    function test_schema4MigrationPreservesClassicBarValues() {
+    function test_schema4MigrationPreservesBarValues() {
         const migrated = ConfigSchema.migrate({
             schemaVersion: 4,
             barPosition: "bottom",
@@ -63,12 +64,56 @@ TestCase {
         compare(migrated.barMargin, 9)
         compare(migrated.barWidgetSpacing, 14)
         compare(migrated.barShowClock, false)
-        compare(
-            JSON.stringify(migrated.barWidgetOrder),
-            JSON.stringify(["clock", "tray"])
-        )
-        compare(migrated.barVisualStyle, "expressive")
+        verify(migrated.barWidgetOrder === undefined)
+        verify(migrated.barVisualStyle === undefined)
         compare(migrated.barSurfaceMode, "edge-to-edge")
+    }
+
+    function test_schema5LegacyBarKeysAreIgnored() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 5,
+            barVisualStyle: "classic",
+            barWidgetOrder: ["clock", "tray"],
+            barSurfaceMode: "floating",
+            barLeftWidgetOrder: [
+                "workspaces",
+                "launcher",
+                "overview",
+                "datetime"
+            ],
+            barRightWidgetOrder: [
+                "dashboard",
+                "tray",
+                "notifications",
+                "system-status",
+                "privacy",
+                "keyboard"
+            ]
+        })
+
+        verify(migrated.barVisualStyle === undefined)
+        verify(migrated.barWidgetOrder === undefined)
+        compare(migrated.barSurfaceMode, "floating")
+        compare(
+            JSON.stringify(migrated.barLeftWidgetOrder),
+            JSON.stringify([
+                "workspaces",
+                "launcher",
+                "overview",
+                "datetime"
+            ])
+        )
+        compare(
+            JSON.stringify(migrated.barRightWidgetOrder),
+            JSON.stringify([
+                "dashboard",
+                "tray",
+                "notifications",
+                "system-status",
+                "privacy",
+                "keyboard"
+            ])
+        )
     }
 
     function test_paletteStyleNormalization() {
@@ -119,28 +164,24 @@ TestCase {
         compare(state.osdSize, 1.4)
     }
 
-    function test_expressiveBarChoiceNormalization() {
+    function test_barChoiceNormalization() {
         const valid = ConfigSchema.normalize({
-            barVisualStyle: "classic",
             barSurfaceMode: "floating",
             barContextMode: "always",
             barStatusLayout: "individual",
             barDateStyle: "full"
         })
         const invalid = ConfigSchema.normalize({
-            barVisualStyle: "glass",
             barSurfaceMode: "detached",
             barContextMode: "polling",
             barStatusLayout: "stacked",
             barDateStyle: "numeric"
         })
 
-        compare(valid.barVisualStyle, "classic")
         compare(valid.barSurfaceMode, "floating")
         compare(valid.barContextMode, "always")
         compare(valid.barStatusLayout, "individual")
         compare(valid.barDateStyle, "full")
-        compare(invalid.barVisualStyle, "expressive")
         compare(invalid.barSurfaceMode, "edge-to-edge")
         compare(invalid.barContextMode, "contextual")
         compare(invalid.barStatusLayout, "grouped")
@@ -212,7 +253,9 @@ TestCase {
         compare(appearance.paletteStyle, "auto")
         verify(appearance.barHeight === undefined)
         compare(bar.barHeight, 48)
-        compare(bar.barVisualStyle, "expressive")
+        verify(bar.barVisualStyle === undefined)
+        verify(bar.barWidgetOrder === undefined)
+        compare(bar.barSurfaceMode, "edge-to-edge")
         compare(bar.barContextMode, "contextual")
         compare(bar.barShowDashboardButton, true)
         compare(bar.barRightWidgetOrder.length, 6)

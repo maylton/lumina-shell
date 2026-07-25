@@ -23,7 +23,6 @@ function defaults() {
         animationScale: 1,
         cornerRadiusScale: 1,
         compactMode: false,
-        barVisualStyle: "expressive",
         barSurfaceMode: "edge-to-edge",
         barContextMode: "contextual",
         barContextTimeout: 3500,
@@ -54,15 +53,6 @@ function defaults() {
         barShowClock: true,
         barClock24Hour: true,
         barShowSeconds: false,
-        barWidgetOrder: [
-            "status",
-            "tray",
-            "control",
-            "notifications",
-            "wallpaper",
-            "session",
-            "clock"
-        ],
         barLeftWidgetOrder: [
             "launcher",
             "overview",
@@ -272,11 +262,6 @@ function normalize(source) {
         0.6,
         1.5
     )
-    result.barVisualStyle = choice(
-        result.barVisualStyle,
-        ["expressive", "classic"],
-        base.barVisualStyle
-    )
     result.barSurfaceMode = choice(
         result.barSurfaceMode,
         ["edge-to-edge", "floating"],
@@ -456,9 +441,6 @@ function normalize(source) {
         )
     }
 
-    if (!Array.isArray(result.barWidgetOrder))
-        result.barWidgetOrder = base.barWidgetOrder.slice()
-
     result.barLeftWidgetOrder = normalizedOrder(
         result.barLeftWidgetOrder,
         base.barLeftWidgetOrder,
@@ -502,7 +484,6 @@ function defaultsForCategory(categoryName) {
             "wallpaperDirectory"
         ],
         bar: [
-            "barVisualStyle",
             "barSurfaceMode",
             "barContextMode",
             "barContextTimeout",
@@ -533,7 +514,6 @@ function defaultsForCategory(categoryName) {
             "barShowClock",
             "barClock24Hour",
             "barShowSeconds",
-            "barWidgetOrder",
             "barLeftWidgetOrder",
             "barRightWidgetOrder",
             "showStatusDetails"

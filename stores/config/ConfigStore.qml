@@ -42,7 +42,6 @@ Singleton {
     property alias animationScale: stateAdapter.animationScale
     property alias cornerRadiusScale: stateAdapter.cornerRadiusScale
     property alias compactMode: stateAdapter.compactMode
-    property alias barVisualStyle: stateAdapter.barVisualStyle
     property alias barSurfaceMode: stateAdapter.barSurfaceMode
     property alias barContextMode: stateAdapter.barContextMode
     property alias barContextTimeout: stateAdapter.barContextTimeout
@@ -85,7 +84,6 @@ Singleton {
     property alias barShowClock: stateAdapter.barShowClock
     property alias barClock24Hour: stateAdapter.barClock24Hour
     property alias barShowSeconds: stateAdapter.barShowSeconds
-    property alias barWidgetOrder: stateAdapter.barWidgetOrder
     property alias barLeftWidgetOrder:
         stateAdapter.barLeftWidgetOrder
     property alias barRightWidgetOrder:
@@ -515,7 +513,6 @@ Singleton {
             property real animationScale: 1
             property real cornerRadiusScale: 1
             property bool compactMode: false
-            property string barVisualStyle: "expressive"
             property string barSurfaceMode: "edge-to-edge"
             property string barContextMode: "contextual"
             property int barContextTimeout: 3500
@@ -546,8 +543,6 @@ Singleton {
             property bool barShowClock: true
             property bool barClock24Hour: true
             property bool barShowSeconds: false
-            property var barWidgetOrder:
-                ConfigSchema.defaults().barWidgetOrder
             property var barLeftWidgetOrder:
                 ConfigSchema.defaults().barLeftWidgetOrder
             property var barRightWidgetOrder:
@@ -711,7 +706,6 @@ Singleton {
                 dynamicTheme: root.dynamicTheme,
                 paletteStyle: root.paletteStyle,
                 barPosition: root.barPosition,
-                barVisualStyle: root.barVisualStyle,
                 barSurfaceMode: root.barSurfaceMode,
                 barContextMode: root.barContextMode,
                 barStatusLayout: root.barStatusLayout,

@@ -140,8 +140,7 @@ QtObject {
             barHeight: ConfigStore.barHeight,
             barWindowHeight: ConfigStore.barHeight
                 + (
-                    ConfigStore.barVisualStyle === "classic"
-                    || ConfigStore.barSurfaceMode === "floating"
+                    ConfigStore.barSurfaceMode === "floating"
                         ? ConfigStore.barMargin * 2
                         : 0
                 ),
