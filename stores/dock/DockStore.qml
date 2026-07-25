@@ -84,12 +84,18 @@ Singleton {
     }
 
     function buildItems() {
+        // Reading the application list keeps pinned metadata reactive when
+        // desktop entries are added or refreshed at runtime.
+        const applicationCount = applications ? applications.length : 0
         const groups = DockModel.groupWindows(windows)
         const favorites = DockModel.uniqueIdentifiers(
             DockPreferences.favoriteAppIds
         )
         const result = []
         const consumedGroups = {}
+
+        if (applicationCount < 0)
+            return result
 
         for (var favoriteIndex = 0;
              favoriteIndex < favorites.length;
