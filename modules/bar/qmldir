@@ -1,6 +1,5 @@
 module qs.modules.bar
 Bar 1.0 Bar.qml
 BarCluster 1.0 BarCluster.qml
+BarLayout 1.0 BarLayout.qml
 BarSurface 1.0 BarSurface.qml
-ClassicBarLayout 1.0 ClassicBarLayout.qml
-ExpressiveBarLayout 1.0 ExpressiveBarLayout.qml

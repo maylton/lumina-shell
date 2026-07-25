@@ -35,9 +35,7 @@ Scope {
                 readonly property bool showActionError: NiriService.actionFeedbackVisible
                     && NiriService.lastActionError.length > 0
                 readonly property string effectiveSurfaceMode:
-                    ConfigStore.barVisualStyle === "classic"
-                        ? "floating"
-                        : ConfigStore.barSurfaceMode
+                    ConfigStore.barSurfaceMode
                 readonly property int effectiveMargin:
                     effectiveSurfaceMode === "floating"
                         ? ConfigStore.barMargin
@@ -88,40 +86,15 @@ Scope {
                     surfaceMode: panel.effectiveSurfaceMode
                     barPosition: ConfigStore.barPosition
 
-                    Loader {
+                    BarLayout {
                         anchors.fill: parent
-                        sourceComponent:
-                            ConfigStore.barVisualStyle === "classic"
-                                ? classicLayout
-                                : expressiveLayout
-                    }
-
-                    Component {
-                        id: classicLayout
-
-                        ClassicBarLayout {
-                            outputName: panel.outputName
-                            visibleWorkspaces: panel.visibleWorkspaces
-                            activeWindowTitle: panel.activeWindowTitle
-                            activeWindowAppId: panel.activeWindowAppId
-                            columnLabel: panel.columnLabel
-                            outputSummary: panel.outputSummary
-                            showActionError: panel.showActionError
-                        }
-                    }
-
-                    Component {
-                        id: expressiveLayout
-
-                        ExpressiveBarLayout {
-                            outputName: panel.outputName
-                            visibleWorkspaces: panel.visibleWorkspaces
-                            activeWindowTitle: panel.activeWindowTitle
-                            activeWindowAppId: panel.activeWindowAppId
-                            columnLabel: panel.columnLabel
-                            workspaceLabel: panel.activeWorkspaceLabel
-                            showActionError: panel.showActionError
-                        }
+                        outputName: panel.outputName
+                        visibleWorkspaces: panel.visibleWorkspaces
+                        activeWindowTitle: panel.activeWindowTitle
+                        activeWindowAppId: panel.activeWindowAppId
+                        columnLabel: panel.columnLabel
+                        workspaceLabel: panel.activeWorkspaceLabel
+                        showActionError: panel.showActionError
                     }
                 }
             }
