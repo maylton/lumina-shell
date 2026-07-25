@@ -4,6 +4,7 @@ import QtQuick
 import qs.design
 import qs.services.audio
 import qs.services.brightness
+import qs.services.i18n
 import qs.services.power
 
 DashboardCard {
@@ -12,19 +13,31 @@ DashboardCard {
     readonly property var powerProfiles: [
         {
             id: "power-saver",
-            label: "Saver"
+            label: I18n.tr(
+                "dashboard.controls.profile.saver",
+                "Saver"
+            )
         },
         {
             id: "balanced",
-            label: "Balanced"
+            label: I18n.tr(
+                "dashboard.controls.profile.balanced",
+                "Balanced"
+            )
         },
         {
             id: "performance",
-            label: "Performance"
+            label: I18n.tr(
+                "dashboard.controls.profile.performance",
+                "Performance"
+            )
         }
     ]
 
-    accessibleName: "Daily controls"
+    accessibleName: I18n.tr(
+        "dashboard.controls.title",
+        "Daily controls"
+    )
 
     Column {
         anchors {
@@ -41,7 +54,10 @@ DashboardCard {
             Text {
                 width: parent.width - muteActions.width
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Daily controls"
+                text: I18n.tr(
+                    "dashboard.controls.title",
+                    "Daily controls"
+                )
                 color: root.luminaDesign.color.onSurface
                 font.pixelSize: root.luminaDesign.typography.titleMedium
                 font.weight: Font.Bold
@@ -58,7 +74,10 @@ DashboardCard {
                         ? "audio-volume-muted-symbolic"
                         : "audio-volume-high-symbolic"
                     symbol: AudioService.outputMuted ? "×" : "♪"
-                    label: "Toggle output mute"
+                    label: I18n.tr(
+                        "dashboard.controls.toggleOutputMute",
+                        "Toggle output mute"
+                    )
                     checked: AudioService.outputMuted
                     available: AudioService.outputAvailable
                     onActivated: AudioService.toggleOutputMute()
@@ -69,7 +88,10 @@ DashboardCard {
                         ? "microphone-sensitivity-muted-symbolic"
                         : "audio-input-microphone-symbolic"
                     symbol: AudioService.inputMuted ? "×" : "●"
-                    label: "Toggle microphone mute"
+                    label: I18n.tr(
+                        "dashboard.controls.toggleMicrophoneMute",
+                        "Toggle microphone mute"
+                    )
                     checked: AudioService.inputMuted
                     available: AudioService.inputAvailable
                     onActivated: AudioService.toggleInputMute()
@@ -84,12 +106,18 @@ DashboardCard {
                 ? "audio-volume-muted-symbolic"
                 : "audio-volume-high-symbolic"
             title: AudioService.outputMuted
-                ? "Output muted"
-                : "Output volume"
+                ? I18n.tr(
+                    "dashboard.controls.outputMuted",
+                    "Output muted"
+                )
+                : I18n.tr(
+                    "dashboard.controls.outputVolume",
+                    "Output volume"
+                )
             symbol: AudioService.outputMuted ? "×" : "♪"
             detail: AudioService.outputAvailable
                 ? Math.round(AudioService.outputVolume * 100) + "%"
-                : "Unavailable"
+                : I18n.tr("common.unavailable", "Unavailable")
             value: AudioService.outputVolume
             available: AudioService.outputAvailable
             onValueRequested: value =>
@@ -103,12 +131,18 @@ DashboardCard {
                 ? "microphone-sensitivity-muted-symbolic"
                 : "audio-input-microphone-symbolic"
             title: AudioService.inputMuted
-                ? "Microphone muted"
-                : "Microphone"
+                ? I18n.tr(
+                    "dashboard.controls.microphoneMuted",
+                    "Microphone muted"
+                )
+                : I18n.tr(
+                    "dashboard.controls.microphone",
+                    "Microphone"
+                )
             symbol: AudioService.inputMuted ? "×" : "●"
             detail: AudioService.inputAvailable
                 ? Math.round(AudioService.inputVolume * 100) + "%"
-                : "Unavailable"
+                : I18n.tr("common.unavailable", "Unavailable")
             value: AudioService.inputVolume
             available: AudioService.inputAvailable
             onValueRequested: value =>
@@ -119,11 +153,17 @@ DashboardCard {
             width: parent.width
             height: 60
             iconName: "display-brightness-symbolic"
-            title: "Brightness"
+            title: I18n.tr(
+                "dashboard.controls.brightness",
+                "Brightness"
+            )
             symbol: "☀"
             detail: BrightnessService.available
                 ? BrightnessService.percentage + "%"
-                : "No backlight"
+                : I18n.tr(
+                    "dashboard.controls.noBacklight",
+                    "No backlight"
+                )
             value: BrightnessService.percentage / 100
             available: BrightnessService.available
             onValueRequested: value =>
@@ -136,7 +176,10 @@ DashboardCard {
 
             Text {
                 width: parent.width / 2
-                text: "Power profile"
+                text: I18n.tr(
+                    "dashboard.controls.powerProfile",
+                    "Power profile"
+                )
                 color: root.luminaDesign.color.onSurface
                 font.pixelSize: root.luminaDesign.typography.bodyMedium
                 font.weight: Font.DemiBold
@@ -147,7 +190,10 @@ DashboardCard {
                 horizontalAlignment: Text.AlignRight
                 text: PowerService.batteryAvailable
                     ? PowerService.batteryPercentage + "%"
-                    : "AC power"
+                    : I18n.tr(
+                        "dashboard.controls.acPower",
+                        "AC power"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }
