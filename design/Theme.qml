@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import qs.stores.config
 import "../modules/bar/BarScalePolicy.js" as BarScalePolicy
+import "../modules/bar/BarSurfacePolicy.js" as BarSurfacePolicy
 
 QtObject {
     id: root
@@ -128,7 +129,68 @@ QtObject {
                 root.outlineColor,
                 root.lightMode ? 0.18 : 0.24
             ),
-            urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB"
+            urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB",
+            barSolidBackground: root.surfaceContainerColor,
+            barTranslucentBackground: root.surfaceContainerColor,
+            barBlurTint: root.surfaceContainerColor,
+            barBlurContrastProtection: root.surfaceBaseColor,
+            barFrostedTint: root.surfaceMutedColor,
+            barFrostedHighlight: root.lightMode
+                ? root.surfaceBaseColor
+                : root.onSurfaceColor
+        },
+        effect: {
+            barBackgroundAlpha:
+                BarSurfacePolicy.backgroundAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity
+                ),
+            barTintAlpha:
+                BarSurfacePolicy.tintAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barContrastProtectionAlpha:
+                BarSurfacePolicy.contrastProtectionAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barBlurFallbackAlpha:
+                BarSurfacePolicy.fallbackAlpha(
+                    "blur",
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barFrostedFallbackAlpha:
+                BarSurfacePolicy.fallbackAlpha(
+                    "frosted",
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barFrostedHighlightAlpha:
+                BarSurfacePolicy.frostedHighlightAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barFrostedGrainAlpha:
+                BarSurfacePolicy.frostedGrainAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity,
+                    root.lightMode
+                ),
+            barDividerAlpha:
+                BarSurfacePolicy.dividerAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity
+                ),
+            barBorderAlpha:
+                BarSurfacePolicy.borderAlpha(
+                    ConfigStore.barBackgroundMode,
+                    ConfigStore.barSurfaceOpacity
+                )
         },
         shape: {
             none: 0,

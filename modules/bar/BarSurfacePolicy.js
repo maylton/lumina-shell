@@ -75,46 +75,118 @@ function blurRegionGeometry(
 
 function backgroundAlpha(mode, opacity) {
     var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
 
-    if (normalized === "transparent")
+    if (normalized === "transparent"
+        || normalized === "blur"
+        || normalized === "frosted") {
         return 0
+    }
 
-    if (normalized === "blur"
-        || normalized === "frosted"
-        || normalized === "translucent")
-        return clampOpacity(opacity)
+    if (normalized === "translucent")
+        return 0.44 + 0.42 * configured
 
     return 1
 }
 
-function dividerAlpha(mode, opacity) {
+function tintAlpha(mode, opacity, lightMode) {
     var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
+
+    if (normalized === "blur") {
+        return lightMode
+            ? 0.18 + 0.24 * configured
+            : 0.24 + 0.22 * configured
+    }
+
+    if (normalized === "frosted") {
+        return lightMode
+            ? 0.30 + 0.24 * configured
+            : 0.34 + 0.24 * configured
+    }
+
+    return 0
+}
+
+function contrastProtectionAlpha(mode, opacity, lightMode) {
+    var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
+
+    if (normalized === "blur") {
+        return lightMode
+            ? 0.04 + 0.04 * configured
+            : 0.08 + 0.06 * configured
+    }
+
+    if (normalized === "frosted") {
+        return lightMode
+            ? 0.05 + 0.04 * configured
+            : 0.09 + 0.06 * configured
+    }
+
+    return 0
+}
+
+function fallbackAlpha(mode, opacity, lightMode) {
+    var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
+
+    if (normalized === "solid")
+        return 1
 
     if (normalized === "transparent")
         return 0
 
-    if (normalized === "blur" || normalized === "translucent")
-        return 0.24 * clampOpacity(opacity)
+    if (normalized === "translucent")
+        return backgroundAlpha(normalized, configured)
+
+    if (normalized === "blur") {
+        return lightMode
+            ? 0.62 + 0.22 * configured
+            : 0.66 + 0.22 * configured
+    }
+
+    return lightMode
+        ? 0.68 + 0.20 * configured
+        : 0.72 + 0.18 * configured
+}
+
+function dividerAlpha(mode, opacity) {
+    var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
+
+    if (normalized === "transparent")
+        return 0
+
+    if (normalized === "translucent")
+        return 0.16 + 0.12 * configured
+
+    if (normalized === "blur")
+        return 0.10 + 0.10 * configured
 
     if (normalized === "frosted")
-        return 0.12 + 0.18 * clampOpacity(opacity)
+        return 0.18 + 0.16 * configured
 
     return 0.24
 }
 
 function borderAlpha(mode, opacity) {
     var normalized = normalizeMode(mode)
+    var configured = clampOpacity(opacity)
 
     if (normalized === "transparent")
         return 0
 
-    if (normalized === "blur" || normalized === "translucent")
-        return 0.42 * clampOpacity(opacity)
+    if (normalized === "translucent")
+        return 0.25 + 0.25 * configured
+
+    if (normalized === "blur")
+        return 0.20 + 0.20 * configured
 
     if (normalized === "frosted")
-        return 0.28 + 0.36 * clampOpacity(opacity)
+        return 0.32 + 0.28 * configured
 
-    return 1
+    return 0.72
 }
 
 function showsFrostedHighlight(mode) {
@@ -123,4 +195,26 @@ function showsFrostedHighlight(mode) {
 
 function showsFrostedGrain(mode) {
     return normalizeMode(mode) === "frosted"
+}
+
+function frostedHighlightAlpha(mode, opacity, lightMode) {
+    if (!showsFrostedHighlight(mode))
+        return 0
+
+    var configured = clampOpacity(opacity)
+
+    return lightMode
+        ? 0.035 + 0.025 * configured
+        : 0.045 + 0.035 * configured
+}
+
+function frostedGrainAlpha(mode, opacity, lightMode) {
+    if (!showsFrostedGrain(mode))
+        return 0
+
+    var configured = clampOpacity(opacity)
+
+    return lightMode
+        ? 0.018 + 0.014 * configured
+        : 0.025 + 0.018 * configured
 }
