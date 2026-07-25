@@ -28,6 +28,7 @@ Item {
 
     Shape {
         anchors.fill: parent
+        antialiasing: true
 
         ShapePath {
             fillColor: root.segmentColor
@@ -41,11 +42,13 @@ Item {
                 y: 0
             }
 
-            PathQuad {
+            PathArc {
                 x: root.width
                 y: root.endRadius
-                controlX: root.width
-                controlY: 0
+                radiusX: root.endRadius
+                radiusY: root.endRadius
+                direction: PathArc.Clockwise
+                useLargeArc: false
             }
 
             PathLine {
@@ -53,11 +56,13 @@ Item {
                 y: root.height - root.endRadius
             }
 
-            PathQuad {
+            PathArc {
                 x: root.width - root.endRadius
                 y: root.height
-                controlX: root.width
-                controlY: root.height
+                radiusX: root.endRadius
+                radiusY: root.endRadius
+                direction: PathArc.Clockwise
+                useLargeArc: false
             }
 
             PathLine {
@@ -65,11 +70,13 @@ Item {
                 y: root.height
             }
 
-            PathQuad {
+            PathArc {
                 x: 0
                 y: root.height - root.startRadius
-                controlX: 0
-                controlY: root.height
+                radiusX: root.startRadius
+                radiusY: root.startRadius
+                direction: PathArc.Clockwise
+                useLargeArc: false
             }
 
             PathLine {
@@ -77,11 +84,13 @@ Item {
                 y: root.startRadius
             }
 
-            PathQuad {
+            PathArc {
                 x: root.startRadius
                 y: 0
-                controlX: 0
-                controlY: 0
+                radiusX: root.startRadius
+                radiusY: root.startRadius
+                direction: PathArc.Clockwise
+                useLargeArc: false
             }
         }
     }
