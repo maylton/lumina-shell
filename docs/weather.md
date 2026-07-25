@@ -40,15 +40,16 @@ GeoIP location.
 
 ## Persistence
 
-Weather location mode, manual city, and refresh interval are stored in:
+Weather location mode, manual city, and refresh interval are stored at:
 
 ```text
-$XDG_STATE_HOME/quickshell/lumina-weather.json
+Quickshell.stateDir/lumina-weather.json
 ```
 
-The exact Quickshell state root follows the active runtime environment. The
-automatic-location cache is stored separately in the Quickshell cache root so
-it can expire or be removed without changing the user's preference.
+The runtime resolves `Quickshell.stateDir` according to the active shell
+configuration and XDG environment. The automatic-location cache is stored
+separately under `Quickshell.cacheDir` so it can expire or be removed without
+changing the user's preference.
 
 Runtime state is available through:
 
