@@ -19,6 +19,35 @@ SettingsPage {
             ConfigStore.barContentScale,
             ConfigStore.compactMode
         )
+    readonly property string backgroundModeDescription: {
+        switch (ConfigStore.barBackgroundMode) {
+        case "translucent":
+            return I18n.tr(
+                "settings.bar.surface.mode.translucent.description",
+                "Transparent tonal surface without blur"
+            )
+        case "blur":
+            return I18n.tr(
+                "settings.bar.surface.mode.blur.description",
+                "Clean live background blur with a tonal protection layer"
+            )
+        case "frosted":
+            return I18n.tr(
+                "settings.bar.surface.mode.frosted.description",
+                "Blur with a richer tint, highlight, and subtle texture"
+            )
+        case "transparent":
+            return I18n.tr(
+                "settings.bar.surface.mode.transparent.description",
+                "No bar background"
+            )
+        default:
+            return I18n.tr(
+                "settings.bar.surface.mode.solid.description",
+                "Opaque tonal background"
+            )
+        }
+    }
 
     title: I18n.tr("settings.category.bar.label", "Bar")
     description: I18n.tr(
@@ -93,20 +122,48 @@ SettingsPage {
                 "settings.bar.surface.background",
                 "Background"
             )
-            description: I18n.tr(
-                "settings.bar.surface.backgroundDescription",
-                "Change only the bar surface"
-            )
+            description: root.backgroundModeDescription
             controlWidth: 560
 
             SettingsSegmentedControl {
                 width: parent.width
                 height: 44
                 options: [
-                    { value: "solid", label: "Solid" },
-                    { value: "blur", label: "Blur" },
-                    { value: "frosted", label: "Frosted glass" },
-                    { value: "transparent", label: "Transparent" }
+                    {
+                        value: "solid",
+                        label: I18n.tr(
+                            "settings.bar.surface.mode.solid.label",
+                            "Solid"
+                        )
+                    },
+                    {
+                        value: "translucent",
+                        label: I18n.tr(
+                            "settings.bar.surface.mode.translucent.label",
+                            "Translucent"
+                        )
+                    },
+                    {
+                        value: "blur",
+                        label: I18n.tr(
+                            "settings.bar.surface.mode.blur.label",
+                            "Blur"
+                        )
+                    },
+                    {
+                        value: "frosted",
+                        label: I18n.tr(
+                            "settings.bar.surface.mode.frosted.label",
+                            "Frosted glass"
+                        )
+                    },
+                    {
+                        value: "transparent",
+                        label: I18n.tr(
+                            "settings.bar.surface.mode.transparent.label",
+                            "Transparent"
+                        )
+                    }
                 ]
                 currentValue: ConfigStore.barBackgroundMode
                 onSelected: value => ConfigStore.setBarValue(
@@ -120,16 +177,21 @@ SettingsPage {
             width: parent.width
             title: I18n.tr(
                 "settings.bar.surface.opacity",
-                "Background opacity"
+                "Background tint opacity"
             )
             description: I18n.tr(
                 "settings.bar.surface.opacityDescription",
-                "Opacity of the bar background only"
+                "Controls the client tint; the compositor controls blur intensity"
             )
-            available: ["blur", "frosted"].indexOf(
-                ConfigStore.barBackgroundMode
-            ) >= 0
-            availabilityText: "Choose Blur or Frosted glass first"
+            available: [
+                "translucent",
+                "blur",
+                "frosted"
+            ].indexOf(ConfigStore.barBackgroundMode) >= 0
+            availabilityText: I18n.tr(
+                "settings.bar.surface.opacityUnavailable",
+                "Choose Translucent, Blur, or Frosted glass first"
+            )
             from: 0
             to: 1
             stepSize: 0.02

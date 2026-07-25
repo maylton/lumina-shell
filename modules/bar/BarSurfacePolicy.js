@@ -84,7 +84,7 @@ function backgroundAlpha(mode, opacity) {
     }
 
     if (normalized === "translucent")
-        return 0.44 + 0.42 * configured
+        return Math.max(0.28, configured)
 
     return 1
 }

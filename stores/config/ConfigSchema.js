@@ -382,12 +382,15 @@ function normalize(source) {
         ["edge-to-edge", "floating"],
         base.barSurfaceMode
     )
-    if (String(result.barBackgroundMode) === "translucent")
-        result.barBackgroundMode = "blur"
-
     result.barBackgroundMode = choice(
         result.barBackgroundMode,
-        ["solid", "blur", "frosted", "transparent"],
+        [
+            "solid",
+            "translucent",
+            "blur",
+            "frosted",
+            "transparent"
+        ],
         base.barBackgroundMode
     )
     result.barSurfaceOpacity = boundedNumber(
@@ -602,6 +605,9 @@ function migrate(source) {
     }
 
     if (version < 7) {
+        if (String(input.barBackgroundMode) === "translucent")
+            input.barBackgroundMode = "blur"
+
         var widgetSettings = BarWidgetCatalog.defaultSettings()
         var pillsEnabled = booleanValue(
             input.barWidgetPillsEnabled,

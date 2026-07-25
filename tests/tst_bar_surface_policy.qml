@@ -94,22 +94,22 @@ TestCase {
         compare(BarSurfacePolicy.backgroundAlpha("transparent", 1), 0)
         compare(
             BarSurfacePolicy.backgroundAlpha("translucent", 0),
-            0.44
+            0.28
         )
         compare(
             BarSurfacePolicy.backgroundAlpha("translucent", 1),
-            0.86
+            1
         )
     }
 
     function test_opacityIsSafelyClamped() {
         compare(
             BarSurfacePolicy.backgroundAlpha("translucent", -1),
-            0.44
+            0.28
         )
         compare(
             BarSurfacePolicy.backgroundAlpha("translucent", 2),
-            0.86
+            1
         )
         verify(BarSurfacePolicy.tintAlpha("blur", -1, true) > 0)
         verify(BarSurfacePolicy.tintAlpha("blur", 2, true) < 1)

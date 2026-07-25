@@ -349,7 +349,7 @@ TestCase {
                 datetime: { dateMode: "numeric" }
             }
         })
-        const legacy = ConfigSchema.normalize({
+        const translucent = ConfigSchema.normalize({
             barBackgroundMode: "translucent"
         })
 
@@ -362,7 +362,7 @@ TestCase {
         )
         compare(valid.barWidgetSettings.tray.mode, "inline")
         compare(valid.barWidgetSettings.datetime.dateMode, "full")
-        compare(legacy.barBackgroundMode, "blur")
+        compare(translucent.barBackgroundMode, "translucent")
         compare(invalid.barSurfaceMode, "edge-to-edge")
         compare(invalid.barBackgroundMode, "solid")
         compare(invalid.barWidgetSettings.context.mode, "contextual")
@@ -372,6 +372,16 @@ TestCase {
         )
         compare(invalid.barWidgetSettings.tray.mode, "grouped")
         compare(invalid.barWidgetSettings.datetime.dateMode, "short")
+    }
+
+    function test_schema6LegacyTranslucentKeepsBlurSemantics() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 6,
+            barBackgroundMode: "translucent"
+        })
+
+        compare(migrated.schemaVersion, 7)
+        compare(migrated.barBackgroundMode, "blur")
     }
 
     function test_barWidgetOrdersAreUniqueAndComplete() {
