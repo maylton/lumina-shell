@@ -10,7 +10,7 @@ SettingsRow {
 
     signal toggled(bool checked)
 
-    controlWidth: 52
+    controlWidth: 58
 
     Accessible.role: Accessible.CheckBox
     Accessible.checked: checked
@@ -21,9 +21,9 @@ SettingsRow {
 
     Rectangle {
         anchors.centerIn: parent
-        width: 48
-        height: 28
-        radius: 14
+        width: 52
+        height: 32
+        radius: root.luminaDesign.shape.full
         color: root.checked
             ? root.luminaDesign.color.primary
             : root.luminaDesign.color.surfaceMuted
@@ -37,12 +37,12 @@ SettingsRow {
         }
 
         Rectangle {
-            width: root.checked ? 22 : 18
+            width: root.checked ? 24 : 16
             height: width
-            radius: width / 2
+            radius: root.luminaDesign.shape.full
             x: root.checked
                 ? parent.width - width - 3
-                : 4
+                : 8
             anchors.verticalCenter: parent.verticalCenter
             color: root.checked
                 ? root.luminaDesign.color.onAccentContainer

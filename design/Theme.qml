@@ -86,10 +86,15 @@ QtObject {
             urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB"
         },
         shape: {
-            small: Math.round(10 * root.radiusScale),
-            medium: Math.round(14 * root.radiusScale),
-            large: Math.round(22 * root.radiusScale),
-            extraLarge: Math.round(30 * root.radiusScale),
+            none: 0,
+            extraSmall: Math.round(4 * root.radiusScale),
+            small: Math.round(8 * root.radiusScale),
+            medium: Math.round(16 * root.radiusScale),
+            large: Math.round(24 * root.radiusScale),
+            largeIncreased: Math.round(28 * root.radiusScale),
+            extraLarge: Math.round(32 * root.radiusScale),
+            extraLargeIncreased: Math.round(40 * root.radiusScale),
+            extraExtraLarge: Math.round(48 * root.radiusScale),
             full: 999
         },
         spacing: {

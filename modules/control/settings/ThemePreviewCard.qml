@@ -22,7 +22,9 @@ Rectangle {
         light ? "#1A1B20" : "#E2E2E9"
 
     implicitHeight: 154
-    radius: luminaDesign.shape.large
+    radius: selected
+        ? luminaDesign.shape.extraLargeIncreased
+        : luminaDesign.shape.extraLarge
     color: selected
         ? luminaDesign.color.accentContainer
         : luminaDesign.color.surfaceMuted
@@ -57,6 +59,13 @@ Rectangle {
         }
     }
 
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.medium
+            easing.type: Easing.OutCubic
+        }
+    }
+
     Rectangle {
         anchors {
             fill: parent
@@ -64,7 +73,7 @@ Rectangle {
             bottomMargin: 34
         }
 
-        radius: root.luminaDesign.shape.medium
+        radius: root.luminaDesign.shape.large
         color: root.previewSurface
 
         Rectangle {
@@ -118,14 +127,14 @@ Rectangle {
             Rectangle {
                 width: parent.width * 0.35
                 height: parent.height
-                radius: 12
+                radius: root.luminaDesign.shape.medium
                 color: root.previewContainer
             }
 
             Rectangle {
                 width: parent.width * 0.65 - parent.spacing
                 height: parent.height
-                radius: 12
+                radius: root.luminaDesign.shape.medium
                 color: root.previewContainer
 
                 Column {

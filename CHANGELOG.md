@@ -42,3 +42,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   plus local system diagnostics and project information.
 - Nine persistent wallpaper-derived Material palette profiles with live
   previews and IPC selection.
+- Expanded Material 3 shape tokens and expressive settings containment,
+  selection pills, switches, sliders, and pressed-state shape motion.

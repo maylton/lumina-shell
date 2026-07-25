@@ -30,7 +30,9 @@ Row {
                     * Math.max(0, root.options.length - 1)
             ) / Math.max(1, root.options.length)
             height: root.height
-            radius: root.luminaDesign.shape.full
+            radius: selected
+                ? root.luminaDesign.shape.full
+                : root.luminaDesign.shape.large
             color: selected
                 ? root.luminaDesign.color.accentContainer
                 : root.luminaDesign.color.surfaceMuted
@@ -39,6 +41,13 @@ Row {
             border.color: activeFocus
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
+
+            Behavior on radius {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.medium
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             Accessible.role: Accessible.RadioButton
             Accessible.name: String(modelData.label)

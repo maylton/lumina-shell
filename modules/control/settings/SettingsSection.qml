@@ -15,10 +15,9 @@ Rectangle {
     width: parent ? parent.width : 0
     implicitHeight: sectionColumn.implicitHeight
         + luminaDesign.spacing.extraLarge * 2
-    radius: luminaDesign.shape.large
+    radius: luminaDesign.shape.extraLarge
     color: luminaDesign.color.surfaceBase
-    border.width: 1
-    border.color: luminaDesign.color.outline
+    border.width: 0
 
     Accessible.role: Accessible.Grouping
     Accessible.name: title

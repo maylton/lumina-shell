@@ -61,56 +61,65 @@ Row {
                 event.accepted = true
             }
 
-            Row {
-                anchors.centerIn: parent
-                spacing: root.luminaDesign.spacing.small
-
-                DashboardIcon {
-                    width: 16
-                    height: 16
-                    iconName: tabButton.modelData.iconName
-                    fallbackSymbol: tabButton.modelData.symbol
-                    iconColor: tabButton.selected
-                        ? root.luminaDesign.color.primary
-                        : root.luminaDesign.color.textMuted
-                    iconSize: 16
-                }
-
-                Text {
-                    text: tabButton.modelData.label
-                    color: tabButton.selected
-                        ? root.luminaDesign.color.onSurface
-                        : root.luminaDesign.color.textMuted
-                    font.pixelSize:
-                        root.luminaDesign.typography.bodyMedium
-                    font.weight: tabButton.selected
-                        ? Font.Bold
-                        : Font.Medium
-                }
-            }
-
             Rectangle {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
+                id: tabPill
+
+                anchors.centerIn: parent
+                width: tabContent.implicitWidth
+                    + root.luminaDesign.spacing.extraLarge * 2
+                height: 36
+                radius: tabButton.selected
+                    ? root.luminaDesign.shape.full
+                    : root.luminaDesign.shape.large
+                color: tabButton.selected
+                    ? root.luminaDesign.color.accentContainer
+                    : tabMouse.containsMouse || tabButton.activeFocus
+                        ? root.luminaDesign.color.surfaceMuted
+                        : "transparent"
+                border.width: tabButton.activeFocus ? 2 : 0
+                border.color: root.luminaDesign.color.primary
+
+                Behavior on radius {
+                    NumberAnimation {
+                        duration: root.luminaDesign.motion.medium
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
-                height: tabButton.selected ? 4 : 1
-                radius: root.luminaDesign.shape.full
-                color: tabButton.selected
-                    ? root.luminaDesign.color.primary
-                    : root.luminaDesign.color.outline
+                Row {
+                    id: tabContent
 
-                Behavior on height {
-                    NumberAnimation {
-                        duration: root.luminaDesign.motion.fast
-                        easing.type: Easing.OutCubic
+                    anchors.centerIn: parent
+                    spacing: root.luminaDesign.spacing.small
+
+                    DashboardIcon {
+                        width: 16
+                        height: 16
+                        iconName: tabButton.modelData.iconName
+                        fallbackSymbol: tabButton.modelData.symbol
+                        iconColor: tabButton.selected
+                            ? root.luminaDesign.color.onAccentContainer
+                            : root.luminaDesign.color.textMuted
+                        iconSize: 16
+                    }
+
+                    Text {
+                        text: tabButton.modelData.label
+                        color: tabButton.selected
+                            ? root.luminaDesign.color.onAccentContainer
+                            : root.luminaDesign.color.textMuted
+                        font.pixelSize:
+                            root.luminaDesign.typography.bodyMedium
+                        font.weight: tabButton.selected
+                            ? Font.Bold
+                            : Font.Medium
                     }
                 }
             }
 
             MouseArea {
+                id: tabMouse
+
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor

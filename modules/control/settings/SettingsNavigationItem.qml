@@ -20,7 +20,7 @@ Rectangle {
 
     implicitHeight: compact ? 44 : 50
     radius: selected
-        ? luminaDesign.shape.extraLarge
+        ? luminaDesign.shape.full
         : luminaDesign.shape.large
     color: selected
         ? luminaDesign.color.accentContainer

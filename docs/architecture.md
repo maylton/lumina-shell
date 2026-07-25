@@ -218,7 +218,9 @@ Lumina uses Material 3 Expressive as its visual foundation while adapting it to 
 Design values are exposed through the single `Theme.luminaTokens` namespace:
 
 - semantic color roles rather than component-specific hex values;
-- contrasting shape tokens for resting, active, and focused surfaces;
+- a Material shape scale from `none` through `extraExtraLarge` and `full`;
+- larger outer containers, smaller nested controls, and animated shape changes
+  for resting, pressed, selected, and focused states;
 - shared spacing and sizing scales;
 - typography roles for labels, body text, and titles;
 - motion durations used consistently by interactive components.

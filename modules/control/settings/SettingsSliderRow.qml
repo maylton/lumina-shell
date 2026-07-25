@@ -47,8 +47,8 @@ SettingsRow {
 
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - valueText.width - parent.spacing
-            height: 8
-            radius: 4
+            height: 16
+            radius: root.luminaDesign.shape.full
             color: root.luminaDesign.color.surfaceMuted
 
             Rectangle {
@@ -62,9 +62,9 @@ SettingsRow {
             }
 
             Rectangle {
-                width: 18
-                height: 18
-                radius: 9
+                width: 6
+                height: 28
+                radius: root.luminaDesign.shape.full
                 x: Math.max(
                     0,
                     Math.min(
@@ -77,12 +77,15 @@ SettingsRow {
                 )
                 anchors.verticalCenter: parent.verticalCenter
                 color: root.luminaDesign.color.primary
-                border.width: 2
-                border.color: root.luminaDesign.color.surfaceBase
             }
 
             MouseArea {
-                anchors.fill: parent
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+                height: 36
                 acceptedButtons: Qt.LeftButton
                 onPressed: mouse => updateValue(mouse.x)
                 onPositionChanged: mouse => {

@@ -138,7 +138,9 @@ SettingsPage {
 
                     width: paletteGrid.cellWidth
                     height: 58
-                    radius: root.luminaDesign.shape.medium
+                    radius: selected
+                        ? root.luminaDesign.shape.full
+                        : root.luminaDesign.shape.large
                     color: selected
                         ? root.luminaDesign.color.accentContainer
                         : root.luminaDesign.color.surfaceMuted
@@ -147,6 +149,13 @@ SettingsPage {
                         ? root.luminaDesign.color.primary
                         : root.luminaDesign.color.outline
                     activeFocusOnTab: enabled
+
+                    Behavior on radius {
+                        NumberAnimation {
+                            duration: root.luminaDesign.motion.medium
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
                     Accessible.role: Accessible.RadioButton
                     Accessible.name: String(modelData.label)

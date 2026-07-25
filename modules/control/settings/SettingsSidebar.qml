@@ -16,6 +16,8 @@ DashboardCard {
     readonly property var luminaDesign: Theme.luminaTokens
 
     accessibleName: "Settings categories"
+    radius: luminaDesign.shape.extraLarge
+    border.width: 0
 
     Column {
         anchors {
@@ -30,7 +32,9 @@ DashboardCard {
 
             width: parent.width
             height: 50
-            radius: root.luminaDesign.shape.large
+            radius: editMouse.pressed
+                ? root.luminaDesign.shape.medium
+                : root.luminaDesign.shape.extraLarge
             color: editMouse.pressed
                 ? Qt.darker(
                     root.luminaDesign.color.accentContainer,
@@ -40,6 +44,13 @@ DashboardCard {
             activeFocusOnTab: true
             border.width: activeFocus ? 2 : 0
             border.color: root.luminaDesign.color.primary
+
+            Behavior on radius {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.medium
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: "Edit config"
@@ -135,7 +146,7 @@ DashboardCard {
         Rectangle {
             width: parent.width
             height: 32
-            radius: root.luminaDesign.shape.full
+            radius: root.luminaDesign.shape.large
             color: folderMouse.containsMouse || activeFocus
                 ? root.luminaDesign.color.surfaceMuted
                 : "transparent"
