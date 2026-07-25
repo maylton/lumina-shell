@@ -76,6 +76,8 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] User and contributor documentation.
 - [x] Recovery from invalid configuration.
 - [x] Runtime internationalization foundation and contributor catalogs.
+- [x] Configurable weather location and refresh behavior.
+- [x] Initial Wi-Fi, wired-network, and Bluetooth management.
 
 ## 0.7 — Extended Beta
 
@@ -126,6 +128,12 @@ This sprint completes the 0.5 public-beta foundation:
    floating geometry.
 8. Maintained Brazilian Portuguese catalog with localized Dashboard and
    Launcher surfaces and explicit product terminology.
+9. Weather settings with optional display, GeoIP or manual-city location,
+   feature-scoped persistence, expiring coordinate cache, and selectable
+   refresh intervals.
+10. Connectivity settings with service-owned Wi-Fi discovery and connection,
+    saved-profile and wired-profile management, and bounded Bluetooth discovery,
+    pairing, connection, and removal.
 
 ### Acceptance criteria
 
@@ -137,7 +145,7 @@ This sprint completes the 0.5 public-beta foundation:
 - Output name, resolution, and scale match `niri msg --json outputs`.
 - Opening and closing the overview updates the bar state.
 - Disconnecting and reconnecting the event stream does not leave stale state.
-- No visual component invokes `niri msg` directly.
+- No visual component invokes `niri msg` or daily-integration commands directly.
 - Only one full-screen interactive overlay is active at a time.
 - An unavailable target output falls back to a connected output.
 - Missing batteries or backlights degrade to an unavailable state.
@@ -147,8 +155,8 @@ This sprint completes the 0.5 public-beta foundation:
 - Primary exclusive surfaces support keyboard dismissal and traversal.
 - Dashboard and graphical settings share one overlay, service layer, and
   persistent configuration store.
-- Graphical settings provide nine keyboard-accessible categories, direct IPC
-  navigation, scoped reset, and debounced save feedback.
+- Graphical settings provide eleven keyboard-accessible categories, direct IPC
+  navigation, scoped reset where supported, and debounced save feedback.
 - Lumina's Material Expressive bar is the only bar layout and supports both
   edge-to-edge and floating surfaces.
 - The default edge-to-edge bar uses a substantial 56-pixel surface, clear
@@ -216,8 +224,15 @@ This sprint completes the 0.5 public-beta foundation:
 - Runtime locale detection, regional fallback, live catalog reload, and
   translation validation support incremental community localization.
 - Brazilian Portuguese is a maintained complete catalog for all extracted
-  message IDs; Dashboard remains Dashboard, and the localized Dashboard and
-  Launcher update through the runtime catalog without changing persisted IDs.
+  message IDs; Dashboard remains Dashboard, and localized Settings surfaces
+  update through the runtime catalog without changing persisted IDs.
+- Weather can be disabled without background requests; automatic mode resolves
+  an approximate city from the public IP without storing the IP, caches only
+  city/region/coordinates for 24 hours, and falls back to a manually entered
+  city with 15–120 minute refresh choices.
+- The Connectivity page lists service-backed Wi-Fi, wired, and Bluetooth state;
+  visual QML does not run commands. Password-protected Wi-Fi uses a temporary
+  `0600` secret file passed to NetworkManager and removes it after the attempt.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves
@@ -241,3 +256,9 @@ This sprint completes the 0.5 public-beta foundation:
 5. [ ] Begin the 0.7 extended-beta work.
 6. [ ] Continue extracting hard-coded English from notifications, session,
    wallpaper, calendar, OSD, and the remaining Settings pages.
+7. [ ] Validate GeoIP/manual weather switching and cache fallback on the native
+   runtime.
+8. [ ] Validate protected Wi-Fi, saved-profile, wired-profile, and Bluetooth
+   pairing flows against physical hardware and the active system agents.
+9. [ ] Add advanced NetworkManager editing for static IP, DNS, IPv6, VPN,
+   hotspot, and 802.1X only after the basic management flow is stable.
