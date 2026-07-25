@@ -147,10 +147,15 @@ This sprint completes the 0.5 public-beta foundation:
   navigation, scoped reset, and debounced save feedback.
 - Lumina's Material Expressive bar is the only bar layout and supports both
   edge-to-edge and floating surfaces.
+- The default edge-to-edge bar uses a substantial 56-pixel surface, clear
+  clock/date hierarchy, and expressive workspace state without shrinking
+  interaction targets.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
 - System tray items can be grouped in a compact popover or kept visible
   inline, and notifications use a compact stateful icon with an unread badge.
+- Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
+  and very narrow widths; centered context never overlaps asymmetric clusters.
 - Schema v4 bar preferences migrate to schema v5 without losing valid
   left/right widget ordering or existing shell preferences; retired bar keys
   are ignored safely.

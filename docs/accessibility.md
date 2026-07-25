@@ -13,8 +13,9 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   state, previews/navigation announce selection, and Left/Right adjust focused
   settings sliders and choices.
 - Launcher arrow keys move through ranked results; Enter activates the selected result.
-- Lumina's Material Expressive bar controls use at least a 36-pixel
-  interaction area. Launcher, overview, workspaces, date/time, tray items,
+- Lumina's Material Expressive bar controls use a 40-pixel interaction area
+  by default and retain at least 36 pixels in compact mode. Launcher,
+  overview, workspaces, date/time, tray items,
   notifications, system status, and Dashboard expose focus outlines, names,
   descriptions, Enter, Space, and hover tooltips.
 - The grouped tray button announces its active-item count, while the

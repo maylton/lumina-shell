@@ -3,10 +3,15 @@
 ## Bar
 
 Lumina creates one instance of **Lumina's Material Expressive bar** for each
-connected output. Its default edge-to-edge tonal surface places launcher,
-overview, transforming workspaces, and localized date/time on the left; a
-temporary Niri context capsule in the center; and tray, notifications, live
-system status, and the Lumina Dashboard button on the right.
+connected output. Its default 56-pixel, edge-to-edge tonal surface places
+launcher, overview, transforming workspaces, and localized date/time on the
+left; a temporary Niri context capsule in the center; and tray, notifications,
+live system status, and the Lumina Dashboard button on the right.
+
+The focused workspace expands into an accent pill. Other active workspaces
+retain a quiet compact pill, while inactive workspaces recede to lightweight
+markers without reducing their keyboard or pointer target. The clock is the
+primary date/time element and the date uses a secondary text role.
 
 The system-status cluster can group network, volume, and battery into one
 pill, or display them individually. Missing hardware is omitted. Clicking the
@@ -28,8 +33,9 @@ The Bar settings page controls:
 Context is event-driven and independent per output. In Contextual mode, a
 window, app ID, column, workspace, or action-error change reveals the capsule
 for the configured duration. Narrow layouts first remove secondary text and
-optional actions; the central context elides instead of overlapping the side
-clusters.
+optional actions; the central context derives its maximum width from the
+smaller side clearance, so it elides or recedes instead of overlapping either
+cluster.
 
 ## Launcher
 

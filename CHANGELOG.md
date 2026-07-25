@@ -67,6 +67,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Raised the default edge-to-edge bar to 56 pixels with 40-pixel interaction
+  targets, stronger clock hierarchy, lighter inactive workspaces, and a more
+  restrained edge divider.
+- Split centered Niri context into primary and secondary information, bounded
+  it against asymmetric side clusters, and refined responsive visibility at
+  desktop, ultrawide, and narrow widths.
+- Added expressive shape transitions to grouped system status, notifications,
+  and Dashboard controls while retaining the global reduced-motion policy.
 - Removed the legacy alternate bar layout, preset selector, preview, and
   persisted style/single-order state. Lumina's Material Expressive bar is now
   the sole implementation while retaining edge-to-edge and floating modes.

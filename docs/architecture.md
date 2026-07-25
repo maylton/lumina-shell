@@ -68,13 +68,19 @@ selection, and the state passed directly to the sole `BarLayout`.
 `BarLayout` implements Lumina's Material Expressive bar. Its left and right
 orders are registries of `Component` objects instantiated through `Loader`;
 preferences therefore reorder or hide widgets without duplicating the layout.
-Edge-to-edge and floating are geometry modes of this same implementation.
+Edge-to-edge and floating are geometry modes of this same implementation. The
+default edge-to-edge surface is 56 pixels high with 40-pixel interaction
+targets; compact mode retains 36-pixel targets.
 
 Each output owns its own `ContextCapsule` and timeout. Window, application,
 column, workspace, and action-error property changes restart that local timer;
-there is no polling or process boundary in the visual component. Date/time
-continues to use the shared `CalendarStore`, while its popup anchors below a
-top bar and above a bottom bar.
+there is no polling or process boundary in the visual component. Primary
+window context and secondary workspace/application/layout metadata use
+separate typography roles. `BarLayoutPolicy` derives the responsive profile
+and bounds the centered capsule by the smaller left/right clearance, preventing
+asymmetric clusters from overlapping it. Date/time continues to use the shared
+`CalendarStore`, while its popup anchors below a top bar and above a bottom
+bar.
 
 `SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
 `PowerService` directly and opens the existing Dashboard through
