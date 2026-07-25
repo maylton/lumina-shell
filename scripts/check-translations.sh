@@ -5,6 +5,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 catalog_dir="${repository_dir}/i18n"
 source_catalog="${catalog_dir}/en-US.json"
+pt_br_catalog="${catalog_dir}/pt-BR.json"
 
 command -v jq >/dev/null 2>&1 || {
     printf 'jq is required to validate translation catalogs.\n' >&2
@@ -18,6 +19,12 @@ command -v perl >/dev/null 2>&1 || {
 
 [[ -f "${source_catalog}" ]] || {
     printf 'Missing source translation catalog: %s\n' "${source_catalog}" >&2
+    exit 1
+}
+
+[[ -f "${pt_br_catalog}" ]] || {
+    printf 'Missing maintained Brazilian Portuguese catalog: %s\n' \
+        "${pt_br_catalog}" >&2
     exit 1
 }
 
@@ -54,6 +61,28 @@ while IFS= read -r catalog_path; do
         exit 1
     fi
 done < <(find "${catalog_dir}" -maxdepth 1 -type f -name '*.json' | sort)
+
+missing_pt_br_keys="$(
+    jq -n -r \
+        --slurpfile source "${source_catalog}" \
+        --slurpfile catalog "${pt_br_catalog}" \
+        '($source[0] | keys) - ($catalog[0] | keys) | .[]'
+)"
+
+if [[ -n "${missing_pt_br_keys}" ]]; then
+    printf 'Keys missing from the maintained pt-BR catalog:\n%s\n' \
+        "${missing_pt_br_keys}" >&2
+    exit 1
+fi
+
+jq -e '
+    .["control.tab.dashboard"] == "Dashboard"
+    and .["settings.category.dashboard.label"] == "Dashboard"
+    and (.["control.header.dashboardSubtitle"] | startswith("Dashboard"))
+' "${pt_br_catalog}" >/dev/null || {
+    printf 'The product term Dashboard must remain Dashboard in pt-BR.\n' >&2
+    exit 1
+}
 
 missing_source_keys="$(
     mapfile -t qml_files < <(
