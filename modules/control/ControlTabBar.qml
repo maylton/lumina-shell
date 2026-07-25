@@ -9,6 +9,9 @@ Item {
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property real tabSpacing: luminaDesign.spacing.medium
+    readonly property string rocketIconSource: Qt.resolvedUrl(
+        "../../assets/icons/rocket-symbolic.svg"
+    )
 
     height: 44
 
@@ -31,8 +34,8 @@ Item {
             model: [
                 {
                     id: "dashboard",
-                    iconName: "view-grid-symbolic",
-                    symbol: "✦",
+                    iconName: "",
+                    symbol: "🚀",
                     label: "Dashboard"
                 },
                 {
@@ -90,6 +93,10 @@ Item {
                         width: 16
                         height: 16
                         iconName: tabButton.modelData.iconName
+                        customSource:
+                            tabButton.modelData.id === "dashboard"
+                                ? root.rocketIconSource
+                                : ""
                         fallbackSymbol: tabButton.modelData.symbol
                         iconColor: tabButton.selected
                             ? root.luminaDesign.color.primary
