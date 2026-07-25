@@ -1,0 +1,1148 @@
+name: Apply shell surface style migration
+
+on:
+  push:
+    branches:
+      - agent/niri-state-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/niri-state-foundation
+          fetch-depth: 0
+
+      - name: Apply shell surface migration
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          ROOT = Path('.')
+
+          def read(path):
+              return (ROOT / path).read_text(encoding='utf-8')
+
+          def write(path, content):
+              target = ROOT / path
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_text(content, encoding='utf-8')
+
+          def replace_once(path, old, new):
+              content = read(path)
+              count = content.count(old)
+              if count != 1:
+                  raise RuntimeError(f'{path}: expected one match, found {count}: {old[:80]!r}')
+              write(path, content.replace(old, new, 1))
+
+          shell_policy = r'''.pragma library
+
+var MINIMUM_OPACITY = 0.55
+var MAXIMUM_OPACITY = 0.95
+
+function clamp(value, minimum, maximum) {
+    var numeric = Number(value)
+
+    if (!isFinite(numeric))
+        numeric = minimum
+
+    return Math.max(minimum, Math.min(maximum, numeric))
+}
+
+function normalizeMode(mode) {
+    var requested = String(mode || "")
+
+    return ["solid", "blur", "frosted"].indexOf(requested) >= 0
+        ? requested
+        : "solid"
+}
+
+function configuredOpacity(value) {
+    return clamp(value, MINIMUM_OPACITY, MAXIMUM_OPACITY)
+}
+
+function requestsBackdropBlur(mode) {
+    var normalized = normalizeMode(mode)
+    return normalized === "blur" || normalized === "frosted"
+}
+
+function baseAlpha(mode) {
+    return normalizeMode(mode) === "solid" ? 1 : 0
+}
+
+function tintAlpha(mode, opacity, lightMode) {
+    var normalized = normalizeMode(mode)
+    var level = configuredOpacity(opacity)
+
+    if (normalized === "blur")
+        return clamp(level * (lightMode ? 0.78 : 0.68), 0.40, 0.76)
+
+    if (normalized === "frosted")
+        return clamp(level * (lightMode ? 0.88 : 0.80), 0.48, 0.84)
+
+    return 0
+}
+
+function contrastProtectionAlpha(mode, lightMode) {
+    var normalized = normalizeMode(mode)
+
+    if (normalized === "blur")
+        return lightMode ? 0.12 : 0.10
+
+    if (normalized === "frosted")
+        return lightMode ? 0.14 : 0.12
+
+    return 0
+}
+
+function highlightAlpha(mode, lightMode) {
+    return normalizeMode(mode) === "frosted"
+        ? lightMode ? 0.10 : 0.07
+        : 0
+}
+
+function grainAlpha(mode, lightMode) {
+    return normalizeMode(mode) === "frosted"
+        ? lightMode ? 0.016 : 0.012
+        : 0
+}
+
+function borderAlpha(mode) {
+    var normalized = normalizeMode(mode)
+
+    if (normalized === "frosted")
+        return 0.56
+
+    if (normalized === "blur")
+        return 0.36
+
+    return 0.42
+}
+
+function fallbackAlpha(mode, opacity, lightMode) {
+    var normalized = normalizeMode(mode)
+
+    if (!requestsBackdropBlur(normalized))
+        return baseAlpha(normalized)
+
+    return clamp(
+        tintAlpha(normalized, opacity, lightMode)
+            + contrastProtectionAlpha(normalized, lightMode),
+        0.52,
+        0.92
+    )
+}
+'''
+
+          shell_surface = r'''pragma ComponentBehavior: Bound
+
+import QtQuick
+import qs.design
+import qs.stores.config
+import "ShellSurfacePolicy.js" as ShellSurfacePolicy
+
+Rectangle {
+    id: root
+
+    default property alias contentData: content.data
+
+    readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string backgroundMode:
+        ShellSurfacePolicy.normalizeMode(
+            ConfigStore.shellBackgroundMode
+        )
+    readonly property real configuredOpacity:
+        ConfigStore.shellSurfaceOpacity
+    readonly property bool frosted:
+        backgroundMode === "frosted"
+    readonly property color tintColor: frosted
+        ? Theme.surfaceMutedColor
+        : Theme.surfaceContainerColor
+    readonly property color highlightColor: Theme.lightMode
+        ? Theme.surfaceBaseColor
+        : Theme.onSurfaceColor
+    readonly property string frostedNoiseSource:
+        "data:image/svg+xml;utf8,"
+        + encodeURIComponent(
+            "<svg xmlns='http://www.w3.org/2000/svg' "
+            + "width='160' height='128' viewBox='0 0 160 128'>"
+            + "<g fill='#ffffff'>"
+            + "<circle cx='7' cy='11' r='.55' opacity='.30'/>"
+            + "<circle cx='31' cy='5' r='.35' opacity='.18'/>"
+            + "<circle cx='68' cy='17' r='.5' opacity='.24'/>"
+            + "<circle cx='119' cy='8' r='.4' opacity='.19'/>"
+            + "<circle cx='151' cy='29' r='.55' opacity='.25'/>"
+            + "<circle cx='19' cy='53' r='.4' opacity='.17'/>"
+            + "<circle cx='83' cy='44' r='.6' opacity='.23'/>"
+            + "<circle cx='137' cy='69' r='.35' opacity='.16'/>"
+            + "<circle cx='48' cy='91' r='.5' opacity='.22'/>"
+            + "<circle cx='103' cy='116' r='.45' opacity='.19'/>"
+            + "</g><g fill='#000000'>"
+            + "<circle cx='51' cy='32' r='.4' opacity='.12'/>"
+            + "<circle cx='111' cy='57' r='.5' opacity='.11'/>"
+            + "<circle cx='8' cy='108' r='.45' opacity='.10'/>"
+            + "<circle cx='145' cy='121' r='.5' opacity='.10'/>"
+            + "</g></svg>"
+        )
+
+    function withAlpha(colorValue, alphaValue) {
+        return Qt.rgba(
+            colorValue.r,
+            colorValue.g,
+            colorValue.b,
+            Math.max(0, Math.min(1, alphaValue))
+        )
+    }
+
+    color: "transparent"
+    clip: true
+
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        color: root.withAlpha(
+            Theme.surfaceContainerColor,
+            ShellSurfacePolicy.baseAlpha(root.backgroundMode)
+        )
+
+        Behavior on color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        color: root.withAlpha(
+            root.tintColor,
+            ShellSurfacePolicy.tintAlpha(
+                root.backgroundMode,
+                root.configuredOpacity,
+                Theme.lightMode
+            )
+        )
+
+        Behavior on color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        color: root.withAlpha(
+            Theme.surfaceBaseColor,
+            ShellSurfacePolicy.contrastProtectionAlpha(
+                root.backgroundMode,
+                Theme.lightMode
+            )
+        )
+
+        Behavior on color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: opacity > 0
+        opacity: ShellSurfacePolicy.highlightAlpha(
+            root.backgroundMode,
+            Theme.lightMode
+        )
+        radius: root.radius
+        color: "transparent"
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+
+            GradientStop {
+                position: 0
+                color: root.highlightColor
+            }
+
+            GradientStop {
+                position: 0.42
+                color: root.withAlpha(root.highlightColor, 0.22)
+            }
+
+            GradientStop {
+                position: 1
+                color: "transparent"
+            }
+        }
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+
+    Image {
+        anchors {
+            fill: parent
+            margins: Math.max(2, Math.round(root.radius * 0.38))
+        }
+        visible: opacity > 0
+        opacity: ShellSurfacePolicy.grainAlpha(
+            root.backgroundMode,
+            Theme.lightMode
+        )
+        source: root.frostedNoiseSource
+        sourceSize.width: 160
+        sourceSize.height: 128
+        fillMode: Image.Tile
+        smooth: false
+        asynchronous: true
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+
+    Item {
+        id: content
+
+        anchors.fill: parent
+        z: 10
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        z: 20
+        radius: root.radius
+        color: "transparent"
+        border.width: 1
+        border.color: root.withAlpha(
+            root.luminaDesign.color.outline,
+            ShellSurfacePolicy.borderAlpha(root.backgroundMode)
+        )
+
+        Behavior on border.color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+    }
+}
+'''
+
+          write('modules/control/ShellSurfacePolicy.js', shell_policy)
+          write('modules/control/ShellSurface.qml', shell_surface)
+
+          replace_once(
+              'modules/control/qmldir',
+              'ControlSlider 1.0 ControlSlider.qml\n',
+              'ControlSlider 1.0 ControlSlider.qml\nShellSurface 1.0 ShellSurface.qml\n'
+          )
+
+          # Schema 8 replaces global alpha transparency with explicit shell styles.
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              'var CURRENT_VERSION = 7',
+              'var CURRENT_VERSION = 8'
+          )
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              '        themeMode: "auto",\n        transparencyEnabled: false,\n        surfaceOpacity: 0.96,\n',
+              '        themeMode: "auto",\n        shellBackgroundMode: "solid",\n        shellSurfaceOpacity: 0.82,\n'
+          )
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              '''    result.surfaceOpacity = boundedNumber(
+        result.surfaceOpacity,
+        base.surfaceOpacity,
+        0.72,
+        1
+    )
+''',
+              '''    result.shellBackgroundMode = choice(
+        result.shellBackgroundMode,
+        ["solid", "blur", "frosted"],
+        base.shellBackgroundMode
+    )
+    result.shellSurfaceOpacity = boundedNumber(
+        result.shellSurfaceOpacity,
+        base.shellSurfaceOpacity,
+        0.55,
+        0.95
+    )
+'''
+          )
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              '        "transparencyEnabled",\n',
+              ''
+          )
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              '''        input.barWidgetSettings = widgetSettings
+    }
+
+    return normalize(input)
+''',
+              '''        input.barWidgetSettings = widgetSettings
+    }
+
+    if (version < 8) {
+        input.shellBackgroundMode = booleanValue(
+            input.transparencyEnabled,
+            false
+        ) ? "blur" : "solid"
+        input.shellSurfaceOpacity = boundedNumber(
+            input.surfaceOpacity,
+            defaults().shellSurfaceOpacity,
+            0.55,
+            0.95
+        )
+        delete input.transparencyEnabled
+        delete input.surfaceOpacity
+    }
+
+    return normalize(input)
+'''
+          )
+          replace_once(
+              'stores/config/ConfigSchema.js',
+              '''            "paletteStyle",
+            "transparencyEnabled",
+            "surfaceOpacity",
+            "animationsEnabled",
+''',
+              '''            "paletteStyle",
+            "shellBackgroundMode",
+            "shellSurfaceOpacity",
+            "animationsEnabled",
+'''
+          )
+
+          # ConfigStore public state and JSON adapter.
+          replace_once(
+              'stores/config/ConfigStore.qml',
+              '''    property alias transparencyEnabled:
+        stateAdapter.transparencyEnabled
+    property alias surfaceOpacity: stateAdapter.surfaceOpacity
+''',
+              '''    property alias shellBackgroundMode:
+        stateAdapter.shellBackgroundMode
+    property alias shellSurfaceOpacity:
+        stateAdapter.shellSurfaceOpacity
+'''
+          )
+          replace_once(
+              'stores/config/ConfigStore.qml',
+              '''            "transparencyEnabled",
+            "surfaceOpacity",
+            "animationsEnabled",
+''',
+              '''            "shellBackgroundMode",
+            "shellSurfaceOpacity",
+            "animationsEnabled",
+'''
+          )
+          replace_once(
+              'stores/config/ConfigStore.qml',
+              '''            property string themeMode: "auto"
+            property bool transparencyEnabled: false
+            property real surfaceOpacity: 0.96
+            property bool animationsEnabled: true
+''',
+              '''            property string themeMode: "auto"
+            property string shellBackgroundMode: "solid"
+            property real shellSurfaceOpacity: 0.82
+            property bool animationsEnabled: true
+'''
+          )
+          replace_once(
+              'stores/config/ConfigStore.qml',
+              '''                themeMode: root.themeMode,
+                dynamicTheme: root.dynamicTheme,
+''',
+              '''                themeMode: root.themeMode,
+                shellBackgroundMode: root.shellBackgroundMode,
+                shellSurfaceOpacity: root.shellSurfaceOpacity,
+                dynamicTheme: root.dynamicTheme,
+'''
+          )
+
+          # Semantic cards remain opaque; only bounded shell surfaces own blur/tint.
+          replace_once(
+              'design/Theme.qml',
+              '''    readonly property real surfaceAlpha:
+        ConfigStore.transparencyEnabled
+            ? ConfigStore.surfaceOpacity
+            : 1
+''',
+              '''    readonly property real surfaceAlpha: 1
+'''
+          )
+
+          # Replace Appearance transparency switch with explicit modes.
+          replace_once(
+              'modules/control/settings/pages/AppearancePage.qml',
+              '''        SettingsSwitchRow {
+            width: parent.width
+            title: "Transparency"
+            description: checked
+                ? "Semantic surfaces use configured opacity"
+                : "Surfaces are fully opaque"
+            checked: ConfigStore.transparencyEnabled
+            onToggled: value =>
+                ConfigStore.setAppearanceValue(
+                    "transparencyEnabled",
+                    value
+                )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: "Surface opacity"
+            description: "Minimum is limited for readable contrast"
+            available: ConfigStore.transparencyEnabled
+            availabilityText: "Enable transparency first"
+            from: 0.72
+            to: 1
+            stepSize: 0.02
+            value: ConfigStore.surfaceOpacity
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value =>
+                ConfigStore.setAppearanceValue(
+                    "surfaceOpacity",
+                    value
+                )
+        }
+''',
+              '''        SettingsComboRow {
+            width: parent.width
+            title: "Surface style"
+            description: ConfigStore.shellBackgroundMode === "solid"
+                ? "Opaque tonal shell surfaces"
+                : ConfigStore.shellBackgroundMode === "blur"
+                    ? "Android-inspired bounded live blur"
+                    : "Blur with richer tint, highlight, and subtle texture"
+            options: [
+                { value: "solid", label: "Solid" },
+                { value: "blur", label: "Blur" },
+                { value: "frosted", label: "Frosted glass" }
+            ]
+            currentValue: ConfigStore.shellBackgroundMode
+            onSelected: value =>
+                ConfigStore.setAppearanceValue(
+                    "shellBackgroundMode",
+                    value
+                )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: "Tint opacity"
+            description: "Controls the tonal protection above live blur"
+            available: ConfigStore.shellBackgroundMode !== "solid"
+            availabilityText: "Solid surfaces are fully opaque"
+            from: 0.55
+            to: 0.95
+            stepSize: 0.02
+            value: ConfigStore.shellSurfaceOpacity
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value =>
+                ConfigStore.setAppearanceValue(
+                    "shellSurfaceOpacity",
+                    value
+                )
+        }
+'''
+          )
+
+          def patch_overlay(path, import_anchor, policy_import, window_anchor,
+                            keyboard_anchor, surface_decl, surface_id):
+              replace_once(path, import_anchor, import_anchor + policy_import)
+              replace_once(
+                  path,
+                  window_anchor,
+                  window_anchor + '                surfaceFormat.opaque: false\n'
+              )
+              region = f'''\n                BackgroundEffect.blurRegion:\n                    ShellSurfacePolicy.requestsBackdropBlur(\n                        ConfigStore.shellBackgroundMode\n                    )\n                        ? shellBlurRegion\n                        : null\n\n                Region {{\n                    id: shellBlurRegion\n\n                    Region {{\n                        x: {surface_id}.x\n                        y: {surface_id}.y\n                        width: {surface_id}.width\n                        height: {surface_id}.height\n                        radius: {surface_id}.radius\n                    }}\n                }}\n'''
+              replace_once(path, keyboard_anchor, keyboard_anchor + region)
+              replace_once(path, surface_decl, surface_decl.replace('Rectangle', 'ShellSurface', 1))
+
+          # Control Center.
+          replace_once(
+              'modules/control/ControlCenter.qml',
+              'import qs.stores.time\n',
+              'import qs.stores.time\nimport "ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/control/ControlCenter.qml',
+              '                color: "transparent"\n                focusable: centerVisible\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: centerVisible\n'
+          )
+          replace_once(
+              'modules/control/ControlCenter.qml',
+              '''                WlrLayershell.keyboardFocus: centerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+''',
+              '''                WlrLayershell.keyboardFocus: centerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: dashboardSurface.x
+                        y: dashboardSurface.y
+                        width: dashboardSurface.width
+                        height: dashboardSurface.height
+                        radius: dashboardSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/control/ControlCenter.qml',
+              '''                Rectangle {
+                    id: dashboardSurface
+''',
+              '''                ShellSurface {
+                    id: dashboardSurface
+'''
+          )
+          replace_once(
+              'modules/control/ControlCenter.qml',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+                    clip: true
+''',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+                    clip: true
+'''
+          )
+
+          # Launcher.
+          replace_once(
+              'modules/launcher/Launcher.qml',
+              'import qs.design\n',
+              'import qs.design\nimport qs.modules.control\nimport qs.stores.config\nimport "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/launcher/Launcher.qml',
+              '                color: "transparent"\n                focusable: launcherVisible\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: launcherVisible\n'
+          )
+          replace_once(
+              'modules/launcher/Launcher.qml',
+              '''                WlrLayershell.keyboardFocus: launcherVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+''',
+              '''                WlrLayershell.keyboardFocus: launcherVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: launcherSurface.x
+                        y: launcherSurface.y
+                        width: launcherSurface.width
+                        height: launcherSurface.height
+                        radius: launcherSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/launcher/Launcher.qml',
+              '''                Rectangle {
+                    id: launcherSurface
+''',
+              '''                ShellSurface {
+                    id: launcherSurface
+'''
+          )
+          replace_once(
+              'modules/launcher/Launcher.qml',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+''',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+'''
+          )
+
+          # Notification Center.
+          replace_once(
+              'modules/notifications/NotificationCenter.qml',
+              'import qs.stores.config\n',
+              'import qs.stores.config\nimport "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/notifications/NotificationCenter.qml',
+              '                color: "transparent"\n                focusable: centerVisible\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: centerVisible\n'
+          )
+          replace_once(
+              'modules/notifications/NotificationCenter.qml',
+              '''                WlrLayershell.keyboardFocus: centerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+''',
+              '''                WlrLayershell.keyboardFocus: centerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: centerSurface.x
+                        y: centerSurface.y
+                        width: centerSurface.width
+                        height: centerSurface.height
+                        radius: centerSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/notifications/NotificationCenter.qml',
+              '''                Rectangle {
+                    id: centerSurface
+''',
+              '''                ShellSurface {
+                    id: centerSurface
+'''
+          )
+          replace_once(
+              'modules/notifications/NotificationCenter.qml',
+              '''                    radius: root.luminaDesign.shape.extraLargeIncreased
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+                    opacity: centerWindow.centerVisible ? 1 : 0
+''',
+              '''                    radius: root.luminaDesign.shape.extraLargeIncreased
+                    opacity: centerWindow.centerVisible ? 1 : 0
+'''
+          )
+
+          # Session Menu.
+          replace_once(
+              'modules/session/SessionMenu.qml',
+              'import qs.design\n',
+              'import qs.design\nimport qs.modules.control\nimport "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/session/SessionMenu.qml',
+              '                color: "transparent"\n                focusable: menuVisible\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: menuVisible\n'
+          )
+          replace_once(
+              'modules/session/SessionMenu.qml',
+              '''                WlrLayershell.keyboardFocus: menuVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+''',
+              '''                WlrLayershell.keyboardFocus: menuVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: menuSurface.x
+                        y: menuSurface.y
+                        width: menuSurface.width
+                        height: menuSurface.height
+                        radius: menuSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/session/SessionMenu.qml',
+              '''                Rectangle {
+                    id: menuSurface
+''',
+              '''                ShellSurface {
+                    id: menuSurface
+'''
+          )
+          replace_once(
+              'modules/session/SessionMenu.qml',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+''',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+'''
+          )
+
+          # Wallpaper Picker.
+          replace_once(
+              'modules/wallpaper/WallpaperPicker.qml',
+              'import qs.design\n',
+              'import qs.design\nimport qs.modules.control\nimport qs.stores.config\nimport "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/wallpaper/WallpaperPicker.qml',
+              '                color: "transparent"\n                focusable: pickerVisible\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: pickerVisible\n'
+          )
+          replace_once(
+              'modules/wallpaper/WallpaperPicker.qml',
+              '''                WlrLayershell.keyboardFocus: pickerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+''',
+              '''                WlrLayershell.keyboardFocus: pickerVisible
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: pickerSurface.x
+                        y: pickerSurface.y
+                        width: pickerSurface.width
+                        height: pickerSurface.height
+                        radius: pickerSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/wallpaper/WallpaperPicker.qml',
+              '''                Rectangle {
+                    id: pickerSurface
+''',
+              '''                ShellSurface {
+                    id: pickerSurface
+'''
+          )
+          replace_once(
+              'modules/wallpaper/WallpaperPicker.qml',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+''',
+              '''                    radius: root.luminaDesign.shape.extraLarge
+'''
+          )
+
+          # OSD.
+          replace_once(
+              'modules/osd/Osd.qml',
+              'import qs.design\n',
+              'import qs.design\nimport qs.modules.control\nimport "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy\n'
+          )
+          replace_once(
+              'modules/osd/Osd.qml',
+              '                color: "transparent"\n                focusable: false\n',
+              '                color: "transparent"\n                surfaceFormat.opaque: false\n                focusable: false\n'
+          )
+          replace_once(
+              'modules/osd/Osd.qml',
+              '                WlrLayershell.keyboardFocus: WlrKeyboardFocus.None\n',
+              '''                WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
+
+                Region {
+                    id: shellBlurRegion
+
+                    Region {
+                        x: osdSurface.x
+                        y: osdSurface.y
+                        width: osdSurface.width
+                        height: osdSurface.height
+                        radius: osdSurface.radius
+                    }
+                }
+'''
+          )
+          replace_once(
+              'modules/osd/Osd.qml',
+              '''                Rectangle {
+                    anchors.fill: parent
+                    radius: root.luminaDesign.shape.extraLarge
+                    color: root.luminaDesign.color.surfaceContainer
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outline
+''',
+              '''                ShellSurface {
+                    id: osdSurface
+
+                    anchors.fill: parent
+                    radius: root.luminaDesign.shape.extraLarge
+'''
+          )
+
+          # Policy tests.
+          write('tests/tst_shell_surface_policy.qml', r'''import QtQuick
+import QtTest
+import "../modules/control/ShellSurfacePolicy.js" as ShellSurfacePolicy
+
+TestCase {
+    name: "ShellSurfacePolicy"
+
+    function test_onlyEffectStylesRequestBlur() {
+        verify(!ShellSurfacePolicy.requestsBackdropBlur("solid"))
+        verify(ShellSurfacePolicy.requestsBackdropBlur("blur"))
+        verify(ShellSurfacePolicy.requestsBackdropBlur("frosted"))
+        verify(!ShellSurfacePolicy.requestsBackdropBlur("invalid"))
+    }
+
+    function test_invalidModeUsesSolidFallback() {
+        compare(ShellSurfacePolicy.normalizeMode("invalid"), "solid")
+        compare(ShellSurfacePolicy.baseAlpha("invalid"), 1)
+    }
+
+    function test_configuredOpacityIsClamped() {
+        compare(ShellSurfacePolicy.configuredOpacity(0), 0.55)
+        compare(ShellSurfacePolicy.configuredOpacity(2), 0.95)
+        compare(ShellSurfacePolicy.configuredOpacity(0.82), 0.82)
+    }
+
+    function test_frostedIsRicherThanCleanBlur() {
+        const blur = ShellSurfacePolicy.tintAlpha("blur", 0.82, false)
+        const frosted = ShellSurfacePolicy.tintAlpha(
+            "frosted", 0.82, false
+        )
+
+        verify(blur > 0 && blur < 1)
+        verify(frosted > blur && frosted < 1)
+        compare(ShellSurfacePolicy.highlightAlpha("blur", false), 0)
+        verify(ShellSurfacePolicy.highlightAlpha("frosted", false) > 0)
+        compare(ShellSurfacePolicy.grainAlpha("blur", false), 0)
+        verify(ShellSurfacePolicy.grainAlpha("frosted", false) > 0)
+    }
+
+    function test_effectFallbackRemainsReadable() {
+        verify(ShellSurfacePolicy.fallbackAlpha("blur", 0.55, true) >= 0.52)
+        verify(ShellSurfacePolicy.fallbackAlpha(
+            "frosted", 0.55, false
+        ) >= 0.52)
+    }
+}
+''')
+
+          schema_tests = read('tests/tst_config_schema.qml')
+          schema_tests = schema_tests.replace('schema7', 'schema8')
+          schema_tests = schema_tests.replace('schemaVersion, 7', 'schemaVersion, 8')
+          schema_tests = schema_tests.replace(
+              '        compare(state.themeMode, "auto")\n',
+              '        compare(state.themeMode, "auto")\n'
+              '        compare(state.shellBackgroundMode, "solid")\n'
+              '        compare(state.shellSurfaceOpacity, 0.82)\n'
+              '        verify(state.transparencyEnabled === undefined)\n'
+              '        verify(state.surfaceOpacity === undefined)\n',
+              1
+          )
+          schema_tests = schema_tests.replace(
+              '''        compare(migrated.transparencyEnabled, true)
+        compare(migrated.surfaceOpacity, 0.78)
+        compare(migrated.barBackgroundMode, "blur")
+''',
+              '''        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.78)
+        compare(migrated.barBackgroundMode, "blur")
+''',
+              1
+          )
+          marker = '\n    function test_paletteStyleNormalization() {'
+          shell_test = r'''
+    function test_schema7TransparencyMigratesToShellSurfaceStyle() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 7,
+            transparencyEnabled: true,
+            surfaceOpacity: 0.74,
+            barBackgroundMode: "frosted"
+        })
+
+        compare(migrated.schemaVersion, 8)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.74)
+        compare(migrated.barBackgroundMode, "frosted")
+        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
+    }
+'''
+          if marker not in schema_tests:
+              raise RuntimeError('tests/tst_config_schema.qml: insertion marker missing')
+          schema_tests = schema_tests.replace(marker, shell_test + marker, 1)
+          write('tests/tst_config_schema.qml', schema_tests)
+
+          # Documentation and roadmap.
+          replace_once(
+              'ROADMAP.md',
+              '1. Graphical configuration with schema v7 persistence and safe schema\n   v3/v4/v5/v6 migration.\n',
+              '1. Graphical configuration with schema v8 persistence and safe schema\n   v3/v4/v5/v6/v7 migration.\n'
+          )
+          replace_once(
+              'ROADMAP.md',
+              '''- The bar supports solid, translucent, blur, frosted-glass, and transparent
+  backgrounds independently of global surface transparency. Only Blur and
+''',
+              '''- Primary shell surfaces support Solid, Android-inspired Blur, and Frosted
+  Glass independently of the bar. Blur remains clean and grain-free; Frosted
+  adds a richer tint, directional highlight, and subtle static texture. Both
+  request native blur only inside their rounded panel bounds, while semantic
+  cards and controls remain opaque.
+- The bar supports solid, translucent, blur, frosted-glass, and transparent
+  backgrounds independently of shell surface style. Only Blur and
+'''
+          )
+          replace_once(
+              'ROADMAP.md',
+              '''- Schema v4 bar preferences migrate through schema v5 and schema v6 into
+  schema v7 without losing valid widget ordering, visibility, global
+  transparency, or existing shell preferences; retired widget-specific keys
+  are ignored safely after migration.
+''',
+              '''- Schema v4 bar preferences migrate through schema v5, schema v6, and
+  schema v7 into schema v8 without losing valid widget ordering, visibility,
+  shell style, or existing preferences; legacy global transparency becomes
+  bounded Blur and retired keys are ignored safely after migration.
+'''
+          )
+
+          architecture = read('docs/architecture.md')
+          insert_after = '''The preferred unified surface is 1440 by 920 logical pixels and remains
+bounded by the selected output's usable area. Dashboard content targets a
+1280-by-752 logical minimum, scaling as one unit below that threshold instead
+of clipping individual cards. Semantic 18-pixel card gaps, 22-pixel content
+insets, and a 42.5/57.5 overview-to-controls split preserve complete daily
+controls while giving media, status, and calendar cards more breathing room.
+'''
+          addition = '''
+
+Primary shell panels use the shared `ShellSurface` composition. Solid draws an
+opaque tonal container. Blur requests a shaped `BackgroundEffect.blurRegion`
+that exactly matches the rounded panel and overlays a clean neutral tint plus
+contrast protection. Frosted Glass uses the same bounded request, then adds a
+richer neutral tint, directional highlight, extremely subtle static grain, and
+a clearer glass edge. Child cards, controls, text, and icons remain opaque; no
+ancestor opacity is used. Launcher, Control Center, Notification Center,
+Wallpaper Picker, Session Menu, and OSD share this policy. The bar keeps its
+independent background configuration.
+'''
+          if insert_after not in architecture:
+              raise RuntimeError('docs/architecture.md: control-center marker missing')
+          architecture = architecture.replace(insert_after, insert_after + addition, 1)
+          architecture = architecture.replace(
+              'Schema 7 adds\nthe normalized `barWidgetSettings` map and active-widget management APIs.',
+              'Schema 7 adds\nthe normalized `barWidgetSettings` map and active-widget management APIs.\nSchema 8 replaces global alpha transparency with persisted Solid, Blur, and\nFrosted Glass shell surface styles plus bounded tint opacity.'
+          )
+          write('docs/architecture.md', architecture)
+
+          changelog = read('CHANGELOG.md')
+          anchor = '### Added\n'
+          entry = '''### Added
+
+- Added independent Solid, Android-inspired Blur, and Frosted Glass styles for
+  primary shell surfaces. Blur is bounded to each rounded panel, Frosted adds a
+  restrained highlight and static grain, and inner semantic content remains
+  opaque.
+'''
+          if anchor not in changelog:
+              raise RuntimeError('CHANGELOG.md: Added heading missing')
+          changelog = changelog.replace(anchor, entry, 1)
+          write('CHANGELOG.md', changelog)
+
+          # The temporary workflow removes itself from the final implementation.
+          Path('.github/workflows/apply-shell-surface-style.yml').unlink()
+          PY
+
+      - name: Validate
+        shell: bash
+        run: |
+          ./scripts/test.sh
+          ./scripts/check-environment.sh
+          grep -R "transparencyEnabled\|surfaceOpacity" \
+            --exclude-dir=.git \
+            --exclude='CHANGELOG.md' \
+            --exclude='ROADMAP.md' \
+            --exclude='docs/architecture.md' \
+            --exclude='tst_config_schema.qml' \
+            . && exit 1 || true
+
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add Android-inspired shell surface styles"
+          git push origin HEAD:agent/niri-state-foundation
