@@ -6,8 +6,10 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.modules.control
+import qs.modules.dock
 import qs.services.i18n
 import qs.stores.config
+import qs.stores.dock
 import qs.stores.launcher
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 
@@ -50,11 +52,76 @@ Scope {
                 id: launcherWindow
 
                 required property var modelData
-                readonly property string outputName: modelData && modelData.name
-                    ? String(modelData.name)
-                    : ""
+
+                readonly property string outputName:
+                    modelData && modelData.name
+                        ? String(modelData.name)
+                        : ""
                 readonly property bool launcherVisible: LauncherStore.open
                     && LauncherStore.activeOutputName === outputName
+
+                property var contextResult: null
+                property string contextIdentifier: ""
+                property real contextMenuX: 0
+                property real contextMenuY: 0
+
+                function closePinMenu(restoreSearchFocus) {
+                    pinMenu.close()
+                    contextResult = null
+                    contextIdentifier = ""
+
+                    if (restoreSearchFocus && launcherVisible) {
+                        Qt.callLater(function() {
+                            queryInput.forceActiveFocus()
+                        })
+                    }
+                }
+
+                function openPinMenu(result, sourceItem) {
+                    if (!result
+                        || result.kind !== "application"
+                        || !result.entry
+                        || !sourceItem) {
+                        return
+                    }
+
+                    const identifier = DockStore.entryIdentifier(
+                        result.entry,
+                        ""
+                    )
+                    if (!identifier)
+                        return
+
+                    const sourcePoint = sourceItem.mapToItem(
+                        launcherSurface,
+                        0,
+                        0
+                    )
+                    const gap = root.luminaDesign.spacing.small
+                    const edge = root.luminaDesign.spacing.small
+                    const belowY = sourcePoint.y
+                        + sourceItem.height
+                        + gap
+                    const aboveY = sourcePoint.y
+                        - pinMenu.height
+                        - gap
+
+                    contextResult = result
+                    contextIdentifier = identifier
+                    contextMenuX = Math.max(
+                        edge,
+                        Math.min(
+                            launcherSurface.width - pinMenu.width - edge,
+                            sourcePoint.x + sourceItem.width
+                                - pinMenu.width
+                        )
+                    )
+                    contextMenuY = belowY + pinMenu.height
+                        <= launcherSurface.height - edge
+                            ? belowY
+                            : Math.max(edge, aboveY)
+                    pinMenu.open()
+                }
 
                 screen: modelData
                 visible: launcherVisible
@@ -100,6 +167,8 @@ Scope {
                         Qt.callLater(function() {
                             queryInput.forceActiveFocus()
                         })
+                    } else {
+                        closePinMenu(false)
                     }
                 }
 
@@ -196,14 +265,22 @@ Scope {
                                 font.pixelSize:
                                     root.luminaDesign.typography.titleMedium
 
-                                onTextEdited: LauncherStore.setQuery(text)
+                                onTextEdited: {
+                                    launcherWindow.closePinMenu(false)
+                                    LauncherStore.setQuery(text)
+                                }
 
                                 Keys.onEscapePressed: event => {
-                                    LauncherStore.close()
+                                    if (pinMenu.opened) {
+                                        launcherWindow.closePinMenu(true)
+                                    } else {
+                                        LauncherStore.close()
+                                    }
                                     event.accepted = true
                                 }
 
                                 Keys.onDownPressed: event => {
+                                    launcherWindow.closePinMenu(false)
                                     LauncherStore.selectNext()
                                     resultList.positionViewAtIndex(
                                         LauncherStore.selectedIndex,
@@ -213,6 +290,7 @@ Scope {
                                 }
 
                                 Keys.onUpPressed: event => {
+                                    launcherWindow.closePinMenu(false)
                                     LauncherStore.selectPrevious()
                                     resultList.positionViewAtIndex(
                                         LauncherStore.selectedIndex,
@@ -222,6 +300,7 @@ Scope {
                                 }
 
                                 Keys.onReturnPressed: event => {
+                                    launcherWindow.closePinMenu(false)
                                     LauncherStore.executeSelected()
                                     event.accepted = true
                                 }
@@ -266,8 +345,17 @@ Scope {
                                 result: modelData
                                 selected:
                                     index === LauncherStore.selectedIndex
-                                onActivated:
+                                onActivated: {
+                                    launcherWindow.closePinMenu(false)
                                     LauncherStore.execute(modelData)
+                                }
+                                onContextMenuRequested: sourceItem => {
+                                    LauncherStore.selectedIndex = index
+                                    launcherWindow.openPinMenu(
+                                        modelData,
+                                        sourceItem
+                                    )
+                                }
                             }
 
                             Text {
@@ -320,6 +408,38 @@ Scope {
                                     root.luminaDesign.typography.labelSmall
                             }
                         }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        z: 10
+                        visible: pinMenu.opened
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onClicked: launcherWindow.closePinMenu(true)
+                    }
+
+                    DockPinMenu {
+                        id: pinMenu
+
+                        z: 11
+                        x: launcherWindow.contextMenuX
+                        y: launcherWindow.contextMenuY
+                        pinned: DockStore.isPinnedIdentifier(
+                            launcherWindow.contextIdentifier
+                        )
+                        applicationTitle: launcherWindow.contextResult
+                            ? String(
+                                launcherWindow.contextResult.title || ""
+                            )
+                            : ""
+                        onActionTriggered: {
+                            DockStore.togglePinnedIdentifier(
+                                launcherWindow.contextIdentifier
+                            )
+                            launcherWindow.closePinMenu(true)
+                        }
+                        onCloseRequested:
+                            launcherWindow.closePinMenu(true)
                     }
                 }
             }
