@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.stores.config
 import qs.stores.shell
+import "../config/ConfigSchema.js" as ConfigSchema
 
 Singleton {
     id: root
@@ -75,27 +76,19 @@ Singleton {
 
     function setSettingsCategory(categoryName) {
         const requested = String(categoryName || "")
-        const normalized = requested === "wallpaper"
-            ? "appearance"
-            : requested
-        const categories = [
-            "appearance",
-            "bar",
-            "dashboard",
-            "behavior",
-            "notifications",
-            "osd",
-            "session",
-            "system",
-            "about"
-        ]
+        const normalized =
+            ConfigSchema.normalizeSettingsCategory(requested)
 
-        if (categories.indexOf(normalized) >= 0) {
-            settingsCategory = normalized
-
-            if (ConfigStore.dashboardRememberCategory)
-                ConfigStore.setLastSettingsCategory(normalized)
+        if (requested !== "wallpaper"
+            && ConfigSchema.settingsCategories()
+                .indexOf(requested) < 0) {
+            return
         }
+
+        settingsCategory = normalized
+
+        if (ConfigStore.dashboardRememberCategory)
+            ConfigStore.setLastSettingsCategory(normalized)
     }
 
     function openFor(outputName, pageName, categoryName) {

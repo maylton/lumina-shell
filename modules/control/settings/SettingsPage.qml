@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.stores.config
+import qs.stores.control
 
 Flickable {
     id: root
@@ -13,6 +14,15 @@ Flickable {
     default property alias pageData: pageBody.data
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool canResetCategory: [
+        "appearance",
+        "bar",
+        "dashboard",
+        "behavior",
+        "notifications",
+        "osd",
+        "session"
+    ].indexOf(ControlCenterStore.settingsCategory) >= 0
 
     clip: true
     contentWidth: width
@@ -33,7 +43,8 @@ Flickable {
 
             Column {
                 width: parent.width - saveStatus.width
-                    - root.luminaDesign.spacing.large
+                    - resetPage.width
+                    - root.luminaDesign.spacing.large * 2
                 spacing: 3
 
                 Text {
@@ -51,6 +62,74 @@ Flickable {
                     elide: Text.ElideRight
                     font.pixelSize:
                         root.luminaDesign.typography.labelMedium
+                }
+            }
+
+            Rectangle {
+                id: resetPage
+
+                visible: root.canResetCategory
+                width: visible ? resetLabel.implicitWidth + 22 : 0
+                height: 30
+                radius: root.luminaDesign.shape.full
+                color: resetMouse.containsMouse || activeFocus
+                    ? root.luminaDesign.color.accentContainer
+                    : root.luminaDesign.color.surfaceMuted
+                activeFocusOnTab: visible
+                border.width: activeFocus ? 2 : 0
+                border.color: root.luminaDesign.color.primary
+
+                Accessible.role: Accessible.Button
+                Accessible.name: "Restore this category"
+                Accessible.description:
+                    "Restore defaults for "
+                        + ControlCenterStore.settingsCategory
+                Accessible.focusable: visible
+                Accessible.focused: activeFocus
+                Accessible.onPressAction: activate()
+
+                function activate() {
+                    ConfigStore.resetCategory(
+                        ControlCenterStore.settingsCategory
+                    )
+                }
+
+                Keys.onSpacePressed: event => {
+                    activate()
+                    event.accepted = true
+                }
+
+                Keys.onReturnPressed: event => {
+                    activate()
+                    event.accepted = true
+                }
+
+                Text {
+                    id: resetLabel
+
+                    anchors.centerIn: parent
+                    text: "Reset page"
+                    color: resetPage.activeFocus
+                        || resetMouse.containsMouse
+                            ? root.luminaDesign.color.onAccentContainer
+                            : root.luminaDesign.color.textMuted
+                    font.pixelSize:
+                        root.luminaDesign.typography.labelSmall
+                    font.weight: Font.DemiBold
+                }
+
+                MouseArea {
+                    id: resetMouse
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        resetPage.forceActiveFocus(
+                            Qt.MouseFocusReason
+                        )
+                        resetPage.activate()
+                    }
                 }
             }
 

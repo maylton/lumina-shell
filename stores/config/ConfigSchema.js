@@ -125,6 +125,29 @@ function choice(value, allowed, fallback) {
     return allowed.indexOf(text) >= 0 ? text : fallback
 }
 
+function settingsCategories() {
+    return [
+        "appearance",
+        "bar",
+        "dashboard",
+        "behavior",
+        "notifications",
+        "osd",
+        "session",
+        "system",
+        "about"
+    ]
+}
+
+function normalizeSettingsCategory(value) {
+    var requested = String(value || "")
+
+    if (requested === "wallpaper")
+        requested = "appearance"
+
+    return choice(requested, settingsCategories(), "appearance")
+}
+
 function booleanValue(value, fallback) {
     return typeof value === "boolean" ? value : fallback
 }
@@ -248,22 +271,8 @@ function normalize(source) {
         0.8,
         1.4
     )
-    result.lastSettingsCategory = choice(
-        result.lastSettingsCategory === "wallpaper"
-            ? "appearance"
-            : result.lastSettingsCategory,
-        [
-            "appearance",
-            "bar",
-            "dashboard",
-            "behavior",
-            "notifications",
-            "osd",
-            "session",
-            "system",
-            "about"
-        ],
-        base.lastSettingsCategory
+    result.lastSettingsCategory = normalizeSettingsCategory(
+        result.lastSettingsCategory
     )
     result.lastControlPage = choice(
         result.lastControlPage,
