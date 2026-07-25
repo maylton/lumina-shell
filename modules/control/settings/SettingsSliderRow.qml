@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import "SettingsSliderGeometry.js" as Geometry
 
 SettingsRow {
     id: root
@@ -13,6 +14,11 @@ SettingsRow {
     property string valueLabel: Math.round(value * 100) + "%"
 
     signal valueEdited(real value)
+
+    readonly property real normalizedValue:
+        Geometry.normalizedValue(value, from, to)
+    readonly property var sliderTokens:
+        luminaDesign.slider
 
     controlWidth: 220
     Accessible.role: Accessible.Slider
@@ -42,40 +48,57 @@ SettingsRow {
         anchors.fill: parent
         spacing: root.luminaDesign.spacing.medium
 
-        Rectangle {
+        Item {
             id: track
 
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - valueText.width - parent.spacing
-            height: 16
-            radius: root.luminaDesign.shape.full
-            color: root.grouped
-                ? root.luminaDesign.color.surfaceBase
-                : root.luminaDesign.color.surfaceMuted
+            height: root.sliderTokens.handleHeight
 
             Rectangle {
-                width: parent.width * (
-                    (root.value - root.from)
-                    / Math.max(0.001, root.to - root.from)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Geometry.activeWidth(
+                    track.width,
+                    handle.width,
+                    root.sliderTokens.handleGap,
+                    root.normalizedValue
                 )
-                height: parent.height
-                radius: parent.radius
+                height: root.sliderTokens.trackHeight
+                radius: root.luminaDesign.shape.full
                 color: root.luminaDesign.color.primary
             }
 
             Rectangle {
-                width: 6
-                height: 28
+                anchors.verticalCenter: parent.verticalCenter
+                x: Geometry.inactiveX(
+                    track.width,
+                    handle.width,
+                    root.sliderTokens.handleGap,
+                    root.normalizedValue
+                )
+                width: Geometry.inactiveWidth(
+                    track.width,
+                    handle.width,
+                    root.sliderTokens.handleGap,
+                    root.normalizedValue
+                )
+                height: root.sliderTokens.trackHeight
                 radius: root.luminaDesign.shape.full
-                x: Math.max(
-                    0,
-                    Math.min(
-                        parent.width - width,
-                        parent.width * (
-                            (root.value - root.from)
-                            / Math.max(0.001, root.to - root.from)
-                        ) - width / 2
-                    )
+                color: root.grouped
+                    ? root.luminaDesign.color.surfaceBase
+                    : root.luminaDesign.color.surfaceMuted
+            }
+
+            Rectangle {
+                id: handle
+
+                width: root.sliderTokens.handleWidth
+                height: root.sliderTokens.handleHeight
+                radius: root.luminaDesign.shape.full
+                x: Geometry.handleX(
+                    track.width,
+                    width,
+                    root.normalizedValue
                 )
                 anchors.verticalCenter: parent.verticalCenter
                 color: root.luminaDesign.color.primary

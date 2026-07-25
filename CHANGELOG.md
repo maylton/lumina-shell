@@ -89,6 +89,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   dividers and one expressive outer contour.
 - Moved section-level segmented selectors outside row groups and replaced
   full-row hover fills with inset state layers that preserve the outer contour.
+- Split Settings slider tracks around the Material handle with a semantic gap
+  and endpoint-safe, tested geometry.
 - Added runtime JSON internationalization with automatic locale selection,
   regional fallback, English and Brazilian Portuguese catalogs, live reload,
   contributor validation, and initial Control Center/Settings coverage.

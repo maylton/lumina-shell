@@ -197,6 +197,12 @@ QtObject {
             trackGap: 4,
             stopSize: 4
         },
+        slider: {
+            trackHeight: 16,
+            handleWidth: 6,
+            handleHeight: 28,
+            handleGap: 6
+        },
         motion: {
             fast: Math.max(1, Math.round(120 * root.motionScale)),
             medium: Math.max(1, Math.round(220 * root.motionScale)),

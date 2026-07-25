@@ -224,6 +224,11 @@ Section-level segmented selectors occupy a separate header slot above that
 surface. Grouped-row hover and focus use inset state layers, so transient input
 feedback never redraws or squares the shared outer contour.
 
+Settings sliders draw active and inactive tracks as separate segments around a
+shared handle. Pure geometry clamps values, reserves the handle gap, and
+collapses the absent segment at either endpoint without changing interaction
+or persisted values.
+
 `ConfigFileService` owns argument-array `xdg-open` processes.
 `SystemDiagnosticsService` owns local version and diagnostic processes.
 Visual components never construct shell command strings.

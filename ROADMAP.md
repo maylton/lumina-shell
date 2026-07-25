@@ -162,6 +162,8 @@ This sprint completes the 0.5 public-beta foundation:
   expressive overshoot when reduced motion is enabled.
 - Related Settings rows share tonal group surfaces, internal dividers, and one
   expressive outer shape without changing their controls or persisted state.
+- Settings sliders separate active and inactive tracks with a stable gap around
+  the Material handle at intermediate and endpoint values.
 - Runtime locale detection, regional fallback, live catalog reload, and
   translation validation support incremental community localization.
 - Dashboard media progress uses a determinate Material Expressive wavy
