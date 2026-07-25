@@ -284,6 +284,12 @@ Scope {
                                 Accessible.onPressAction:
                                     LauncherStore.toggle(panel.outputName)
 
+                                function activateFromPointer() {
+                                    launcherButton.forceActiveFocus()
+                                    launcherButton.focus = false
+                                    LauncherStore.toggle(panel.outputName)
+                                }
+
                                 Keys.onSpacePressed: event => {
                                     LauncherStore.toggle(panel.outputName)
                                     event.accepted = true
@@ -350,7 +356,7 @@ Scope {
                                                     Math.round(width * 0.24)
                                                 )
                                                 color:
-                                                    root.luminaDesign.color.primary
+                                                    root.luminaDesign.color.onSurface
                                             }
                                         }
                                     }
@@ -362,12 +368,7 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        launcherButton.forceActiveFocus(
-                                            Qt.MouseFocusReason
-                                        )
-                                        LauncherStore.toggle(panel.outputName)
-                                    }
+                                    onClicked: launcherButton.activateFromPointer()
                                 }
                             }
 
