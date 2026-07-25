@@ -119,9 +119,9 @@ This sprint completes the 0.5 public-beta foundation:
 4. Native environment and service diagnostics.
 5. Keyboard, focus, and assistive-technology metadata baseline.
 6. User, installation, compatibility, and contributor documentation.
-7. Expressive Desktop bar refinement with a preserved Lumina Classic
-   fallback, schema v5 migration, per-output context, and configurable widget
-   ordering.
+7. Lumina's Material Expressive bar refinement with schema v5 migration,
+   per-output context, configurable widget ordering, and edge-to-edge or
+   floating geometry.
 
 ### Acceptance criteria
 
@@ -145,12 +145,13 @@ This sprint completes the 0.5 public-beta foundation:
   persistent configuration store.
 - Graphical settings provide nine keyboard-accessible categories, direct IPC
   navigation, scoped reset, and debounced save feedback.
-- Expressive Desktop is the default edge-to-edge bar preset; Lumina Classic
-  remains available as the floating regression reference.
+- Lumina's Material Expressive bar is the only bar layout and supports both
+  edge-to-edge and floating surfaces.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
-- Schema v4 bar preferences migrate to schema v5 without losing the Classic
-  widget order or existing shell preferences.
+- Schema v4 bar preferences migrate to schema v5 without losing valid
+  left/right widget ordering or existing shell preferences; retired bar keys
+  are ignored safely.
 - Privacy and keyboard-layout indicators remain hidden until their native
   event sources can be validated.
 

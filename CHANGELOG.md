@@ -46,12 +46,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   selection pills, switches, sliders, and pressed-state shape motion.
 - Wallpaper-derived neutral and neutral-variant tonal roles for shell
   surfaces, containers, text, and outlines.
-- Schema v5 Expressive Desktop bar preferences with safe schema-v4 migration,
-  normalized left/right widget orders, and Lumina Classic compatibility.
-- Composable edge-to-edge Expressive bar with transforming workspaces,
+- Schema v5 Material Expressive bar preferences with safe schema-v4 migration
+  and normalized left/right widget orders.
+- Composable Material Expressive bar with edge-to-edge and floating geometry,
+  transforming workspaces,
   localized date/time, per-output contextual Niri capsule, real system-status
   services, dedicated Dashboard access, and responsive optional actions.
-- Expanded Bar settings with preset previews, surface/context/status controls,
+- Expanded Bar settings with surface/context/status controls,
   optional actions, accessible ordering, and immediate persistence.
 - Consistent semantic spacing between the bar and calendars, tray popups,
   notifications, and the unified control-center surface on either edge.
@@ -59,3 +60,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   point in the desktop bar and the Dashboard tab.
 - Theme-independent gear glyphs for Settings navigation and its dashboard
   shortcut, optically scaled to match adjacent icons.
+
+### Changed
+
+- Removed the legacy alternate bar layout, preset selector, preview, and
+  persisted style/single-order state. Lumina's Material Expressive bar is now
+  the sole implementation while retaining edge-to-edge and floating modes.

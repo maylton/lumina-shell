@@ -13,10 +13,10 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   state, previews/navigation announce selection, and Left/Right adjust focused
   settings sliders and choices.
 - Launcher arrow keys move through ranked results; Enter activates the selected result.
-- Expressive bar controls use at least a 36-pixel interaction area. Launcher,
-  overview, workspaces, date/time, tray items, notifications, system status,
-  and Dashboard expose focus outlines, names, descriptions, Enter, Space, and
-  hover tooltips.
+- Lumina's Material Expressive bar controls use at least a 36-pixel
+  interaction area. Launcher, overview, workspaces, date/time, tray items,
+  notifications, system status, and Dashboard expose focus outlines, names,
+  descriptions, Enter, Space, and hover tooltips.
 - The active workspace changes both shape and width, so selection does not
   depend on color. Urgency has a border and an assistive description.
 - Bar widget-order rows provide separate keyboard-focusable Show/Hide, Move

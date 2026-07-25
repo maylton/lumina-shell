@@ -22,8 +22,8 @@ The Niri state increment introduces:
 - reactive output, workspace, and window stores;
 - queued overview and workspace actions with reactive completion state;
 - a demo fallback when `$NIRI_SOCKET` is unavailable;
-- composable Classic and Expressive bar layouts with output-aware workspace,
-  context, date/time, status, launcher, notification, and system-tray widgets.
+- Lumina's Material Expressive bar with output-aware workspace, context,
+  date/time, status, launcher, notification, and system-tray widgets.
 
 The Niri event stream supplies a complete initial state followed by incremental updates. Unknown events are ignored so newer Niri versions can add event variants without breaking the shell.
 
@@ -57,19 +57,18 @@ Niri window state includes `layout.pos_in_scrolling_layout`, a 1-based pair cont
 ## Bar composition
 
 `Bar.qml` owns only the per-screen `PanelWindow`, layer-shell geometry, output
-selection, and the state passed to the active visual layout. `BarSurface`
-implements the geometry contract:
+selection, and the state passed directly to the sole `BarLayout`.
+`BarSurface` implements the geometry contract:
 
 - **edge-to-edge:** the surface and `PanelWindow` use `barHeight`, with no
   outer margin and a subtle edge divider;
 - **floating:** `barHeight` remains the visible surface height while the
   window and exclusive zone add the configured margins.
 
-`ExpressiveBarLayout` is the default schema-v5 preset. Its left and right
+`BarLayout` implements Lumina's Material Expressive bar. Its left and right
 orders are registries of `Component` objects instantiated through `Loader`;
-preferences therefore reorder or hide widgets without duplicating layout
-branches. `ClassicBarLayout` preserves the previous floating composition and
-legacy `barWidgetOrder` data as a fallback and regression reference.
+preferences therefore reorder or hide widgets without duplicating the layout.
+Edge-to-edge and floating are geometry modes of this same implementation.
 
 Each output owns its own `ContextCapsule` and timeout. Window, application,
 column, workspace, and action-error property changes restart that local timer;
@@ -192,10 +191,9 @@ temporarily normalizes to Appearance.
 
 `ConfigStore` persists user state through an atomic Quickshell `FileView` and
 `JsonAdapter`. Schema 4 added semantic appearance, dashboard, behavior,
-notification, OSD, session, and navigation preferences. Schema 5 adds the
-Expressive/Classic bar preset, edge/floating surface, context policy,
-date/status options, widget visibility, and independent left/right orders
-while retaining the legacy Classic order.
+notification, OSD, session, and navigation preferences. Schema 5 adds
+edge/floating bar surfaces, context policy, date/status options, widget
+visibility, and independent left/right orders.
 
 The default path is `Quickshell.stateDir/lumina-state.json`.
 `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
@@ -203,7 +201,9 @@ migrated the single-string wallpaper shape into a default plus per-output map.
 Schema v3 added OSD and bar-detail preferences. Schema v4 normalizes missing
 and out-of-range values. Schema v5 migrates v4 in place, filters unknown or
 duplicate widget IDs, preserves valid ordering, and restores required IDs
-without changing wallpapers or preferences outside the Bar category.
+without changing wallpapers or preferences outside the Bar category. Retired
+layout-selection and single-order keys are ignored safely and disappear the
+next time the adapter writes the configuration.
 
 Writes are debounced and only occur after initialization, so loading,
 migration, and slider movement cannot continuously rewrite the file.

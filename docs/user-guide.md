@@ -2,11 +2,11 @@
 
 ## Bar
 
-Lumina creates one bar for each connected output. **Expressive Desktop** is the
-default: an edge-to-edge tonal surface with launcher, overview, transforming
-workspaces, and localized date/time on the left; a temporary Niri context
-capsule in the center; and tray, notifications, live system status, and the
-Lumina Dashboard button on the right.
+Lumina creates one instance of **Lumina's Material Expressive bar** for each
+connected output. Its default edge-to-edge tonal surface places launcher,
+overview, transforming workspaces, and localized date/time on the left; a
+temporary Niri context capsule in the center; and tray, notifications, live
+system status, and the Lumina Dashboard button on the right.
 
 The system-status cluster can group network, volume, and battery into one
 pill, or display them individually. Missing hardware is omitted. Clicking the
@@ -14,9 +14,7 @@ cluster opens the existing Dashboard rather than another popup. Wallpaper and
 session actions remain in the Dashboard by default, but can be enabled on the
 bar.
 
-**Lumina Classic** preserves the previous floating composition. In graphical
-settings, Bar → Visual style switches presets immediately. The same page
-controls:
+The Bar settings page controls:
 
 - top or bottom position, edge-to-edge or floating surface, visible height,
   margin, opacity, spacing, and compact mode;
@@ -96,7 +94,7 @@ active output or keyboard focus. The nine categories are:
 
 - **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
   motion, shape, and density;
-- **Bar:** Expressive/Classic preset, surface geometry, Niri context, date and
+- **Bar:** edge-to-edge or floating surface geometry, Niri context, date and
   time, grouped status, optional actions, and left/right widget ordering;
 - **Dashboard:** opening behavior, density, and visible cards;
 - **Behavior:** outside-click dismissal, output fallback, destructive-action
@@ -127,9 +125,10 @@ reopening follows the configured memory policy; explicit IPC calls can select
 the page and category.
 
 Schema 5 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 4 files migrate in place while preserving
-the previous Classic settings and widget order. Invalid JSON is still copied
-to the adjacent `.invalid` backup before defaults are restored.
+once per pointer movement. Schema 4 files migrate in place. Retired
+layout-selection and single-order fields in existing schema 5 files are
+ignored safely and removed on the next save. Invalid JSON is still copied to
+the adjacent `.invalid` backup before defaults are restored.
 
 ## Notifications
 
