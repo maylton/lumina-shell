@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.design
 import qs.stores.config
 
@@ -14,25 +15,35 @@ Rectangle {
     property real availableWidth: 0
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property string contextText: {
+    readonly property string primaryText: {
         if (showActionError && actionError.length > 0)
-            return "Niri action failed · " + actionError
-
-        const parts = []
+            return "Niri action failed"
 
         if (ConfigStore.barShowWindowTitle
             && activeWindowTitle.length > 0)
-            parts.push(activeWindowTitle)
-        else if (activeWindowAppId.length > 0)
-            parts.push(activeWindowAppId)
-        else if (workspaceLabel.length > 0)
+            return activeWindowTitle
+
+        if (activeWindowAppId.length > 0)
+            return activeWindowAppId
+
+        if (workspaceLabel.length > 0)
+            return workspaceLabel
+
+        return "Desktop"
+    }
+    readonly property string secondaryText: {
+        if (showActionError && actionError.length > 0)
+            return actionError
+
+        const parts = []
+
+        if (workspaceLabel.length > 0
+            && workspaceLabel !== primaryText)
             parts.push(workspaceLabel)
-        else
-            parts.push("Desktop")
 
         if (ConfigStore.barShowAppId
             && activeWindowAppId.length > 0
-            && activeWindowAppId !== activeWindowTitle)
+            && activeWindowAppId !== primaryText)
             parts.push(activeWindowAppId)
 
         if (ConfigStore.barShowColumnIndicator
@@ -41,6 +52,11 @@ Rectangle {
 
         return parts.join(" · ")
     }
+    readonly property bool showSecondary:
+        secondaryText.length > 0 && availableWidth >= 280
+    readonly property string contextText: showSecondary
+        ? primaryText + " · " + secondaryText
+        : primaryText
     readonly property string changeSignature: [
         activeWindowTitle,
         activeWindowAppId,
@@ -52,13 +68,24 @@ Rectangle {
     readonly property bool hasContext: contextText.length > 0
     readonly property bool shouldShow:
         ConfigStore.barContextMode === "always"
-        || ConfigStore.barContextMode === "contextual"
+        || (
+            ConfigStore.barContextMode === "contextual"
             && revealContext
+        )
+    readonly property real contentImplicitWidth:
+        primaryLabel.implicitWidth
+        + (
+            showSecondary
+                ? secondaryLabel.implicitWidth
+                    + contextRow.spacing * 2
+                    + contextDivider.width
+                : 0
+        )
     readonly property real targetWidth: shouldShow && hasContext
         ? Math.max(
             0,
             Math.min(
-                contextLabel.implicitWidth + 28,
+                contentImplicitWidth + 28,
                 availableWidth
             )
         )
@@ -143,23 +170,64 @@ Rectangle {
         }
     }
 
-    Text {
-        id: contextLabel
+    RowLayout {
+        id: contextRow
 
         anchors {
-            fill: parent
-            leftMargin: 14
-            rightMargin: 14
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
         }
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
-        text: root.contextText
-        color: root.showActionError
-            ? root.luminaDesign.color.urgent
-            : root.luminaDesign.color.onSurface
-        elide: Text.ElideRight
-        font.pixelSize: root.luminaDesign.typography.bodyMedium
-        font.weight: Font.DemiBold
+
+        width: Math.max(0, root.width - 28)
+        height: parent.height
+        spacing: root.luminaDesign.spacing.small
+
+        Text {
+            id: primaryLabel
+
+            Layout.fillWidth: true
+            Layout.minimumWidth: Math.min(72, implicitWidth)
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: root.showSecondary
+                ? Text.AlignLeft
+                : Text.AlignHCenter
+            text: root.primaryText
+            color: root.showActionError
+                ? root.luminaDesign.color.urgent
+                : root.luminaDesign.color.onSurface
+            elide: Text.ElideRight
+            font.pixelSize: root.luminaDesign.typography.bodyMedium
+            font.weight: Font.DemiBold
+        }
+
+        Rectangle {
+            id: contextDivider
+
+            Layout.alignment: Qt.AlignVCenter
+            visible: root.showSecondary
+            width: 3
+            height: 3
+            radius: 2
+            color: root.showActionError
+                ? root.luminaDesign.color.urgent
+                : root.luminaDesign.color.outline
+        }
+
+        Text {
+            id: secondaryLabel
+
+            Layout.alignment: Qt.AlignVCenter
+            Layout.maximumWidth: contextRow.width * 0.56
+            visible: root.showSecondary
+            text: root.secondaryText
+            color: root.showActionError
+                ? root.luminaDesign.color.urgent
+                : root.luminaDesign.color.textMuted
+            elide: Text.ElideRight
+            font.pixelSize:
+                root.luminaDesign.typography.barSecondary
+            font.weight: Font.Medium
+        }
     }
 
     Timer {

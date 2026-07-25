@@ -68,10 +68,12 @@ Rectangle {
 
     visible: itemCount > 0
     implicitWidth: visible
-        ? statusRow.implicitWidth + (individual ? 0 : 16)
+        ? statusRow.implicitWidth + (individual ? 0 : 20)
         : 0
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: luminaDesign.shape.full
+    radius: expanded || statusMouse.containsMouse
+        ? luminaDesign.shape.full
+        : luminaDesign.shape.large
     color: individual
         ? "transparent"
         : expanded || statusMouse.containsMouse
@@ -110,6 +112,13 @@ Rectangle {
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.fast
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.medium
+            easing.type: Easing.OutCubic
         }
     }
 

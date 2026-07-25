@@ -47,7 +47,7 @@ Rectangle {
             color: root.alert
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.onSurface
-            font.pixelSize: root.luminaDesign.typography.labelMedium
+            font.pixelSize: root.luminaDesign.typography.bodyMedium
             font.weight: Font.DemiBold
         }
     }

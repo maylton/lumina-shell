@@ -7,6 +7,7 @@ import qs.modules.session
 import qs.modules.wallpaper
 import qs.services.niri
 import qs.stores.config
+import "BarLayoutPolicy.js" as BarLayoutPolicy
 
 Item {
     id: root
@@ -20,8 +21,20 @@ Item {
     required property bool showActionError
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property bool compactLayout: width < 1400
-    readonly property bool narrowLayout: width < 1080
+    readonly property var responsiveProfile:
+        BarLayoutPolicy.profile(width)
+    readonly property bool wideLayout: responsiveProfile.wide
+    readonly property bool compactLayout: responsiveProfile.compact
+    readonly property bool narrowLayout: responsiveProfile.narrow
+    readonly property bool veryNarrowLayout:
+        responsiveProfile.veryNarrow
+    readonly property real centerAvailableWidth:
+        BarLayoutPolicy.centerAvailableWidth(
+            width,
+            leftArea.x + leftArea.width,
+            width - rightArea.x,
+            luminaDesign.spacing.extraLarge
+        )
     readonly property var leftRegistry: ({
         launcher: launcherComponent,
         overview: overviewComponent,
@@ -39,23 +52,22 @@ Item {
         session: sessionComponent
     })
     readonly property var widgetVisibility: ({
-        launcher: ConfigStore.barShowLauncher && !narrowLayout,
+        launcher: ConfigStore.barShowLauncher && !veryNarrowLayout,
         overview: ConfigStore.barShowOverview && !narrowLayout,
         workspaces: ConfigStore.barShowWorkspaces,
         datetime: ConfigStore.barShowClock,
         privacy: ConfigStore.barShowPrivacyIndicators,
         keyboard: ConfigStore.barShowKeyboardLayout,
-        tray: ConfigStore.barShowTray && width >= 900,
-        notifications: ConfigStore.barShowNotifications
-            && width >= 820,
+        tray: ConfigStore.barShowTray && width >= 1040,
+        notifications: ConfigStore.barShowNotifications,
         "system-status": ConfigStore.barShowAudioStatus
             || ConfigStore.barShowNetworkStatus
             || ConfigStore.barShowBatteryStatus,
         dashboard: ConfigStore.barShowDashboardButton,
         wallpaper: ConfigStore.barShowWallpaperButton
-            && width >= 1180,
+            && wideLayout,
         session: ConfigStore.barShowSessionButton
-            && width >= 1180
+            && wideLayout
     })
 
     function widgetEnabled(widgetId) {
@@ -67,9 +79,11 @@ Item {
 
         anchors {
             left: parent.left
-            leftMargin: root.luminaDesign.spacing.large
+            leftMargin: root.luminaDesign.spacing.extraLarge
             verticalCenter: parent.verticalCenter
         }
+
+        clusterSpacing: ConfigStore.barWidgetSpacing
 
         Repeater {
             model: ConfigStore.barLeftWidgetOrder
@@ -89,10 +103,7 @@ Item {
         id: contextCapsule
 
         anchors.centerIn: parent
-        availableWidth: Math.max(
-            0,
-            root.width - leftArea.width - rightArea.width - 64
-        )
+        availableWidth: root.centerAvailableWidth
         activeWindowTitle: root.activeWindowTitle
         activeWindowAppId: root.activeWindowAppId
         columnLabel: root.columnLabel
@@ -106,9 +117,14 @@ Item {
 
         anchors {
             right: parent.right
-            rightMargin: root.luminaDesign.spacing.large
+            rightMargin: root.luminaDesign.spacing.extraLarge
             verticalCenter: parent.verticalCenter
         }
+
+        clusterSpacing: Math.max(
+            root.luminaDesign.spacing.extraSmall,
+            Math.round(ConfigStore.barWidgetSpacing * 0.65)
+        )
 
         Repeater {
             model: ConfigStore.barRightWidgetOrder
@@ -189,7 +205,7 @@ Item {
         id: systemStatusComponent
 
         SystemStatusCluster {
-            compact: root.width < 1320
+            compact: !root.wideLayout
             outputName: root.outputName
         }
     }

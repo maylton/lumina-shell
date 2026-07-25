@@ -14,9 +14,9 @@ Rectangle {
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded
-        ? luminaDesign.shape.large
-        : luminaDesign.shape.full
+    radius: expanded || dashboardMouse.containsMouse
+        ? luminaDesign.shape.full
+        : luminaDesign.shape.large
     color: expanded || dashboardMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : "transparent"

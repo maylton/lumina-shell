@@ -19,7 +19,9 @@ Rectangle {
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
+    radius: expanded || notificationMouse.containsMouse
+        ? luminaDesign.shape.full
+        : luminaDesign.shape.large
     scale: notificationMouse.pressed
         ? 0.94
         : notificationMouse.containsMouse
@@ -61,6 +63,13 @@ Rectangle {
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.fast
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.medium
+            easing.type: Easing.OutCubic
         }
     }
 
