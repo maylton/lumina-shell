@@ -184,7 +184,13 @@ Before accepting loaded state, `ConfigStore` parses the original JSON independen
 
 Lumina owns one background-layer wallpaper surface per output. `WallpaperService` resolves a per-output assignment with a shared default fallback and exposes typed setters plus a `wallpaper` IPC target.
 
-Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service scores quantized colors for saturation and mid-tone contrast, then updates semantic primary, accent-container, foreground, and outline roles in `Theme`. Disabling dynamic color restores the static Lumina palette immediately.
+Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service
+scores quantized colors for saturation and mid-tone contrast, then derives
+accent roles plus low-chroma neutral and neutral-variant tones for surfaces,
+containers, text, and outlines. These tonal levels give the bar and overlays a
+wallpaper-related tint without using saturated accent colors as large
+backgrounds. Disabling dynamic color restores the static Lumina palette
+immediately.
 
 The wallpaper picker uses Qt's `FolderListModel` with image-only filters. It targets the output from which it was opened, previews the configured directory without copying files, and persists paths containing spaces or URL encoding through the same service boundary.
 

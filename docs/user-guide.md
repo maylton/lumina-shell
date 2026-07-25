@@ -115,7 +115,9 @@ paths are persisted independently per output with a shared default fallback.
 Dynamic color samples the focused output wallpaper and updates semantic Lumina
 colors. The Appearance page offers Auto, Content, Expressive, Fidelity, Fruit
 Salad, Monochrome, Neutral, Rainbow, and Tonal Spot profiles. Auto chooses a
-profile from the saturation of the extracted wallpaper color.
+profile from the saturation of the extracted wallpaper color. Each profile
+also derives low-chroma tonal surfaces, so the bar, dashboard, settings, and
+other overlays share the wallpaper hue while maintaining readable contrast.
 
 The profile can also be changed through IPC:
 

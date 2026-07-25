@@ -92,7 +92,7 @@ SettingsPage {
         title: "Material palette"
         description: Theme.dynamicPaletteActive
             ? root.paletteLabel(ConfigStore.paletteStyle)
-                + " colors generated from the active wallpaper"
+                + " accents and tonal surfaces from the active wallpaper"
             : "Lumina's default semantic accent colors are active"
 
         SettingsSwitchRow {
@@ -193,7 +193,7 @@ SettingsPage {
 
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 50
+                            width: 62
                             spacing: 2
 
                             Repeater {
@@ -204,7 +204,7 @@ SettingsPage {
                                 delegate: Rectangle {
                                     required property var modelData
 
-                                    width: 15
+                                    width: 14
                                     height: 22
                                     radius: 7
                                     color: modelData
@@ -218,7 +218,7 @@ SettingsPage {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width
-                                - 50
+                                - 62
                                 - parent.spacing
                             text: String(paletteOption.modelData.label)
                             color: paletteOption.selected

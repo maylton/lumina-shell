@@ -30,6 +30,16 @@ QtObject {
         lightMode ? "#102F5C" : "#D7E3FF"
     property color outlineColor:
         lightMode ? "#74777F" : "#8E9099"
+    property color surfaceBaseColor:
+        lightMode ? "#F8F9FF" : "#111318"
+    property color surfaceContainerColor:
+        lightMode ? "#EFF0F7" : "#1D2026"
+    property color surfaceMutedColor:
+        lightMode ? "#E2E3EA" : "#292C33"
+    property color onSurfaceColor:
+        lightMode ? "#1A1B20" : "#E2E2E9"
+    property color textMutedColor:
+        lightMode ? "#44474F" : "#C3C6CF"
     property bool dynamicPaletteActive: false
 
     function withAlpha(colorValue, opacityValue) {
@@ -41,11 +51,25 @@ QtObject {
         )
     }
 
-    function applyDynamicPalette(primary, accentContainer, outline) {
+    function applyDynamicPalette(
+        primary,
+        accentContainer,
+        outline,
+        neutral
+    ) {
         primaryColor = primary
         accentContainerColor = accentContainer
         accentForegroundColor = lightMode ? "#102030" : "#F4F7FF"
         outlineColor = outline
+
+        if (neutral) {
+            surfaceBaseColor = neutral.surfaceBase
+            surfaceContainerColor = neutral.surfaceContainer
+            surfaceMutedColor = neutral.surfaceMuted
+            onSurfaceColor = neutral.onSurface
+            textMutedColor = neutral.textMuted
+        }
+
         dynamicPaletteActive = true
     }
 
@@ -54,6 +78,11 @@ QtObject {
         accentContainerColor = lightMode ? "#D7E3FF" : "#294777"
         accentForegroundColor = lightMode ? "#102F5C" : "#D7E3FF"
         outlineColor = lightMode ? "#74777F" : "#8E9099"
+        surfaceBaseColor = lightMode ? "#F8F9FF" : "#111318"
+        surfaceContainerColor = lightMode ? "#EFF0F7" : "#1D2026"
+        surfaceMutedColor = lightMode ? "#E2E3EA" : "#292C33"
+        onSurfaceColor = lightMode ? "#1A1B20" : "#E2E2E9"
+        textMutedColor = lightMode ? "#44474F" : "#C3C6CF"
         dynamicPaletteActive = false
     }
 
@@ -65,20 +94,20 @@ QtObject {
     readonly property var luminaTokens: ({
         color: {
             surfaceBase: root.withAlpha(
-                root.lightMode ? "#F8F9FF" : "#111318",
+                root.surfaceBaseColor,
                 root.surfaceAlpha
             ),
             surfaceContainer: root.withAlpha(
-                root.lightMode ? "#EFF0F7" : "#1D2026",
+                root.surfaceContainerColor,
                 root.surfaceAlpha
             ),
             surfaceMuted: root.withAlpha(
-                root.lightMode ? "#E2E3EA" : "#292C33",
+                root.surfaceMutedColor,
                 Math.max(0.78, root.surfaceAlpha)
             ),
             scrim: root.lightMode ? "#8F111318" : "#B3111318",
-            onSurface: root.lightMode ? "#1A1B20" : "#E2E2E9",
-            textMuted: root.lightMode ? "#44474F" : "#C3C6CF",
+            onSurface: root.onSurfaceColor,
+            textMuted: root.textMutedColor,
             primary: root.primaryColor,
             accentContainer: root.accentContainerColor,
             onAccentContainer: root.accentForegroundColor,

@@ -229,52 +229,73 @@ Singleton {
         const selected = resolvedPaletteStyle(style, source)
         var primaryHue = sourceHue
         var containerHue = sourceHue
-        var outlineHue = sourceHue
         var primarySaturation = 0.5
         var containerSaturation = 0.32
-        var outlineSaturation = 0.2
+        var neutralSaturation = 0.06
+        var neutralVariantSaturation = 0.12
 
         if (selected === "content") {
             primarySaturation = clamped(sourceSaturation, 0.32, 0.82)
             containerSaturation = primarySaturation * 0.58
-            outlineSaturation = primarySaturation * 0.32
+            neutralSaturation = clamped(
+                sourceSaturation * 0.1,
+                0.03,
+                0.09
+            )
+            neutralVariantSaturation = clamped(
+                sourceSaturation * 0.18,
+                0.07,
+                0.15
+            )
         } else if (selected === "expressive") {
             primaryHue += 0.16
             containerHue -= 0.12
-            outlineHue += 0.32
             primarySaturation = 0.74
             containerSaturation = 0.52
-            outlineSaturation = 0.38
+            neutralSaturation = 0.08
+            neutralVariantSaturation = 0.15
         } else if (selected === "fidelity") {
             primarySaturation = sourceSaturation
             containerSaturation = sourceSaturation * 0.72
-            outlineSaturation = sourceSaturation * 0.45
+            neutralSaturation = clamped(
+                sourceSaturation * 0.14,
+                0.02,
+                0.12
+            )
+            neutralVariantSaturation = clamped(
+                sourceSaturation * 0.22,
+                0.06,
+                0.18
+            )
         } else if (selected === "fruit-salad") {
             primaryHue -= 0.12
             containerHue += 0.1
-            outlineHue += 0.25
             primarySaturation = 0.72
             containerSaturation = 0.56
-            outlineSaturation = 0.36
+            neutralSaturation = 0.09
+            neutralVariantSaturation = 0.16
         } else if (selected === "monochrome") {
             primarySaturation = 0
             containerSaturation = 0
-            outlineSaturation = 0
+            neutralSaturation = 0
+            neutralVariantSaturation = 0
         } else if (selected === "neutral") {
             primarySaturation = 0.16
             containerSaturation = 0.1
-            outlineSaturation = 0.08
+            neutralSaturation = 0.025
+            neutralVariantSaturation = 0.055
         } else if (selected === "rainbow") {
             primaryHue += 0.24
             containerHue -= 0.18
-            outlineHue += 0.42
             primarySaturation = 0.78
             containerSaturation = 0.64
-            outlineSaturation = 0.48
+            neutralSaturation = 0.1
+            neutralVariantSaturation = 0.18
         } else {
             primarySaturation = 0.52
             containerSaturation = 0.34
-            outlineSaturation = 0.22
+            neutralSaturation = 0.06
+            neutralVariantSaturation = 0.12
         }
 
         const darkMode = !Theme.lightMode
@@ -292,10 +313,37 @@ Singleton {
                 darkMode ? 0.29 : 0.88
             ),
             outline: colorTone(
-                outlineHue,
-                outlineSaturation,
+                sourceHue,
+                neutralVariantSaturation,
                 darkMode ? 0.62 : 0.48
-            )
+            ),
+            neutral: {
+                surfaceBase: colorTone(
+                    sourceHue,
+                    neutralSaturation,
+                    darkMode ? 0.075 : 0.98
+                ),
+                surfaceContainer: colorTone(
+                    sourceHue,
+                    neutralSaturation,
+                    darkMode ? 0.125 : 0.94
+                ),
+                surfaceMuted: colorTone(
+                    sourceHue,
+                    neutralVariantSaturation,
+                    darkMode ? 0.19 : 0.87
+                ),
+                onSurface: colorTone(
+                    sourceHue,
+                    neutralSaturation * 0.55,
+                    darkMode ? 0.9 : 0.1
+                ),
+                textMuted: colorTone(
+                    sourceHue,
+                    neutralVariantSaturation * 0.6,
+                    darkMode ? 0.74 : 0.32
+                )
+            }
         }
     }
 
@@ -307,6 +355,7 @@ Singleton {
         return [
             palette.primary,
             palette.container,
+            palette.neutral.surfaceMuted,
             palette.outline
         ]
     }
@@ -327,7 +376,8 @@ Singleton {
         Theme.applyDynamicPalette(
             palette.primary,
             palette.container,
-            palette.outline
+            palette.outline,
+            palette.neutral
         )
     }
 

@@ -38,7 +38,12 @@ Scope {
                 dynamicTheme: WallpaperService.dynamicThemeEnabled,
                 paletteActive: Theme.dynamicPaletteActive,
                 paletteStyle: WallpaperService.paletteStyle,
-                primary: String(Theme.primaryColor)
+                primary: String(Theme.primaryColor),
+                surfaceBase: String(Theme.surfaceBaseColor),
+                surfaceContainer: String(Theme.surfaceContainerColor),
+                surfaceMuted: String(Theme.surfaceMutedColor),
+                onSurface: String(Theme.onSurfaceColor),
+                textMuted: String(Theme.textMutedColor)
             })
         }
     }

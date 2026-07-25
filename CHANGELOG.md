@@ -44,3 +44,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   previews and IPC selection.
 - Expanded Material 3 shape tokens and expressive settings containment,
   selection pills, switches, sliders, and pressed-state shape motion.
+- Wallpaper-derived neutral and neutral-variant tonal roles for shell
+  surfaces, containers, text, and outlines.
