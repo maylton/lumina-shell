@@ -41,7 +41,7 @@ Rectangle {
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.shape.full
-        : luminaDesign.shape.large
+        : luminaDesign.shape.barLarge
     scale: dateTimeMouse.pressed
         ? 0.96
         : 1
@@ -128,7 +128,7 @@ Rectangle {
             visible: dateLabel.visible
             width: root.luminaDesign.size.barDividerDot
             height: width
-            radius: 2
+            radius: width / 2
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.outline

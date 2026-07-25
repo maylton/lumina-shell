@@ -35,9 +35,11 @@ The Bar settings page controls:
 - independent left/right widget order with Move up, Move down, and Show/Hide.
 
 Automatic scaling uses 56 pixels as its 100% reference and proportionally
-updates bar icons, text, workspace shapes, padding, gaps, badges, and pointer
-targets. Compact mode further reduces density without ignoring the chosen
-height or scale; interaction targets never shrink below 36 logical pixels.
+updates widget surfaces, icons, text, workspace shapes, padding, gaps, badges,
+and pointer targets using the direct `height ÷ 56` ratio. The 40–80 pixel
+height range therefore maps to approximately 71–143%. Compact mode further
+reduces density without ignoring the chosen height or scale; a 30-pixel
+interaction floor applies only at the smallest combinations.
 
 Bar background opacity is separate from **Appearance → Transparency**. The
 Appearance controls continue to affect Dashboard, Settings, and other shell

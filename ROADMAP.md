@@ -156,9 +156,10 @@ This sprint completes the 0.5 public-beta foundation:
   native Niri blur limited to the blur and frosted-glass bar region. All modes
   reserve work area while the background wallpaper ignores shell exclusion
   zones and continues beneath the transparent surface.
-- Bar height spans 40–80 pixels; automatic or bounded manual scaling adjusts
-  semantic widget dimensions while retaining safe interaction targets and a
-  single-line layout.
+- Bar height spans 40–80 pixels; automatic scaling uses the direct
+  `barHeight / 56` ratio for widget geometry, icons, type, spacing, and shapes,
+  while bounded manual scaling and small safety floors preserve a single-line
+  layout.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
 - System tray items can be grouped in a compact popover or kept visible

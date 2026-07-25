@@ -98,12 +98,14 @@ Edge-to-edge and floating are geometry modes of this same implementation. The
 default edge-to-edge surface is 56 pixels high with 40-pixel interaction
 targets.
 
-`BarScalePolicy` derives automatic content scale as
-`clamp(barHeight / 56, 0.80, 1.40)`. Manual mode uses the persisted
-`barContentScale` with the same bounds. Compact mode applies a moderate 0.94
-density factor without discarding the selected height or scale. The policy
-does not transform `BarLayout`; `Theme.luminaTokens` instead exposes semantic
-bar sizes, typography, padding, and gaps consumed by each widget. Touch
+`BarScalePolicy` derives automatic content scale directly as
+`clamp(barHeight, 40, 80) / 56`, so the supported automatic range is about
+71–143%. Manual mode keeps the persisted 80–140% range. Compact mode applies a
+0.94 density factor without discarding the selected height or scale. The
+policy does not transform `BarLayout`; `Theme.luminaTokens` instead exposes
+proportional widget geometry, typography, padding, gaps, and bar-specific
+shape roles consumed by each widget. Small legibility and interaction floors
+apply only at the lowest combinations of height and compact density. Touch
 targets retain a 36-pixel minimum, while typography and spacing use moderated
 curves so an 80-pixel bar does not resemble a globally enlarged mobile UI.
 

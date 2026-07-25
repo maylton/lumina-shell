@@ -52,8 +52,15 @@ Rectangle {
 
         return parts.join(" · ")
     }
+    readonly property real scaledWidthReference:
+        luminaDesign.size.barContentScale
+    readonly property real secondaryWidthThreshold:
+        Math.round(280 * scaledWidthReference)
+    readonly property real visibleWidthThreshold:
+        Math.round(72 * scaledWidthReference)
     readonly property bool showSecondary:
-        secondaryText.length > 0 && availableWidth >= 280
+        secondaryText.length > 0
+        && availableWidth >= secondaryWidthThreshold
     readonly property string contextText: showSecondary
         ? primaryText + " · " + secondaryText
         : primaryText
@@ -101,7 +108,7 @@ Rectangle {
     height: luminaDesign.size.barTouchTarget
     radius: shouldShow
         ? luminaDesign.shape.full
-        : luminaDesign.shape.small
+        : luminaDesign.shape.barSmall
     color: showActionError
         ? Qt.rgba(
             luminaDesign.color.urgent.r,
@@ -110,7 +117,10 @@ Rectangle {
             0.14
         )
         : luminaDesign.color.surfaceMuted
-    opacity: shouldShow && targetWidth >= 72 ? 1 : 0
+    opacity: shouldShow
+        && targetWidth >= visibleWidthThreshold
+            ? 1
+            : 0
     visible: ConfigStore.barContextMode !== "hidden"
         && (opacity > 0 || width > 0)
     clip: true
@@ -202,13 +212,18 @@ Rectangle {
                 )
         )
         height: parent.height
-        spacing: root.luminaDesign.spacing.small
+        spacing: root.luminaDesign.spacing.barItemGap
 
         Text {
             id: primaryLabel
 
             Layout.fillWidth: true
-            Layout.minimumWidth: Math.min(72, implicitWidth)
+            Layout.minimumWidth: Math.min(
+                Math.round(
+                    72 * root.scaledWidthReference
+                ),
+                implicitWidth
+            )
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: root.showSecondary
                 ? Text.AlignLeft
@@ -230,7 +245,7 @@ Rectangle {
             visible: root.showSecondary
             width: root.luminaDesign.size.barDividerDot
             height: width
-            radius: 2
+            radius: width / 2
             color: root.showActionError
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.outline

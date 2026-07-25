@@ -16,7 +16,9 @@ Rectangle {
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
+    radius: expanded
+        ? luminaDesign.shape.full
+        : luminaDesign.shape.barMedium
     scale: launcherMouse.pressed
         ? 0.96
         : 1.0

@@ -36,7 +36,7 @@ Item {
         id: trayRow
 
         anchors.verticalCenter: parent.verticalCenter
-        spacing: root.luminaDesign.spacing.extraSmall
+        spacing: root.luminaDesign.spacing.barItemGap
 
         Rectangle {
             id: groupButton
@@ -46,7 +46,7 @@ Item {
             height: root.luminaDesign.size.barTouchTarget
             radius: trayPopup.visible
                 ? root.luminaDesign.shape.full
-                : root.luminaDesign.shape.medium
+                : root.luminaDesign.shape.barMedium
             color: trayPopup.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
                 : ConfigStore.barBackgroundMode === "transparent"

@@ -80,6 +80,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Made automatic bar sizing fully proportional to its 56-pixel reference:
+  widget surfaces, icons, typography, spacing, badges, context thresholds, and
+  expressive radii now follow `barHeight / 56` across the 40–80 pixel range,
+  with narrow safety floors at the smallest sizes.
 - Increased the preferred unified control-center surface, card gaps, content
   insets, and Dashboard action targets; rebalanced the left column so Daily
   Controls no longer clips its power-profile actions.

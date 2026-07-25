@@ -22,7 +22,7 @@ Rectangle {
                 : luminaDesign.spacing.barItemGap
         )
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: individual ? luminaDesign.shape.large : 0
+    radius: individual ? luminaDesign.shape.barLarge : 0
     color: individual
         ? luminaDesign.color.surfaceMuted
         : "transparent"

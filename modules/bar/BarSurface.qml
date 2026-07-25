@@ -52,7 +52,7 @@ Rectangle {
     }
 
     anchors.margins: edgeToEdge ? 0 : outerMargin
-    radius: edgeToEdge ? 0 : luminaDesign.shape.large
+    radius: edgeToEdge ? 0 : luminaDesign.shape.barLarge
     color: colorWithAlpha(
         luminaDesign.color.surfaceContainer,
         backgroundAlpha

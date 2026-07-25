@@ -109,7 +109,7 @@ Rectangle {
         radius: root.selected
             ? root.luminaDesign.shape.workspaceActive
             : root.active
-                ? root.luminaDesign.shape.large
+                ? root.luminaDesign.shape.barLarge
                 : root.luminaDesign.shape.full
         color: root.selected || workspaceMouse.containsMouse
             ? root.luminaDesign.color.accentContainer

@@ -12,7 +12,7 @@ Rectangle {
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: NiriService.overviewOpen
         ? luminaDesign.shape.full
-        : luminaDesign.shape.medium
+        : luminaDesign.shape.barMedium
     scale: overviewMouse.pressed
         ? 0.96
         : 1.0

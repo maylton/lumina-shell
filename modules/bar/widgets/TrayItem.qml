@@ -41,7 +41,7 @@ Rectangle {
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: needsAttention
         ? luminaDesign.shape.full
-        : luminaDesign.shape.medium
+        : luminaDesign.shape.barMedium
     scale: itemMouse.pressed
         ? 0.96
         : 1.0
@@ -112,7 +112,7 @@ Rectangle {
         anchors.centerIn: parent
         width: root.luminaDesign.size.barTrayIcon
         height: root.luminaDesign.size.barTrayIcon
-        radius: root.luminaDesign.shape.small
+        radius: root.luminaDesign.shape.barSmall
         color: root.luminaDesign.color.surfaceMuted
         visible: String(trayIcon.source).length === 0
             || trayIcon.status === Image.Error
@@ -143,7 +143,12 @@ Rectangle {
         anchors {
             right: parent.right
             bottom: parent.bottom
-            margins: 3
+            margins: Math.max(
+                2,
+                Math.round(
+                    root.luminaDesign.spacing.barItemGap / 2
+                )
+            )
         }
 
         width: root.luminaDesign.size.barStatusDot

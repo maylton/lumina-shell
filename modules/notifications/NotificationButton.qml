@@ -22,7 +22,7 @@ Rectangle {
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded || notificationMouse.containsMouse
         ? luminaDesign.shape.full
-        : luminaDesign.shape.large
+        : luminaDesign.shape.barLarge
     scale: notificationMouse.pressed
         ? 0.96
         : 1.0
@@ -109,7 +109,7 @@ Rectangle {
             2,
             Math.round(root.luminaDesign.size.barContentScale * 2)
         )
-        radius: 1
+        radius: height / 2
         rotation: -45
         color: root.expanded
             ? root.luminaDesign.color.onAccentContainer

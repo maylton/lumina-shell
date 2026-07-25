@@ -17,7 +17,9 @@ Rectangle {
     implicitWidth: wallpaperLabel.implicitWidth
         + (luminaDesign.spacing.barWidgetPadding * 2)
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
+    radius: expanded
+        ? luminaDesign.shape.full
+        : luminaDesign.shape.barMedium
     color: expanded || wallpaperMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : ConfigStore.barBackgroundMode === "transparent"
