@@ -62,29 +62,52 @@ Scope {
                     Math.max(160, width - DockPreferences.margin * 2)
                 readonly property int surfaceWidth: taskPanel
                     ? width
-                    : Math.min(
-                        maximumFloatingWidth,
-                        desiredFloatingWidth
-                    )
+                    : Math.min(maximumFloatingWidth, desiredFloatingWidth)
+                readonly property bool contextMenuOpen: dockPinMenu.opened
+                readonly property int contextMenuExtraHeight:
+                    contextMenuOpen ? dockPinMenu.height + 12 : 0
                 readonly property bool pointerInside:
-                    revealHover.hovered || surfaceHover.hovered
+                    revealHover.hovered
+                    || surfaceHover.hovered
+                    || contextMenuOpen
                 readonly property bool expanded:
                     !DockPreferences.autoHide
                     || revealRequested
                     || pointerInside
 
                 property bool revealRequested: !DockPreferences.autoHide
+                property var contextItem: null
+                property real contextAnchorX: width / 2
+
+                function closeContextMenu() {
+                    dockPinMenu.close()
+                    contextItem = null
+                }
+
+                function openContextMenu(item, sourceItem) {
+                    if (!item || !sourceItem)
+                        return
+
+                    const point = sourceItem.mapToItem(panel, 0, 0)
+                    contextItem = item
+                    contextAnchorX = point.x + sourceItem.width / 2
+                    revealRequested = true
+                    hideTimer.stop()
+                    dockPinMenu.open()
+                }
 
                 screen: modelData
                 visible: DockPreferences.initialized
                     && DockPreferences.enabled
-                implicitHeight: expanded ? expandedHeight : collapsedHeight
+                implicitHeight: expanded
+                    ? expandedHeight + contextMenuExtraHeight
+                    : collapsedHeight
                 exclusiveZone: DockPreferences.reserveSpace
                     && !DockPreferences.autoHide
                         ? expandedHeight
                         : 0
                 color: "transparent"
-                focusable: false
+                focusable: contextMenuOpen
                 surfaceFormat.opaque: false
 
                 anchors {
@@ -95,8 +118,18 @@ Scope {
 
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.namespace: "lumina-dock"
+                WlrLayershell.keyboardFocus: contextMenuOpen
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
 
                 mask: Region {
+                    Region {
+                        x: 0
+                        y: 0
+                        width: panel.contextMenuOpen ? panel.width : 0
+                        height: panel.contextMenuOpen ? panel.height : 0
+                    }
+
                     Region {
                         x: dockSurface.x
                         y: dockSurface.y
@@ -163,8 +196,10 @@ Scope {
                     }
 
                     function onEnabledChanged() {
-                        if (!DockPreferences.enabled)
+                        if (!DockPreferences.enabled) {
+                            panel.closeContextMenu()
                             panel.revealRequested = !DockPreferences.autoHide
+                        }
                     }
                 }
 
@@ -194,16 +229,26 @@ Scope {
                                 hideTimer.stop()
                                 panel.revealRequested = true
                             } else if (DockPreferences.autoHide
-                                && !surfaceHover.hovered) {
+                                && !surfaceHover.hovered
+                                && !panel.contextMenuOpen) {
                                 hideTimer.restart()
                             }
                         }
                     }
                 }
 
+                MouseArea {
+                    anchors.fill: parent
+                    z: 1
+                    visible: panel.contextMenuOpen
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: panel.closeContextMenu()
+                }
+
                 ShellSurface {
                     id: dockSurface
 
+                    z: 2
                     x: panel.taskPanel
                         ? 0
                         : Math.max(0, (panel.width - width) / 2)
@@ -227,7 +272,8 @@ Scope {
                                 hideTimer.stop()
                                 panel.revealRequested = true
                             } else if (DockPreferences.autoHide
-                                && !revealHover.hovered) {
+                                && !revealHover.hovered
+                                && !panel.contextMenuOpen) {
                                 hideTimer.restart()
                             }
                         }
@@ -285,17 +331,20 @@ Scope {
                                     LauncherStore.toggle(panel.outputName)
 
                                 function activateFromPointer() {
+                                    panel.closeContextMenu()
                                     launcherButton.forceActiveFocus()
                                     launcherButton.focus = false
                                     LauncherStore.toggle(panel.outputName)
                                 }
 
                                 Keys.onSpacePressed: event => {
+                                    panel.closeContextMenu()
                                     LauncherStore.toggle(panel.outputName)
                                     event.accepted = true
                                 }
 
                                 Keys.onReturnPressed: event => {
+                                    panel.closeContextMenu()
                                     LauncherStore.toggle(panel.outputName)
                                     event.accepted = true
                                 }
@@ -368,7 +417,8 @@ Scope {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: launcherButton.activateFromPointer()
+                                    onClicked:
+                                        launcherButton.activateFromPointer()
                                 }
                             }
 
@@ -390,14 +440,44 @@ Scope {
 
                                     item: modelData
                                     iconSize: DockPreferences.iconSize
-                                    onActivated:
+                                    onActivated: {
+                                        panel.closeContextMenu()
                                         DockStore.activate(modelData)
-                                    onPinToggled:
-                                        DockStore.togglePinned(modelData)
+                                    }
+                                    onContextMenuRequested: sourceItem =>
+                                        panel.openContextMenu(
+                                            modelData,
+                                            sourceItem
+                                        )
                                 }
                             }
                         }
                     }
+                }
+
+                DockPinMenu {
+                    id: dockPinMenu
+
+                    z: 3
+                    x: Math.max(
+                        12,
+                        Math.min(
+                            panel.width - width - 12,
+                            panel.contextAnchorX - width / 2
+                        )
+                    )
+                    y: dockSurface.y - height - 8
+                    pinned: panel.contextItem
+                        ? Boolean(panel.contextItem.pinned)
+                        : false
+                    applicationTitle: panel.contextItem
+                        ? String(panel.contextItem.title || "")
+                        : ""
+                    onActionTriggered: {
+                        DockStore.togglePinned(panel.contextItem)
+                        panel.closeContextMenu()
+                    }
+                    onCloseRequested: panel.closeContextMenu()
                 }
             }
         }
