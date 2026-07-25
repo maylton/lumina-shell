@@ -31,3 +31,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Automatic dashboard identity from the session user and `/etc/os-release`.
 - Automatic MPRIS playing, paused, and idle-state presentation.
 - Tested Niri event reduction with stale-state clearing, bounded reconnect backoff, and initial-state synchronization.
+- GPL-3.0-or-later project licensing with explicit third-party credits and contribution terms.

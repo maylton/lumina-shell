@@ -84,6 +84,8 @@ For installation changes, validate both dry-run and an isolated target:
 
 Never run uninstall validation against a real user configuration.
 
-## License note
+## Contribution license
 
-A project license is still pending. External contributions should wait until the licensing decision is recorded.
+Lumina Shell is licensed under `GPL-3.0-or-later`. By submitting a contribution for inclusion, you agree to license it under the same terms unless a different compatible license is explicitly documented for that material.
+
+Do not submit copied code, artwork, icons, or other third-party material without preserving its copyright notice, confirming license compatibility, and recording it in [CREDITS.md](CREDITS.md).

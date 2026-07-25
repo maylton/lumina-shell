@@ -22,7 +22,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Add minimal design tokens.
 - [x] Validate the foundation on CachyOS with Niri.
 - [x] Record the supported Quickshell and Niri versions.
-- [ ] Select and add the project license.
+- [x] Select and add the project license.
 
 ### Niri IPC
 
@@ -143,5 +143,5 @@ This sprint completes the 0.5 public-beta foundation:
 1. [x] Add event-reduction and reconnection tests.
 2. [ ] Validate backlight and battery behavior on a laptop.
 3. [ ] Validate overlay hotplug behavior with two physical outputs.
-4. [ ] Select the project license.
+4. [x] Select the project license.
 5. [ ] Begin the 0.7 extended-beta work.

@@ -89,4 +89,8 @@ lumina-shell/
 
 ## License
 
-The project license has not been selected yet. Do not copy or redistribute the source as an open-source package until a license is added.
+Copyright © 2026 Maylton and Lumina Shell contributors.
+
+Lumina Shell is free software licensed under the [GNU General Public License version 3 or later](LICENSE), identified by SPDX as `GPL-3.0-or-later`.
+
+See [CREDITS.md](CREDITS.md) for the licenses of runtime components and the projects used as architectural or design references.

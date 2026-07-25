@@ -186,6 +186,8 @@ The token namespace also provides the future boundary for wallpaper-derived dyna
 
 Other Quickshell desktops, including Sleex, are useful architectural references for modular widgets and centralized adaptive theming. Lumina does not inherit their compositor assumptions or visual identity: it remains Niri-first and develops its own Material Expressive component language.
 
+Lumina's source is licensed under `GPL-3.0-or-later`. Runtime dependencies and external architectural or design references are listed separately in [`CREDITS.md`](../CREDITS.md); reference projects do not become source dependencies unless explicitly recorded there.
+
 ## Layer policy
 
 - Bar: `Top`
