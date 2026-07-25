@@ -33,6 +33,21 @@ Singleton {
     readonly property string cachePath:
         Quickshell.cacheDir + "/lumina-weather-location.json"
     readonly property double cacheLifetime: 24 * 60 * 60 * 1000
+    readonly property var geoIpProviders: [
+        {
+            id: "ipwho.is",
+            url: "https://ipwho.is/"
+                + "?fields=success,message,city,region,latitude,longitude"
+                + (String(I18n.locale || "").toLowerCase()
+                    .indexOf("pt") === 0
+                    ? "&lang=pt-BR"
+                    : "")
+        },
+        {
+            id: "ipapi.co",
+            url: "https://ipapi.co/json/"
+        }
+    ]
 
     property bool available: false
     property bool cacheLoaded: false
@@ -49,6 +64,9 @@ Singleton {
     property double lastUpdated: 0
     property string lastError: ""
     property var forecast: []
+    property int geoIpProviderIndex: -1
+    property string activeGeoIpProvider: ""
+    property string geoIpFailure: ""
 
     function languageCode() {
         const value = String(I18n.locale || "en-US")
@@ -71,6 +89,23 @@ Singleton {
             + "&temperature_unit=celsius"
             + "&timezone=auto"
             + "&forecast_days=3"
+    }
+
+    function curlCommand(url) {
+        return [
+            "curl",
+            "--fail",
+            "--silent",
+            "--show-error",
+            "--location",
+            "--connect-timeout",
+            "5",
+            "--max-time",
+            "10",
+            "--user-agent",
+            "Lumina-Shell/0.1",
+            String(url || "")
+        ]
     }
 
     function cacheIsFresh() {
@@ -134,6 +169,23 @@ Singleton {
         lastUpdated = 0
     }
 
+    function startGeoIpLookup(providerIndex) {
+        const index = Number(providerIndex)
+
+        if (!enabled
+            || locationMode !== "automatic-ip"
+            || geoIpProcess.running
+            || index < 0
+            || index >= geoIpProviders.length) {
+            return false
+        }
+
+        geoIpProviderIndex = index
+        activeGeoIpProvider = String(geoIpProviders[index].id || "")
+        geoIpProcess.exec(curlCommand(geoIpProviders[index].url))
+        return true
+    }
+
     function resolveLocation(forceAutomaticLookup) {
         if (!enabled || loading || !WeatherPreferences.initialized)
             return
@@ -156,18 +208,10 @@ Singleton {
             return
         }
 
-        geoIpProcess.exec([
-            "curl",
-            "--fail",
-            "--silent",
-            "--show-error",
-            "--location",
-            "--max-time",
-            "10",
-            "--user-agent",
-            "Lumina-Shell/0.1",
-            "https://ipapi.co/json/"
-        ])
+        geoIpFailure = ""
+        geoIpProviderIndex = -1
+        activeGeoIpProvider = ""
+        startGeoIpLookup(0)
     }
 
     function requestGeocoding(locationQuery) {
@@ -176,18 +220,7 @@ Singleton {
         if (!query || geocodingProcess.running)
             return
 
-        geocodingProcess.exec([
-            "curl",
-            "--fail",
-            "--silent",
-            "--show-error",
-            "--location",
-            "--max-time",
-            "10",
-            "--user-agent",
-            "Lumina-Shell/0.1",
-            geocodingUrl(query)
-        ])
+        geocodingProcess.exec(curlCommand(geocodingUrl(query)))
     }
 
     function parseGeoIp(rawText) {
@@ -200,17 +233,27 @@ Singleton {
             return false
         }
 
-        if (payload.error) {
-            lastError = String(payload.reason || "Automatic location unavailable")
+        if (payload.success === false || payload.error) {
+            lastError = String(
+                payload.message
+                    || payload.reason
+                    || "Automatic location unavailable"
+            )
             return false
         }
 
         const city = String(payload.city || "")
-        const region = String(payload.region || "")
+        const region = String(payload.region || payload.region_name || "")
         const lat = Number(payload.latitude)
         const lon = Number(payload.longitude)
 
-        if (!applyLocation(city, region, lat, lon, "automatic-ip")) {
+        if (!applyLocation(
+            city,
+            region,
+            lat,
+            lon,
+            "automatic-ip:" + activeGeoIpProvider
+        )) {
             lastError = "Automatic weather location was incomplete"
             return false
         }
@@ -369,18 +412,7 @@ Singleton {
             return
         }
 
-        forecastProcess.exec([
-            "curl",
-            "--fail",
-            "--silent",
-            "--show-error",
-            "--location",
-            "--max-time",
-            "10",
-            "--user-agent",
-            "Lumina-Shell/0.1",
-            forecastUrl()
-        ])
+        forecastProcess.exec(curlCommand(forecastUrl()))
     }
 
     function refresh(forceLocation) {
@@ -407,6 +439,9 @@ Singleton {
         locationName = ""
         locationSource = ""
         lastError = ""
+        geoIpFailure = ""
+        geoIpProviderIndex = -1
+        activeGeoIpProvider = ""
 
         if (enabled)
             Qt.callLater(function() { root.resolveLocation(false) })
@@ -486,7 +521,7 @@ Singleton {
         stderr: StdioCollector { id: geoIpError }
 
         onExited: (exitCode, exitStatus) => {
-            if (!root.enabled)
+            if (!root.enabled || root.locationMode !== "automatic-ip")
                 return
 
             if (exitCode === 0 && root.parseGeoIp(geoIpOutput.text)) {
@@ -494,13 +529,29 @@ Singleton {
                 return
             }
 
+            const providerError = String(geoIpError.text || "").trim()
+                || root.lastError
+                || "Automatic location unavailable"
+            root.geoIpFailure = root.activeGeoIpProvider
+                ? root.activeGeoIpProvider + ": " + providerError
+                : providerError
+
+            const nextProvider = root.geoIpProviderIndex + 1
+            if (nextProvider < root.geoIpProviders.length) {
+                root.lastError = ""
+                Qt.callLater(function() {
+                    root.startGeoIpLookup(nextProvider)
+                })
+                return
+            }
+
             if (root.applyCachedLocation()) {
+                root.lastError = ""
                 root.requestForecast()
                 return
             }
 
-            root.lastError = String(geoIpError.text || "").trim()
-                || root.lastError
+            root.lastError = root.geoIpFailure
                 || "Automatic weather location unavailable"
         }
     }
@@ -588,7 +639,9 @@ Singleton {
                 refreshInterval: WeatherPreferences.refreshInterval,
                 updatedAt: root.lastUpdated,
                 provider: "Open-Meteo",
-                automaticLocationProvider: "ipapi.co",
+                automaticLocationProvider: root.activeGeoIpProvider,
+                automaticLocationProviders: ["ipwho.is", "ipapi.co"],
+                automaticLocationError: root.geoIpFailure,
                 error: root.lastError
             })
         }
