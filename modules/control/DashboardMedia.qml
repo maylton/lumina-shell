@@ -139,6 +139,7 @@ DashboardCard {
                     ? MediaService.position / MediaService.length
                     : 0
                 wavy: MediaService.hasSession
+                    && MediaService.playing
                 moving: MediaService.playing
                     && ControlCenterStore.open
                     && ControlCenterStore.activePage === "dashboard"

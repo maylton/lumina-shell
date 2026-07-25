@@ -317,9 +317,10 @@ selected-state feedback.
 Determinate media progress uses a reusable linear wavy indicator. Its active
 path follows the Material Expressive stroke, amplitude, wavelength, track-gap,
 and stop-indicator proportions; MPRIS position updates animate smoothly, and
-the wave advances only while playback and the Dashboard are active. Paused
-playback preserves a static waveform, while reduced motion disables phase
-movement without removing progress information.
+the wave advances only while playback and the Dashboard are active. Pausing
+smoothly collapses the waveform into a flat determinate line, while resuming
+restores its amplitude. Reduced motion disables phase movement without removing
+progress information.
 
 The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
 

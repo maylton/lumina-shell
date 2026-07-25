@@ -215,7 +215,12 @@ QtObject {
                 Math.max(1, Math.round(360 * root.motionScale)),
             workspaceTransform:
                 Math.max(1, Math.round(300 * root.motionScale)),
+            mediaProgressMorph:
+                Math.max(1, Math.round(420 * root.motionScale)),
+            mediaWaveCycle:
+                Math.max(1, Math.round(1600 * root.motionScale)),
             effectsEasing: Easing.OutCubic,
+            continuousEasing: Easing.InOutCubic,
             spatialEasing: ConfigStore.reduceMotion
                 || !ConfigStore.animationsEnabled
                     ? Easing.OutCubic

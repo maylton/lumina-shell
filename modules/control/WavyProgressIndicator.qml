@@ -48,17 +48,15 @@ Item {
 
     Behavior on renderedAmplitude {
         NumberAnimation {
-            duration: root.luminaDesign.motion.spatialDefault
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot:
-                root.luminaDesign.motion.spatialOvershoot
+            duration: root.luminaDesign.motion.mediaProgressMorph
+            easing.type: root.luminaDesign.motion.continuousEasing
         }
     }
 
     NumberAnimation on phase {
         from: 0
         to: root.progressTokens.waveLength
-        duration: 1000
+        duration: root.luminaDesign.motion.mediaWaveCycle
         loops: Animation.Infinite
         running: root.moving
             && ConfigStore.animationsEnabled
