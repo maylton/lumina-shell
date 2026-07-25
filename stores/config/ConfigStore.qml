@@ -58,6 +58,8 @@ Singleton {
     property alias barHeight: stateAdapter.barHeight
     property alias barMargin: stateAdapter.barMargin
     property alias barWidgetSpacing: stateAdapter.barWidgetSpacing
+    property alias barWidgetPillsEnabled:
+        stateAdapter.barWidgetPillsEnabled
     property alias barShowLauncher: stateAdapter.barShowLauncher
     property alias barShowOverview: stateAdapter.barShowOverview
     property alias barShowWindowTitle:
@@ -548,6 +550,7 @@ Singleton {
             property int barHeight: 56
             property int barMargin: 5
             property int barWidgetSpacing: 10
+            property bool barWidgetPillsEnabled: true
             property bool barShowLauncher: true
             property bool barShowOverview: true
             property bool barShowWindowTitle: true
@@ -742,6 +745,7 @@ Singleton {
                 barHeight: root.barHeight,
                 barAutoScaleContents: root.barAutoScaleContents,
                 barContentScale: root.barContentScale,
+                barWidgetPillsEnabled: root.barWidgetPillsEnabled,
                 barContextMode: root.barContextMode,
                 barStatusLayout: root.barStatusLayout,
                 barTrayMode: root.barTrayMode,

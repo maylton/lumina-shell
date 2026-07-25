@@ -270,6 +270,22 @@ SettingsPage {
     }
 
     SettingsSection {
+        title: "Widgets"
+        description: "Shared presentation for every bar item"
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Widget backgrounds"
+            description: "Show resting pill surfaces behind bar widgets"
+            checked: ConfigStore.barWidgetPillsEnabled
+            onToggled: value => ConfigStore.setBarValue(
+                "barWidgetPillsEnabled",
+                value
+            )
+        }
+    }
+
+    SettingsSection {
         title: "Context"
         description: "Focused Niri context in the center of each output"
 

@@ -21,6 +21,7 @@ TestCase {
         compare(state.barContextMode, "contextual")
         compare(state.barStatusLayout, "grouped")
         compare(state.barTrayMode, "grouped")
+        compare(state.barWidgetPillsEnabled, true)
         compare(state.barShowAudioLabel, true)
         compare(state.barShowNetworkLabel, true)
         compare(state.barContextTimeout, 3500)
@@ -384,6 +385,7 @@ TestCase {
         compare(bar.barContentScale, 1)
         compare(bar.barContextMode, "contextual")
         compare(bar.barTrayMode, "grouped")
+        compare(bar.barWidgetPillsEnabled, true)
         compare(bar.barShowAudioLabel, true)
         compare(bar.barShowNetworkLabel, true)
         compare(bar.barShowDashboardButton, true)
@@ -419,6 +421,7 @@ TestCase {
             paletteStyle: "fruit-salad",
             barPosition: "bottom",
             barTrayMode: "inline",
+            barWidgetPillsEnabled: false,
             barShowAudioLabel: false,
             barShowNetworkLabel: false,
             dashboardShowMedia: false,
@@ -434,6 +437,7 @@ TestCase {
         compare(restored.paletteStyle, "fruit-salad")
         compare(restored.barPosition, "bottom")
         compare(restored.barTrayMode, "inline")
+        compare(restored.barWidgetPillsEnabled, false)
         compare(restored.barShowAudioLabel, false)
         compare(restored.barShowNetworkLabel, false)
         compare(restored.dashboardShowMedia, false)
