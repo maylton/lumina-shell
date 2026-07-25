@@ -118,18 +118,9 @@ Rectangle {
         UserAvatar {
             anchors.verticalCenter: parent.verticalCenter
             avatarSize: root.luminaDesign.size.barTouchTarget
-            cornerRadius: root.showUserName
-                ? avatarSize / 2
-                : root.radius
+            cornerRadius: avatarSize / 2
             useImage: root.avatarDisplay !== "initials"
-            borderWidth: root.expanded
-                || root.activeFocus
-                || avatarMouse.containsMouse
-                ? 2
-                : 1
-            borderColor: root.expanded || avatarMouse.containsMouse
-                ? root.luminaDesign.color.onAccentContainer
-                : root.luminaDesign.color.primary
+            borderWidth: 0
         }
 
         Text {
@@ -143,15 +134,6 @@ Rectangle {
                 root.luminaDesign.typography.barSecondary
             font.weight: Font.DemiBold
         }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        z: 2
-        radius: root.radius
-        color: "transparent"
-        border.width: root.activeFocus ? 2 : 0
-        border.color: root.luminaDesign.color.primary
     }
 
     MouseArea {

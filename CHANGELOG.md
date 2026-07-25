@@ -98,6 +98,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Removed the avatar-only color ring and image-shape morph from the bar entry
+  point. The account picture stays circular while the shared button container
+  owns hover, focus, pressed, and open states like adjacent bar widgets.
 - Simplified Bar settings to global surface controls followed by active widget
   rows with configure, reorder, and remove actions. Hidden widgets no longer
   occupy the main list or make reorder controls skip.
