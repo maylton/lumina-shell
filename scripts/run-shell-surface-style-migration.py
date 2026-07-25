@@ -112,6 +112,94 @@ def normalize_payload(payload: str) -> str:
         "ConfigStore Appearance replacement keys",
     )
 
+    payload = normalize_literal_block(
+        payload,
+        "'''            property string themeMode: \"auto\"\n",
+        [
+            (
+                "  property bool transparencyEnabled: false\n",
+                "            property bool transparencyEnabled: false\n",
+            ),
+            (
+                "  property real surfaceOpacity: 0.96\n",
+                "            property real surfaceOpacity: 0.96\n",
+            ),
+            (
+                "  property bool animationsEnabled: true\n",
+                "            property bool animationsEnabled: true\n",
+            ),
+        ],
+        "ConfigStore adapter source properties",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''            property string themeMode: \"auto\"\n",
+        [
+            (
+                '  property string shellBackgroundMode: "solid"\n',
+                '            property string shellBackgroundMode: "solid"\n',
+            ),
+            (
+                "  property real shellSurfaceOpacity: 0.82\n",
+                "            property real shellSurfaceOpacity: 0.82\n",
+            ),
+            (
+                "  property bool animationsEnabled: true\n",
+                "            property bool animationsEnabled: true\n",
+            ),
+        ],
+        "ConfigStore adapter replacement properties",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''                themeMode: root.themeMode,\n",
+        [
+            (
+                "  dynamicTheme: root.dynamicTheme,\n",
+                "                dynamicTheme: root.dynamicTheme,\n",
+            ),
+        ],
+        "ConfigStore snapshot source",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''                themeMode: root.themeMode,\n",
+        [
+            (
+                "  shellBackgroundMode: root.shellBackgroundMode,\n",
+                "                shellBackgroundMode: root.shellBackgroundMode,\n",
+            ),
+            (
+                "  shellSurfaceOpacity: root.shellSurfaceOpacity,\n",
+                "                shellSurfaceOpacity: root.shellSurfaceOpacity,\n",
+            ),
+            (
+                "  dynamicTheme: root.dynamicTheme,\n",
+                "                dynamicTheme: root.dynamicTheme,\n",
+            ),
+        ],
+        "ConfigStore snapshot replacement",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''    readonly property real surfaceAlpha:\n",
+        [
+            (
+                "  ConfigStore.transparencyEnabled\n",
+                "        ConfigStore.transparencyEnabled\n",
+            ),
+            (
+                "  ? ConfigStore.surfaceOpacity\n",
+                "            ? ConfigStore.surfaceOpacity\n",
+            ),
+            (
+                "  : 1\n",
+                "            : 1\n",
+            ),
+        ],
+        "Theme surfaceAlpha source",
+    )
+
     return payload
 
 
