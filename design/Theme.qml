@@ -112,6 +112,10 @@ QtObject {
             accentContainer: root.accentContainerColor,
             onAccentContainer: root.accentForegroundColor,
             outline: root.outlineColor,
+            divider: root.withAlpha(
+                root.outlineColor,
+                root.lightMode ? 0.18 : 0.24
+            ),
             urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB"
         },
         shape: {

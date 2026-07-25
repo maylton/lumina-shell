@@ -216,6 +216,11 @@ and About; only the right content area scrolls. Every visible preference calls
 a typed `ConfigStore` setter or an existing service, and consumer modules
 observe the same state immediately.
 
+Standard section rows render inside one tonal group surface. The section owns
+the outer expressive contour and clipping, while rows contribute interaction
+states and inset dividers instead of independent resting capsules. Visual
+preview sections can opt out when their cards already provide containment.
+
 `ConfigFileService` owns argument-array `xdg-open` processes.
 `SystemDiagnosticsService` owns local version and diagnostic processes.
 Visual components never construct shell command strings.

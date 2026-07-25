@@ -8,6 +8,7 @@ Rectangle {
 
     required property string title
     property string description: ""
+    property bool groupedRows: true
     default property alias sectionData: body.data
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -58,11 +59,25 @@ Rectangle {
             }
         }
 
-        Column {
-            id: body
-
+        Rectangle {
             width: parent.width
-            spacing: root.luminaDesign.spacing.controlItemGap
+            implicitHeight: body.implicitHeight
+            radius: root.luminaDesign.shape.largeIncreased
+            color: root.groupedRows
+                ? root.luminaDesign.color.surfaceMuted
+                : "transparent"
+            clip: root.groupedRows
+
+            Column {
+                id: body
+
+                property bool settingsGroup: root.groupedRows
+
+                width: parent.width
+                spacing: root.groupedRows
+                    ? 1
+                    : root.luminaDesign.spacing.controlItemGap
+            }
         }
     }
 }

@@ -20,16 +20,29 @@ Rectangle {
     signal activated
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool grouped:
+        parent
+            && typeof parent.settingsGroup !== "undefined"
+            && parent.settingsGroup
+    readonly property bool lastGroupedItem:
+        !grouped
+            || !parent
+            || parent.children.length === 0
+            || parent.children[parent.children.length - 1] === root
 
     implicitHeight: Math.max(68, contentRow.implicitHeight + 24)
-    radius: rowMouse.pressed
-        ? luminaDesign.shape.medium
-        : luminaDesign.shape.large
+    radius: grouped
+        ? luminaDesign.shape.none
+        : rowMouse.pressed
+            ? luminaDesign.shape.medium
+            : luminaDesign.shape.large
     color: rowMouse.pressed
         ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.12)
         : rowMouse.containsMouse || activeFocus
             ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.06)
-            : luminaDesign.color.surfaceMuted
+            : grouped
+                ? "transparent"
+                : luminaDesign.color.surfaceMuted
     opacity: enabled && available ? 1 : 0.56
     scale: rowMouse.pressed ? 0.99 : 1
     activeFocusOnTab: available
@@ -195,5 +208,20 @@ Rectangle {
             root.forceActiveFocus(Qt.MouseFocusReason)
             root.activated()
         }
+    }
+
+    Rectangle {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 12
+            rightMargin: 12
+        }
+
+        z: 2
+        visible: root.grouped && !root.lastGroupedItem
+        height: 1
+        color: root.luminaDesign.color.divider
     }
 }

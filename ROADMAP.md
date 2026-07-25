@@ -159,6 +159,8 @@ This sprint completes the 0.5 public-beta foundation:
 - Bar, Dashboard, and Settings distinguish spatial shape/bounds transitions
   from color/opacity effects, share semantic spacing roles, and remove
   expressive overshoot when reduced motion is enabled.
+- Related Settings rows share tonal group surfaces, internal dividers, and one
+  expressive outer shape without changing their controls or persisted state.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves

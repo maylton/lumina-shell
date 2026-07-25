@@ -58,7 +58,9 @@ SettingsRow {
     Rectangle {
         anchors.fill: parent
         radius: root.luminaDesign.shape.full
-        color: root.luminaDesign.color.surfaceMuted
+        color: root.grouped
+            ? root.luminaDesign.color.surfaceBase
+            : root.luminaDesign.color.surfaceMuted
         border.width: 1
         border.color: root.activeFocus
             ? root.luminaDesign.color.primary

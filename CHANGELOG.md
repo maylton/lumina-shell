@@ -85,6 +85,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Added directional Dashboard/Settings and settings-category transitions, a
   shared moving tab indicator, persistent category instances, and consistent
   card, section, item, and content spacing.
+- Grouped related Settings rows into shared tonal surfaces with subtle internal
+  dividers and one expressive outer contour.
 - Reworked the notification center with adaptive height, lighter scrim,
   hierarchical header controls, an expressive empty state, and contained
   notification cards.

@@ -49,7 +49,9 @@ SettingsRow {
             width: parent.width - valueText.width - parent.spacing
             height: 16
             radius: root.luminaDesign.shape.full
-            color: root.luminaDesign.color.surfaceMuted
+            color: root.grouped
+                ? root.luminaDesign.color.surfaceBase
+                : root.luminaDesign.color.surfaceMuted
 
             Rectangle {
                 width: parent.width * (

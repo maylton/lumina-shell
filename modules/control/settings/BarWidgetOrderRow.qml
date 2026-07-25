@@ -15,10 +15,23 @@ Rectangle {
     signal moveDown
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool grouped:
+        parent
+            && typeof parent.settingsGroup !== "undefined"
+            && parent.settingsGroup
+    readonly property bool lastGroupedItem:
+        !grouped
+            || !parent
+            || parent.children.length === 0
+            || parent.children[parent.children.length - 1] === root
 
     implicitHeight: 68
-    radius: luminaDesign.shape.large
-    color: luminaDesign.color.surfaceMuted
+    radius: grouped
+        ? luminaDesign.shape.none
+        : luminaDesign.shape.large
+    color: grouped
+        ? "transparent"
+        : luminaDesign.color.surfaceMuted
 
     Accessible.role: Accessible.Grouping
     Accessible.name: widgetTitle
@@ -229,5 +242,19 @@ Rectangle {
                 }
             }
         }
+    }
+
+    Rectangle {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 12
+            rightMargin: 12
+        }
+
+        visible: root.grouped && !root.lastGroupedItem
+        height: 1
+        color: root.luminaDesign.color.divider
     }
 }

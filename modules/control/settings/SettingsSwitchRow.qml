@@ -26,7 +26,9 @@ SettingsRow {
         radius: root.luminaDesign.shape.full
         color: root.checked
             ? root.luminaDesign.color.primary
-            : root.luminaDesign.color.surfaceMuted
+            : root.grouped
+                ? root.luminaDesign.color.surfaceBase
+                : root.luminaDesign.color.surfaceMuted
         border.width: root.checked ? 0 : 1
         border.color: root.luminaDesign.color.outline
 

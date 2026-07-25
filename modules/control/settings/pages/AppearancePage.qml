@@ -47,6 +47,7 @@ SettingsPage {
 
     SettingsSection {
         title: "Theme mode"
+        groupedRows: false
         description: ConfigStore.themeMode === "auto"
             ? "Auto uses Lumina's predictable dark fallback on this runtime"
             : "Choose the light or dark semantic token set"
@@ -90,6 +91,7 @@ SettingsPage {
 
     SettingsSection {
         title: "Material palette"
+        groupedRows: false
         description: Theme.dynamicPaletteActive
             ? root.paletteLabel(ConfigStore.paletteStyle)
                 + " accents and tonal surfaces from the active wallpaper"
@@ -254,6 +256,7 @@ SettingsPage {
 
     SettingsSection {
         title: "Wallpaper"
+        groupedRows: false
         description: "Current image and source directory for " + root.outputName
 
         Row {
