@@ -65,12 +65,33 @@ selection, and the state passed directly to the sole `BarLayout`.
 - **floating:** `barHeight` remains the visible surface height while the
   window and exclusive zone add the configured margins.
 
+Its background contract is independent from global shell transparency:
+
+- **solid:** forces the tonal container background to alpha 1;
+- **translucent:** applies `barSurfaceOpacity` only to the background color;
+- **transparent:** removes the background, edge divider, and floating border.
+
+The `Rectangle` that owns children is never assigned an `opacity`, so bar
+widgets and popup surfaces remain fully opaque. Divider and floating-border
+alpha are derived separately by `BarSurfacePolicy`. Color changes use the
+existing effects motion tokens. Blur is intentionally absent because the
+supported Quickshell/Niri combination has no validated blur backend.
+
 `BarLayout` implements Lumina's Material Expressive bar. Its left and right
 orders are registries of `Component` objects instantiated through `Loader`;
 preferences therefore reorder or hide widgets without duplicating the layout.
 Edge-to-edge and floating are geometry modes of this same implementation. The
 default edge-to-edge surface is 56 pixels high with 40-pixel interaction
-targets; compact mode retains 36-pixel targets.
+targets.
+
+`BarScalePolicy` derives automatic content scale as
+`clamp(barHeight / 56, 0.80, 1.40)`. Manual mode uses the persisted
+`barContentScale` with the same bounds. Compact mode applies a moderate 0.94
+density factor without discarding the selected height or scale. The policy
+does not transform `BarLayout`; `Theme.luminaTokens` instead exposes semantic
+bar sizes, typography, padding, and gaps consumed by each widget. Touch
+targets retain a 36-pixel minimum, while typography and spacing use moderated
+curves so an 80-pixel bar does not resemble a globally enlarged mobile UI.
 
 Each output owns its own `ContextCapsule` and timeout. Window, application,
 column, workspace, and action-error property changes restart that local timer;
@@ -263,7 +284,8 @@ surfaces can migrate incrementally without changing service or store state.
 `JsonAdapter`. Schema 4 added semantic appearance, dashboard, behavior,
 notification, OSD, session, and navigation preferences. Schema 5 adds
 edge/floating bar surfaces, context policy, date/status options, widget
-visibility, and independent left/right orders.
+visibility, and independent left/right orders. Schema 6 adds independent bar
+background mode/opacity and automatic or manual content scaling.
 
 The default path is `Quickshell.stateDir/lumina-state.json`.
 `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
@@ -273,7 +295,9 @@ and out-of-range values. Schema v5 migrates v4 in place, filters unknown or
 duplicate widget IDs, preserves valid ordering, and restores required IDs
 without changing wallpapers or preferences outside the Bar category. Retired
 layout-selection and single-order keys are ignored safely and disappear the
-next time the adapter writes the configuration.
+next time the adapter writes the configuration. Schema v6 migrates schema v5
+global transparency into an equivalent initial bar background, then separates
+future bar changes from `transparencyEnabled` and `surfaceOpacity`.
 
 Writes are debounced and only occur after initialization, so loading,
 migration, and slider movement cannot continuously rewrite the file.
@@ -331,6 +355,7 @@ Design values are exposed through the single `Theme.luminaTokens` namespace:
 - larger outer containers, smaller nested controls, and animated shape changes
   for resting, pressed, selected, and focused states;
 - shared spacing and sizing scales;
+- height-responsive semantic bar size, typography, padding, and gap roles;
 - typography roles for labels, body text, and titles;
 - semantic motion families used consistently by interactive components.
 

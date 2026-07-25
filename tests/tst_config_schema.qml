@@ -212,6 +212,26 @@ TestCase {
         compare(state.osdSize, 1.4)
     }
 
+    function test_barAppearanceValuesUseIndependentBounds() {
+        const minimum = ConfigSchema.normalize({
+            barHeight: 2,
+            barSurfaceOpacity: -1,
+            barContentScale: 0.1
+        })
+        const maximum = ConfigSchema.normalize({
+            barHeight: 200,
+            barSurfaceOpacity: 5,
+            barContentScale: 3
+        })
+
+        compare(minimum.barHeight, 40)
+        compare(minimum.barSurfaceOpacity, 0)
+        compare(minimum.barContentScale, 0.8)
+        compare(maximum.barHeight, 80)
+        compare(maximum.barSurfaceOpacity, 1)
+        compare(maximum.barContentScale, 1.4)
+    }
+
     function test_barChoiceNormalization() {
         const valid = ConfigSchema.normalize({
             barSurfaceMode: "floating",

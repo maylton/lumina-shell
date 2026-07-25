@@ -66,6 +66,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   and accessible status.
 - Persistent Bar settings to hide network and volume text independently while
   preserving their status icons and interactions.
+- Schema v6 bar appearance preferences with safe schema-v5 migration,
+  independent background mode and opacity, automatic height-derived content
+  scaling, and bounded manual scaling.
+- Solid, translucent, and transparent bar backgrounds that keep child widgets
+  and popup surfaces fully opaque without requiring a blur backend.
 
 ### Changed
 
@@ -117,3 +122,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   the sole implementation while retaining edge-to-edge and floating modes.
 - Preserve left/right widget ordering when JsonAdapter exposes persisted
   arrays as QML sequence values.
+- Scale Material Expressive bar icons, typography, workspace states, status
+  badges, padding, gaps, and interaction targets semantically across 40–80
+  pixel heights while retaining a moderate compact-density adjustment.

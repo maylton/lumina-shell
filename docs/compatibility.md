@@ -77,6 +77,14 @@ Transparency changes semantic surface alpha directly. Blur is not offered
 because Lumina has no verified blur backend. Disabling animations or enabling
 reduced motion preserves focus feedback while minimizing transition duration.
 
+The bar has a separate schema-v6 background policy. Solid, translucent, and
+transparent modes alter only `BarSurface` background, divider, and floating
+border colors; Dashboard, Settings, bar children, calendars, and tray popups
+do not inherit `barSurfaceOpacity`. Automatic content scale is implemented
+semantically for 40–80 logical-pixel heights, not as a global transform.
+Native visual passes for every height/mode combination at 1920×1080,
+mixed-scale, and multi-output configurations remain explicit follow-ups.
+
 Local System/About actions resolve project files from `LUMINA_ROOT`, or the
 shell process working directory. Installed packages should set `LUMINA_ROOT`
 when they launch Lumina outside its installation directory.
@@ -91,11 +99,11 @@ not poll shell commands or treat an unmuted microphone as “in use.”
 
 ## Configuration recovery
 
-Schema v3-to-v5 and v4-to-v5 migration, retired bar-key handling,
-normalization, serialization, scoped reset, widget-order deduplication, and
-malformed-JSON recovery are covered by isolated tests. Invalid source is
-preserved at the adjacent `.invalid` path before defaults are written
-atomically.
+Schema v3/v4-to-v5 and v5-to-v6 migration, retired bar-key handling,
+normalization, serialization, scoped reset, widget-order deduplication,
+bar-scale policy, surface-alpha policy, and malformed-JSON recovery are
+covered by isolated tests. Invalid source is preserved at the adjacent
+`.invalid` path before defaults are written atomically.
 
 ## Accessibility validation
 

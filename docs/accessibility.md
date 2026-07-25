@@ -14,7 +14,8 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   settings sliders and choices.
 - Launcher arrow keys move through ranked results; Enter activates the selected result.
 - Lumina's Material Expressive bar controls use a 40-pixel interaction area
-  by default and retain at least 36 pixels in compact mode. Launcher,
+  at the default 56-pixel height and retain at least 36 pixels across 40–80
+  pixel heights, automatic/manual scaling, and compact mode. Launcher,
   overview, workspaces, date/time, tray items,
   notifications, system status, and Dashboard expose focus outlines, names,
   descriptions, Enter, Space, and hover tooltips.
@@ -22,6 +23,9 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   notification bell announces unread count and Do Not Disturb state.
 - The active workspace changes both shape and width, so selection does not
   depend on color. Urgency has a border and an assistive description.
+- Transparent-bar mode keeps interactive widgets on subtle tonal state
+  surfaces rather than reducing text or icon opacity; focus outlines and
+  selected states remain unchanged.
 - Bar widget-order rows provide separate keyboard-focusable Show/Hide, Move
   up, and Move down controls.
 

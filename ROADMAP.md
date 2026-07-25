@@ -113,16 +113,16 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 This sprint completes the 0.5 public-beta foundation:
 
-1. Graphical configuration with schema v5 persistence and safe schema v3/v4
+1. Graphical configuration with schema v6 persistence and safe schema v3/v4/v5
    migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
 5. Keyboard, focus, and assistive-technology metadata baseline.
 6. User, installation, compatibility, and contributor documentation.
-7. Lumina's Material Expressive bar refinement with schema v5 migration,
-   per-output context, configurable widget ordering, and edge-to-edge or
-   floating geometry.
+7. Lumina's Material Expressive bar refinement with schema v6 migration,
+   per-output context, configurable widget ordering, independent background,
+   responsive content scaling, and edge-to-edge or floating geometry.
 
 ### Acceptance criteria
 
@@ -151,6 +151,11 @@ This sprint completes the 0.5 public-beta foundation:
 - The default edge-to-edge bar uses a substantial 56-pixel surface, clear
   clock/date hierarchy, and expressive workspace state without shrinking
   interaction targets.
+- The bar supports solid, translucent, and transparent backgrounds independently
+  of global surface transparency, with opaque child content and no blur.
+- Bar height spans 40–80 pixels; automatic or bounded manual scaling adjusts
+  semantic widget dimensions while retaining safe interaction targets and a
+  single-line layout.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
 - System tray items can be grouped in a compact popover or kept visible
@@ -175,9 +180,9 @@ This sprint completes the 0.5 public-beta foundation:
   through its responsive scale policy.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
-- Schema v4 bar preferences migrate to schema v5 without losing valid
-  left/right widget ordering or existing shell preferences; retired bar keys
-  are ignored safely.
+- Schema v4 bar preferences migrate through schema v5, and schema v5 migrates
+  to schema v6 without losing valid widget ordering, global transparency, or
+  existing shell preferences; retired bar keys are ignored safely.
 - Privacy and keyboard-layout indicators remain hidden until their native
   event sources can be validated.
 

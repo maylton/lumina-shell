@@ -21,14 +21,30 @@ bar.
 
 The Bar settings page controls:
 
-- top or bottom position, edge-to-edge or floating surface, visible height,
-  margin, opacity, spacing, and compact mode;
+- a solid, translucent, or transparent bar background and independent
+  background opacity;
+- top or bottom position, edge-to-edge or floating geometry, 40–80 pixel
+  height, margin, spacing, and compact mode;
+- automatic content scaling from the selected height or a manual 80–140%
+  scale;
 - Always, Contextual, or Hidden Niri context and the contextual timeout;
 - title, application ID, column, localized date style, 12/24-hour time, and
   seconds;
 - grouped or individual status, individual service visibility, optional
   network/volume text, and a grouped tray menu or always-visible tray icons;
 - independent left/right widget order with Move up, Move down, and Show/Hide.
+
+Automatic scaling uses 56 pixels as its 100% reference and proportionally
+updates bar icons, text, workspace shapes, padding, gaps, badges, and pointer
+targets. Compact mode further reduces density without ignoring the chosen
+height or scale; interaction targets never shrink below 36 logical pixels.
+
+Bar background opacity is separate from **Appearance → Transparency**. The
+Appearance controls continue to affect Dashboard, Settings, and other shell
+surfaces, while **Bar → Surface → Background opacity** changes only a
+translucent bar. Transparent mode keeps widgets on their own subtle tonal
+surfaces for contrast. Lumina intentionally offers no blur until a backend is
+validated for the supported Niri and Quickshell environment.
 
 Context is event-driven and independent per output. In Contextual mode, a
 window, app ID, column, workspace, or action-error change reveals the capsule
@@ -105,8 +121,9 @@ active output or keyboard focus. The nine categories are:
 
 - **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
   motion, shape, and density;
-- **Bar:** edge-to-edge or floating surface geometry, Niri context, date and
-  time, grouped status, optional actions, and left/right widget ordering;
+- **Bar:** background transparency, responsive scale, edge-to-edge or floating
+  geometry, Niri context, date and time, grouped status, optional actions, and
+  left/right widget ordering;
 - **Dashboard:** opening behavior, density, and visible cards;
 - **Behavior:** outside-click dismissal, output fallback, destructive-action
   confirmation, and reduced motion;
@@ -135,11 +152,13 @@ Available category identifiers are `appearance`, `bar`, `dashboard`,
 reopening follows the configured memory policy; explicit IPC calls can select
 the page and category.
 
-Schema 5 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 4 files migrate in place. Retired
-layout-selection and single-order fields in existing schema 5 files are
-ignored safely and removed on the next save. Invalid JSON is still copied to
-the adjacent `.invalid` backup before defaults are restored.
+Schema 6 writes are debounced, so sliders update the shell without writing
+once per pointer movement. Schema 3, 4, and 5 files migrate in place. Existing
+global transparency initializes the independent bar mode during schema-5
+migration without changing the global preference. Retired layout-selection
+and single-order fields are ignored safely and removed on the next save.
+Invalid JSON is still copied to the adjacent `.invalid` backup before defaults
+are restored.
 
 ## Notifications
 
