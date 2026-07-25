@@ -3,6 +3,7 @@ import qs.design
 import qs.modules.control
 import qs.stores.config
 import qs.stores.control
+import qs.stores.system
 
 Rectangle {
     id: root
@@ -15,25 +16,24 @@ Rectangle {
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded || dashboardMouse.containsMouse
+    radius: expanded || avatarMouse.containsMouse
         ? luminaDesign.shape.full
         : luminaDesign.shape.barLarge
-    color: expanded || dashboardMouse.containsMouse
+    color: expanded || avatarMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : ConfigStore.barWidgetPillsEnabled
             && ConfigStore.barBackgroundMode === "transparent"
             ? luminaDesign.color.surfaceMuted
             : "transparent"
-    scale: dashboardMouse.pressed
-        ? 0.96
-        : 1
+    scale: avatarMouse.pressed ? 0.96 : 1
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open Lumina dashboard"
-    Accessible.description: "Quick controls and shell settings"
+    Accessible.name: "Open dashboard for "
+        + SystemInfoStore.displayName
+    Accessible.description: "Quick controls and session actions"
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate()
@@ -80,20 +80,20 @@ Rectangle {
         }
     }
 
-    DashboardIcon {
+    UserAvatar {
         anchors.centerIn: parent
-        customSource: Qt.resolvedUrl(
-            "../../../assets/icons/rocket-symbolic.svg"
+        avatarSize: Math.max(
+            root.luminaDesign.size.barIcon + 8,
+            root.luminaDesign.size.barTouchTarget - 7
         )
-        fallbackSymbol: "🚀"
-        iconColor: root.expanded
+        borderWidth: root.expanded || root.activeFocus ? 2 : 1
+        borderColor: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.primary
-        iconSize: root.luminaDesign.size.barIcon
     }
 
     MouseArea {
-        id: dashboardMouse
+        id: avatarMouse
 
         anchors.fill: parent
         hoverEnabled: true
@@ -106,8 +106,8 @@ Rectangle {
 
     TrayTooltip {
         anchorItem: root
-        title: "Lumina dashboard"
-        description: "Quick controls and shell settings"
-        shown: dashboardMouse.containsMouse
+        title: SystemInfoStore.displayName
+        description: "Open Dashboard and session actions"
+        shown: avatarMouse.containsMouse
     }
 }

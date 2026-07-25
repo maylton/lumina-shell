@@ -31,29 +31,17 @@ Item {
                 - root.luminaDesign.spacing.controlContentInset * 2
             spacing: root.luminaDesign.spacing.controlItemGap
 
-            Rectangle {
+            UserAvatar {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 58
-                height: 58
-                radius: root.luminaDesign.shape.full
-                color: root.luminaDesign.color.accentContainer
-                border.width: 2
-                border.color: root.luminaDesign.color.primary
-
-                Text {
-                    anchors.centerIn: parent
-                    text: SystemInfoStore.userInitial
-                    color: root.luminaDesign.color.onAccentContainer
-                    font.pixelSize: 26
-                    font.weight: Font.Bold
-                }
+                avatarSize: 58
+                borderWidth: 2
             }
 
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: "Welcome, "
-                    + SystemInfoStore.userName
+                    + SystemInfoStore.displayName
                     + "!"
                 color: root.luminaDesign.color.onSurface
                 elide: Text.ElideRight

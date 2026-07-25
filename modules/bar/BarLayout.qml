@@ -218,7 +218,7 @@ Item {
     Component {
         id: dashboardComponent
 
-        DashboardButton {
+        UserAvatarButton {
             outputName: root.outputName
         }
     }
