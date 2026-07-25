@@ -1,4 +1,6 @@
 module qs.modules.control.settings
+BarStylePreview 1.0 BarStylePreview.qml
+BarWidgetOrderRow 1.0 BarWidgetOrderRow.qml
 SettingsActionRow 1.0 SettingsActionRow.qml
 SettingsComboRow 1.0 SettingsComboRow.qml
 SettingsNavigationItem 1.0 SettingsNavigationItem.qml

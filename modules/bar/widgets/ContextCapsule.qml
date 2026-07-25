@@ -20,7 +20,8 @@ Rectangle {
 
         const parts = []
 
-        if (activeWindowTitle.length > 0)
+        if (ConfigStore.barShowWindowTitle
+            && activeWindowTitle.length > 0)
             parts.push(activeWindowTitle)
         else if (activeWindowAppId.length > 0)
             parts.push(activeWindowAppId)

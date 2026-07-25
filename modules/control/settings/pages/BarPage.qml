@@ -8,16 +8,115 @@ SettingsPage {
     id: root
 
     title: "Bar"
-    description: "Position, density, and the information shown per output"
+    description: "Expressive layout, behavior, and widgets per output"
+
+    function widgetLabel(widgetId) {
+        const labels = {
+            launcher: "Launcher",
+            overview: "Overview",
+            workspaces: "Workspaces",
+            datetime: "Date and time",
+            tray: "System tray",
+            notifications: "Notifications",
+            "system-status": "System status",
+            dashboard: "Dashboard",
+            wallpaper: "Wallpaper",
+            session: "Session"
+        }
+
+        return labels[String(widgetId || "")] || String(widgetId)
+    }
+
+    function widgetDescription(widgetId) {
+        const descriptions = {
+            launcher: "Application search",
+            overview: "Niri overview",
+            workspaces: "Workspaces for this output",
+            datetime: "Clock, date, and calendar",
+            tray: "StatusNotifier items",
+            notifications: "Notification center",
+            "system-status": "Network, audio, and battery",
+            dashboard: "Lumina quick controls",
+            wallpaper: "Wallpaper picker",
+            session: "Session and layout actions"
+        }
+
+        return descriptions[String(widgetId || "")] || ""
+    }
+
+    function configurableOrder(order) {
+        const result = []
+
+        for (var index = 0; index < order.length; ++index) {
+            const id = String(order[index])
+
+            if (["privacy", "keyboard"].indexOf(id) < 0)
+                result.push(id)
+        }
+
+        return result
+    }
 
     SettingsSection {
-        title: "Layout"
-        description: "Sizing updates every output immediately"
+        title: "Visual style"
+        description: "Switch presets immediately without restarting"
+
+        Row {
+            width: parent.width
+            height: 126
+            spacing: root.luminaDesign.spacing.medium
+
+            BarStylePreview {
+                width: (parent.width - parent.spacing) / 2
+                height: parent.height
+                label: "Expressive Desktop"
+                visualStyle: "expressive"
+                selected:
+                    ConfigStore.barVisualStyle === "expressive"
+                onActivated: ConfigStore.setBarValue(
+                    "barVisualStyle",
+                    "expressive"
+                )
+            }
+
+            BarStylePreview {
+                width: (parent.width - parent.spacing) / 2
+                height: parent.height
+                label: "Lumina Classic"
+                visualStyle: "classic"
+                selected: ConfigStore.barVisualStyle === "classic"
+                onActivated: ConfigStore.setBarValue(
+                    "barVisualStyle",
+                    "classic"
+                )
+            }
+        }
+    }
+
+    SettingsSection {
+        title: "Surface"
+        description: ConfigStore.barSurfaceMode === "edge-to-edge"
+            ? "Edge-to-edge ignores the outer margin"
+            : "Floating reserves margin around the visible surface"
+
+        SettingsSegmentedControl {
+            width: parent.width
+            height: 44
+            options: [
+                { value: "edge-to-edge", label: "Edge-to-edge" },
+                { value: "floating", label: "Floating" }
+            ]
+            currentValue: ConfigStore.barSurfaceMode
+            onSelected: value => ConfigStore.setBarValue(
+                "barSurfaceMode",
+                value
+            )
+        }
 
         SettingsComboRow {
             width: parent.width
             title: "Position"
-            description: "Anchor the shell bar to the screen edge"
+            description: "Anchor the bar to the screen edge"
             options: [
                 { value: "top", label: "Top" },
                 { value: "bottom", label: "Bottom" }
@@ -29,8 +128,8 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Height"
-            description: "Available range: 40–72 pixels"
+            title: "Visible height"
+            description: "Surface height, excluding floating margins"
             from: 40
             to: 72
             stepSize: 2
@@ -43,7 +142,12 @@ SettingsPage {
         SettingsSliderRow {
             width: parent.width
             title: "Outer margin"
-            description: "Space between the bar surface and screen edge"
+            description: "Space around a floating bar"
+            available:
+                ConfigStore.barSurfaceMode === "floating"
+                || ConfigStore.barVisualStyle === "classic"
+            availabilityText:
+                "Edge-to-edge mode does not use an outer margin"
             from: 0
             to: 18
             stepSize: 1
@@ -55,51 +159,97 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
+            title: "Surface opacity"
+            description: "Shared tonal-surface opacity"
+            from: 0.72
+            to: 1
+            stepSize: 0.02
+            value: ConfigStore.surfaceOpacity
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value => ConfigStore.setAppearanceValue(
+                "surfaceOpacity",
+                value
+            )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
             title: "Widget spacing"
-            description: "Horizontal distance between major widgets"
+            description: "Horizontal distance between clusters"
             from: 2
             to: 24
             stepSize: 1
             value: ConfigStore.barWidgetSpacing
             valueLabel: Math.round(value) + " px"
-            onValueEdited: value =>
-                ConfigStore.setBarValue("barWidgetSpacing", value)
+            onValueEdited: value => ConfigStore.setBarValue(
+                "barWidgetSpacing",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Compact mode"
+            description: "Reduce spacing while preserving touch targets"
+            checked: ConfigStore.compactMode
+            onToggled: value => ConfigStore.setAppearanceValue(
+                "compactMode",
+                value
+            )
         }
     }
 
     SettingsSection {
-        title: "Window and Niri"
-        description: "Choose which compositor context remains visible"
+        title: "Context"
+        description: "Focused Niri context in the center of each output"
 
-        SettingsSwitchRow {
+        SettingsSegmentedControl {
             width: parent.width
-            title: "Window title"
-            description: "Show the focused window title"
-            checked: ConfigStore.barShowWindowTitle
-            onToggled: value =>
-                ConfigStore.setBarValue("barShowWindowTitle", value)
+            height: 44
+            options: [
+                { value: "always", label: "Always" },
+                { value: "contextual", label: "Contextual" },
+                { value: "hidden", label: "Hidden" }
+            ]
+            currentValue: ConfigStore.barContextMode
+            onSelected: value => ConfigStore.setBarValue(
+                "barContextMode",
+                value
+            )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: "Context duration"
+            description: "Time before contextual information recedes"
+            available: ConfigStore.barContextMode === "contextual"
+            availabilityText: "Choose Contextual mode first"
+            from: 1000
+            to: 15000
+            stepSize: 500
+            value: ConfigStore.barContextTimeout
+            valueLabel: (value / 1000).toFixed(1) + " s"
+            onValueEdited: value => ConfigStore.setBarValue(
+                "barContextTimeout",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Center title"
-            description: "Center text inside the available title region"
-            available: ConfigStore.barShowWindowTitle
-            availabilityText: "Enable the window title first"
-            checked: ConfigStore.barCenterWindowTitle
-            onToggled: value =>
-                ConfigStore.setBarValue(
-                    "barCenterWindowTitle",
-                    value
-                )
+            title: "Window title"
+            description: "Include the focused window title"
+            checked: ConfigStore.barShowWindowTitle
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowWindowTitle",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
             title: "Application ID"
-            description: "Show the app ID below the title"
-            available: ConfigStore.barShowWindowTitle
-            availabilityText: "Enable the window title first"
+            description: "Include the focused application ID"
             checked: ConfigStore.barShowAppId
             onToggled: value =>
                 ConfigStore.setBarValue("barShowAppId", value)
@@ -107,37 +257,115 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Workspaces"
-            description: "Show Niri workspaces for each output"
-            checked: ConfigStore.barShowWorkspaces
-            onToggled: value =>
-                ConfigStore.setBarValue("barShowWorkspaces", value)
-        }
-
-        SettingsSwitchRow {
-            width: parent.width
-            title: "Column indicator"
-            description: "Show the focused Niri column position"
+            title: "Column"
+            description: "Include the focused Niri column or tile"
             checked: ConfigStore.barShowColumnIndicator
-            onToggled: value =>
-                ConfigStore.setBarValue(
-                    "barShowColumnIndicator",
-                    value
-                )
-        }
-
-        SettingsSwitchRow {
-            width: parent.width
-            title: "Output details"
-            description: "Show Niri state, resolution, and scale"
-            checked: ConfigStore.showStatusDetails
-            onToggled: value =>
-                ConfigStore.setShowStatusDetails(value)
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowColumnIndicator",
+                value
+            )
         }
     }
 
     SettingsSection {
-        title: "System widgets"
+        title: "Date and time"
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Show date"
+            description: "Place the date beside the clock"
+            checked: ConfigStore.barShowDate
+            onToggled: value =>
+                ConfigStore.setBarValue("barShowDate", value)
+        }
+
+        SettingsComboRow {
+            width: parent.width
+            title: "Date style"
+            description: "Choose the localized date detail"
+            available: ConfigStore.barShowDate
+            availabilityText: "Enable the date first"
+            options: [
+                { value: "short", label: "25 Jul" },
+                { value: "weekday", label: "Fri, 25 Jul" },
+                { value: "full", label: "Full" }
+            ]
+            currentValue: ConfigStore.barDateStyle
+            onSelected: value =>
+                ConfigStore.setBarValue("barDateStyle", value)
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "24-hour format"
+            description: "Use HH:mm instead of a 12-hour clock"
+            checked: ConfigStore.barClock24Hour
+            onToggled: value => ConfigStore.setBarValue(
+                "barClock24Hour",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Show seconds"
+            description: "Refresh the clock once per second"
+            checked: ConfigStore.barShowSeconds
+            onToggled: value =>
+                ConfigStore.setBarValue("barShowSeconds", value)
+        }
+    }
+
+    SettingsSection {
+        title: "System status"
+        description: "Only available native service data is shown"
+
+        SettingsSegmentedControl {
+            width: parent.width
+            height: 44
+            options: [
+                { value: "grouped", label: "Grouped" },
+                { value: "individual", label: "Individual" }
+            ]
+            currentValue: ConfigStore.barStatusLayout
+            onSelected: value => ConfigStore.setBarValue(
+                "barStatusLayout",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Audio"
+            description: "Volume, mute, and output availability"
+            checked: ConfigStore.barShowAudioStatus
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowAudioStatus",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Network"
+            description: "Connected network or offline state"
+            checked: ConfigStore.barShowNetworkStatus
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowNetworkStatus",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Battery"
+            description: "Shown only when a laptop battery exists"
+            checked: ConfigStore.barShowBatteryStatus
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowBatteryStatus",
+                value
+            )
+        }
 
         SettingsSwitchRow {
             width: parent.width
@@ -145,38 +373,118 @@ SettingsPage {
             description: "Show StatusNotifier items"
             checked: ConfigStore.barShowTray
             onToggled: value =>
-                ConfigStore.setBarValue("barShowTray", value)
+                ConfigStore.setBarWidgetVisible("tray", value)
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Clock"
-            description: "Show time and calendar access"
-            checked: ConfigStore.barShowClock
-            onToggled: value =>
-                ConfigStore.setBarValue("barShowClock", value)
+            title: "Notifications"
+            description: "Show notification center access"
+            checked: ConfigStore.barShowNotifications
+            onToggled: value => ConfigStore.setBarWidgetVisible(
+                "notifications",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "24-hour format"
-            description: "Use HH:mm instead of a 12-hour clock"
-            available: ConfigStore.barShowClock
-            availabilityText: "Enable the clock first"
-            checked: ConfigStore.barClock24Hour
-            onToggled: value =>
-                ConfigStore.setBarValue("barClock24Hour", value)
+            title: "Dashboard button"
+            description: "Show dedicated Lumina quick controls"
+            checked: ConfigStore.barShowDashboardButton
+            onToggled: value => ConfigStore.setBarWidgetVisible(
+                "dashboard",
+                value
+            )
+        }
+    }
+
+    SettingsSection {
+        title: "Optional actions"
+        description: "Wallpaper and session remain in the Dashboard"
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Wallpaper button"
+            description: "Also expose the wallpaper picker on the bar"
+            checked: ConfigStore.barShowWallpaperButton
+            onToggled: value => ConfigStore.setBarWidgetVisible(
+                "wallpaper",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show seconds"
-            description: "Refresh the clock once per second"
-            available: ConfigStore.barShowClock
-            availabilityText: "Enable the clock first"
-            checked: ConfigStore.barShowSeconds
-            onToggled: value =>
-                ConfigStore.setBarValue("barShowSeconds", value)
+            title: "Session button"
+            description: "Also expose session actions on the bar"
+            checked: ConfigStore.barShowSessionButton
+            onToggled: value => ConfigStore.setBarWidgetVisible(
+                "session",
+                value
+            )
+        }
+    }
+
+    SettingsSection {
+        title: "Left widget order"
+        description: "Move and hide widgets without restarting"
+
+        Repeater {
+            model: root.configurableOrder(
+                ConfigStore.barLeftWidgetOrder
+            )
+
+            delegate: BarWidgetOrderRow {
+                required property var modelData
+                required property int index
+
+                width: parent.width
+                widgetTitle: root.widgetLabel(modelData)
+                description: root.widgetDescription(modelData)
+                checked: ConfigStore.barWidgetVisible(modelData)
+                canMoveUp: index > 0
+                canMoveDown: index < root.configurableOrder(
+                    ConfigStore.barLeftWidgetOrder
+                ).length - 1
+                onToggled: value =>
+                    ConfigStore.setBarWidgetVisible(modelData, value)
+                onMoveUp:
+                    ConfigStore.moveBarWidget("left", modelData, -1)
+                onMoveDown:
+                    ConfigStore.moveBarWidget("left", modelData, 1)
+            }
+        }
+    }
+
+    SettingsSection {
+        title: "Right widget order"
+        description: "Privacy and keyboard indicators remain hidden until a native backend is available"
+
+        Repeater {
+            model: root.configurableOrder(
+                ConfigStore.barRightWidgetOrder
+            )
+
+            delegate: BarWidgetOrderRow {
+                required property var modelData
+                required property int index
+
+                width: parent.width
+                widgetTitle: root.widgetLabel(modelData)
+                description: root.widgetDescription(modelData)
+                checked: ConfigStore.barWidgetVisible(modelData)
+                canMoveUp: index > 0
+                canMoveDown: index < root.configurableOrder(
+                    ConfigStore.barRightWidgetOrder
+                ).length - 1
+                onToggled: value =>
+                    ConfigStore.setBarWidgetVisible(modelData, value)
+                onMoveUp:
+                    ConfigStore.moveBarWidget("right", modelData, -1)
+                onMoveDown:
+                    ConfigStore.moveBarWidget("right", modelData, 1)
+            }
         }
     }
 }
