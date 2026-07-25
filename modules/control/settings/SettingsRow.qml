@@ -58,6 +58,16 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activated()
 
+    function releasePointerFocus() {
+        root.forceActiveFocus()
+        root.focus = false
+    }
+
+    function activateFromPointer() {
+        releasePointerFocus()
+        root.activated()
+    }
+
     Keys.onSpacePressed: event => {
         if (root.available)
             root.activated()
@@ -243,10 +253,7 @@ Rectangle {
         cursorShape: root.available
             ? Qt.PointingHandCursor
             : Qt.ForbiddenCursor
-        onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
-            root.activated()
-        }
+        onClicked: root.activateFromPointer()
     }
 
     Rectangle {
