@@ -124,6 +124,12 @@ Flickable {
                     )
                 }
 
+                function activateFromPointer() {
+                    resetPage.forceActiveFocus()
+                    resetPage.focus = false
+                    resetPage.activate()
+                }
+
                 Keys.onSpacePressed: event => {
                     activate()
                     event.accepted = true
@@ -157,12 +163,7 @@ Flickable {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        resetPage.forceActiveFocus(
-                            Qt.MouseFocusReason
-                        )
-                        resetPage.activate()
-                    }
+                    onClicked: resetPage.activateFromPointer()
                 }
             }
 
