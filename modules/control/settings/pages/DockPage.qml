@@ -114,7 +114,7 @@ SettingsPage {
             iconName: "preferences-desktop-icons-symbolic"
             symbol: "□"
             value: DockPreferences.iconSize
-            from: 36
+            from: 30
             to: 72
             stepSize: 2
             valueLabel: Math.round(value) + " px"
