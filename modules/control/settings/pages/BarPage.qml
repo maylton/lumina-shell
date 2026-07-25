@@ -338,6 +338,23 @@ SettingsPage {
                 ConfigStore.setBarWidgetVisible("tray", value)
         }
 
+        SettingsComboRow {
+            width: parent.width
+            title: "Tray icons"
+            description: ConfigStore.barTrayMode === "grouped"
+                ? "Keep items in a compact menu"
+                : "Keep every active item visible on the bar"
+            available: ConfigStore.barShowTray
+            availabilityText: "Enable the system tray first"
+            options: [
+                { value: "grouped", label: "Grouped" },
+                { value: "inline", label: "Always visible" }
+            ]
+            currentValue: ConfigStore.barTrayMode
+            onSelected: value =>
+                ConfigStore.setBarValue("barTrayMode", value)
+        }
+
         SettingsSwitchRow {
             width: parent.width
             title: "Notifications"

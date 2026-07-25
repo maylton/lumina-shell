@@ -67,6 +67,7 @@ Singleton {
     property alias barShowPrivacyIndicators:
         stateAdapter.barShowPrivacyIndicators
     property alias barShowTray: stateAdapter.barShowTray
+    property alias barTrayMode: stateAdapter.barTrayMode
     property alias barShowNotifications:
         stateAdapter.barShowNotifications
     property alias barShowDashboardButton:
@@ -543,6 +544,7 @@ Singleton {
             property bool barShowKeyboardLayout: true
             property bool barShowPrivacyIndicators: true
             property bool barShowTray: true
+            property string barTrayMode: "grouped"
             property bool barShowNotifications: true
             property bool barShowDashboardButton: true
             property bool barShowAudioStatus: true
@@ -719,6 +721,7 @@ Singleton {
                 barSurfaceMode: root.barSurfaceMode,
                 barContextMode: root.barContextMode,
                 barStatusLayout: root.barStatusLayout,
+                barTrayMode: root.barTrayMode,
                 dashboardDefaultPage: root.dashboardDefaultPage,
                 doNotDisturb: root.doNotDisturb,
                 osdEnabled: root.osdEnabled,

@@ -16,6 +16,7 @@ TestCase {
         compare(state.barSurfaceMode, "edge-to-edge")
         compare(state.barContextMode, "contextual")
         compare(state.barStatusLayout, "grouped")
+        compare(state.barTrayMode, "grouped")
         compare(state.barContextTimeout, 3500)
         compare(state.barHeight, 48)
         compare(state.barShowWallpaperButton, false)
@@ -169,22 +170,26 @@ TestCase {
             barSurfaceMode: "floating",
             barContextMode: "always",
             barStatusLayout: "individual",
+            barTrayMode: "inline",
             barDateStyle: "full"
         })
         const invalid = ConfigSchema.normalize({
             barSurfaceMode: "detached",
             barContextMode: "polling",
             barStatusLayout: "stacked",
+            barTrayMode: "floating",
             barDateStyle: "numeric"
         })
 
         compare(valid.barSurfaceMode, "floating")
         compare(valid.barContextMode, "always")
         compare(valid.barStatusLayout, "individual")
+        compare(valid.barTrayMode, "inline")
         compare(valid.barDateStyle, "full")
         compare(invalid.barSurfaceMode, "edge-to-edge")
         compare(invalid.barContextMode, "contextual")
         compare(invalid.barStatusLayout, "grouped")
+        compare(invalid.barTrayMode, "grouped")
         compare(invalid.barDateStyle, "short")
     }
 
@@ -299,6 +304,7 @@ TestCase {
         verify(bar.barWidgetOrder === undefined)
         compare(bar.barSurfaceMode, "edge-to-edge")
         compare(bar.barContextMode, "contextual")
+        compare(bar.barTrayMode, "grouped")
         compare(bar.barShowDashboardButton, true)
         compare(bar.barRightWidgetOrder.length, 6)
         verify(bar.themeMode === undefined)
@@ -331,6 +337,7 @@ TestCase {
             themeMode: "light",
             paletteStyle: "fruit-salad",
             barPosition: "bottom",
+            barTrayMode: "inline",
             dashboardShowMedia: false,
             notificationPopupPosition: "bottom-left",
             osdSize: 1.2,
@@ -343,6 +350,7 @@ TestCase {
         compare(restored.themeMode, "light")
         compare(restored.paletteStyle, "fruit-salad")
         compare(restored.barPosition, "bottom")
+        compare(restored.barTrayMode, "inline")
         compare(restored.dashboardShowMedia, false)
         compare(
             restored.notificationPopupPosition,

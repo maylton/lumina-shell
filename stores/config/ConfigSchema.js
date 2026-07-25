@@ -43,6 +43,7 @@ function defaults() {
         barShowKeyboardLayout: true,
         barShowPrivacyIndicators: true,
         barShowTray: true,
+        barTrayMode: "grouped",
         barShowNotifications: true,
         barShowDashboardButton: true,
         barShowAudioStatus: true,
@@ -306,6 +307,11 @@ function normalize(source) {
         ["grouped", "individual"],
         base.barStatusLayout
     )
+    result.barTrayMode = choice(
+        result.barTrayMode,
+        ["grouped", "inline"],
+        base.barTrayMode
+    )
     result.barPosition = choice(
         result.barPosition,
         ["top", "bottom"],
@@ -527,6 +533,7 @@ function defaultsForCategory(categoryName) {
             "barShowKeyboardLayout",
             "barShowPrivacyIndicators",
             "barShowTray",
+            "barTrayMode",
             "barShowNotifications",
             "barShowDashboardButton",
             "barShowAudioStatus",
