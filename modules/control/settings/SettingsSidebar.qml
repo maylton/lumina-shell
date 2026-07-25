@@ -26,6 +26,11 @@ DashboardCard {
         return 0
     }
 
+    function releasePointerFocus(item) {
+        item.forceActiveFocus()
+        item.focus = false
+    }
+
     accessibleName: I18n.tr(
         "settings.sidebar.accessibleName",
         "Settings categories"
@@ -124,7 +129,7 @@ DashboardCard {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    editButton.forceActiveFocus(Qt.MouseFocusReason)
+                    root.releasePointerFocus(editButton)
                     ConfigFileService.openConfigFile()
                 }
             }
@@ -228,7 +233,10 @@ DashboardCard {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: ConfigFileService.openConfigDirectory()
+                onClicked: {
+                    root.releasePointerFocus(folderButton)
+                    ConfigFileService.openConfigDirectory()
+                }
             }
         }
 
