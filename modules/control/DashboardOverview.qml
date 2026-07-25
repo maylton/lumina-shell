@@ -118,11 +118,9 @@ Item {
                 font.weight: Font.DemiBold
             }
 
-            Rectangle {
+            Item {
                 width: parent.width
                 height: 42
-                radius: root.luminaDesign.shape.large
-                color: root.luminaDesign.color.surfaceMuted
 
                 Accessible.role: Accessible.Pane
                 Accessible.name: WeatherService.available
