@@ -201,6 +201,9 @@ This sprint completes the 0.5 public-beta foundation:
   track gap, small inner track corners, fully rounded outer ends, vertical
   handle, endpoint-safe geometry, and stop indicator while preserving pointer,
   keyboard, and service interactions.
+- Explicit Light and Dark modes own complete, contrast-tested tonal schemes;
+  wallpaper-derived color stores both variants and switches modes without
+  retaining colors from the previous scheme.
 - Settings combo rows open real Material dropdown menus with selected state,
   bounded placement, outside dismissal, and keyboard navigation.
 - Runtime locale detection, regional fallback, live catalog reload, and

@@ -4,11 +4,14 @@ import QtQuick
 import qs.stores.config
 import "../modules/bar/BarScalePolicy.js" as BarScalePolicy
 import "../modules/bar/BarSurfacePolicy.js" as BarSurfacePolicy
+import "ThemePalette.js" as ThemePalette
 
 QtObject {
     id: root
 
-    readonly property bool lightMode: ConfigStore.themeMode === "light"
+    readonly property string resolvedMode:
+        ThemePalette.normalizedMode(ConfigStore.themeMode)
+    readonly property bool lightMode: resolvedMode === "light"
     readonly property bool automaticMode:
         ConfigStore.themeMode === "auto"
     readonly property real surfaceAlpha:
@@ -36,24 +39,43 @@ QtObject {
     readonly property real barShapeScale:
         barContentScale * radiusScale
 
-    property color primaryColor: lightMode ? "#305EA8" : "#ADC6FF"
-    property color accentContainerColor:
-        lightMode ? "#D7E3FF" : "#294777"
-    property color accentForegroundColor:
-        lightMode ? "#102F5C" : "#D7E3FF"
-    property color outlineColor:
-        lightMode ? "#74777F" : "#8E9099"
-    property color surfaceBaseColor:
-        lightMode ? "#F8F9FF" : "#111318"
-    property color surfaceContainerColor:
-        lightMode ? "#EFF0F7" : "#1D2026"
-    property color surfaceMutedColor:
-        lightMode ? "#E2E3EA" : "#292C33"
-    property color onSurfaceColor:
-        lightMode ? "#1A1B20" : "#E2E2E9"
-    property color textMutedColor:
-        lightMode ? "#44474F" : "#C3C6CF"
+    property var dynamicLightPalette: ({})
+    property var dynamicDarkPalette: ({})
     property bool dynamicPaletteActive: false
+
+    readonly property var activePalette:
+        ThemePalette.activePalette(
+            resolvedMode,
+            dynamicPaletteActive,
+            dynamicLightPalette,
+            dynamicDarkPalette
+        )
+    readonly property color primaryColor: activePalette.primary
+    readonly property color onPrimaryColor: activePalette.onPrimary
+    readonly property color accentContainerColor:
+        activePalette.accentContainer
+    readonly property color accentForegroundColor:
+        activePalette.onAccentContainer
+    readonly property color outlineColor: activePalette.outline
+    readonly property color outlineVariantColor:
+        activePalette.outlineVariant
+    readonly property color surfaceLowestColor:
+        activePalette.surfaceLowest
+    readonly property color surfaceLowColor:
+        activePalette.surfaceLow
+    readonly property color surfaceBaseColor:
+        activePalette.surfaceBase
+    readonly property color surfaceContainerColor:
+        activePalette.surfaceContainer
+    readonly property color surfaceHighColor:
+        activePalette.surfaceHigh
+    readonly property color surfaceMutedColor:
+        activePalette.surfaceMuted
+    readonly property color onSurfaceColor:
+        activePalette.onSurface
+    readonly property color textMutedColor:
+        activePalette.textMuted
+    readonly property color scrimColor: activePalette.scrim
 
     function withAlpha(colorValue, opacityValue) {
         return Qt.rgba(
@@ -64,48 +86,38 @@ QtObject {
         )
     }
 
-    function applyDynamicPalette(
-        primary,
-        accentContainer,
-        outline,
-        neutral
-    ) {
-        primaryColor = primary
-        accentContainerColor = accentContainer
-        accentForegroundColor = lightMode ? "#102030" : "#F4F7FF"
-        outlineColor = outline
-
-        if (neutral) {
-            surfaceBaseColor = neutral.surfaceBase
-            surfaceContainerColor = neutral.surfaceContainer
-            surfaceMutedColor = neutral.surfaceMuted
-            onSurfaceColor = neutral.onSurface
-            textMutedColor = neutral.textMuted
+    function applyDynamicPalettes(lightPalette, darkPalette) {
+        if (!ThemePalette.complete(lightPalette)
+            || !ThemePalette.complete(darkPalette)) {
+            resetPalette()
+            return
         }
 
+        dynamicLightPalette = lightPalette
+        dynamicDarkPalette = darkPalette
         dynamicPaletteActive = true
     }
 
     function resetPalette() {
-        primaryColor = lightMode ? "#305EA8" : "#ADC6FF"
-        accentContainerColor = lightMode ? "#D7E3FF" : "#294777"
-        accentForegroundColor = lightMode ? "#102F5C" : "#D7E3FF"
-        outlineColor = lightMode ? "#74777F" : "#8E9099"
-        surfaceBaseColor = lightMode ? "#F8F9FF" : "#111318"
-        surfaceContainerColor = lightMode ? "#EFF0F7" : "#1D2026"
-        surfaceMutedColor = lightMode ? "#E2E3EA" : "#292C33"
-        onSurfaceColor = lightMode ? "#1A1B20" : "#E2E2E9"
-        textMutedColor = lightMode ? "#44474F" : "#C3C6CF"
+        dynamicLightPalette = ({})
+        dynamicDarkPalette = ({})
         dynamicPaletteActive = false
     }
 
-    onLightModeChanged: {
-        if (!dynamicPaletteActive)
-            resetPalette()
+    function previewPalette(mode) {
+        return ThemePalette.basePalette(mode)
     }
 
     readonly property var luminaTokens: ({
         color: {
+            surfaceLowest: root.withAlpha(
+                root.surfaceLowestColor,
+                root.surfaceAlpha
+            ),
+            surfaceLow: root.withAlpha(
+                root.surfaceLowColor,
+                root.surfaceAlpha
+            ),
             surfaceBase: root.withAlpha(
                 root.surfaceBaseColor,
                 root.surfaceAlpha
@@ -114,22 +126,40 @@ QtObject {
                 root.surfaceContainerColor,
                 root.surfaceAlpha
             ),
+            surfaceHigh: root.withAlpha(
+                root.surfaceHighColor,
+                Math.max(0.84, root.surfaceAlpha)
+            ),
             surfaceMuted: root.withAlpha(
                 root.surfaceMutedColor,
                 Math.max(0.78, root.surfaceAlpha)
             ),
-            scrim: root.lightMode ? "#8F111318" : "#B3111318",
+            scrim: root.withAlpha(
+                root.scrimColor,
+                root.lightMode ? 0.48 : 0.70
+            ),
             onSurface: root.onSurfaceColor,
             textMuted: root.textMutedColor,
             primary: root.primaryColor,
+            onPrimary: root.onPrimaryColor,
             accentContainer: root.accentContainerColor,
             onAccentContainer: root.accentForegroundColor,
             outline: root.outlineColor,
-            divider: root.withAlpha(
-                root.outlineColor,
-                root.lightMode ? 0.18 : 0.24
+            outlineVariant: root.outlineVariantColor,
+            divider: root.lightMode
+                ? root.withAlpha(root.outlineVariantColor, 0.64)
+                : root.withAlpha(root.outlineColor, 0.24),
+            urgent: root.activePalette.urgent,
+            errorContainer: root.activePalette.errorContainer,
+            onErrorContainer: root.activePalette.onErrorContainer,
+            hoverState: root.withAlpha(
+                root.onSurfaceColor,
+                0.08
             ),
-            urgent: root.lightMode ? "#BA1A1A" : "#FFB4AB",
+            pressedState: root.withAlpha(
+                root.onSurfaceColor,
+                0.12
+            ),
             barSolidBackground: root.surfaceContainerColor,
             barTranslucentBackground: root.surfaceContainerColor,
             barBlurTint: root.surfaceContainerColor,

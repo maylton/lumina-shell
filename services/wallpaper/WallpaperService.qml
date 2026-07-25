@@ -154,6 +154,53 @@ Singleton {
         return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722
     }
 
+    function linearColorChannel(channel) {
+        return channel <= 0.04045
+            ? channel / 12.92
+            : Math.pow((channel + 0.055) / 1.055, 2.4)
+    }
+
+    function relativeColorLuminance(color) {
+        return linearColorChannel(color.r) * 0.2126
+            + linearColorChannel(color.g) * 0.7152
+            + linearColorChannel(color.b) * 0.0722
+    }
+
+    function colorContrast(first, second) {
+        const firstLuminance = relativeColorLuminance(first)
+        const secondLuminance = relativeColorLuminance(second)
+        const lighter = Math.max(firstLuminance, secondLuminance)
+        const darker = Math.min(firstLuminance, secondLuminance)
+
+        return (lighter + 0.05) / (darker + 0.05)
+    }
+
+    function contrastColor(
+        hue,
+        saturation,
+        initialLightness,
+        background,
+        target,
+        lighten
+    ) {
+        var lightness = initialLightness
+        var candidate = colorTone(hue, saturation, lightness)
+
+        for (var index = 0;
+            index < 48
+                && colorContrast(candidate, background) < target;
+            ++index) {
+            lightness = clamped(
+                lightness + (lighten ? 0.015 : -0.015),
+                0.03,
+                0.99
+            )
+            candidate = colorTone(hue, saturation, lightness)
+        }
+
+        return candidate
+    }
+
     function chooseAccent(colors) {
         if (!colors || colors.length === 0)
             return null
@@ -218,7 +265,7 @@ Singleton {
         return "tonal-spot"
     }
 
-    function paletteFor(style, sourceColor) {
+    function paletteFor(style, sourceColor, mode) {
         const source = sourceColor || Qt.color("#4F83CC")
         const sourceHue = normalizedHue(source.hslHue)
         const sourceSaturation = clamped(
@@ -298,64 +345,120 @@ Singleton {
             neutralVariantSaturation = 0.12
         }
 
-        const darkMode = !Theme.lightMode
+        const darkMode = String(mode || "dark") !== "light"
+        const surfaceLowest = colorTone(
+            sourceHue,
+            neutralSaturation,
+            darkMode ? 0.04 : 1
+        )
+        const surfaceLow = colorTone(
+            sourceHue,
+            neutralSaturation,
+            darkMode ? 0.10 : 0.965
+        )
+        const surfaceBase = colorTone(
+            sourceHue,
+            neutralSaturation,
+            darkMode ? 0.075 : 0.985
+        )
+        const surfaceContainer = colorTone(
+            sourceHue,
+            neutralSaturation,
+            darkMode ? 0.125 : 0.94
+        )
+        const surfaceHigh = colorTone(
+            sourceHue,
+            neutralVariantSaturation,
+            darkMode ? 0.155 : 0.91
+        )
+        const surfaceMuted = colorTone(
+            sourceHue,
+            neutralVariantSaturation,
+            darkMode ? 0.19 : 0.87
+        )
+        const primary = contrastColor(
+            primaryHue,
+            primarySaturation,
+            darkMode ? 0.76 : 0.38,
+            surfaceBase,
+            4.5,
+            darkMode
+        )
+        const accentContainer = colorTone(
+            containerHue,
+            containerSaturation,
+            darkMode ? 0.29 : 0.88
+        )
 
         return {
+            mode: darkMode ? "dark" : "light",
             style: selected,
-            primary: colorTone(
+            primary: primary,
+            onPrimary: contrastColor(
                 primaryHue,
                 primarySaturation,
-                darkMode ? 0.76 : 0.38
+                darkMode ? 0.16 : 0.99,
+                primary,
+                4.5,
+                !darkMode
             ),
-            container: colorTone(
+            accentContainer: accentContainer,
+            onAccentContainer: contrastColor(
                 containerHue,
-                containerSaturation,
-                darkMode ? 0.29 : 0.88
+                containerSaturation * 0.82,
+                darkMode ? 0.91 : 0.18,
+                accentContainer,
+                4.5,
+                darkMode
             ),
             outline: colorTone(
                 sourceHue,
                 neutralVariantSaturation,
                 darkMode ? 0.62 : 0.48
             ),
-            neutral: {
-                surfaceBase: colorTone(
-                    sourceHue,
-                    neutralSaturation,
-                    darkMode ? 0.075 : 0.98
-                ),
-                surfaceContainer: colorTone(
-                    sourceHue,
-                    neutralSaturation,
-                    darkMode ? 0.125 : 0.94
-                ),
-                surfaceMuted: colorTone(
-                    sourceHue,
-                    neutralVariantSaturation,
-                    darkMode ? 0.19 : 0.87
-                ),
-                onSurface: colorTone(
-                    sourceHue,
-                    neutralSaturation * 0.55,
-                    darkMode ? 0.9 : 0.1
-                ),
-                textMuted: colorTone(
-                    sourceHue,
-                    neutralVariantSaturation * 0.6,
-                    darkMode ? 0.74 : 0.32
-                )
-            }
+            outlineVariant: colorTone(
+                sourceHue,
+                neutralVariantSaturation,
+                darkMode ? 0.32 : 0.79
+            ),
+            surfaceLowest: surfaceLowest,
+            surfaceLow: surfaceLow,
+            surfaceBase: surfaceBase,
+            surfaceContainer: surfaceContainer,
+            surfaceHigh: surfaceHigh,
+            surfaceMuted: surfaceMuted,
+            onSurface: colorTone(
+                sourceHue,
+                neutralSaturation * 0.55,
+                darkMode ? 0.9 : 0.1
+            ),
+            textMuted: colorTone(
+                sourceHue,
+                neutralVariantSaturation * 0.6,
+                darkMode ? 0.74 : 0.32
+            ),
+            urgent: Qt.color(darkMode ? "#FFB4AB" : "#BA1A1A"),
+            errorContainer:
+                Qt.color(darkMode ? "#3A171B" : "#FFDAD6"),
+            onErrorContainer:
+                Qt.color(darkMode ? "#FFDAD6" : "#410002"),
+            scrim: Qt.color(darkMode ? "#111318" : "#000000")
         }
     }
 
     function previewColors(style) {
         const source = chooseAccent(wallpaperColors.colors)
             || Qt.color("#4F83CC")
-        const palette = paletteFor(style, source)
+        const palette = paletteFor(
+            style,
+            source,
+            Theme.resolvedMode
+        )
 
         return [
             palette.primary,
-            palette.container,
-            palette.neutral.surfaceMuted,
+            palette.accentContainer,
+            palette.surfaceMuted,
             palette.outline
         ]
     }
@@ -371,13 +474,9 @@ Singleton {
         if (!accent)
             return
 
-        const palette = paletteFor(paletteStyle, accent)
-
-        Theme.applyDynamicPalette(
-            palette.primary,
-            palette.container,
-            palette.outline,
-            palette.neutral
+        Theme.applyDynamicPalettes(
+            paletteFor(paletteStyle, accent, "light"),
+            paletteFor(paletteStyle, accent, "dark")
         )
     }
 

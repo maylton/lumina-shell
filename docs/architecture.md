@@ -458,7 +458,22 @@ smoothly collapses the waveform into a flat determinate line, while resuming
 restores its amplitude. Reduced motion disables phase movement without removing
 progress information.
 
-The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
+The token namespace is the boundary for wallpaper-derived dynamic color.
+Visual modules consume semantic roles and must not know how the palette was
+generated.
+
+`ThemePalette.js` owns complete static Light and Dark schemes, semantic-role
+validation, mode selection, and contrast-test helpers. The validated Dark
+foundation remains unchanged. The Light scheme defines its own surface
+hierarchy, foregrounds, outlines, primary roles, error roles, and state-layer
+colors instead of deriving them by inversion.
+
+Wallpaper color generation produces both Light and Dark tonal variants from
+the same source color. `Theme` stores those variants and selects one
+reactively, so changing modes never depends on signal ordering and cannot
+retain the previous mode's surface colors. In the validated runtime, Auto
+continues to use the documented Dark fallback because no stable system
+color-scheme preference is available.
 
 Other Quickshell desktops, including Sleex, are useful architectural references for modular widgets and centralized adaptive theming. Lumina does not inherit their compositor assumptions or visual identity: it remains Niri-first and develops its own Material Expressive component language.
 

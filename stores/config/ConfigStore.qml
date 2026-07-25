@@ -831,6 +831,10 @@ Singleton {
             root.setShowStatusDetails(enabled)
         }
 
+        function theme(mode: string): void {
+            root.setThemeMode(mode)
+        }
+
         function status(): string {
             return JSON.stringify({
                 schemaVersion: root.schemaVersion,
