@@ -3,12 +3,60 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.connectivity
+import qs.services.i18n
 import qs.stores.control
 
 DashboardCard {
     id: root
 
-    accessibleName: "Connectivity and system status"
+    readonly property string wifiDetail: ConnectivityService.wifiConnected
+        ? ConnectivityService.wifiName
+        : ConnectivityService.wifiEnabled
+            ? I18n.tr(
+                "dashboard.status.wifi.notConnected",
+                "Not connected"
+            )
+            : I18n.tr(
+                "dashboard.status.disabled",
+                "Disabled"
+            )
+    readonly property string networkDetail:
+        ConnectivityService.wifiConnected
+            ? ConnectivityService.wifiName
+            : ConnectivityService.wiredConnected
+                ? I18n.tr(
+                    "dashboard.status.wired",
+                    "Wired"
+                )
+                : I18n.tr(
+                    "dashboard.status.offline",
+                    "Offline"
+                )
+    readonly property bool networkOffline:
+        !ConnectivityService.wifiConnected
+        && !ConnectivityService.wiredConnected
+    readonly property string bluetoothDetail:
+        !ConnectivityService.bluetoothAvailable
+            ? I18n.tr(
+                "common.unavailable",
+                "Unavailable"
+            )
+            : !ConnectivityService.bluetoothEnabled
+                ? I18n.tr(
+                    "dashboard.status.disabled",
+                    "Disabled"
+                )
+                : ConnectivityService.bluetoothConnectedCount > 0
+                    ? ConnectivityService.bluetoothSummary
+                    : I18n.tr(
+                        "dashboard.status.bluetooth.on",
+                        "On"
+                    )
+
+    accessibleName: I18n.tr(
+        "dashboard.status.accessibleName",
+        "Connectivity and system status"
+    )
 
     Column {
         anchors {
@@ -23,7 +71,10 @@ DashboardCard {
 
             Text {
                 width: parent.width
-                text: "System status"
+                text: I18n.tr(
+                    "dashboard.status.title",
+                    "System status"
+                )
                 color: root.luminaDesign.color.onSurface
                 font.pixelSize: root.luminaDesign.typography.titleMedium
                 font.weight: Font.Bold
@@ -37,7 +88,7 @@ DashboardCard {
             QuickToggle {
                 width: (parent.width - parent.spacing) / 2
                 title: "Wi-Fi"
-                detail: ConnectivityService.wifiName
+                detail: root.wifiDetail
                 iconName: ConnectivityService.wifiConnected
                     ? "network-wireless-signal-excellent-symbolic"
                     : ConnectivityService.wifiEnabled
@@ -52,7 +103,7 @@ DashboardCard {
             QuickToggle {
                 width: (parent.width - parent.spacing) / 2
                 title: "Bluetooth"
-                detail: ConnectivityService.bluetoothSummary
+                detail: root.bluetoothDetail
                 iconName: ConnectivityService.bluetoothEnabled
                     ? "bluetooth-active-symbolic"
                     : "bluetooth-disabled-symbolic"
@@ -70,18 +121,27 @@ DashboardCard {
             Repeater {
                 model: [
                     {
-                        label: ConnectivityService.networkSummary,
-                        value: "Connection",
+                        label: root.networkDetail,
+                        value: I18n.tr(
+                            "dashboard.status.connection",
+                            "Connection"
+                        ),
                         connection: true
                     },
                     {
                         label: ControlCenterStore.uptimeLabel,
-                        value: "Uptime",
+                        value: I18n.tr(
+                            "dashboard.status.uptime",
+                            "Uptime"
+                        ),
                         connection: false
                     },
                     {
                         label: ConnectivityService.bluetoothConnectedCount,
-                        value: "Connected devices",
+                        value: I18n.tr(
+                            "dashboard.status.connectedDevices",
+                            "Connected devices"
+                        ),
                         connection: false
                     }
                 ]
@@ -104,8 +164,7 @@ DashboardCard {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: statusMetric.modelData.label
                             color: statusMetric.modelData.connection
-                                ? ConnectivityService.networkSummary
-                                    === "Offline"
+                                ? root.networkOffline
                                     ? root.luminaDesign.color.urgent
                                     : root.luminaDesign.color.primary
                                 : root.luminaDesign.color.onSurface
