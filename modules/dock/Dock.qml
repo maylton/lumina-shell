@@ -60,7 +60,7 @@ Scope {
                 readonly property bool expanded:
                     !DockPreferences.autoHide
                     || revealRequested
-                    || hoverArea.containsMouse
+                    || dockHover.hovered
 
                 property bool revealRequested: !DockPreferences.autoHide
 
@@ -132,16 +132,27 @@ Scope {
                     }
                 }
 
+                HoverHandler {
+                    id: dockHover
+
+                    onHoveredChanged: {
+                        if (hovered) {
+                            hideTimer.stop()
+                            panel.revealRequested = true
+                        } else if (DockPreferences.autoHide) {
+                            hideTimer.restart()
+                        }
+                    }
+                }
+
                 Timer {
                     id: hideTimer
 
                     interval: 650
                     repeat: false
                     onTriggered: {
-                        if (DockPreferences.autoHide
-                            && !hoverArea.containsMouse) {
+                        if (DockPreferences.autoHide && !dockHover.hovered)
                             panel.revealRequested = false
-                        }
                     }
                 }
 
@@ -345,22 +356,6 @@ Scope {
                                         DockStore.togglePinned(modelData)
                                 }
                             }
-                        }
-                    }
-                }
-
-                MouseArea {
-                    id: hoverArea
-
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
-                    hoverEnabled: true
-                    onContainsMouseChanged: {
-                        if (containsMouse) {
-                            hideTimer.stop()
-                            panel.revealRequested = true
-                        } else if (DockPreferences.autoHide) {
-                            hideTimer.restart()
                         }
                     }
                 }
