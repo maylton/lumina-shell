@@ -6,7 +6,6 @@ import Quickshell.Wayland
 import qs.services.niri
 import qs.stores.config
 import qs.stores.niri
-import "BarSurfacePolicy.js" as BarSurfacePolicy
 
 Scope {
     id: root
@@ -67,10 +66,7 @@ Scope {
                 screen: modelData
                 implicitHeight: ConfigStore.barHeight
                     + (effectiveMargin * 2)
-                exclusiveZone: BarSurfacePolicy.exclusiveZone(
-                    ConfigStore.barBackgroundMode,
-                    implicitHeight
-                )
+                exclusiveZone: implicitHeight
                 color: "transparent"
                 focusable: false
 

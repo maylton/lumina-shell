@@ -46,11 +46,11 @@ Frosted Glass. Blur is a clean native background blur with a tonal tint.
 Frosted Glass adds a subtle grain, optical highlight, and stronger glass edge.
 Transparent mode keeps widgets on their own subtle tonal surfaces for
 contrast. On Niri 26.04, Blur and Frosted Glass request native background blur
-limited to the bar surface. Solid, Blur, and Frosted Glass reserve desktop
-work area, so tiled windows do not appear behind their surfaces. Transparent
-is a true overlay: windows can appear behind it, avoiding the empty wallpaper
-strip that an invisible reserved zone would create. Existing `translucent`
-preferences are loaded as Blur automatically.
+limited to the bar surface. All four modes reserve desktop work area, so tiled
+windows do not appear behind bar controls. Lumina's wallpaper surface ignores
+shell exclusion zones and continues beneath the reserved strip, allowing
+Transparent to reveal the wallpaper without exposing a second bar surface.
+Existing `translucent` preferences are loaded as Blur automatically.
 
 When automatic content scaling is enabled, Settings shows the calculated
 effective percentage as a read-only value. Disabling it exposes the manual

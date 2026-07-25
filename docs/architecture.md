@@ -75,13 +75,14 @@ Its background contract is independent from global shell transparency:
 - **transparent:** removes the background, edge divider, and floating border.
 
 The `Rectangle` that owns children is never assigned an `opacity`, so bar
-widgets and popup surfaces remain fully opaque. Divider, floating-border, and
-exclusive-zone policies are derived separately by `BarSurfacePolicy`. Color
-changes use the existing effects motion tokens. Solid, Blur, and Frosted Glass
-reserve the full layer-shell height. Transparent uses an exclusive zone of
-zero: otherwise the wallpaper exposed by the reserved work area would look
-like a second bar, since no tiled window can occupy that strip. In Blur and
-Frosted Glass modes, the `PanelWindow` requests Niri 26.04's native
+widgets and popup surfaces remain fully opaque. Divider and floating-border
+policies are derived separately by `BarSurfacePolicy`. Color changes use the
+existing effects motion tokens. Every mode reserves the full layer-shell
+height, so tiled windows never sit behind bar controls. The wallpaper
+`PanelWindow` uses `ExclusionMode.Ignore`, allowing its image to cover the
+whole output beneath that reserved area; Transparent therefore reveals the
+wallpaper rather than a compositor-colored strip. In Blur and Frosted Glass
+modes, the bar `PanelWindow` requests Niri 26.04's native
 `ext-background-effect` blur through
 `BackgroundEffect.blurRegion`; the region matches only the visible
 edge-to-edge or rounded floating bar. Frosted Glass adds its tint, grain, and

@@ -153,9 +153,9 @@ This sprint completes the 0.5 public-beta foundation:
   interaction targets.
 - The bar supports solid, blur, frosted-glass, and transparent backgrounds
   independently of global surface transparency, with opaque child content and
-  native Niri blur limited to the blur and frosted-glass bar region. The three
-  surfaced modes reserve work area; Transparent is an intentional overlay so
-  it can reveal windows instead of an empty wallpaper strip.
+  native Niri blur limited to the blur and frosted-glass bar region. All modes
+  reserve work area while the background wallpaper ignores shell exclusion
+  zones and continues beneath the transparent surface.
 - Bar height spans 40–80 pixels; automatic or bounded manual scaling adjusts
   semantic widget dimensions while retaining safe interaction targets and a
   single-line layout.

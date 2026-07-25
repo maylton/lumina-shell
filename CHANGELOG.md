@@ -74,9 +74,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   layer-shell background effect; Frosted Glass builds on it with a tonal tint,
   subtle grain, and glass-edge highlight. Legacy `translucent` preferences
   migrate to Blur.
-- Transparent bar mode now overlays the workspace instead of exposing an empty
-  wallpaper strip through a reserved exclusive zone; surfaced modes continue
-  to reserve their full height.
+- The wallpaper surface now ignores shell exclusion zones, allowing Transparent
+  bars to reserve work area without exposing a compositor-colored strip or
+  placing tiled windows behind bar controls.
 
 ### Changed
 

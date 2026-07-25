@@ -65,7 +65,7 @@ Scope {
                 screen: modelData
                 color: root.luminaDesign.color.surfaceBase
                 focusable: false
-                exclusiveZone: 0
+                exclusionMode: ExclusionMode.Ignore
 
                 anchors {
                     top: true
