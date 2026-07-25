@@ -14,12 +14,32 @@ SettingsPage {
 
     readonly property string currentWallpaper:
         WallpaperService.wallpaperFor(outputName)
+    readonly property var paletteOptions: [
+        { value: "auto", label: "Auto" },
+        { value: "content", label: "Content" },
+        { value: "expressive", label: "Expressive" },
+        { value: "fidelity", label: "Fidelity" },
+        { value: "fruit-salad", label: "Fruit Salad" },
+        { value: "monochrome", label: "Monochrome" },
+        { value: "neutral", label: "Neutral" },
+        { value: "rainbow", label: "Rainbow" },
+        { value: "tonal-spot", label: "Tonal Spot" }
+    ]
 
     function wallpaperFileName(path) {
         const value = String(path || "")
         const separator = value.lastIndexOf("/")
 
         return separator >= 0 ? value.slice(separator + 1) : value
+    }
+
+    function paletteLabel(value) {
+        for (var index = 0; index < paletteOptions.length; ++index) {
+            if (paletteOptions[index].value === value)
+                return paletteOptions[index].label
+        }
+
+        return "Auto"
     }
 
     title: "Appearance"
@@ -71,7 +91,8 @@ SettingsPage {
     SettingsSection {
         title: "Material palette"
         description: Theme.dynamicPaletteActive
-            ? "Accent colors are generated from the active wallpaper"
+            ? root.paletteLabel(ConfigStore.paletteStyle)
+                + " colors generated from the active wallpaper"
             : "Lumina's default semantic accent colors are active"
 
         SettingsSwitchRow {
@@ -85,6 +106,136 @@ SettingsPage {
             checked: ConfigStore.dynamicTheme
             onToggled: value =>
                 WallpaperService.setDynamicTheme(value)
+        }
+
+        Grid {
+            id: paletteGrid
+
+            readonly property real cellWidth: (
+                width - spacing * Math.max(0, columns - 1)
+            ) / columns
+
+            width: parent.width
+            height: Math.ceil(root.paletteOptions.length / columns) * 58
+                + Math.max(0, Math.ceil(
+                    root.paletteOptions.length / columns
+                ) - 1) * spacing
+            columns: width < 760 ? 2 : 3
+            spacing: root.luminaDesign.spacing.small
+            opacity: ConfigStore.dynamicTheme ? 1 : 0.5
+            enabled: ConfigStore.dynamicTheme
+
+            Repeater {
+                model: root.paletteOptions
+
+                delegate: Rectangle {
+                    id: paletteOption
+
+                    required property var modelData
+                    readonly property bool selected:
+                        String(modelData.value)
+                            === ConfigStore.paletteStyle
+
+                    width: paletteGrid.cellWidth
+                    height: 58
+                    radius: root.luminaDesign.shape.medium
+                    color: selected
+                        ? root.luminaDesign.color.accentContainer
+                        : root.luminaDesign.color.surfaceMuted
+                    border.width: activeFocus ? 2 : 1
+                    border.color: activeFocus || selected
+                        ? root.luminaDesign.color.primary
+                        : root.luminaDesign.color.outline
+                    activeFocusOnTab: enabled
+
+                    Accessible.role: Accessible.RadioButton
+                    Accessible.name: String(modelData.label)
+                        + " palette"
+                    Accessible.checked: selected
+                    Accessible.focusable: enabled
+                    Accessible.focused: activeFocus
+                    Accessible.onPressAction:
+                        WallpaperService.setPaletteStyle(
+                            String(modelData.value)
+                        )
+
+                    Keys.onSpacePressed: event => {
+                        WallpaperService.setPaletteStyle(
+                            String(modelData.value)
+                        )
+                        event.accepted = true
+                    }
+
+                    Keys.onReturnPressed: event => {
+                        WallpaperService.setPaletteStyle(
+                            String(modelData.value)
+                        )
+                        event.accepted = true
+                    }
+
+                    Row {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            margins: root.luminaDesign.spacing.medium
+                        }
+                        spacing: root.luminaDesign.spacing.medium
+
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 50
+                            spacing: 2
+
+                            Repeater {
+                                model: WallpaperService.previewColors(
+                                    String(paletteOption.modelData.value)
+                                )
+
+                                delegate: Rectangle {
+                                    required property var modelData
+
+                                    width: 15
+                                    height: 22
+                                    radius: 7
+                                    color: modelData
+                                    border.width: 1
+                                    border.color:
+                                        root.luminaDesign.color.outline
+                                }
+                            }
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                                - 50
+                                - parent.spacing
+                            text: String(paletteOption.modelData.label)
+                            color: paletteOption.selected
+                                ? root.luminaDesign.color.onAccentContainer
+                                : root.luminaDesign.color.onSurface
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                            font.weight: Font.DemiBold
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            paletteOption.forceActiveFocus(
+                                Qt.MouseFocusReason
+                            )
+                            WallpaperService.setPaletteStyle(
+                                String(paletteOption.modelData.value)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

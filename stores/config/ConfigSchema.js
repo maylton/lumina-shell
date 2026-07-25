@@ -7,6 +7,7 @@ function defaults() {
         schemaVersion: CURRENT_VERSION,
         doNotDisturb: false,
         dynamicTheme: true,
+        paletteStyle: "auto",
         wallpapers: {},
         defaultWallpaper:
             "/usr/share/wallpapers/cachyos-wallpapers/Abstract.png",
@@ -177,6 +178,21 @@ function normalize(source) {
         result.themeMode,
         ["auto", "light", "dark"],
         base.themeMode
+    )
+    result.paletteStyle = choice(
+        result.paletteStyle,
+        [
+            "auto",
+            "content",
+            "expressive",
+            "fidelity",
+            "fruit-salad",
+            "monochrome",
+            "neutral",
+            "rainbow",
+            "tonal-spot"
+        ],
+        base.paletteStyle
     )
     result.surfaceOpacity = boundedNumber(
         result.surfaceOpacity,
@@ -358,6 +374,7 @@ function defaultsForCategory(categoryName) {
         appearance: [
             "themeMode",
             "dynamicTheme",
+            "paletteStyle",
             "transparencyEnabled",
             "surfaceOpacity",
             "animationsEnabled",

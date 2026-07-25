@@ -11,6 +11,7 @@ Singleton {
     id: root
 
     readonly property bool dynamicThemeEnabled: ConfigStore.dynamicTheme
+    readonly property string paletteStyle: ConfigStore.paletteStyle
     readonly property string wallpaperDirectory: ConfigStore.wallpaperDirectory
     readonly property var wallpapers: ConfigStore.wallpapers
     readonly property string defaultWallpaper: ConfigStore.defaultWallpaper
@@ -176,6 +177,140 @@ Singleton {
         return selected
     }
 
+    function normalizedHue(hue) {
+        const value = Number(hue)
+
+        if (!isFinite(value) || value < 0)
+            return 0.58
+
+        return ((value % 1) + 1) % 1
+    }
+
+    function clamped(value, minimum, maximum) {
+        return Math.max(minimum, Math.min(maximum, Number(value)))
+    }
+
+    function colorTone(hue, saturation, lightness) {
+        return Qt.hsla(
+            normalizedHue(hue),
+            clamped(saturation, 0, 1),
+            clamped(lightness, 0, 1),
+            1
+        )
+    }
+
+    function resolvedPaletteStyle(style, sourceColor) {
+        const requested = String(style || "auto")
+
+        if (requested !== "auto")
+            return requested
+
+        const saturation = sourceColor
+            ? Number(sourceColor.hslSaturation)
+            : 0
+
+        if (saturation < 0.18)
+            return "content"
+
+        if (saturation < 0.48)
+            return "neutral"
+
+        return "tonal-spot"
+    }
+
+    function paletteFor(style, sourceColor) {
+        const source = sourceColor || Qt.color("#4F83CC")
+        const sourceHue = normalizedHue(source.hslHue)
+        const sourceSaturation = clamped(
+            source.hslSaturation < 0 ? 0 : source.hslSaturation,
+            0,
+            1
+        )
+        const selected = resolvedPaletteStyle(style, source)
+        var primaryHue = sourceHue
+        var containerHue = sourceHue
+        var outlineHue = sourceHue
+        var primarySaturation = 0.5
+        var containerSaturation = 0.32
+        var outlineSaturation = 0.2
+
+        if (selected === "content") {
+            primarySaturation = clamped(sourceSaturation, 0.32, 0.82)
+            containerSaturation = primarySaturation * 0.58
+            outlineSaturation = primarySaturation * 0.32
+        } else if (selected === "expressive") {
+            primaryHue += 0.16
+            containerHue -= 0.12
+            outlineHue += 0.32
+            primarySaturation = 0.74
+            containerSaturation = 0.52
+            outlineSaturation = 0.38
+        } else if (selected === "fidelity") {
+            primarySaturation = sourceSaturation
+            containerSaturation = sourceSaturation * 0.72
+            outlineSaturation = sourceSaturation * 0.45
+        } else if (selected === "fruit-salad") {
+            primaryHue -= 0.12
+            containerHue += 0.1
+            outlineHue += 0.25
+            primarySaturation = 0.72
+            containerSaturation = 0.56
+            outlineSaturation = 0.36
+        } else if (selected === "monochrome") {
+            primarySaturation = 0
+            containerSaturation = 0
+            outlineSaturation = 0
+        } else if (selected === "neutral") {
+            primarySaturation = 0.16
+            containerSaturation = 0.1
+            outlineSaturation = 0.08
+        } else if (selected === "rainbow") {
+            primaryHue += 0.24
+            containerHue -= 0.18
+            outlineHue += 0.42
+            primarySaturation = 0.78
+            containerSaturation = 0.64
+            outlineSaturation = 0.48
+        } else {
+            primarySaturation = 0.52
+            containerSaturation = 0.34
+            outlineSaturation = 0.22
+        }
+
+        const darkMode = !Theme.lightMode
+
+        return {
+            style: selected,
+            primary: colorTone(
+                primaryHue,
+                primarySaturation,
+                darkMode ? 0.76 : 0.38
+            ),
+            container: colorTone(
+                containerHue,
+                containerSaturation,
+                darkMode ? 0.29 : 0.88
+            ),
+            outline: colorTone(
+                outlineHue,
+                outlineSaturation,
+                darkMode ? 0.62 : 0.48
+            )
+        }
+    }
+
+    function previewColors(style) {
+        const source = chooseAccent(wallpaperColors.colors)
+            || Qt.color("#4F83CC")
+        const palette = paletteFor(style, source)
+
+        return [
+            palette.primary,
+            palette.container,
+            palette.outline
+        ]
+    }
+
     function applyColors(colors) {
         if (!dynamicThemeEnabled) {
             Theme.resetPalette()
@@ -187,14 +322,13 @@ Singleton {
         if (!accent)
             return
 
-        const luminance = colorLuminance(accent)
-        const primary = luminance < 0.62
-            ? Qt.lighter(accent, 1.75)
-            : Qt.darker(accent, 1.12)
-        const container = Qt.darker(accent, luminance < 0.35 ? 1.18 : 1.65)
-        const outline = Qt.lighter(container, 1.55)
+        const palette = paletteFor(paletteStyle, accent)
 
-        Theme.applyDynamicPalette(primary, container, outline)
+        Theme.applyDynamicPalette(
+            palette.primary,
+            palette.container,
+            palette.outline
+        )
     }
 
     function setDynamicTheme(enabled) {
@@ -203,6 +337,13 @@ Singleton {
         if (!Boolean(enabled))
             Theme.resetPalette()
         else
+            applyColors(wallpaperColors.colors)
+    }
+
+    function setPaletteStyle(style) {
+        ConfigStore.setPaletteStyle(style)
+
+        if (dynamicThemeEnabled)
             applyColors(wallpaperColors.colors)
     }
 
@@ -221,6 +362,11 @@ Singleton {
                 root.applyColors(wallpaperColors.colors)
             else
                 Theme.resetPalette()
+        }
+
+        function onPaletteStyleChanged() {
+            if (root.dynamicThemeEnabled)
+                root.applyColors(wallpaperColors.colors)
         }
     }
 

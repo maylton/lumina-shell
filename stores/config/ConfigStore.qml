@@ -27,6 +27,7 @@ Singleton {
     property alias schemaVersion: stateAdapter.schemaVersion
     property alias doNotDisturb: stateAdapter.doNotDisturb
     property alias dynamicTheme: stateAdapter.dynamicTheme
+    property alias paletteStyle: stateAdapter.paletteStyle
     property alias wallpapers: stateAdapter.wallpapers
     property alias defaultWallpaper: stateAdapter.defaultWallpaper
     property alias wallpaperDirectory: stateAdapter.wallpaperDirectory
@@ -245,6 +246,10 @@ Singleton {
         setValue("dynamicTheme", Boolean(value))
     }
 
+    function setPaletteStyle(value) {
+        setValue("paletteStyle", String(value || "auto"))
+    }
+
     function setWallpapers(value) {
         setValue("wallpapers", cloneMap(value))
     }
@@ -382,6 +387,7 @@ Singleton {
                 ConfigSchema.CURRENT_VERSION
             property bool doNotDisturb: false
             property bool dynamicTheme: true
+            property string paletteStyle: "auto"
             property var wallpapers: ({})
             property string defaultWallpaper:
                 "/usr/share/wallpapers/cachyos-wallpapers/Abstract.png"
@@ -569,6 +575,7 @@ Singleton {
                 lastError: root.lastError,
                 themeMode: root.themeMode,
                 dynamicTheme: root.dynamicTheme,
+                paletteStyle: root.paletteStyle,
                 barPosition: root.barPosition,
                 dashboardDefaultPage: root.dashboardDefaultPage,
                 doNotDisturb: root.doNotDisturb,

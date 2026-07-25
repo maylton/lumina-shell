@@ -10,6 +10,7 @@ TestCase {
 
         compare(state.schemaVersion, 4)
         compare(state.themeMode, "auto")
+        compare(state.paletteStyle, "auto")
         compare(state.barHeight, 48)
         compare(state.notificationPopupMaximum, 3)
         compare(state.osdDuration, 1800)
@@ -33,6 +34,19 @@ TestCase {
         compare(migrated.osdDuration, 3000)
         compare(migrated.showStatusDetails, false)
         compare(migrated.themeMode, "auto")
+        compare(migrated.paletteStyle, "auto")
+    }
+
+    function test_paletteStyleNormalization() {
+        const expressive = ConfigSchema.normalize({
+            paletteStyle: "expressive"
+        })
+        const invalid = ConfigSchema.normalize({
+            paletteStyle: "unsupported"
+        })
+
+        compare(expressive.paletteStyle, "expressive")
+        compare(invalid.paletteStyle, "auto")
     }
 
     function test_legacyWallpaperStringMigrates() {
@@ -75,6 +89,7 @@ TestCase {
         const bar = ConfigSchema.defaultsForCategory("bar")
 
         compare(appearance.themeMode, "auto")
+        compare(appearance.paletteStyle, "auto")
         verify(appearance.barHeight === undefined)
         compare(bar.barHeight, 48)
         verify(bar.themeMode === undefined)
@@ -105,6 +120,7 @@ TestCase {
     function test_serializationRestoresSettings() {
         const configured = ConfigSchema.normalize({
             themeMode: "light",
+            paletteStyle: "fruit-salad",
             barPosition: "bottom",
             dashboardShowMedia: false,
             notificationPopupPosition: "bottom-left",
@@ -116,6 +132,7 @@ TestCase {
         )
 
         compare(restored.themeMode, "light")
+        compare(restored.paletteStyle, "fruit-salad")
         compare(restored.barPosition, "bottom")
         compare(restored.dashboardShowMedia, false)
         compare(

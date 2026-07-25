@@ -23,6 +23,10 @@ Scope {
             WallpaperService.setDynamicTheme(enabled)
         }
 
+        function palette(style: string): void {
+            WallpaperService.setPaletteStyle(style)
+        }
+
         function picker(outputName: string): void {
             WallpaperService.togglePicker(outputName)
         }
@@ -33,6 +37,7 @@ Scope {
                 wallpaper: WallpaperService.wallpaperFor(outputName),
                 dynamicTheme: WallpaperService.dynamicThemeEnabled,
                 paletteActive: Theme.dynamicPaletteActive,
+                paletteStyle: WallpaperService.paletteStyle,
                 primary: String(Theme.primaryColor)
             })
         }

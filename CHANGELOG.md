@@ -40,3 +40,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   migration, validation clamps, and serialization tests.
 - Live appearance, bar, dashboard, notification, OSD, and session preferences,
   plus local system diagnostics and project information.
+- Nine persistent wallpaper-derived Material palette profiles with live
+  previews and IPC selection.

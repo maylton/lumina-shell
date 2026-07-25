@@ -110,7 +110,19 @@ Only one process can own `org.freedesktop.Notifications`. If Noctalia already ow
 
 ## Wallpapers and color
 
-The **Wall** chip opens the image picker on the selected output. Wallpaper paths are persisted independently per output with a shared default fallback. Dynamic color samples the focused output wallpaper and updates semantic Lumina colors.
+The **Wall** chip opens the image picker on the selected output. Wallpaper
+paths are persisted independently per output with a shared default fallback.
+Dynamic color samples the focused output wallpaper and updates semantic Lumina
+colors. The Appearance page offers Auto, Content, Expressive, Fidelity, Fruit
+Salad, Monochrome, Neutral, Rainbow, and Tonal Spot profiles. Auto chooses a
+profile from the saturation of the extracted wallpaper color.
+
+The profile can also be changed through IPC:
+
+```bash
+qs ipc -p /path/to/lumina-shell call wallpaper palette expressive
+qs ipc -p /path/to/lumina-shell call wallpaper status DP-1
+```
 
 ## Layout and session
 
