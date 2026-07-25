@@ -164,6 +164,8 @@ This sprint completes the 0.5 public-beta foundation:
   expressive outer shape without changing their controls or persisted state.
 - Settings sliders separate active and inactive tracks with a stable gap around
   the Material handle at intermediate and endpoint values.
+- Settings combo rows open real Material dropdown menus with selected state,
+  bounded placement, outside dismissal, and keyboard navigation.
 - Runtime locale detection, regional fallback, live catalog reload, and
   translation validation support incremental community localization.
 - Dashboard media progress uses a determinate Material Expressive wavy

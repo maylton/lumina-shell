@@ -229,6 +229,12 @@ shared handle. Pure geometry clamps values, reserves the handle gap, and
 collapses the absent segment at either endpoint without changing interaction
 or persisted values.
 
+Settings combo rows keep their typed `options`, `currentValue`, and `selected`
+contract, but present choices in a shared overlay dropdown rather than cycling
+on click. The menu retains selected and highlighted states, supports arrow,
+Home, End, Enter, Space, Escape, and outside dismissal, and flips above its
+anchor when the output viewport has insufficient room below.
+
 `ConfigFileService` owns argument-array `xdg-open` processes.
 `SystemDiagnosticsService` owns local version and diagnostic processes.
 Visual components never construct shell command strings.
