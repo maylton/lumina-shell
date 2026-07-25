@@ -1,9 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
+import QtQuick.Controls.impl as ControlsImpl
 import Quickshell
-import Quickshell.Widgets
 
 Item {
     id: root
@@ -22,22 +21,16 @@ Item {
     implicitWidth: iconSize
     implicitHeight: iconSize
 
-    IconImage {
+    ControlsImpl.IconImage {
         id: sourceIcon
 
         anchors.fill: parent
         source: root.iconSource
+        color: root.iconColor
         asynchronous: true
-        mipmap: true
-        visible: false
-    }
-
-    MultiEffect {
-        anchors.fill: parent
-        source: sourceIcon
         visible: root.iconReady
-        colorization: 1
-        colorizationColor: root.iconColor
+        sourceSize.width: root.iconSize
+        sourceSize.height: root.iconSize
     }
 
     Text {

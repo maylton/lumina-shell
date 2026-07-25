@@ -2,10 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
-import qs.services.connectivity
-import qs.services.niri
 import qs.services.notifications
-import qs.services.wallpaper
 import qs.stores.control
 import qs.stores.session
 import qs.stores.settings
@@ -70,13 +67,6 @@ Item {
         spacing: root.luminaDesign.spacing.small
 
         DashboardAction {
-            iconName: "view-refresh-symbolic"
-            symbol: "↻"
-            label: "Refresh Niri outputs"
-            onActivated: NiriService.requestOutputRefresh()
-        }
-
-        DashboardAction {
             iconName: "preferences-system-symbolic"
             symbol: "⚙"
             label: "Open Lumina settings"
@@ -91,45 +81,11 @@ Item {
         }
 
         DashboardAction {
-            iconName: ConnectivityService.wifiConnected
-                ? "network-wireless-signal-excellent-symbolic"
-                : ConnectivityService.wifiEnabled
-                    ? "network-wireless-symbolic"
-                    : "network-wireless-disabled-symbolic"
-            symbol: "◉"
-            label: "Wi-Fi"
-            checked: ConnectivityService.wifiEnabled
-            available: ConnectivityService.wifiAvailable
-            onActivated: ConnectivityService.toggleWifi()
-        }
-
-        DashboardAction {
-            iconName: ConnectivityService.bluetoothEnabled
-                ? "bluetooth-active-symbolic"
-                : "bluetooth-disabled-symbolic"
-            symbol: "ᛒ"
-            label: "Bluetooth"
-            checked: ConnectivityService.bluetoothEnabled
-            available: ConnectivityService.bluetoothAvailable
-            onActivated: ConnectivityService.toggleBluetooth()
-        }
-
-        DashboardAction {
             iconName: "notifications-disabled-symbolic"
             symbol: "◐"
             label: "Do Not Disturb"
             checked: NotificationService.doNotDisturb
             onActivated: NotificationService.toggleDoNotDisturb()
-        }
-
-        DashboardAction {
-            iconName: "preferences-color-symbolic"
-            symbol: "✦"
-            label: "Dynamic color"
-            checked: WallpaperService.dynamicThemeEnabled
-            onActivated: WallpaperService.setDynamicTheme(
-                !WallpaperService.dynamicThemeEnabled
-            )
         }
 
         DashboardAction {
