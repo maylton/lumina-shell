@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repository_dir="$(cd -- "${script_dir}/.." && pwd)"
+
+if command -v qmltestrunner >/dev/null 2>&1; then
+    qml_test_runner="$(command -v qmltestrunner)"
+elif [[ -x /usr/lib/qt6/bin/qmltestrunner ]]; then
+    qml_test_runner="/usr/lib/qt6/bin/qmltestrunner"
+else
+    printf 'qmltestrunner was not found. Install Qt 6 declarative tools.\n' >&2
+    exit 1
+fi
+
+QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}" \
+    "${qml_test_runner}" -input "${repository_dir}/tests"

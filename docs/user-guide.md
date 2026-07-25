@@ -108,6 +108,7 @@ qs ipc -p /path/to/lumina-shell call audio status
 qs ipc -p /path/to/lumina-shell call brightness status
 qs ipc -p /path/to/lumina-shell call power status
 qs ipc -p /path/to/lumina-shell call media status
+qs ipc -p /path/to/lumina-shell call niri status
 qs ipc -p /path/to/lumina-shell call connectivity status
 qs ipc -p /path/to/lumina-shell call weather status
 qs ipc -p /path/to/lumina-shell call config status

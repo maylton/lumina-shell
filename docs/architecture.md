@@ -57,7 +57,7 @@ Niri window state includes `layout.pos_in_scrolling_layout`, a 1-based pair cont
 
 The event-stream process is persistent and read-only. Output snapshots and compositor actions use separate short-lived `Process` objects, because an IPC connection that has entered event-stream mode cannot also accept regular requests.
 
-When the event stream exits unexpectedly, Lumina waits briefly and reconnects. The bar exposes connecting, connected, and demo states without blocking the UI.
+When the event stream exits unexpectedly, Lumina immediately clears compositor-owned state, stops an in-flight output snapshot, and reconnects with bounded exponential backoff. A new stream remains in the synchronizing state until output, workspace, and window snapshots arrive; a five-second initial-state timeout restarts an incomplete connection. The bar exposes connecting, synchronizing, connected, reconnecting, and demo states without blocking the UI.
 
 ### Niri action lifecycle
 
@@ -203,7 +203,6 @@ Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands
 
 The next open implementation areas are:
 
-- tests for event reduction and reconnection;
 - laptop backlight and battery validation;
 - physical two-output hotplug validation;
 - 0.7 extended-beta features.

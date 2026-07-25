@@ -40,6 +40,12 @@ Quickshell manages the contents of `.qmlls.ini` for the current machine. The fil
 
 Use `qmlls` through the editor for project-aware diagnostics. A standalone `qmllint` invocation may not resolve Quickshell root-relative `qs.*` imports or `PanelWindow`, so runtime validation remains required.
 
+Run the pure QML service tests with:
+
+```bash
+./scripts/test.sh
+```
+
 ## Manual validation
 
 On a Wayland development host:

@@ -29,7 +29,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Connect to `$NIRI_SOCKET`.
 - [x] Consume the JSON event stream.
 - [x] Maintain reactive output, workspace, window, and overview state.
-- [ ] Reconnect safely after compositor or socket interruption.
+- [x] Reconnect safely after compositor or socket interruption.
 - [x] Expose compositor actions through `NiriService`.
 
 ### First bar widgets
@@ -140,7 +140,7 @@ This sprint completes the 0.5 public-beta foundation:
 
 ## Open follow-ups
 
-1. [ ] Add event-reduction and reconnection tests.
+1. [x] Add event-reduction and reconnection tests.
 2. [ ] Validate backlight and battery behavior on a laptop.
 3. [ ] Validate overlay hotplug behavior with two physical outputs.
 4. [ ] Select the project license.

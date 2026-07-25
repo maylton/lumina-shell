@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.stores.niri
+import "NiriEventReducer.js" as NiriEventReducer
 
 Singleton {
     id: root
@@ -15,14 +16,17 @@ Singleton {
     readonly property bool available: socketPath.length > 0
     readonly property bool demoMode: !available
     readonly property bool connected: eventStream.running && receivedInitialState
+    readonly property bool receivedInitialState:
+        NiriEventReducer.isInitialStateComplete(initialSyncState)
     readonly property bool actionRunning: actionProcess.running
     readonly property bool actionFailed: actionStatus === "failed"
     readonly property int pendingActionCount: actionQueue.length
         + (activeActionName.length > 0 ? 1 : 0)
 
-    property bool receivedInitialState: false
+    property var initialSyncState: NiriEventReducer.initialSyncState()
     property bool overviewOpen: false
     property bool outputRefreshPending: false
+    property int reconnectAttempt: 0
     property string status: demoMode ? "demo" : "connecting"
     property string lastError: ""
     property string lastEventType: ""
@@ -56,9 +60,91 @@ Singleton {
         if (!available || eventStream.running)
             return
 
-        status = "connecting"
-        lastError = ""
+        initialSyncState = NiriEventReducer.initialSyncState()
+        status = reconnectAttempt > 0 ? "reconnecting" : "connecting"
         eventStream.running = true
+    }
+
+    function currentCompositorState() {
+        return NiriEventReducer.createState(
+            WorkspaceStore.workspaces,
+            WindowStore.windows,
+            overviewOpen
+        )
+    }
+
+    function applyCompositorState(state) {
+        WorkspaceStore.replace(state.workspaces)
+        WindowStore.replace(state.windows)
+        overviewOpen = state.overviewOpen
+    }
+
+    function clearCompositorState() {
+        applyCompositorState(NiriEventReducer.emptyState())
+        OutputStore.replace([])
+        lastEventType = ""
+        initialSyncState = NiriEventReducer.initialSyncState()
+    }
+
+    function scheduleReconnect(exitCode) {
+        clearCompositorState()
+        outputRefreshPending = false
+        outputRefreshTimer.stop()
+
+        if (outputSnapshot.running)
+            outputSnapshot.running = false
+
+        if (!available) {
+            status = "demo"
+            return
+        }
+
+        reconnectAttempt += 1
+        status = "reconnecting"
+        reconnectTimer.interval =
+            NiriEventReducer.reconnectDelay(reconnectAttempt)
+
+        if (!lastError)
+            lastError = "Niri event stream exited with code " + exitCode
+
+        reconnectTimer.restart()
+    }
+
+    function updateInitialSynchronization(snapshotType) {
+        const wasComplete = receivedInitialState
+
+        initialSyncState = NiriEventReducer.markInitialSnapshot(
+            initialSyncState,
+            snapshotType
+        )
+
+        if (NiriEventReducer.isInitialStateComplete(initialSyncState)) {
+            status = "connected"
+            reconnectAttempt = 0
+
+            if (!wasComplete)
+                lastError = ""
+
+            initialSyncTimer.stop()
+        } else if (eventStream.running) {
+            status = "synchronizing"
+        }
+    }
+
+    function statusObject() {
+        return {
+            available: available,
+            connected: connected,
+            status: status,
+            receivedInitialState: receivedInitialState,
+            reconnectAttempt: reconnectAttempt,
+            lastError: lastError,
+            lastEventType: lastEventType,
+            outputCount: OutputStore.count,
+            workspaceCount: WorkspaceStore.workspaces.length,
+            windowCount: WindowStore.windows.length,
+            overviewOpen: overviewOpen
+        }
     }
 
     function requestOutputRefresh() {
@@ -87,6 +173,9 @@ Singleton {
     }
 
     function handleOutputsSnapshot(rawText) {
+        if (!eventStream.running)
+            return
+
         const text = String(rawText).trim()
 
         if (!text)
@@ -116,89 +205,46 @@ Singleton {
         }
 
         OutputStore.replaceMap(outputMap)
+        updateInitialSynchronization("OutputsSnapshot")
     }
 
     function handleLine(rawLine) {
-        const line = String(rawLine).trim()
+        const parsed = NiriEventReducer.parseLine(rawLine)
 
-        if (!line)
-            return
-
-        var event
-
-        try {
-            event = JSON.parse(line)
-        } catch (error) {
-            lastError = "Invalid Niri event JSON: " + error
-            console.warn("Lumina NiriService:", lastError, line)
+        if (!parsed.accepted) {
+            if (parsed.error) {
+                lastError = parsed.error
+                console.warn(
+                    "Lumina NiriService:",
+                    lastError,
+                    String(rawLine).trim()
+                )
+            }
             return
         }
 
-        const keys = Object.keys(event)
-
-        if (keys.length !== 1)
-            return
-
-        const eventType = keys[0]
-        const payload = event[eventType] || {}
+        const eventType = parsed.eventType
+        const payload = parsed.payload
+        const result = NiriEventReducer.reduce(
+            currentCompositorState(),
+            eventType,
+            payload
+        )
 
         lastEventType = eventType
-        status = "connected"
-        receivedInitialState = true
         eventReceived(eventType)
 
-        switch (eventType) {
-        case "WorkspacesChanged":
-            WorkspaceStore.replace(payload.workspaces || [])
-            break
-        case "WorkspaceUrgencyChanged":
-            WorkspaceStore.setUrgent(payload.id, payload.urgent)
-            break
-        case "WorkspaceActivated":
-            WorkspaceStore.activate(payload.id, payload.focused)
-            break
-        case "WorkspaceActiveWindowChanged":
-            WorkspaceStore.setActiveWindow(payload.workspace_id, payload.active_window_id)
-            break
-        case "WindowsChanged":
-            WindowStore.replace(payload.windows || [])
-            break
-        case "WindowOpenedOrChanged":
-            WindowStore.upsert(payload.window)
-            break
-        case "WindowClosed":
-            WindowStore.remove(payload.id)
-            break
-        case "WindowFocusChanged":
-            WindowStore.focus(payload.id)
-            break
-        case "WindowUrgencyChanged":
-            WindowStore.setUrgent(payload.id, payload.urgent)
-            break
-        case "WindowLayoutsChanged":
-            applyWindowLayoutChanges(payload.changes || [])
-            break
-        case "OverviewOpenedOrClosed":
-            overviewOpen = Boolean(payload.is_open)
-            break
-        case "ConfigLoaded":
+        if (result.handled)
+            applyCompositorState(result.state)
+
+        updateInitialSynchronization(eventType)
+
+        if (eventType === "ConfigLoaded") {
             if (payload.failed) {
                 lastError = "Niri reported a failed configuration reload"
             } else {
                 requestOutputRefresh()
             }
-            break
-        default:
-            break
-        }
-    }
-
-    function applyWindowLayoutChanges(changes) {
-        for (var i = 0; i < changes.length; ++i) {
-            const change = changes[i]
-
-            if (change && change.length >= 2)
-                WindowStore.updateLayout(change[0], change[1])
         }
     }
 
@@ -472,6 +518,14 @@ Singleton {
         )
     }
 
+    IpcHandler {
+        target: "niri"
+
+        function status(): string {
+            return JSON.stringify(root.statusObject())
+        }
+    }
+
     Component.onCompleted: initialize()
 
     Connections {
@@ -504,20 +558,15 @@ Singleton {
         }
 
         onStarted: {
-            root.status = "connected"
+            root.status = "synchronizing"
             root.lastError = ""
+            initialSyncTimer.restart()
             root.requestOutputRefresh()
         }
 
         onExited: (exitCode, exitStatus) => {
-            root.receivedInitialState = false
-
-            if (root.available) {
-                root.status = "reconnecting"
-                reconnectTimer.restart()
-            } else {
-                root.status = "demo"
-            }
+            initialSyncTimer.stop()
+            root.scheduleReconnect(exitCode)
         }
     }
 
@@ -573,9 +622,22 @@ Singleton {
 
     Timer {
         id: reconnectTimer
-        interval: 1500
+        interval: 1000
         repeat: false
         onTriggered: root.startStream()
+    }
+
+    Timer {
+        id: initialSyncTimer
+        interval: 5000
+        repeat: false
+        onTriggered: {
+            if (!root.receivedInitialState && eventStream.running) {
+                root.lastError =
+                    "Niri event stream did not provide its initial state"
+                eventStream.running = false
+            }
+        }
     }
 
     Timer {
