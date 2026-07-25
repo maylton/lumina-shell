@@ -1,7 +1,6 @@
 import QtQuick
 import qs.design
 import qs.modules.bar.widgets
-import qs.modules.control
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.session
@@ -88,6 +87,16 @@ Item {
             verticalCenter: parent.verticalCenter
         }
 
+        PrivacyIndicator {
+            visible: ConfigStore.barShowPrivacyIndicators
+                && sourceAvailable
+        }
+
+        KeyboardLayoutIndicator {
+            visible: ConfigStore.barShowKeyboardLayout
+                && sourceAvailable
+        }
+
         TrayWidget {
             anchors.verticalCenter: parent.verticalCenter
             visible: ConfigStore.barShowTray
@@ -99,7 +108,13 @@ Item {
             outputName: root.outputName
         }
 
-        ControlButton {
+        SystemStatusCluster {
+            anchors.verticalCenter: parent.verticalCenter
+            compact: root.width < 1320
+            outputName: root.outputName
+        }
+
+        DashboardButton {
             anchors.verticalCenter: parent.verticalCenter
             visible: ConfigStore.barShowDashboardButton
             outputName: root.outputName
