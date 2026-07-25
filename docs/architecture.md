@@ -22,7 +22,8 @@ The Niri state increment introduces:
 - reactive output, workspace, and window stores;
 - queued overview and workspace actions with reactive completion state;
 - a demo fallback when `$NIRI_SOCKET` is unavailable;
-- workspace, focused-window, output, column-position, connection, overview, clock, calendar, launcher, and system-tray widgets in the bar.
+- composable Classic and Expressive bar layouts with output-aware workspace,
+  context, date/time, status, launcher, notification, and system-tray widgets.
 
 The Niri event stream supplies a complete initial state followed by incremental updates. Unknown events are ignored so newer Niri versions can add event variants without breaking the shell.
 
@@ -52,6 +53,34 @@ Requests are debounced and coalesced. Lumina does not continuously poll outputs.
 ### Column position
 
 Niri window state includes `layout.pos_in_scrolling_layout`, a 1-based pair containing the column index and the tile index inside that column. `WindowStore` normalizes this into a compact label for the active window on each output. Floating windows are represented explicitly and windows without a scrolling-layout position omit the indicator.
+
+## Bar composition
+
+`Bar.qml` owns only the per-screen `PanelWindow`, layer-shell geometry, output
+selection, and the state passed to the active visual layout. `BarSurface`
+implements the geometry contract:
+
+- **edge-to-edge:** the surface and `PanelWindow` use `barHeight`, with no
+  outer margin and a subtle edge divider;
+- **floating:** `barHeight` remains the visible surface height while the
+  window and exclusive zone add the configured margins.
+
+`ExpressiveBarLayout` is the default schema-v5 preset. Its left and right
+orders are registries of `Component` objects instantiated through `Loader`;
+preferences therefore reorder or hide widgets without duplicating layout
+branches. `ClassicBarLayout` preserves the previous floating composition and
+legacy `barWidgetOrder` data as a fallback and regression reference.
+
+Each output owns its own `ContextCapsule` and timeout. Window, application,
+column, workspace, and action-error property changes restart that local timer;
+there is no polling or process boundary in the visual component. Date/time
+continues to use the shared `CalendarStore`, while its popup anchors below a
+top bar and above a bottom bar.
+
+`SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
+`PowerService` directly and opens the existing Dashboard through
+`ControlCenterStore`. Missing capabilities are omitted. It never creates a
+second quick-controls popup.
 
 ## Process policy
 
@@ -162,15 +191,19 @@ temporarily normalizes to Appearance.
 ## Persistent configuration
 
 `ConfigStore` persists user state through an atomic Quickshell `FileView` and
-`JsonAdapter`. Schema 4 adds semantic appearance, bar, dashboard, behavior,
-notification, OSD, session, and navigation preferences while retaining the
-existing wallpaper and Do Not Disturb keys.
+`JsonAdapter`. Schema 4 added semantic appearance, dashboard, behavior,
+notification, OSD, session, and navigation preferences. Schema 5 adds the
+Expressive/Classic bar preset, edge/floating surface, context policy,
+date/status options, widget visibility, and independent left/right orders
+while retaining the legacy Classic order.
 
 The default path is `Quickshell.stateDir/lumina-state.json`.
 `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
 migrated the single-string wallpaper shape into a default plus per-output map.
 Schema v3 added OSD and bar-detail preferences. Schema v4 normalizes missing
-and out-of-range values while preserving all known previous preferences.
+and out-of-range values. Schema v5 migrates v4 in place, filters unknown or
+duplicate widget IDs, preserves valid ordering, and restores required IDs
+without changing wallpapers or preferences outside the Bar category.
 
 Writes are debounced and only occur after initialization, so loading,
 migration, and slider movement cannot continuously rewrite the file.
@@ -213,7 +246,7 @@ surfaces. It records the active surface and output so opening one full-screen
 interactive overlay closes the previous one instead of stacking competing
 keyboard surfaces.
 
-Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; and persisted wallpaper assignments remain available for a later reconnect.
+Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; context timers are destroyed with their bar delegate; and persisted wallpaper assignments remain available for a later reconnect.
 
 Each module still creates one lightweight surface delegate per connected screen. The coordinator only makes the selected delegate visible, preserving independent per-output geometry without duplicating service state.
 
@@ -230,6 +263,11 @@ Design values are exposed through the single `Theme.luminaTokens` namespace:
 - shared spacing and sizing scales;
 - typography roles for labels, body text, and titles;
 - motion durations used consistently by interactive components.
+
+The bar adds semantic touch-target, workspace resting/active shape, and
+workspace-transform motion tokens. Disabling animation or enabling reduced
+motion shortens transformations through the existing global motion scale
+while preserving focus and selected-state feedback.
 
 The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
 

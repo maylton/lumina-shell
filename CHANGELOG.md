@@ -46,3 +46,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   selection pills, switches, sliders, and pressed-state shape motion.
 - Wallpaper-derived neutral and neutral-variant tonal roles for shell
   surfaces, containers, text, and outlines.
+- Schema v5 Expressive Desktop bar preferences with safe schema-v4 migration,
+  normalized left/right widget orders, and Lumina Classic compatibility.
+- Composable edge-to-edge Expressive bar with transforming workspaces,
+  localized date/time, per-output contextual Niri capsule, real system-status
+  services, dedicated Dashboard access, and responsive optional actions.
+- Expanded Bar settings with preset previews, surface/context/status controls,
+  optional actions, accessible ordering, and immediate persistence.

@@ -2,7 +2,35 @@
 
 ## Bar
 
-Lumina creates one top bar for each connected output. The left side contains the launcher, overview, and output workspaces. The center follows the active window. The right side contains Niri/output state, tray items, quick settings, notifications, wallpaper, session controls, and the calendar clock.
+Lumina creates one bar for each connected output. **Expressive Desktop** is the
+default: an edge-to-edge tonal surface with launcher, overview, transforming
+workspaces, and localized date/time on the left; a temporary Niri context
+capsule in the center; and tray, notifications, live system status, and the
+Lumina Dashboard button on the right.
+
+The system-status cluster can group network, volume, and battery into one
+pill, or display them individually. Missing hardware is omitted. Clicking the
+cluster opens the existing Dashboard rather than another popup. Wallpaper and
+session actions remain in the Dashboard by default, but can be enabled on the
+bar.
+
+**Lumina Classic** preserves the previous floating composition. In graphical
+settings, Bar → Visual style switches presets immediately. The same page
+controls:
+
+- top or bottom position, edge-to-edge or floating surface, visible height,
+  margin, opacity, spacing, and compact mode;
+- Always, Contextual, or Hidden Niri context and the contextual timeout;
+- title, application ID, column, localized date style, 12/24-hour time, and
+  seconds;
+- grouped or individual status and individual service visibility;
+- independent left/right widget order with Move up, Move down, and Show/Hide.
+
+Context is event-driven and independent per output. In Contextual mode, a
+window, app ID, column, workspace, or action-error change reveals the capsule
+for the configured duration. Narrow layouts first remove secondary text and
+optional actions; the central context elides instead of overlapping the side
+clusters.
 
 ## Launcher
 
@@ -68,8 +96,8 @@ active output or keyboard focus. The nine categories are:
 
 - **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
   motion, shape, and density;
-- **Bar:** position, sizing, focused-window data, Niri indicators, tray, and
-  clock format;
+- **Bar:** Expressive/Classic preset, surface geometry, Niri context, date and
+  time, grouped status, optional actions, and left/right widget ordering;
 - **Dashboard:** opening behavior, density, and visible cards;
 - **Behavior:** outside-click dismissal, output fallback, destructive-action
   confirmation, and reduced motion;
@@ -98,9 +126,10 @@ Available category identifiers are `appearance`, `bar`, `dashboard`,
 reopening follows the configured memory policy; explicit IPC calls can select
 the page and category.
 
-Schema 4 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 3 files migrate in place. Invalid JSON is
-still copied to the adjacent `.invalid` backup before defaults are restored.
+Schema 5 writes are debounced, so sliders update the shell without writing
+once per pointer movement. Schema 4 files migrate in place while preserving
+the previous Classic settings and widget order. Invalid JSON is still copied
+to the adjacent `.invalid` backup before defaults are restored.
 
 ## Notifications
 

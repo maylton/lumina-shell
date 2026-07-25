@@ -112,13 +112,16 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 This sprint completes the 0.5 public-beta foundation:
 
-1. Graphical configuration with schema v4 persistence and safe schema v3
+1. Graphical configuration with schema v5 persistence and safe schema v3/v4
    migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
 5. Keyboard, focus, and assistive-technology metadata baseline.
 6. User, installation, compatibility, and contributor documentation.
+7. Expressive Desktop bar refinement with a preserved Lumina Classic
+   fallback, schema v5 migration, per-output context, and configurable widget
+   ordering.
 
 ### Acceptance criteria
 
@@ -142,6 +145,14 @@ This sprint completes the 0.5 public-beta foundation:
   persistent configuration store.
 - Graphical settings provide nine keyboard-accessible categories, direct IPC
   navigation, scoped reset, and debounced save feedback.
+- Expressive Desktop is the default edge-to-edge bar preset; Lumina Classic
+  remains available as the floating regression reference.
+- Workspace, date/time, Niri context, system status, notification, tray, and
+  Dashboard clusters remain single-line and output-aware.
+- Schema v4 bar preferences migrate to schema v5 without losing the Classic
+  widget order or existing shell preferences.
+- Privacy and keyboard-layout indicators remain hidden until their native
+  event sources can be validated.
 
 ## Open follow-ups
 

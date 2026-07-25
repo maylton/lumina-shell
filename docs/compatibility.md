@@ -41,7 +41,16 @@ The session locker itself remains an external session responsibility until Lumin
 
 Per-output surface selection, exclusive overlay coordination, and fallback from an unavailable output name were validated on the active `DP-1` output. The bar, wallpaper, and overlay delegates all derive their geometry from `Quickshell.screens`.
 
-Disconnect handling is implemented for active overlays, notification popups, calendars, and persisted wallpaper mappings. A native hotplug transition across two physical outputs remains an explicit compatibility follow-up.
+The Expressive bar keeps workspace, active-window context, context timeout,
+calendar, and Dashboard targeting inside each output delegate. Disconnect
+handling is implemented for active overlays, notification popups, calendars,
+context timers, and persisted wallpaper mappings. A native hotplug transition
+across two physical outputs remains an explicit compatibility follow-up.
+
+The active host provides one 3440×1440 output. Compact breakpoints and
+non-overlap behavior are implemented for narrower logical widths, but
+1920×1080, mixed-scale, and two-physical-output visual passes remain native
+validation items.
 
 ## Daily controls
 
@@ -70,12 +79,20 @@ Local System/About actions resolve project files from `LUMINA_ROOT`, or the
 shell process working directory. Installed packages should set `LUMINA_ROOT`
 when they launch Lumina outside its installation directory.
 
+## Keyboard layout and privacy status
+
+Niri 26.04 does not expose a stable keyboard-layout event in the state stream
+consumed by Lumina. The validated noctalia-qs 0.0.12 runtime also does not
+provide a reliable camera, screen-capture, or recording usage source for this
+bar. The components and ordering slots exist, but stay invisible; Lumina does
+not poll shell commands or treat an unmuted microphone as “in use.”
+
 ## Configuration recovery
 
-Schema v3-to-v4 migration, normalization, serialization, scoped reset, and
-malformed-JSON recovery are covered by isolated tests. Invalid source is
-preserved at the adjacent `.invalid` path before defaults are written
-atomically.
+Schema v3-to-v5 and v4-to-v5 migration, normalization, serialization, scoped
+reset, widget-order deduplication, and malformed-JSON recovery are covered by
+isolated tests. Invalid source is preserved at the adjacent `.invalid` path
+before defaults are written atomically.
 
 ## Accessibility validation
 

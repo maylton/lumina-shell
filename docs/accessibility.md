@@ -13,6 +13,14 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   state, previews/navigation announce selection, and Left/Right adjust focused
   settings sliders and choices.
 - Launcher arrow keys move through ranked results; Enter activates the selected result.
+- Expressive bar controls use at least a 36-pixel interaction area. Launcher,
+  overview, workspaces, date/time, tray items, notifications, system status,
+  and Dashboard expose focus outlines, names, descriptions, Enter, Space, and
+  hover tooltips.
+- The active workspace changes both shape and width, so selection does not
+  depend on color. Urgency has a border and an assistive description.
+- Bar widget-order rows provide separate keyboard-focusable Show/Hide, Move
+  up, and Move down controls.
 
 Focused controls use a visible primary-color outline. Disabled controls are
 removed from keyboard traversal and retain an explanatory label such as
@@ -22,6 +30,10 @@ independent scroll position.
 ## Assistive technology
 
 Controls expose Qt `Accessible` metadata and actions instead of relying on painted text alone. Notifications expose their summary and body, launcher results expose selection state, toggles expose checked state, and exclusive surfaces provide predictable Escape behavior.
+
+The non-interactive Niri context capsule exposes a static-text description and
+never enters the tab order. Reduced motion keeps selected shapes and focus
+outlines even when transitions are minimized.
 
 This baseline has been runtime-tested for QML validity and keyboard focus behavior. A formal screen-reader pass and contrast audit remain part of the stable-release accessibility work.
 
