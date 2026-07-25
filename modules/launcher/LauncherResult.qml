@@ -11,8 +11,14 @@ Rectangle {
     required property bool selected
 
     signal activated
+    signal contextMenuRequested(var sourceItem)
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool supportsDockPinning:
+        result
+        && result.kind === "application"
+        && result.entry
+        && String(result.entry.id || "").length > 0
 
     implicitHeight: root.luminaDesign.size.launcherRowHeight
     radius: selected
@@ -135,8 +141,17 @@ Rectangle {
         id: resultMouse
 
         anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.activated()
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) {
+                if (root.supportsDockPinning)
+                    root.contextMenuRequested(root)
+                return
+            }
+
+            root.activated()
+        }
     }
 }
