@@ -34,3 +34,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - GPL-3.0-or-later project licensing with explicit third-party credits and contribution terms.
 - Unified Dashboard and Shell Settings views with direct category navigation
   and no duplicate overlay state.
+- Material Expressive settings sidebar with nine categories, reusable
+  accessible controls, light/dark previews, and local Edit config actions.
+- Schema v4 persistence with debounced save status, category reset, schema v3
+  migration, validation clamps, and serialization tests.
+- Live appearance, bar, dashboard, notification, OSD, and session preferences,
+  plus local system diagnostics and project information.

@@ -145,21 +145,38 @@ competing surfaces or duplicate focus state.
 
 ## Graphical settings
 
-Settings edit only typed `ConfigStore`, notification, and wallpaper service
-methods. The current categories expose appearance, bar, wallpaper,
-notification, OSD, and configuration-health preferences, plus a two-step reset
-action. `modules/settings/Settings.qml` is an IPC bridge into the control
-center rather than a second visual surface. IPC callers can open the Settings
-view or a specific category directly, while ordinary shell toggles retain the
-last active view and category.
+Settings use reusable page, section, row, switch, slider, combo, action,
+segmented-control, sidebar, and preview components. The fixed sidebar exposes
+Appearance, Bar, Dashboard, Behavior, Notifications, OSD, Session, System,
+and About; only the right content area scrolls. Every visible preference calls
+a typed `ConfigStore` setter or an existing service, and consumer modules
+observe the same state immediately.
+
+`ConfigFileService` owns argument-array `xdg-open` processes.
+`SystemDiagnosticsService` owns local version and diagnostic processes.
+Visual components never construct shell command strings.
+`modules/settings/Settings.qml` remains an IPC bridge into the control center,
+not a second visual surface. IPC can open a category directly; `wallpaper`
+temporarily normalizes to Appearance.
 
 ## Persistent configuration
 
-`ConfigStore` persists user state through an atomic Quickshell `FileView` and `JsonAdapter`. The schema stores Do Not Disturb, wallpaper assignments, wallpaper directory, dynamic-theme, OSD, and bar-detail preferences.
+`ConfigStore` persists user state through an atomic Quickshell `FileView` and
+`JsonAdapter`. Schema 4 adds semantic appearance, bar, dashboard, behavior,
+notification, OSD, session, and navigation preferences while retaining the
+existing wallpaper and Do Not Disturb keys.
 
-The default path is `Quickshell.stateDir/lumina-state.json`. `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2 migrated the original single-string wallpaper shape into a default wallpaper plus a per-output map. Schema v3 adds OSD and bar-detail preferences while retaining the previous state.
+The default path is `Quickshell.stateDir/lumina-state.json`.
+`LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
+migrated the single-string wallpaper shape into a default plus per-output map.
+Schema v3 added OSD and bar-detail preferences. Schema v4 normalizes missing
+and out-of-range values while preserving all known previous preferences.
 
-Writes are debounced and only occur after initialization, so loading and migration cannot overlap or continuously rewrite the file.
+Writes are debounced and only occur after initialization, so loading,
+migration, and slider movement cannot continuously rewrite the file.
+`dirty`, `saving`, `lastSavedAt`, `lastSaveSucceeded`, and
+`saveStatusLabel` expose progress. Category defaults and full defaults share
+the pure `ConfigSchema.js` definitions used by migration tests.
 
 Before accepting loaded state, `ConfigStore` parses the original JSON independently of `JsonAdapter`. Invalid JSON is copied to the adjacent `.invalid` path, replaced atomically with defaults, and surfaced through graphical settings and the `config status` IPC operation.
 
@@ -175,7 +192,10 @@ The wallpaper picker uses Qt's `FolderListModel` with image-only filters. It tar
 
 Advanced layout requests remain typed methods on `NiriService`. The session surface exposes focus, move, center, width, floating, fullscreen, and tabbed-column operations without placing Niri commands in QML visual components. A subset is also available through launcher action results.
 
-`SessionService` owns lock, suspend, logout, restart, and power-off execution. Every session operation enters an explicit confirmation state before execution. Logout is submitted through `NiriService.quitSession()`; the remaining operations use argument-array `loginctl` or `systemctl` processes and report their exit state.
+`SessionService` owns lock, suspend, logout, restart, and power-off execution.
+Destructive confirmation follows schema-backed policy; lock and suspend submit
+directly. Logout uses `NiriService.quitSession()`; the remaining operations use
+argument-array `loginctl` or `systemctl` processes and report their exit state.
 
 The `session` IPC target can open the menu and describe the resolved command without executing it. This provides a safe diagnostics path for session integration.
 

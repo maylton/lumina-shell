@@ -9,9 +9,15 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
 - Tab and Shift+Tab move through controls that accept keyboard interaction.
 - Enter and Space activate buttons, toggles, radio choices, notification actions, and session actions.
 - Left and Right adjust focused audio, microphone, and brightness sliders in five-percent steps.
+- Settings rows expose names and descriptions; switches announce checked
+  state, previews/navigation announce selection, and Left/Right adjust focused
+  settings sliders and choices.
 - Launcher arrow keys move through ranked results; Enter activates the selected result.
 
-Focused controls use a visible primary-color outline. Disabled hardware controls are removed from keyboard traversal and retain an explanatory label such as `No backlight`.
+Focused controls use a visible primary-color outline. Disabled controls are
+removed from keyboard traversal and retain an explanatory label such as
+`No backlight`. The Settings sidebar stays fixed while each category keeps an
+independent scroll position.
 
 ## Assistive technology
 

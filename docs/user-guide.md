@@ -36,7 +36,8 @@ The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab
 - battery state and power profiles;
 - an inline calendar.
 
-The **Settings** tab contains persistent shell configuration. Recent
+The **Settings** tab contains persistent shell configuration in a fixed
+category sidebar and independently scrollable content area. Recent
 notifications remain in the Dashboard so daily actions do not require
 switching context. The header contains shortcuts for settings, session
 controls, Do Not Disturb, and closing the dashboard.
@@ -63,16 +64,25 @@ qs ipc -p /path/to/lumina-shell call control close
 
 Choose the settings action in the control-center header. Dashboard and
 settings are two views of the same overlay, so they cannot compete for the
-active output or keyboard focus. The settings categories control:
+active output or keyboard focus. The nine categories are:
 
-- wallpaper-derived dynamic color;
-- detailed or compact Niri status in the bar;
-- OSD visibility and duration;
-- Do Not Disturb;
-- wallpaper directory;
-- restoration of default preferences.
+- **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
+  motion, shape, and density;
+- **Bar:** position, sizing, focused-window data, Niri indicators, tray, and
+  clock format;
+- **Dashboard:** opening behavior, density, and visible cards;
+- **Behavior:** outside-click dismissal, output fallback, destructive-action
+  confirmation, and reduced motion;
+- **Notifications:** DND, popup placement, timing, limits, images, and history;
+- **OSD:** visibility, position, timing, size, values, and event types;
+- **Session:** visible actions and confirmation policy;
+- **System:** live integration state, diagnostics, configuration, and recovery;
+- **About:** local version, license, documentation, and credits.
 
-Reset requires a second confirmation click. The configuration card shows its schema and storage path.
+`Edit config` and its folder action use the system default application.
+Category reset is immediate; restoring everything requires a second
+confirmation. The page header reports `Saved`, `Saving…`, or
+`Could not save`.
 
 Settings can open directly on an output and category:
 
@@ -82,10 +92,15 @@ qs ipc -p /path/to/lumina-shell call settings openCategory osd DP-1
 qs ipc -p /path/to/lumina-shell call settings category wallpaper
 ```
 
-Available category identifiers are `appearance`, `bar`, `wallpaper`,
-`notifications`, `osd`, and `system`. Closing and reopening from the shell
-retains the current view and category; an explicit IPC `control open` request
-returns to the Dashboard.
+Available category identifiers are `appearance`, `bar`, `dashboard`,
+`behavior`, `notifications`, `osd`, `session`, `system`, and `about`.
+`wallpaper` remains a compatibility alias for `appearance`. Closing and
+reopening follows the configured memory policy; explicit IPC calls can select
+the page and category.
+
+Schema 4 writes are debounced, so sliders update the shell without writing
+once per pointer movement. Schema 3 files migrate in place. Invalid JSON is
+still copied to the adjacent `.invalid` backup before defaults are restored.
 
 ## Notifications
 
@@ -99,7 +114,10 @@ The **Wall** chip opens the image picker on the selected output. Wallpaper paths
 
 ## Layout and session
 
-The **Session** chip contains typed Niri layout actions and lock, suspend, logout, restart, and power-off requests. Every session-state action requires confirmation. Secure locking remains the responsibility of the configured external locker.
+The **Session** chip contains typed Niri layout actions and lock, suspend,
+logout, restart, and power-off requests. Confirmation for destructive actions
+is configurable; lock and suspend are submitted directly. Secure locking
+remains the responsibility of the configured external locker.
 
 ## OSD integration
 
@@ -130,6 +148,8 @@ qs ipc -p /path/to/lumina-shell call niri status
 qs ipc -p /path/to/lumina-shell call connectivity status
 qs ipc -p /path/to/lumina-shell call weather status
 qs ipc -p /path/to/lumina-shell call config status
+qs ipc -p /path/to/lumina-shell call diagnostics status
+qs ipc -p /path/to/lumina-shell call configFile status
 ```
 
 Known portal and notification-name warnings are documented in [compatibility.md](compatibility.md).

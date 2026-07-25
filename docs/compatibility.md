@@ -55,9 +55,27 @@ The `noctalia-qs 0.0.12` networking model does not type the active wired device 
 
 The optional weather card uses `curl` to query Open-Meteo geocoding and forecast endpoints without an API key. By default, Lumina derives a city from the system timezone through `timedatectl`; `LUMINA_WEATHER_LOCATION` overrides that query when the timezone city is not precise enough. Network, geocoding, and command failures leave the rest of the dashboard available.
 
+## Appearance and configuration
+
+`noctalia-qs 0.0.12` does not expose a stable system color-scheme preference
+used by Lumina. `themeMode: "auto"` therefore has a documented dark fallback;
+explicit Light and Dark use complete semantic token sets. Dynamic wallpaper
+colors continue to provide accent roles in either mode.
+
+Transparency changes semantic surface alpha directly. Blur is not offered
+because Lumina has no verified blur backend. Disabling animations or enabling
+reduced motion preserves focus feedback while minimizing transition duration.
+
+Local System/About actions resolve project files from `LUMINA_ROOT`, or the
+shell process working directory. Installed packages should set `LUMINA_ROOT`
+when they launch Lumina outside its installation directory.
+
 ## Configuration recovery
 
-Schema v3 migration and malformed-JSON recovery were validated with an isolated `LUMINA_STATE_PATH`. The invalid source was preserved at the adjacent `.invalid` path before defaults were written atomically.
+Schema v3-to-v4 migration, normalization, serialization, scoped reset, and
+malformed-JSON recovery are covered by isolated tests. Invalid source is
+preserved at the adjacent `.invalid` path before defaults are written
+atomically.
 
 ## Accessibility validation
 

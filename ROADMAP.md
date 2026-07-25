@@ -112,7 +112,8 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 This sprint completes the 0.5 public-beta foundation:
 
-1. Graphical configuration with schema v3 persistence.
+1. Graphical configuration with schema v4 persistence and safe schema v3
+   migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
@@ -139,6 +140,8 @@ This sprint completes the 0.5 public-beta foundation:
 - Primary exclusive surfaces support keyboard dismissal and traversal.
 - Dashboard and graphical settings share one overlay, service layer, and
   persistent configuration store.
+- Graphical settings provide nine keyboard-accessible categories, direct IPC
+  navigation, scoped reset, and debounced save feedback.
 
 ## Open follow-ups
 
