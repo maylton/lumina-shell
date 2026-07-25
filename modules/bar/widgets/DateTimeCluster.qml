@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.design
 import qs.modules.calendar
 import qs.stores.config
@@ -9,17 +10,45 @@ Rectangle {
 
     required property string outputName
     property string barPosition: ConfigStore.barPosition
-    property bool showDate: ConfigStore.barShowDate
     property bool compact: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string clockLayout: String(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "clockLayout",
+            "inline"
+        )
+    )
+    readonly property string dateMode: String(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "dateMode",
+            "short"
+        )
+    )
+    readonly property bool showDate: dateMode !== "hidden"
+    readonly property bool showSeparator: Boolean(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "showSeparator",
+            true
+        )
+    )
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "showBackground",
+            true
+        )
+    )
     readonly property bool expanded:
         CalendarStore.isOpenFor(outputName)
     readonly property string formattedDate: {
         if (!showDate)
             return ""
 
-        const style = compact ? "short" : ConfigStore.barDateStyle
+        const style = compact ? "short" : dateMode
 
         if (style === "weekday")
             return Qt.formatDate(CalendarStore.currentDate, "ddd, d MMM")
@@ -47,7 +76,7 @@ Rectangle {
         : 1
     color: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barWidgetPillsEnabled
+        : showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     activeFocusOnTab: true
@@ -109,14 +138,21 @@ Rectangle {
         }
     }
 
-    Row {
+    GridLayout {
         id: dateTimeContent
 
         anchors.centerIn: parent
-        spacing: root.luminaDesign.spacing.barItemGap
+        columns: root.clockLayout === "inline" ? 3 : 1
+        columnSpacing: root.clockLayout === "inline"
+            ? root.luminaDesign.spacing.barItemGap
+            : Math.max(1, root.luminaDesign.spacing.extraSmall)
+        rowSpacing: Math.max(
+            1,
+            root.luminaDesign.spacing.extraSmall
+        )
 
         Text {
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignCenter
             text: CalendarStore.formattedTime
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
@@ -126,8 +162,10 @@ Rectangle {
         }
 
         Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignCenter
             visible: dateLabel.visible
+                && root.showSeparator
+                && root.clockLayout === "inline"
             width: root.luminaDesign.size.barDividerDot
             height: width
             radius: width / 2
@@ -139,7 +177,7 @@ Rectangle {
         Text {
             id: dateLabel
 
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignCenter
             visible: root.showDate && !root.compact
                 && root.formattedDate.length > 0
             text: root.formattedDate

@@ -55,7 +55,13 @@ Rectangle {
             ? Qt.darker(luminaDesign.color.surfaceMuted, 1.12)
             : itemMouse.containsMouse
                 ? luminaDesign.color.surfaceMuted
-                : ConfigStore.barWidgetPillsEnabled
+                : Boolean(
+                    ConfigStore.widgetSetting(
+                        "tray",
+                        "showBackground",
+                        false
+                    )
+                )
                     && ConfigStore.barBackgroundMode === "transparent"
                     ? luminaDesign.color.surfaceMuted
                     : "transparent"

@@ -14,15 +14,91 @@ Rectangle {
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool individual:
-        ConfigStore.barStatusLayout === "individual"
+        ConfigStore.widgetSetting(
+            "system-status",
+            "layout",
+            "grouped"
+        ) === "individual"
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "system-status",
+            "showBackground",
+            true
+        )
+    )
     readonly property bool showNetwork:
-        ConfigStore.barShowNetworkStatus
+        Boolean(ConfigStore.widgetSetting(
+            "system-status",
+            "showNetwork",
+            true
+        ))
     readonly property bool showAudio:
-        ConfigStore.barShowAudioStatus
+        Boolean(ConfigStore.widgetSetting(
+            "system-status",
+            "showAudio",
+            true
+        ))
         && AudioService.outputAvailable
     readonly property bool showBattery:
-        ConfigStore.barShowBatteryStatus
+        Boolean(ConfigStore.widgetSetting(
+            "system-status",
+            "showBattery",
+            true
+        ))
         && PowerService.batteryAvailable
+    readonly property string networkTextMode: String(
+        ConfigStore.widgetSetting(
+            "system-status",
+            "networkTextMode",
+            "summary"
+        )
+    )
+    readonly property string audioTextMode: String(
+        ConfigStore.widgetSetting(
+            "system-status",
+            "audioTextMode",
+            "percentage"
+        )
+    )
+    readonly property string batteryTextMode: String(
+        ConfigStore.widgetSetting(
+            "system-status",
+            "batteryTextMode",
+            "percentage"
+        )
+    )
+    readonly property string networkLabel: {
+        if (networkTextMode === "icon")
+            return ""
+
+        if (networkTextMode === "name")
+            return ConnectivityService.wifiConnected
+                ? ConnectivityService.wifiName
+                : ConnectivityService.networkSummary
+
+        if (networkTextMode === "type")
+            return ConnectivityService.wifiConnected
+                ? "Wi-Fi"
+                : ConnectivityService.wiredConnected
+                    ? "Wired"
+                    : "Offline"
+
+        return ConnectivityService.networkSummary
+    }
+    readonly property string audioLabel:
+        audioTextMode === "icon"
+            ? ""
+            : audioTextMode === "state"
+                ? AudioService.outputMuted ? "Muted" : "Active"
+                : AudioService.outputMuted
+                    ? "Muted"
+                    : Math.round(AudioService.outputVolume * 100) + "%"
+    readonly property string batteryLabel:
+        batteryTextMode === "icon"
+            ? ""
+            : batteryTextMode === "state"
+                ? PowerService.batteryState
+                : PowerService.batteryPercentage + "%"
     readonly property int itemCount:
         Number(showNetwork)
         + Number(showAudio)
@@ -83,7 +159,7 @@ Rectangle {
         ? "transparent"
         : expanded || statusMouse.containsMouse
             ? luminaDesign.color.accentContainer
-            : ConfigStore.barWidgetPillsEnabled
+            : showBackground
                 ? luminaDesign.color.surfaceMuted
                 : "transparent"
     scale: statusMouse.pressed
@@ -168,13 +244,13 @@ Rectangle {
             visible: root.showNetwork
             individual: root.individual
             showLabel: !root.compact
-                && ConfigStore.barShowNetworkLabel
+                && root.networkTextMode !== "icon"
             iconName: root.networkIcon
             fallbackSymbol:
                 ConnectivityService.networkSummary === "Offline"
                     ? "×"
                     : "◉"
-            label: ConnectivityService.networkSummary
+            label: root.networkLabel
             description: "Network "
                 + ConnectivityService.networkSummary
             alert: ConnectivityService.networkSummary === "Offline"
@@ -184,12 +260,10 @@ Rectangle {
             visible: root.showAudio
             individual: root.individual
             showLabel: !root.compact
-                && ConfigStore.barShowAudioLabel
+                && root.audioTextMode !== "icon"
             iconName: root.audioIcon
             fallbackSymbol: AudioService.outputMuted ? "×" : "♪"
-            label: AudioService.outputMuted
-                ? "Muted"
-                : Math.round(AudioService.outputVolume * 100) + "%"
+            label: root.audioLabel
             description: AudioService.outputName
             alert: AudioService.outputMuted
         }
@@ -198,11 +272,12 @@ Rectangle {
             visible: root.showBattery
             individual: root.individual
             showLabel: !root.compact
+                && root.batteryTextMode !== "icon"
             iconName: PowerService.batteryIcon.length > 0
                 ? PowerService.batteryIcon
                 : "battery-symbolic"
             fallbackSymbol: root.batteryCharging ? "⚡" : "▰"
-            label: PowerService.batteryPercentage + "%"
+            label: root.batteryLabel
             description: PowerService.batteryState
         }
     }

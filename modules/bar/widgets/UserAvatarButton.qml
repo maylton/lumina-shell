@@ -15,8 +15,32 @@ Rectangle {
         ControlCenterStore.activeOutputName === outputName
     readonly property real circleDiameter:
         luminaDesign.size.barTouchTarget
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "dashboard",
+            "showBackground",
+            false
+        )
+    )
+    readonly property string avatarDisplay: String(
+        ConfigStore.widgetSetting(
+            "dashboard",
+            "avatarDisplay",
+            "image"
+        )
+    )
+    readonly property bool showUserName: Boolean(
+        ConfigStore.widgetSetting(
+            "dashboard",
+            "showUserName",
+            false
+        )
+    )
 
-    width: circleDiameter
+    width: showUserName
+        ? avatarContent.implicitWidth
+            + luminaDesign.spacing.barWidgetPadding * 2
+        : circleDiameter
     height: circleDiameter
     implicitWidth: circleDiameter
     implicitHeight: circleDiameter
@@ -25,8 +49,7 @@ Rectangle {
         : circleDiameter / 2
     color: expanded || avatarMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barWidgetPillsEnabled
-            && ConfigStore.barBackgroundMode === "transparent"
+        : showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     scale: avatarMouse.pressed ? 0.96 : 1
@@ -84,18 +107,42 @@ Rectangle {
         }
     }
 
-    UserAvatar {
+    Row {
+        id: avatarContent
+
         anchors.centerIn: parent
-        avatarSize: root.luminaDesign.size.barTouchTarget
-        cornerRadius: root.radius
-        borderWidth: root.expanded
-            || root.activeFocus
-            || avatarMouse.containsMouse
-            ? 2
-            : 1
-        borderColor: root.expanded || avatarMouse.containsMouse
-            ? root.luminaDesign.color.onAccentContainer
-            : root.luminaDesign.color.primary
+        spacing: root.showUserName
+            ? root.luminaDesign.spacing.barItemGap
+            : 0
+
+        UserAvatar {
+            anchors.verticalCenter: parent.verticalCenter
+            avatarSize: root.luminaDesign.size.barTouchTarget
+            cornerRadius: root.showUserName
+                ? avatarSize / 2
+                : root.radius
+            useImage: root.avatarDisplay !== "initials"
+            borderWidth: root.expanded
+                || root.activeFocus
+                || avatarMouse.containsMouse
+                ? 2
+                : 1
+            borderColor: root.expanded || avatarMouse.containsMouse
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.primary
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.showUserName
+            text: SystemInfoStore.displayName
+            color: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.onSurface
+            font.pixelSize:
+                root.luminaDesign.typography.barSecondary
+            font.weight: Font.DemiBold
+        }
     }
 
     Rectangle {

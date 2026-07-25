@@ -15,18 +15,67 @@ Rectangle {
     property real availableWidth: 0
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string displayMode: String(
+        ConfigStore.widgetSetting(
+            "context",
+            "mode",
+            "contextual"
+        )
+    )
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "context",
+            "showBackground",
+            true
+        )
+    )
+    readonly property bool showWindowTitle: Boolean(
+        ConfigStore.widgetSetting(
+            "context",
+            "showWindowTitle",
+            true
+        )
+    )
+    readonly property bool showWorkspace: Boolean(
+        ConfigStore.widgetSetting(
+            "context",
+            "showWorkspace",
+            true
+        )
+    )
+    readonly property bool showApplicationId: Boolean(
+        ConfigStore.widgetSetting(
+            "context",
+            "showApplicationId",
+            true
+        )
+    )
+    readonly property bool showColumn: Boolean(
+        ConfigStore.widgetSetting(
+            "context",
+            "showColumn",
+            true
+        )
+    )
+    readonly property int displayTimeout: Number(
+        ConfigStore.widgetSetting(
+            "context",
+            "timeout",
+            3500
+        )
+    )
     readonly property string primaryText: {
         if (showActionError && actionError.length > 0)
             return "Niri action failed"
 
-        if (ConfigStore.barShowWindowTitle
+        if (showWindowTitle
             && activeWindowTitle.length > 0)
             return activeWindowTitle
 
-        if (activeWindowAppId.length > 0)
+        if (showApplicationId && activeWindowAppId.length > 0)
             return activeWindowAppId
 
-        if (workspaceLabel.length > 0)
+        if (showWorkspace && workspaceLabel.length > 0)
             return workspaceLabel
 
         return "Desktop"
@@ -37,16 +86,17 @@ Rectangle {
 
         const parts = []
 
-        if (workspaceLabel.length > 0
+        if (showWorkspace
+            && workspaceLabel.length > 0
             && workspaceLabel !== primaryText)
             parts.push(workspaceLabel)
 
-        if (ConfigStore.barShowAppId
+        if (showApplicationId
             && activeWindowAppId.length > 0
             && activeWindowAppId !== primaryText)
             parts.push(activeWindowAppId)
 
-        if (ConfigStore.barShowColumnIndicator
+        if (showColumn
             && columnLabel.length > 0)
             parts.push(columnLabel)
 
@@ -74,9 +124,9 @@ Rectangle {
     ].join("\u001f")
     readonly property bool hasContext: contextText.length > 0
     readonly property bool shouldShow:
-        ConfigStore.barContextMode === "always"
+        displayMode === "always"
         || (
-            ConfigStore.barContextMode === "contextual"
+            displayMode === "contextual"
             && revealContext
         )
     readonly property real contentImplicitWidth:
@@ -116,14 +166,14 @@ Rectangle {
             luminaDesign.color.urgent.b,
             0.14
         )
-        : ConfigStore.barWidgetPillsEnabled
+        : showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     opacity: shouldShow
         && targetWidth >= visibleWidthThreshold
             ? 1
             : 0
-    visible: ConfigStore.barContextMode !== "hidden"
+    visible: displayMode !== "hidden"
         && (opacity > 0 || width > 0)
     clip: true
 
@@ -131,7 +181,7 @@ Rectangle {
     Accessible.name: contextText
 
     function reveal() {
-        if (ConfigStore.barContextMode !== "contextual"
+        if (displayMode !== "contextual"
             || !hasContext)
             return
 
@@ -146,16 +196,11 @@ Rectangle {
     Connections {
         target: ConfigStore
 
-        function onBarContextModeChanged() {
-            if (ConfigStore.barContextMode === "contextual")
+        function onBarWidgetSettingsChanged() {
+            if (root.displayMode === "contextual")
                 root.reveal()
             else
                 hideTimer.stop()
-        }
-
-        function onBarContextTimeoutChanged() {
-            if (root.revealContext)
-                hideTimer.restart()
         }
     }
 
@@ -273,7 +318,7 @@ Rectangle {
     Timer {
         id: hideTimer
 
-        interval: ConfigStore.barContextTimeout
+        interval: root.displayTimeout
         repeat: false
         onTriggered: root.revealContext = false
     }

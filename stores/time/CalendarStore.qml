@@ -10,11 +10,40 @@ Singleton {
 
     readonly property var locale: Qt.locale()
     readonly property date currentDate: systemClock.date
+    readonly property string configuredHourFormat: String(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "hourFormat",
+            "24"
+        )
+    )
+    readonly property bool configuredSeconds: Boolean(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "showSeconds",
+            false
+        )
+    )
+    readonly property string configuredTimeFormat: {
+        if (configuredHourFormat === "system") {
+            const systemFormat = locale.timeFormat(Locale.ShortFormat)
+
+            if (!configuredSeconds)
+                return systemFormat
+
+            return systemFormat.indexOf("ss") >= 0
+                ? systemFormat
+                : systemFormat.replace(/(AP|ap|a|A)?$/, ":ss\\1")
+        }
+
+        if (configuredHourFormat === "12")
+            return configuredSeconds ? "h:mm:ss AP" : "h:mm AP"
+
+        return configuredSeconds ? "HH:mm:ss" : "HH:mm"
+    }
     readonly property string formattedTime: Qt.formatDateTime(
         currentDate,
-        ConfigStore.barClock24Hour
-            ? ConfigStore.barShowSeconds ? "HH:mm:ss" : "HH:mm"
-            : ConfigStore.barShowSeconds ? "h:mm:ss AP" : "h:mm AP"
+        configuredTimeFormat
     )
     readonly property string todayKey: dateKey(currentDate)
     readonly property int firstDayOfWeek: Number(locale.firstDayOfWeek)
@@ -165,7 +194,7 @@ Singleton {
 
     SystemClock {
         id: systemClock
-        precision: ConfigStore.barShowSeconds
+        precision: root.configuredSeconds
             ? SystemClock.Seconds
             : SystemClock.Minutes
     }

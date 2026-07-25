@@ -14,12 +14,13 @@ Item {
     property real cornerRadius: avatarSize / 2
     property real borderWidth: 1
     property color borderColor: luminaDesign.color.primary
+    property bool useImage: ConfigStore.dashboardUseUserAvatarImage
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property string customAvatarPath:
         ConfigStore.dashboardUserAvatarPath
     readonly property var candidates: {
-        if (!ConfigStore.dashboardUseUserAvatarImage)
+        if (!root.useImage)
             return []
 
         const result = []
@@ -93,7 +94,7 @@ Item {
         id: customAvatarFile
 
         path: root.localPath(root.customAvatarPath)
-        preload: ConfigStore.dashboardUseUserAvatarImage
+        preload: root.useImage
             && path.length > 0
         printErrors: false
         onPathChanged: root.customAvatarAvailable = false

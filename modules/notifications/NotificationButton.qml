@@ -17,6 +17,27 @@ Rectangle {
         === outputName
     readonly property real circleDiameter:
         luminaDesign.size.barTouchTarget
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "notifications",
+            "showBackground",
+            false
+        )
+    )
+    readonly property bool showUnreadBadge: Boolean(
+        ConfigStore.widgetSetting(
+            "notifications",
+            "showUnreadBadge",
+            true
+        )
+    )
+    readonly property bool showDoNotDisturbState: Boolean(
+        ConfigStore.widgetSetting(
+            "notifications",
+            "showDoNotDisturbState",
+            true
+        )
+    )
 
     property bool tooltipVisible: false
 
@@ -32,8 +53,7 @@ Rectangle {
         : 1.0
     color: expanded || notificationMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barWidgetPillsEnabled
-            && ConfigStore.barBackgroundMode === "transparent"
+        : showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     border.width: activeFocus ? 2 : 0
@@ -99,7 +119,8 @@ Rectangle {
         fallbackSymbol: "●"
         iconColor: root.expanded
             ? root.luminaDesign.color.onAccentContainer
-            : NotificationService.doNotDisturb
+            : root.showDoNotDisturbState
+                && NotificationService.doNotDisturb
                 ? root.luminaDesign.color.textMuted
                 : root.luminaDesign.color.onSurface
         iconSize: root.luminaDesign.size.barNotificationIcon
@@ -107,7 +128,8 @@ Rectangle {
 
     Rectangle {
         anchors.centerIn: notificationIcon
-        visible: NotificationService.doNotDisturb
+        visible: root.showDoNotDisturbState
+            && NotificationService.doNotDisturb
         width: notificationIcon.width
             + root.luminaDesign.spacing.extraSmall
         height: Math.max(
@@ -129,7 +151,8 @@ Rectangle {
             top: parent.top
         }
 
-        visible: NotificationService.unreadCount > 0
+        visible: root.showUnreadBadge
+            && NotificationService.unreadCount > 0
         width: Math.max(
             root.luminaDesign.size.barBadgeHeight,
             badgeLabel.implicitWidth

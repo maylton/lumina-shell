@@ -16,8 +16,21 @@ Rectangle {
         && LauncherStore.activeOutputName === outputName
     readonly property real circleDiameter:
         luminaDesign.size.barTouchTarget
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "launcher",
+            "showBackground",
+            false
+        )
+    )
+    readonly property bool showLabel: Boolean(
+        ConfigStore.widgetSetting("launcher", "showLabel", false)
+    )
 
-    width: circleDiameter
+    width: showLabel
+        ? launcherContent.implicitWidth
+            + luminaDesign.spacing.barWidgetPadding * 2
+        : circleDiameter
     height: circleDiameter
     implicitWidth: circleDiameter
     implicitHeight: circleDiameter
@@ -29,7 +42,7 @@ Rectangle {
         : 1.0
     color: expanded || launcherMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barWidgetPillsEnabled
+        : showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     border.width: activeFocus ? 2 : 0
@@ -75,14 +88,35 @@ Rectangle {
         }
     }
 
-    DashboardIcon {
+    Row {
+        id: launcherContent
+
         anchors.centerIn: parent
-        iconName: "system-search-symbolic"
-        fallbackSymbol: "⌕"
-        iconColor: root.expanded
-            ? root.luminaDesign.color.onAccentContainer
-            : root.luminaDesign.color.onSurface
-        iconSize: root.luminaDesign.size.barIcon
+        spacing: root.showLabel
+            ? root.luminaDesign.spacing.barItemGap
+            : 0
+
+        DashboardIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            iconName: "system-search-symbolic"
+            fallbackSymbol: "⌕"
+            iconColor: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.onSurface
+            iconSize: root.luminaDesign.size.barIcon
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.showLabel
+            text: "Apps"
+            color: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.onSurface
+            font.pixelSize:
+                root.luminaDesign.typography.barSecondary
+            font.weight: Font.DemiBold
+        }
     }
 
     MouseArea {

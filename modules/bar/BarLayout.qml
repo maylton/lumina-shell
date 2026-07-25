@@ -60,9 +60,7 @@ Item {
         keyboard: ConfigStore.barShowKeyboardLayout,
         tray: ConfigStore.barShowTray && width >= 1040,
         notifications: ConfigStore.barShowNotifications,
-        "system-status": ConfigStore.barShowAudioStatus
-            || ConfigStore.barShowNetworkStatus
-            || ConfigStore.barShowBatteryStatus,
+        "system-status": ConfigStore.barShowSystemStatus,
         dashboard: ConfigStore.barShowDashboardButton,
         wallpaper: ConfigStore.barShowWallpaperButton
             && wideLayout,

@@ -24,7 +24,21 @@ Item {
         return items
     }
     readonly property int itemCount: activeItems.length
-    readonly property bool grouped: ConfigStore.barTrayMode === "grouped"
+    readonly property bool grouped: ConfigStore.widgetSetting(
+        "tray",
+        "mode",
+        "grouped"
+    ) === "grouped"
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "tray",
+            "showBackground",
+            false
+        )
+    )
+    readonly property bool showCount: Boolean(
+        ConfigStore.widgetSetting("tray", "showCount", false)
+    )
 
     property bool tooltipVisible: false
 
@@ -49,8 +63,7 @@ Item {
                 : height / 2
             color: trayPopup.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
-                : ConfigStore.barWidgetPillsEnabled
-                    && ConfigStore.barBackgroundMode === "transparent"
+                : root.showBackground
                     ? root.luminaDesign.color.surfaceMuted
                     : "transparent"
             border.width: activeFocus ? 2 : 0
@@ -114,7 +127,7 @@ Item {
                     right: parent.right
                     top: parent.top
                 }
-                visible: root.itemCount > 1
+                visible: root.showCount && root.itemCount > 0
                 width: Math.max(
                     root.luminaDesign.size.barBadgeHeight,
                     trayCount.implicitWidth
@@ -196,7 +209,7 @@ Item {
     Connections {
         target: ConfigStore
 
-        function onBarTrayModeChanged() {
+        function onBarWidgetSettingsChanged() {
             trayPopup.dismiss()
         }
     }

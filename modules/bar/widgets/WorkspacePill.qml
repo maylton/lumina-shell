@@ -7,18 +7,23 @@ Rectangle {
     id: root
 
     required property var workspace
+    property string labelMode: "active"
+    property string inactiveStyle: "dot"
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool selected: Boolean(workspace.is_focused)
     readonly property bool active: Boolean(workspace.is_active)
+    readonly property bool showWorkspaceLabel:
+        labelMode === "all"
+        || (
+            labelMode === "active"
+            && (selected || active)
+        )
 
-    implicitWidth: selected
+    implicitWidth: showWorkspaceLabel
         ? workspaceLabel.implicitWidth
             + (luminaDesign.spacing.barHorizontalPadding * 2)
-        : active
-            ? workspaceLabel.implicitWidth
-                + (luminaDesign.spacing.barWidgetPadding * 2)
-            : luminaDesign.size.barTouchTarget
+        : luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: luminaDesign.shape.full
     scale: workspaceMouse.pressed
@@ -78,23 +83,23 @@ Rectangle {
         id: workspaceVisual
 
         anchors.centerIn: parent
-        width: root.selected
+        width: root.showWorkspaceLabel
             ? root.width
-            : root.active
-                ? workspaceLabel.implicitWidth
-                    + (
-                        root.luminaDesign.spacing.barWidgetPadding
-                        * 2
-                    )
+            : root.inactiveStyle === "number"
+                ? Math.max(
+                    root.luminaDesign.size.barWorkspaceMarker * 2,
+                    workspaceLabel.implicitWidth
+                        + root.luminaDesign.spacing.barItemGap * 2
+                )
                 : workspaceMouse.containsMouse
                     ? Math.round(
                         root.luminaDesign.size.barWorkspaceMarker
                         * 1.8
                     )
                     : root.luminaDesign.size.barWorkspaceMarker
-        height: root.selected
+        height: root.showWorkspaceLabel
             ? root.luminaDesign.size.barWorkspaceActiveHeight
-            : root.active
+            : root.inactiveStyle === "number"
                 ? Math.max(
                     root.luminaDesign.size.barWorkspaceMarker * 2,
                     root.luminaDesign.size.barWorkspaceActiveHeight
@@ -106,9 +111,9 @@ Rectangle {
                         * 1.8
                     )
                     : root.luminaDesign.size.barWorkspaceMarker
-        radius: root.selected
+        radius: root.showWorkspaceLabel
             ? root.luminaDesign.shape.workspaceActive
-            : root.active
+            : root.inactiveStyle === "number"
                 ? root.luminaDesign.shape.barLarge
                 : root.luminaDesign.shape.full
         color: root.selected || workspaceMouse.containsMouse
@@ -157,7 +162,8 @@ Rectangle {
             id: workspaceLabel
 
             anchors.centerIn: parent
-            visible: root.selected || root.active
+            visible: root.showWorkspaceLabel
+                || root.inactiveStyle === "number"
             opacity: visible ? 1 : 0
             text: WorkspaceStore.labelFor(root.workspace)
             color: root.selected

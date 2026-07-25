@@ -24,7 +24,13 @@ Rectangle {
         )
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: individual ? luminaDesign.shape.barLarge : 0
-    color: individual && ConfigStore.barWidgetPillsEnabled
+    color: individual && Boolean(
+        ConfigStore.widgetSetting(
+            "system-status",
+            "showBackground",
+            true
+        )
+    )
         ? luminaDesign.color.surfaceMuted
         : "transparent"
 
