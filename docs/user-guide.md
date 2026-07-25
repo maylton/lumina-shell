@@ -36,7 +36,10 @@ The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab
 - battery state and power profiles;
 - an inline calendar.
 
-The **Notifications** tab expands notification history while keeping the daily controls and system status available. The header contains shortcuts for settings, session controls, Do Not Disturb, and closing the dashboard.
+The **Settings** tab contains persistent shell configuration. Recent
+notifications remain in the Dashboard so daily actions do not require
+switching context. The header contains shortcuts for settings, session
+controls, Do Not Disturb, and closing the dashboard.
 
 Hardware controls degrade to an unavailable state instead of preventing the shell from starting.
 
@@ -52,13 +55,15 @@ The control center can also be opened and switched through IPC:
 
 ```bash
 qs ipc -p /path/to/lumina-shell call control open DP-1
-qs ipc -p /path/to/lumina-shell call control tab notifications
+qs ipc -p /path/to/lumina-shell call control page settings
 qs ipc -p /path/to/lumina-shell call control close
 ```
 
 ## Graphical settings
 
-Choose the settings action in the control-center header. The settings surface controls:
+Choose the settings action in the control-center header. Dashboard and
+settings are two views of the same overlay, so they cannot compete for the
+active output or keyboard focus. The settings categories control:
 
 - wallpaper-derived dynamic color;
 - detailed or compact Niri status in the bar;
@@ -68,6 +73,19 @@ Choose the settings action in the control-center header. The settings surface co
 - restoration of default preferences.
 
 Reset requires a second confirmation click. The configuration card shows its schema and storage path.
+
+Settings can open directly on an output and category:
+
+```bash
+qs ipc -p /path/to/lumina-shell call settings open DP-1
+qs ipc -p /path/to/lumina-shell call settings openCategory osd DP-1
+qs ipc -p /path/to/lumina-shell call settings category wallpaper
+```
+
+Available category identifiers are `appearance`, `bar`, `wallpaper`,
+`notifications`, `osd`, and `system`. Closing and reopening from the shell
+retains the current view and category; an explicit IPC `control open` request
+returns to the Dashboard.
 
 ## Notifications
 

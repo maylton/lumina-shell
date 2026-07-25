@@ -137,6 +137,8 @@ This sprint completes the 0.5 public-beta foundation:
 - Invalid JSON is preserved before defaults are restored.
 - Install and uninstall scripts reject unsafe or unmanaged targets.
 - Primary exclusive surfaces support keyboard dismissal and traversal.
+- Dashboard and graphical settings share one overlay, service layer, and
+  persistent configuration store.
 
 ## Open follow-ups
 

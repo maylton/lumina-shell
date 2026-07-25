@@ -5,7 +5,6 @@ import qs.design
 import qs.services.notifications
 import qs.stores.control
 import qs.stores.session
-import qs.stores.settings
 
 Item {
     id: root
@@ -51,7 +50,9 @@ Item {
             }
 
             Text {
-                text: "Desktop dashboard"
+                text: ControlCenterStore.activePage === "settings"
+                    ? "Shell configuration"
+                    : "Desktop dashboard"
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }
@@ -69,8 +70,9 @@ Item {
         DashboardAction {
             iconName: "preferences-system-symbolic"
             symbol: "⚙"
-            label: "Open Lumina settings"
-            onActivated: SettingsStore.openFor(root.outputName)
+            label: "Open shell settings"
+            checked: ControlCenterStore.activePage === "settings"
+            onActivated: ControlCenterStore.setPage("settings")
         }
 
         DashboardAction {

@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import qs.design
 import qs.services.notifications
 import qs.stores.control
+import qs.stores.settings
 import qs.stores.time
 
 Scope {
@@ -18,7 +19,7 @@ Scope {
         target: "control"
 
         function open(outputName: string): void {
-            ControlCenterStore.openFor(outputName)
+            ControlCenterStore.openFor(outputName, "dashboard")
         }
 
         function close(): void {
@@ -29,18 +30,22 @@ Scope {
             ControlCenterStore.toggle(outputName)
         }
 
-        function tab(tabName: string): void {
-            ControlCenterStore.setTab(tabName)
+        function page(pageName: string): void {
+            ControlCenterStore.setPage(pageName)
+        }
 
-            if (tabName === "notifications")
-                NotificationService.markAllRead()
+        function tab(tabName: string): void {
+            ControlCenterStore.setPage(tabName)
         }
 
         function status(): string {
             return JSON.stringify({
                 open: ControlCenterStore.open,
                 output: ControlCenterStore.activeOutputName,
-                tab: ControlCenterStore.activeTab
+                page: ControlCenterStore.activePage,
+                tab: ControlCenterStore.activePage,
+                settingsCategory:
+                    ControlCenterStore.settingsCategory
             })
         }
     }
@@ -53,9 +58,10 @@ Scope {
                 id: controlWindow
 
                 required property var modelData
-                readonly property string outputName: modelData && modelData.name
-                    ? String(modelData.name)
-                    : ""
+                readonly property string outputName:
+                    modelData && modelData.name
+                        ? String(modelData.name)
+                        : ""
                 readonly property bool centerVisible:
                     ControlCenterStore.activeOutputName === outputName
                 readonly property real safeMargin:
@@ -97,7 +103,11 @@ Scope {
                     focus: controlWindow.centerVisible
 
                     Keys.onEscapePressed: event => {
-                        ControlCenterStore.close()
+                        if (SettingsStore.resetConfirmation)
+                            SettingsStore.cancelReset()
+                        else
+                            ControlCenterStore.close()
+
                         event.accepted = true
                     }
                 }
@@ -118,7 +128,8 @@ Scope {
                     anchors.centerIn: parent
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,
-                        controlWindow.width - controlWindow.safeMargin * 2
+                        controlWindow.width
+                            - controlWindow.safeMargin * 2
                     )
                     height: Math.min(
                         root.luminaDesign.size.controlCenterHeight,
@@ -150,129 +161,8 @@ Scope {
                             outputName: controlWindow.outputName
                         }
 
-                        Row {
-                            id: tabBar
-
+                        ControlTabBar {
                             width: parent.width
-                            height: 44
-                            spacing: root.luminaDesign.spacing.medium
-
-                            Repeater {
-                                model: [
-                                    {
-                                        id: "home",
-                                        iconName: "view-grid-symbolic",
-                                        symbol: "✦",
-                                        label: "Dashboard"
-                                    },
-                                    {
-                                        id: "notifications",
-                                        iconName:
-                                            "preferences-system-notifications-symbolic",
-                                        symbol: "☷",
-                                        label: "Notifications"
-                                    }
-                                ]
-
-                                delegate: Rectangle {
-                                    id: tabButton
-
-                                    required property var modelData
-                                    readonly property bool selected:
-                                        ControlCenterStore.activeTab
-                                            === modelData.id
-
-                                    width: (
-                                        tabBar.width - tabBar.spacing
-                                    ) / 2
-                                    height: tabBar.height
-                                    color: "transparent"
-                                    activeFocusOnTab: true
-
-                                    Accessible.role: Accessible.PageTab
-                                    Accessible.name: modelData.label
-                                    Accessible.selected: selected
-                                    Accessible.focusable: true
-                                    Accessible.focused: activeFocus
-                                    Accessible.onPressAction: activate()
-
-                                    function activate() {
-                                        ControlCenterStore.setTab(
-                                            modelData.id
-                                        )
-
-                                        if (modelData.id === "notifications")
-                                            NotificationService.markAllRead()
-                                    }
-
-                                    Keys.onSpacePressed: event => {
-                                        activate()
-                                        event.accepted = true
-                                    }
-
-                                    Keys.onReturnPressed: event => {
-                                        activate()
-                                        event.accepted = true
-                                    }
-
-                                    Row {
-                                        anchors.centerIn: parent
-                                        spacing:
-                                            root.luminaDesign.spacing.small
-
-                                        DashboardIcon {
-                                            width: 16
-                                            height: 16
-                                            iconName:
-                                                tabButton.modelData.iconName
-                                            fallbackSymbol:
-                                                tabButton.modelData.symbol
-                                            iconColor: tabButton.selected
-                                                ? root.luminaDesign.color.primary
-                                                : root.luminaDesign.color.textMuted
-                                            iconSize: 16
-                                        }
-
-                                        Text {
-                                            text: tabButton.modelData.label
-                                            color: tabButton.selected
-                                                ? root.luminaDesign.color.onSurface
-                                                : root.luminaDesign.color.textMuted
-                                            font.pixelSize:
-                                                root.luminaDesign.typography.bodyMedium
-                                            font.weight: tabButton.selected
-                                                ? Font.Bold
-                                                : Font.Medium
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        anchors {
-                                            left: parent.left
-                                            right: parent.right
-                                            bottom: parent.bottom
-                                        }
-
-                                        height: tabButton.selected ? 3 : 1
-                                        radius: root.luminaDesign.shape.full
-                                        color: tabButton.selected
-                                            ? root.luminaDesign.color.primary
-                                            : root.luminaDesign.color.outline
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            tabButton.forceActiveFocus(
-                                                Qt.MouseFocusReason
-                                            )
-                                            tabButton.activate()
-                                        }
-                                    }
-                                }
-                            }
                         }
 
                         Item {
@@ -286,171 +176,77 @@ Scope {
                             clip: true
 
                             Item {
-                                id: scaledDashboard
+                                id: scaledContent
 
                                 anchors.centerIn: parent
-                                width: parent.width / controlWindow.panelScale
+                                width: parent.width
+                                    / controlWindow.panelScale
                                 height: parent.height
                                     / controlWindow.panelScale
                                 scale: controlWindow.panelScale
 
-                                Item {
-                                    anchors.fill: parent
-                                    visible:
-                                        ControlCenterStore.activeTab === "home"
+                                DashboardView {
+                                    readonly property bool pageActive:
+                                        ControlCenterStore.activePage
+                                            === "dashboard"
 
-                                    Item {
-                                        id: leftColumn
+                                    width: parent.width
+                                    height: parent.height
+                                    x: pageActive
+                                        ? 0
+                                        : -Math.round(width * 0.06)
+                                    opacity: pageActive ? 1 : 0
+                                    visible: pageActive || opacity > 0.01
+                                    enabled: pageActive
+                                    active: pageActive
+                                    outputName:
+                                        controlWindow.outputName
 
-                                        anchors {
-                                            left: parent.left
-                                            top: parent.top
-                                            bottom: parent.bottom
-                                        }
-
-                                        width: (parent.width
-                                            - root.luminaDesign.spacing.medium * 2)
-                                            * 0.27
-
-                                        DashboardOverview {
-                                            id: overview
-
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: parent.top
-                                            }
-
-                                            height: parent.height * 0.45
-                                        }
-
-                                        DashboardControls {
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: overview.bottom
-                                                bottom: parent.bottom
-                                                topMargin:
-                                                    root.luminaDesign.spacing.medium
-                                            }
+                                    Behavior on x {
+                                        NumberAnimation {
+                                            duration:
+                                                root.luminaDesign.motion.medium
+                                            easing.type: Easing.OutCubic
                                         }
                                     }
 
-                                    DashboardNotifications {
-                                        id: homeNotifications
-
-                                        anchors {
-                                            left: leftColumn.right
-                                            top: parent.top
-                                            bottom: parent.bottom
-                                            leftMargin:
-                                                root.luminaDesign.spacing.medium
-                                        }
-
-                                        width: (parent.width
-                                            - root.luminaDesign.spacing.medium * 2)
-                                            * 0.41
-                                        compact: true
-                                    }
-
-                                    Item {
-                                        anchors {
-                                            left: homeNotifications.right
-                                            right: parent.right
-                                            top: parent.top
-                                            bottom: parent.bottom
-                                            leftMargin:
-                                                root.luminaDesign.spacing.medium
-                                        }
-
-                                        DashboardMedia {
-                                            id: mediaCard
-
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: parent.top
-                                            }
-
-                                            height: parent.height * 0.24
-                                        }
-
-                                        DashboardStatus {
-                                            id: statusCard
-
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: mediaCard.bottom
-                                                topMargin:
-                                                    root.luminaDesign.spacing.medium
-                                            }
-
-                                            height: parent.height * 0.29
-                                        }
-
-                                        DashboardCalendar {
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: statusCard.bottom
-                                                bottom: parent.bottom
-                                                topMargin:
-                                                    root.luminaDesign.spacing.medium
-                                            }
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration:
+                                                root.luminaDesign.motion.fast
                                         }
                                     }
                                 }
 
-                                Item {
-                                    anchors.fill: parent
-                                    visible:
-                                        ControlCenterStore.activeTab
-                                            === "notifications"
+                                ShellSettingsView {
+                                    readonly property bool pageActive:
+                                        ControlCenterStore.activePage
+                                            === "settings"
 
-                                    DashboardNotifications {
-                                        id: expandedNotifications
+                                    width: parent.width
+                                    height: parent.height
+                                    x: pageActive
+                                        ? 0
+                                        : Math.round(width * 0.06)
+                                    opacity: pageActive ? 1 : 0
+                                    visible: pageActive || opacity > 0.01
+                                    enabled: pageActive
+                                    active: pageActive
+                                    outputName:
+                                        controlWindow.outputName
 
-                                        anchors {
-                                            left: parent.left
-                                            top: parent.top
-                                            bottom: parent.bottom
+                                    Behavior on x {
+                                        NumberAnimation {
+                                            duration:
+                                                root.luminaDesign.motion.medium
+                                            easing.type: Easing.OutCubic
                                         }
-
-                                        width: parent.width * 0.66
                                     }
 
-                                    Item {
-                                        anchors {
-                                            left: expandedNotifications.right
-                                            right: parent.right
-                                            top: parent.top
-                                            bottom: parent.bottom
-                                            leftMargin:
-                                                root.luminaDesign.spacing.medium
-                                        }
-
-                                        DashboardControls {
-                                            id: notificationControls
-
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: parent.top
-                                            }
-
-                                            height: parent.height * 0.54
-                                        }
-
-                                        DashboardStatus {
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                top: notificationControls.bottom
-                                                bottom: parent.bottom
-                                                topMargin:
-                                                    root.luminaDesign.spacing.medium
-                                            }
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration:
+                                                root.luminaDesign.motion.fast
                                         }
                                     }
                                 }

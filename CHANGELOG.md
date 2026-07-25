@@ -32,3 +32,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Automatic MPRIS playing, paused, and idle-state presentation.
 - Tested Niri event reduction with stale-state clearing, bounded reconnect backoff, and initial-state synchronization.
 - GPL-3.0-or-later project licensing with explicit third-party credits and contribution terms.
+- Unified Dashboard and Shell Settings views with direct category navigation
+  and no duplicate overlay state.

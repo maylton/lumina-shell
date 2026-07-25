@@ -15,7 +15,8 @@ Singleton {
             : ""
     readonly property string uptimeLabel: formatUptime(uptimeSeconds)
 
-    property string activeTab: "home"
+    property string activePage: "dashboard"
+    property string settingsCategory: "appearance"
     property double uptimeSeconds: 0
 
     function formatUptime(seconds) {
@@ -47,15 +48,43 @@ Singleton {
             uptimeSeconds = value
     }
 
-    function setTab(tabName) {
-        const requested = String(tabName || "")
+    function setPage(pageName) {
+        const requested = String(pageName || "")
+        const normalized = requested === "home"
+            || requested === "notifications"
+            ? "dashboard"
+            : requested
 
-        if (["home", "notifications"].indexOf(requested) >= 0)
-            activeTab = requested
+        if (["dashboard", "settings"].indexOf(normalized) >= 0)
+            activePage = normalized
     }
 
-    function openFor(outputName) {
-        activeTab = "home"
+    function setTab(tabName) {
+        setPage(tabName)
+    }
+
+    function setSettingsCategory(categoryName) {
+        const requested = String(categoryName || "")
+        const categories = [
+            "appearance",
+            "bar",
+            "wallpaper",
+            "notifications",
+            "osd",
+            "system"
+        ]
+
+        if (categories.indexOf(requested) >= 0)
+            settingsCategory = requested
+    }
+
+    function openFor(outputName, pageName, categoryName) {
+        if (pageName)
+            setPage(pageName)
+
+        if (categoryName)
+            setSettingsCategory(categoryName)
+
         OverlayStore.openFor("control", outputName)
     }
 
@@ -64,7 +93,11 @@ Singleton {
     }
 
     function toggle(outputName) {
-        OverlayStore.toggle("control", outputName)
+        if (OverlayStore.isOpenFor("control", outputName)) {
+            close()
+        } else {
+            openFor(outputName)
+        }
     }
 
     FileView {

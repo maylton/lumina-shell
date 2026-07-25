@@ -1,0 +1,7 @@
+module qs.modules.control.settings
+AppearanceSettings 1.0 AppearanceSettings.qml
+BarSettings 1.0 BarSettings.qml
+NotificationSettings 1.0 NotificationSettings.qml
+OsdSettings 1.0 OsdSettings.qml
+SystemSettings 1.0 SystemSettings.qml
+WallpaperSettings 1.0 WallpaperSettings.qml

@@ -128,13 +128,30 @@ Every service exposes a read-only `status` IPC operation for diagnostics. Visual
 
 `OsdStore` reduces volume, microphone, brightness, session-lock, and explicit lock-key events into one timed presentation state. The OSD resolves the focused Niri output, never requests keyboard focus, and closes if that output disappears. The `osd` IPC target allows compositor key bindings to publish lock-key state without embedding input-device assumptions in the shell.
 
-The Material control center is a centered desktop dashboard with a responsive three-column composition. Its dashboard tab combines the active workspace and output, clock, weather, daily controls, notification history, media, connectivity, power, and calendar. A dedicated notifications tab expands history without creating a second service owner. The presentation is split into focused `Dashboard*` components while service and store boundaries remain unchanged.
+The Material control center is a centered desktop surface with stable
+dimensions and two views. `DashboardView` combines the active workspace and
+output, clock, weather, daily controls, notification history, media,
+connectivity, power, and calendar. `ShellSettingsView` provides persistent
+configuration through focused category components. `ControlTabBar` switches
+between them with a short horizontal transition; every settings category owns
+its own scroll position.
 
-Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same typed service methods used by IPC. `ControlCenterStore` owns the selected dashboard tab and uptime presentation and participates in `OverlayStore`, so the dashboard cannot compete with launcher, notification, wallpaper, settings, or session surfaces for keyboard focus.
+Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do
+Not Disturb, dynamic color, battery status, and power profiles all call the
+same typed service methods used by IPC. `ControlCenterStore` owns `activePage`,
+`settingsCategory`, the selected output, and uptime presentation. It
+participates in `OverlayStore`, so Dashboard and Settings never create
+competing surfaces or duplicate focus state.
 
 ## Graphical settings
 
-The settings surface edits only typed `ConfigStore`, notification, and wallpaper service methods. It exposes appearance, OSD, notification, and wallpaper preferences, plus a two-step reset action and configuration-health card. Settings use the same overlay coordinator and per-output fallback as other exclusive surfaces.
+Settings edit only typed `ConfigStore`, notification, and wallpaper service
+methods. The current categories expose appearance, bar, wallpaper,
+notification, OSD, and configuration-health preferences, plus a two-step reset
+action. `modules/settings/Settings.qml` is an IPC bridge into the control
+center rather than a second visual surface. IPC callers can open the Settings
+view or a specific category directly, while ordinary shell toggles retain the
+last active view and category.
 
 ## Persistent configuration
 
@@ -164,7 +181,11 @@ The `session` IPC target can open the menu and describe the resolved command wit
 
 ## Multi-output surfaces
 
-`OverlayStore` is the process-wide coordinator for launcher, control center, settings, notification center, wallpaper picker, and session menu surfaces. It records the active surface and output so opening one full-screen interactive overlay closes the previous one instead of stacking competing keyboard surfaces.
+`OverlayStore` is the process-wide coordinator for launcher, the unified
+control center, notification center, wallpaper picker, and session menu
+surfaces. It records the active surface and output so opening one full-screen
+interactive overlay closes the previous one instead of stacking competing
+keyboard surfaces.
 
 Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; and persisted wallpaper assignments remain available for a later reconnect.
 

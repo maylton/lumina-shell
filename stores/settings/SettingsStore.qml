@@ -3,31 +3,50 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.stores.config
+import qs.stores.control
 import qs.stores.shell
 
 Singleton {
     id: root
 
-    readonly property bool open: activeOutputName.length > 0
+    readonly property bool open: ControlCenterStore.open
+        && ControlCenterStore.activePage === "settings"
     readonly property string activeOutputName:
-        OverlayStore.activeSurface === "settings"
-            ? OverlayStore.activeOutputName
+        open
+            ? ControlCenterStore.activeOutputName
             : ""
+    readonly property string activeCategory:
+        ControlCenterStore.settingsCategory
 
     property bool resetConfirmation: false
 
     function openFor(outputName) {
         resetConfirmation = false
-        OverlayStore.openFor("settings", outputName)
+        ControlCenterStore.openFor(outputName, "settings")
+    }
+
+    function openCategory(categoryName, outputName) {
+        resetConfirmation = false
+        ControlCenterStore.openFor(
+            outputName,
+            "settings",
+            categoryName
+        )
+    }
+
+    function setCategory(categoryName) {
+        ControlCenterStore.setSettingsCategory(categoryName)
     }
 
     function close() {
         resetConfirmation = false
-        OverlayStore.close("settings")
+
+        if (open)
+            ControlCenterStore.close()
     }
 
     function toggle(outputName) {
-        if (OverlayStore.isOpenFor("settings", outputName)) {
+        if (open && activeOutputName === String(outputName || "")) {
             close()
         } else {
             openFor(outputName)
@@ -51,10 +70,19 @@ Singleton {
     }
 
     Connections {
+        target: ControlCenterStore
+
+        function onActivePageChanged() {
+            if (ControlCenterStore.activePage !== "settings")
+                root.resetConfirmation = false
+        }
+    }
+
+    Connections {
         target: OverlayStore
 
         function onActiveSurfaceChanged() {
-            if (OverlayStore.activeSurface !== "settings")
+            if (OverlayStore.activeSurface !== "control")
                 root.resetConfirmation = false
         }
     }

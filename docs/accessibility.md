@@ -4,7 +4,8 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
 
 ## Keyboard behavior
 
-- Escape closes the active launcher, control center, settings, notification, wallpaper, or session surface.
+- Escape closes the active launcher, unified control center, notification,
+  wallpaper, or session surface.
 - Tab and Shift+Tab move through controls that accept keyboard interaction.
 - Enter and Space activate buttons, toggles, radio choices, notification actions, and session actions.
 - Left and Right adjust focused audio, microphone, and brightness sliders in five-percent steps.
