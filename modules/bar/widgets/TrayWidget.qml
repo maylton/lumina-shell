@@ -49,7 +49,8 @@ Item {
                 : root.luminaDesign.shape.barMedium
             color: trayPopup.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
-                : ConfigStore.barBackgroundMode === "transparent"
+                : ConfigStore.barWidgetPillsEnabled
+                    && ConfigStore.barBackgroundMode === "transparent"
                     ? root.luminaDesign.color.surfaceMuted
                     : "transparent"
             border.width: activeFocus ? 2 : 0

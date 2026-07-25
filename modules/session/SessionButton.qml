@@ -23,7 +23,8 @@ Rectangle {
         : luminaDesign.shape.barMedium
     color: expanded || sessionMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barBackgroundMode === "transparent"
+        : ConfigStore.barWidgetPillsEnabled
+            && ConfigStore.barBackgroundMode === "transparent"
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     scale: sessionMouse.pressed

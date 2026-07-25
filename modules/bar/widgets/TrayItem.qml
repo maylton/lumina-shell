@@ -51,7 +51,8 @@ Rectangle {
             ? Qt.darker(luminaDesign.color.surfaceMuted, 1.12)
             : itemMouse.containsMouse
                 ? luminaDesign.color.surfaceMuted
-                : ConfigStore.barBackgroundMode === "transparent"
+                : ConfigStore.barWidgetPillsEnabled
+                    && ConfigStore.barBackgroundMode === "transparent"
                     ? luminaDesign.color.surfaceMuted
                     : "transparent"
     activeFocusOnTab: true

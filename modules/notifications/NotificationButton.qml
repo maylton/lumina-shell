@@ -28,7 +28,8 @@ Rectangle {
         : 1.0
     color: expanded || notificationMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barBackgroundMode === "transparent"
+        : ConfigStore.barWidgetPillsEnabled
+            && ConfigStore.barBackgroundMode === "transparent"
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     border.width: activeFocus ? 2 : 0

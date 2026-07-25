@@ -47,7 +47,9 @@ Rectangle {
         : 1
     color: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : luminaDesign.color.surfaceMuted
+        : ConfigStore.barWidgetPillsEnabled
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary

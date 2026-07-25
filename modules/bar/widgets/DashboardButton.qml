@@ -20,7 +20,8 @@ Rectangle {
         : luminaDesign.shape.barLarge
     color: expanded || dashboardMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barBackgroundMode === "transparent"
+        : ConfigStore.barWidgetPillsEnabled
+            && ConfigStore.barBackgroundMode === "transparent"
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     scale: dashboardMouse.pressed

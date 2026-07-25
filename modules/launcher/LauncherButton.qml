@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.stores.config
 import qs.stores.launcher
 
 Rectangle {
@@ -24,7 +25,9 @@ Rectangle {
         : 1.0
     color: expanded || launcherMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : luminaDesign.color.surfaceMuted
+        : ConfigStore.barWidgetPillsEnabled
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
     activeFocusOnTab: true

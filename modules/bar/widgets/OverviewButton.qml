@@ -2,6 +2,7 @@ import QtQuick
 import qs.design
 import qs.modules.control
 import qs.services.niri
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -18,7 +19,9 @@ Rectangle {
         : 1.0
     color: NiriService.overviewOpen || overviewMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : luminaDesign.color.surfaceMuted
+        : ConfigStore.barWidgetPillsEnabled
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary

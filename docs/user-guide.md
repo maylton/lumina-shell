@@ -32,6 +32,8 @@ The Bar settings page controls:
   seconds;
 - grouped or individual status, individual service visibility, optional
   network/volume text, and a grouped tray menu or always-visible tray icons;
+- one global switch for resting widget pill backgrounds, without removing
+  hover, focus, open, urgency, or error feedback;
 - independent left/right widget order with Move up, Move down, and Show/Hide.
 
 Automatic scaling uses 56 pixels as its 100% reference and proportionally
@@ -68,6 +70,12 @@ cluster.
 Network and volume labels can be disabled independently while retaining their
 icons, live state, Dashboard action, tooltip, and accessible description.
 Responsive compact layouts may hide these labels regardless of the preference.
+
+Disabling **Widget backgrounds** removes resting pill surfaces from launcher,
+overview, workspaces, date/time, context, tray, notifications, system status,
+Dashboard, and optional actions at once. Interactive and semantic state layers
+still appear temporarily, and tray menus, tooltips, calendars, and other
+popups keep their own surfaces.
 
 ## Launcher
 

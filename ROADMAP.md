@@ -162,6 +162,8 @@ This sprint completes the 0.5 public-beta foundation:
   layout.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
+- One persistent bar preference can remove resting pill backgrounds from every
+  widget while preserving hover, focus, open, urgent, and error feedback.
 - System tray items can be grouped in a compact popover or kept visible
   inline, and notifications use a compact stateful icon with an unread badge.
 - Network and volume text can be hidden independently without disabling their

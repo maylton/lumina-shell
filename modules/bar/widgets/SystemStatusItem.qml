@@ -1,6 +1,7 @@
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -23,7 +24,7 @@ Rectangle {
         )
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: individual ? luminaDesign.shape.barLarge : 0
-    color: individual
+    color: individual && ConfigStore.barWidgetPillsEnabled
         ? luminaDesign.color.surfaceMuted
         : "transparent"
 

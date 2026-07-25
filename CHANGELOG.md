@@ -74,6 +74,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   layer-shell background effect; Frosted Glass builds on it with a tonal tint,
   subtle grain, and glass-edge highlight. Legacy `translucent` preferences
   migrate to Blur.
+- Persistent global control for resting bar-widget pill backgrounds, covering
+  launcher, overview, workspaces, date/time, context, tray, notifications,
+  system status, Dashboard, wallpaper, and session actions while preserving
+  interactive and semantic feedback.
 - The wallpaper surface now ignores shell exclusion zones, allowing Transparent
   bars to reserve work area without exposing a compositor-colored strip or
   placing tiled windows behind bar controls.

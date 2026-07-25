@@ -83,7 +83,9 @@ Rectangle {
         ? "transparent"
         : expanded || statusMouse.containsMouse
             ? luminaDesign.color.accentContainer
-            : luminaDesign.color.surfaceMuted
+            : ConfigStore.barWidgetPillsEnabled
+                ? luminaDesign.color.surfaceMuted
+                : "transparent"
     scale: statusMouse.pressed
         ? 0.96
         : 1

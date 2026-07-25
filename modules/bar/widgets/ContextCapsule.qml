@@ -116,7 +116,9 @@ Rectangle {
             luminaDesign.color.urgent.b,
             0.14
         )
-        : luminaDesign.color.surfaceMuted
+        : ConfigStore.barWidgetPillsEnabled
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     opacity: shouldShow
         && targetWidth >= visibleWidthThreshold
             ? 1

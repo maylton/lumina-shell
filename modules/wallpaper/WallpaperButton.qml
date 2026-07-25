@@ -22,7 +22,8 @@ Rectangle {
         : luminaDesign.shape.barMedium
     color: expanded || wallpaperMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : ConfigStore.barBackgroundMode === "transparent"
+        : ConfigStore.barWidgetPillsEnabled
+            && ConfigStore.barBackgroundMode === "transparent"
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     scale: wallpaperMouse.pressed
