@@ -16,6 +16,10 @@ Singleton {
             ? OverlayStore.activeOutputName
             : ""
     readonly property string uptimeLabel: formatUptime(uptimeSeconds)
+    readonly property var auxiliarySettingsCategories: [
+        "weather",
+        "connectivity"
+    ]
 
     property string activePage: ConfigStore.dashboardRememberPage
         ? ConfigStore.lastControlPage
@@ -76,10 +80,13 @@ Singleton {
 
     function setSettingsCategory(categoryName) {
         const requested = String(categoryName || "")
-        const normalized =
-            ConfigSchema.normalizeSettingsCategory(requested)
+        const auxiliary = auxiliarySettingsCategories.indexOf(requested) >= 0
+        const normalized = auxiliary
+            ? requested
+            : ConfigSchema.normalizeSettingsCategory(requested)
 
         if (requested !== "wallpaper"
+            && !auxiliary
             && ConfigSchema.settingsCategories()
                 .indexOf(requested) < 0) {
             return
@@ -87,7 +94,7 @@ Singleton {
 
         settingsCategory = normalized
 
-        if (ConfigStore.dashboardRememberCategory)
+        if (ConfigStore.dashboardRememberCategory && !auxiliary)
             ConfigStore.setLastSettingsCategory(normalized)
     }
 
