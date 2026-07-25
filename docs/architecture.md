@@ -128,6 +128,11 @@ separators, selection controls, disabled states, and nested entries.
 - `WindowStore.windows` for currently open Niri windows;
 - typed shell actions exposed by `NiriService`.
 
+The ranking layer sorts every matching visible desktop entry without applying
+a fixed result cap. The `ListView` virtualizes the complete result set, so
+large application catalogs remain scrollable without creating every delegate
+at once. Desktop entries marked `NoDisplay` remain intentionally excluded.
+
 The launcher creates one overlay surface per screen but makes only the requested output visible. It takes exclusive keyboard focus while open, supports arrow-key navigation, and releases the surface after launching or closing.
 
 The `launcher` IPC target allows Niri key bindings to open the surface without routing commands through visual components:

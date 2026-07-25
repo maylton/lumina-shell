@@ -6,6 +6,7 @@ import qs.services.niri
 import qs.stores.niri
 import qs.stores.session
 import qs.stores.shell
+import "LauncherSearch.js" as LauncherSearch
 
 Singleton {
     id: root
@@ -23,37 +24,15 @@ Singleton {
     property int selectedIndex: 0
 
     function normalizedText(value) {
-        return String(value || "").toLocaleLowerCase().trim()
+        return LauncherSearch.normalizedText(value)
     }
 
     function searchableText(parts) {
-        return normalizedText(parts.filter(part => Boolean(part)).join(" "))
+        return LauncherSearch.searchableText(parts)
     }
 
     function matchScore(needle, title, details) {
-        if (!needle)
-            return 1
-
-        const titleText = normalizedText(title)
-        const detailText = normalizedText(details)
-        const haystack = titleText + " " + detailText
-        const tokens = needle.split(/\s+/)
-
-        for (var i = 0; i < tokens.length; ++i) {
-            if (haystack.indexOf(tokens[i]) < 0)
-                return -1
-        }
-
-        if (titleText === needle)
-            return 1000
-
-        if (titleText.indexOf(needle) === 0)
-            return 800
-
-        if (titleText.indexOf(needle) >= 0)
-            return 600
-
-        return 300
+        return LauncherSearch.matchScore(needle, title, details)
     }
 
     function iconForWindow(windowItem) {
@@ -187,14 +166,7 @@ Singleton {
             }
         }
 
-        matches.sort((left, right) => {
-            if (left.score !== right.score)
-                return right.score - left.score
-
-            return left.title.localeCompare(right.title)
-        })
-
-        return matches.slice(0, 12)
+        return LauncherSearch.finalizeResults(matches)
     }
 
     function defaultOutputName() {

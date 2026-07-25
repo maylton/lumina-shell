@@ -26,6 +26,16 @@ Scope {
         function toggle(outputName: string): void {
             LauncherStore.toggle(outputName)
         }
+
+        function status(): string {
+            return JSON.stringify({
+                open: LauncherStore.open,
+                outputName: LauncherStore.activeOutputName,
+                query: LauncherStore.query,
+                applicationCount: LauncherStore.applications.length,
+                resultCount: LauncherStore.results.length
+            })
+        }
     }
 
     Variants {

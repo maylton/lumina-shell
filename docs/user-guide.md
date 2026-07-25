@@ -198,6 +198,7 @@ qs ipc -p /path/to/lumina-shell call media status
 qs ipc -p /path/to/lumina-shell call niri status
 qs ipc -p /path/to/lumina-shell call connectivity status
 qs ipc -p /path/to/lumina-shell call weather status
+qs ipc -p /path/to/lumina-shell call launcher status
 qs ipc -p /path/to/lumina-shell call config status
 qs ipc -p /path/to/lumina-shell call diagnostics status
 qs ipc -p /path/to/lumina-shell call configFile status
