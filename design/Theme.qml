@@ -446,7 +446,9 @@ QtObject {
             trackHeight: 16,
             handleWidth: 6,
             handleHeight: 28,
-            handleGap: 6
+            handleGap: 6,
+            stopSize: 4,
+            stateLayerSize: 32
         },
         motion: {
             fast: Math.max(1, Math.round(120 * root.motionScale)),

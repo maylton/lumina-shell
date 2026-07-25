@@ -1,9 +1,9 @@
 import QtQuick
 import QtTest
-import "../modules/control/settings/SettingsSliderGeometry.js" as Geometry
+import "../modules/control/SliderGeometry.js" as Geometry
 
 TestCase {
-    name: "SettingsSliderGeometry"
+    name: "SliderGeometry"
 
     function test_normalizesAndClampsValues() {
         compare(Geometry.normalizedValue(-2, 0, 10), 0)
@@ -28,5 +28,11 @@ TestCase {
         compare(Geometry.inactiveX(160, 6, 6, 0), 12)
         compare(Geometry.activeWidth(160, 6, 6, 1), 148)
         compare(Geometry.inactiveWidth(160, 6, 6, 1), 0)
+    }
+
+    function test_mapsPointerToHandleTravel() {
+        compare(Geometry.progressFromPosition(160, 6, 0), 0)
+        compare(Geometry.progressFromPosition(160, 6, 80), 0.5)
+        compare(Geometry.progressFromPosition(160, 6, 160), 1)
     }
 }

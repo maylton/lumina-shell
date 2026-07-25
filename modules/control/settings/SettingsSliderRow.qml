@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
-import "SettingsSliderGeometry.js" as Geometry
+import "../SliderGeometry.js" as Geometry
 
 SettingsRow {
     id: root

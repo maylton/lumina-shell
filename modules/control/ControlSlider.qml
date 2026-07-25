@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import "SliderGeometry.js" as Geometry
 
 Rectangle {
     id: root
@@ -16,6 +17,7 @@ Rectangle {
     signal valueRequested(real value)
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property var sliderTokens: luminaDesign.slider
     readonly property real clampedValue: Math.max(
         0,
         Math.min(1, Number(value) || 0)
@@ -25,9 +27,10 @@ Rectangle {
         if (!available)
             return
 
-        const nextValue = Math.max(
-            0,
-            Math.min(1, Number(position) / sliderTrack.width)
+        const nextValue = Geometry.progressFromPosition(
+            sliderTrack.width,
+            sliderTokens.handleWidth,
+            position
         )
 
         valueRequested(nextValue)
@@ -66,7 +69,9 @@ Rectangle {
             left: parent.left
             right: parent.right
             top: parent.top
-            margins: root.luminaDesign.spacing.large
+            leftMargin: root.luminaDesign.spacing.large
+            rightMargin: root.luminaDesign.spacing.large
+            topMargin: root.luminaDesign.spacing.small
         }
 
         DashboardIcon {
@@ -99,7 +104,7 @@ Rectangle {
         }
     }
 
-    Rectangle {
+    Item {
         id: sliderTrack
 
         anchors {
@@ -108,42 +113,156 @@ Rectangle {
             leftMargin: root.luminaDesign.spacing.large
             rightMargin: root.luminaDesign.spacing.large
             bottom: parent.bottom
-            bottomMargin: root.luminaDesign.spacing.medium
+            bottomMargin: root.luminaDesign.spacing.small
         }
 
-        height: 10
-        radius: 5
-        color: root.luminaDesign.color.surfaceContainer
-        clip: true
+        height: root.sliderTokens.handleHeight
 
         Rectangle {
-            width: parent.width * root.clampedValue
-            height: parent.height
-            radius: parent.radius
+            anchors.verticalCenter: parent.verticalCenter
+            width: Geometry.activeWidth(
+                sliderTrack.width,
+                sliderHandle.width,
+                root.sliderTokens.handleGap,
+                root.clampedValue
+            )
+            height: root.sliderTokens.trackHeight
+            radius: root.luminaDesign.shape.full
+            color: root.available
+                ? root.luminaDesign.color.primary
+                : root.luminaDesign.color.outline
+            visible: width > 0
+
+            Behavior on width {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
+                }
+            }
+        }
+
+        Rectangle {
+            id: inactiveTrack
+
+            anchors.verticalCenter: parent.verticalCenter
+            x: Geometry.inactiveX(
+                sliderTrack.width,
+                sliderHandle.width,
+                root.sliderTokens.handleGap,
+                root.clampedValue
+            )
+            width: Geometry.inactiveWidth(
+                sliderTrack.width,
+                sliderHandle.width,
+                root.sliderTokens.handleGap,
+                root.clampedValue
+            )
+            height: root.sliderTokens.trackHeight
+            radius: root.luminaDesign.shape.full
+            color: root.luminaDesign.color.surfaceContainer
+            visible: width > 0
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
+                }
+            }
+
+            Behavior on width {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
+                }
+            }
+        }
+
+        Rectangle {
+            id: stopIndicator
+
+            readonly property real endCenter:
+                sliderTrack.width - root.sliderTokens.trackHeight / 2
+
+            width: root.sliderTokens.stopSize
+            height: width
+            radius: root.luminaDesign.shape.full
+            x: endCenter - width / 2
+            anchors.verticalCenter: parent.verticalCenter
+            color: root.available
+                ? root.luminaDesign.color.onSurface
+                : root.luminaDesign.color.textMuted
+            opacity: 0.62
+            visible: inactiveTrack.width
+                >= root.sliderTokens.trackHeight
+        }
+
+        Rectangle {
+            id: handleStateLayer
+
+            width: root.sliderTokens.stateLayerSize
+            height: width
+            radius: root.luminaDesign.shape.full
+            x: sliderHandle.x
+                + sliderHandle.width / 2
+                - width / 2
+            anchors.verticalCenter: parent.verticalCenter
+            color: root.luminaDesign.color.primary
+            opacity: sliderPointer.pressed
+                ? 0.16
+                : sliderPointer.containsMouse || root.activeFocus
+                    ? 0.1
+                    : 0
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
+                }
+            }
+        }
+
+        Rectangle {
+            id: sliderHandle
+
+            width: root.sliderTokens.handleWidth
+            height: root.sliderTokens.handleHeight
+            radius: root.luminaDesign.shape.full
+            x: Geometry.handleX(
+                sliderTrack.width,
+                width,
+                root.clampedValue
+            )
+            anchors.verticalCenter: parent.verticalCenter
             color: root.available
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
 
-            Behavior on width {
+            Behavior on x {
                 NumberAnimation {
-                    duration:
-                        root.luminaDesign.motion.spatialFast
-                    easing.type:
-                        root.luminaDesign.motion.spatialEasing
-                    easing.overshoot:
-                        root.luminaDesign.motion.spatialOvershoot
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type: root.luminaDesign.motion.effectsEasing
                 }
             }
         }
 
         MouseArea {
+            id: sliderPointer
+
             anchors {
                 fill: parent
-                topMargin: -8
-                bottomMargin: -8
+                topMargin: -4
+                bottomMargin: -4
             }
 
             enabled: root.available
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onPressed: mouse => {
                 root.forceActiveFocus(Qt.MouseFocusReason)

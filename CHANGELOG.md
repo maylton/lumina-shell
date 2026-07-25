@@ -157,6 +157,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   full-row hover fills with inset state layers that preserve the outer contour.
 - Split Settings slider tracks around the Material handle with a semantic gap
   and endpoint-safe, tested geometry.
+- Restyled Dashboard volume, microphone, and brightness sliders with Material
+  3 active/inactive tracks, a vertical handle, stable gap, stop indicator, and
+  shared endpoint-safe geometry.
 - Replaced cyclic Settings combo controls with real Material dropdown menus,
   including selected state, viewport-aware placement, outside dismissal, and
   complete keyboard navigation.
