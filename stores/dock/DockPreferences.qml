@@ -13,6 +13,7 @@ Singleton {
 
     property alias schemaVersion: adapter.schemaVersion
     property alias enabled: adapter.enabled
+    property alias mode: adapter.mode
     property alias autoHide: adapter.autoHide
     property alias showRunning: adapter.showRunning
     property alias reserveSpace: adapter.reserveSpace
@@ -29,6 +30,7 @@ Singleton {
         return {
             schemaVersion: adapter.schemaVersion,
             enabled: adapter.enabled,
+            mode: adapter.mode,
             autoHide: adapter.autoHide,
             showRunning: adapter.showRunning,
             reserveSpace: adapter.reserveSpace,
@@ -48,6 +50,7 @@ Singleton {
     function applyValues(values) {
         adapter.schemaVersion = values.schemaVersion
         adapter.enabled = values.enabled
+        adapter.mode = values.mode
         adapter.autoHide = values.autoHide
         adapter.showRunning = values.showRunning
         adapter.reserveSpace = values.reserveSpace
@@ -85,6 +88,10 @@ Singleton {
 
     function setEnabled(value) {
         setValue("enabled", Boolean(value))
+    }
+
+    function setMode(value) {
+        setValue("mode", value)
     }
 
     function setAutoHide(value) {
@@ -161,6 +168,7 @@ Singleton {
 
             property int schemaVersion: DockPreferencesLogic.CURRENT_VERSION
             property bool enabled: false
+            property string mode: "floating"
             property bool autoHide: true
             property bool showRunning: true
             property bool reserveSpace: false
