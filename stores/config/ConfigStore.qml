@@ -327,6 +327,87 @@ Singleton {
             setValue(key, value)
     }
 
+    function barVisibilityKeys(widgetId) {
+        const keys = {
+            launcher: ["barShowLauncher"],
+            overview: ["barShowOverview"],
+            workspaces: ["barShowWorkspaces"],
+            datetime: ["barShowClock"],
+            privacy: ["barShowPrivacyIndicators"],
+            keyboard: ["barShowKeyboardLayout"],
+            tray: ["barShowTray"],
+            notifications: ["barShowNotifications"],
+            "system-status": [
+                "barShowAudioStatus",
+                "barShowNetworkStatus",
+                "barShowBatteryStatus"
+            ],
+            dashboard: ["barShowDashboardButton"],
+            wallpaper: ["barShowWallpaperButton"],
+            session: ["barShowSessionButton"]
+        }
+
+        return keys[String(widgetId || "")] || []
+    }
+
+    function setBarWidgetVisible(widgetId, visible) {
+        const id = String(widgetId || "")
+        const keys = barVisibilityKeys(id)
+
+        for (var index = 0; index < keys.length; ++index)
+            setValue(keys[index], Boolean(visible))
+
+        if (Boolean(visible)
+            && ["wallpaper", "session"].indexOf(id) >= 0
+            && barRightWidgetOrder.indexOf(id) < 0) {
+            const next = cloneList(barRightWidgetOrder)
+            next.push(id)
+            setValue("barRightWidgetOrder", next)
+        }
+    }
+
+    function barWidgetVisible(widgetId) {
+        const keys = barVisibilityKeys(widgetId)
+
+        if (keys.length === 0)
+            return false
+
+        for (var index = 0; index < keys.length; ++index) {
+            if (Boolean(stateAdapter[keys[index]]))
+                return true
+        }
+
+        return false
+    }
+
+    function moveBarWidget(side, widgetId, offset) {
+        const key = String(side) === "left"
+            ? "barLeftWidgetOrder"
+            : String(side) === "right"
+                ? "barRightWidgetOrder"
+                : ""
+
+        if (!key)
+            return
+
+        const order = cloneList(stateAdapter[key])
+        const currentIndex = order.indexOf(String(widgetId || ""))
+        const targetIndex = Math.max(
+            0,
+            Math.min(
+                order.length - 1,
+                currentIndex + Number(offset || 0)
+            )
+        )
+
+        if (currentIndex < 0 || targetIndex === currentIndex)
+            return
+
+        const moved = order.splice(currentIndex, 1)[0]
+        order.splice(targetIndex, 0, moved)
+        setValue(key, order)
+    }
+
     function setDashboardValue(key, value) {
         if (String(key).indexOf("dashboard") === 0)
             setValue(key, value)

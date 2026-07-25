@@ -20,6 +20,47 @@ Item {
     required property bool showActionError
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool compactLayout: width < 1400
+    readonly property bool narrowLayout: width < 1080
+    readonly property var leftRegistry: ({
+        launcher: launcherComponent,
+        overview: overviewComponent,
+        workspaces: workspacesComponent,
+        datetime: dateTimeComponent
+    })
+    readonly property var rightRegistry: ({
+        privacy: privacyComponent,
+        keyboard: keyboardComponent,
+        tray: trayComponent,
+        notifications: notificationsComponent,
+        "system-status": systemStatusComponent,
+        dashboard: dashboardComponent,
+        wallpaper: wallpaperComponent,
+        session: sessionComponent
+    })
+    readonly property var widgetVisibility: ({
+        launcher: ConfigStore.barShowLauncher && !narrowLayout,
+        overview: ConfigStore.barShowOverview && !narrowLayout,
+        workspaces: ConfigStore.barShowWorkspaces,
+        datetime: ConfigStore.barShowClock,
+        privacy: ConfigStore.barShowPrivacyIndicators,
+        keyboard: ConfigStore.barShowKeyboardLayout,
+        tray: ConfigStore.barShowTray && width >= 900,
+        notifications: ConfigStore.barShowNotifications
+            && width >= 820,
+        "system-status": ConfigStore.barShowAudioStatus
+            || ConfigStore.barShowNetworkStatus
+            || ConfigStore.barShowBatteryStatus,
+        dashboard: ConfigStore.barShowDashboardButton,
+        wallpaper: ConfigStore.barShowWallpaperButton
+            && width >= 1180,
+        session: ConfigStore.barShowSessionButton
+            && width >= 1180
+    })
+
+    function widgetEnabled(widgetId) {
+        return Boolean(widgetVisibility[String(widgetId || "")])
+    }
 
     BarCluster {
         id: leftArea
@@ -30,35 +71,17 @@ Item {
             verticalCenter: parent.verticalCenter
         }
 
-        LauncherButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowLauncher
-            outputName: root.outputName
-        }
+        Repeater {
+            model: ConfigStore.barLeftWidgetOrder
 
-        OverviewButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowOverview
-        }
+            delegate: Loader {
+                required property var modelData
 
-        WorkspaceStrip {
-            anchors.verticalCenter: parent.verticalCenter
-            workspaces: ConfigStore.barShowWorkspaces
-                ? root.visibleWorkspaces
-                : []
-            itemSpacing: ConfigStore.barWidgetSpacing
-            visualStyle: "expressive"
-        }
-
-        DateTimeCluster {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowClock
-            compact: root.width < 1400
-            visualStyle: "expressive"
-            barPosition: ConfigStore.barPosition
-            outputName: root.outputName.length > 0
-                ? root.outputName
-                : "screen"
+                active: root.widgetEnabled(String(modelData))
+                visible: active
+                sourceComponent:
+                    root.leftRegistry[String(modelData)] || null
+            }
         }
     }
 
@@ -87,48 +110,112 @@ Item {
             verticalCenter: parent.verticalCenter
         }
 
-        PrivacyIndicator {
-            visible: ConfigStore.barShowPrivacyIndicators
-                && sourceAvailable
-        }
+        Repeater {
+            model: ConfigStore.barRightWidgetOrder
 
-        KeyboardLayoutIndicator {
-            visible: ConfigStore.barShowKeyboardLayout
-                && sourceAvailable
-        }
+            delegate: Loader {
+                required property var modelData
 
-        TrayWidget {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowTray
+                active: root.widgetEnabled(String(modelData))
+                visible: active
+                sourceComponent:
+                    root.rightRegistry[String(modelData)] || null
+            }
         }
+    }
 
-        NotificationButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowNotifications
+    Component {
+        id: launcherComponent
+
+        LauncherButton {
             outputName: root.outputName
         }
+    }
+
+    Component {
+        id: overviewComponent
+
+        OverviewButton {}
+    }
+
+    Component {
+        id: workspacesComponent
+
+        WorkspaceStrip {
+            workspaces: root.visibleWorkspaces
+            itemSpacing: ConfigStore.barWidgetSpacing
+            visualStyle: "expressive"
+        }
+    }
+
+    Component {
+        id: dateTimeComponent
+
+        DateTimeCluster {
+            compact: root.compactLayout
+            visualStyle: "expressive"
+            barPosition: ConfigStore.barPosition
+            outputName: root.outputName.length > 0
+                ? root.outputName
+                : "screen"
+        }
+    }
+
+    Component {
+        id: privacyComponent
+
+        PrivacyIndicator {}
+    }
+
+    Component {
+        id: keyboardComponent
+
+        KeyboardLayoutIndicator {}
+    }
+
+    Component {
+        id: trayComponent
+
+        TrayWidget {}
+    }
+
+    Component {
+        id: notificationsComponent
+
+        NotificationButton {
+            outputName: root.outputName
+        }
+    }
+
+    Component {
+        id: systemStatusComponent
 
         SystemStatusCluster {
-            anchors.verticalCenter: parent.verticalCenter
             compact: root.width < 1320
             outputName: root.outputName
         }
+    }
+
+    Component {
+        id: dashboardComponent
 
         DashboardButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowDashboardButton
             outputName: root.outputName
         }
+    }
+
+    Component {
+        id: wallpaperComponent
 
         WallpaperButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowWallpaperButton
             outputName: root.outputName
         }
+    }
+
+    Component {
+        id: sessionComponent
 
         SessionButton {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: ConfigStore.barShowSessionButton
             outputName: root.outputName
         }
     }
