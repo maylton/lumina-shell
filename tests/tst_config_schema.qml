@@ -24,6 +24,8 @@ TestCase {
         compare(state.barWidgetPillsEnabled, true)
         compare(state.barShowAudioLabel, true)
         compare(state.barShowNetworkLabel, true)
+        compare(state.dashboardUseUserAvatarImage, true)
+        compare(state.dashboardUserAvatarPath, "")
         compare(state.barContextTimeout, 3500)
         compare(state.barHeight, 56)
         compare(state.barShowWallpaperButton, false)
@@ -371,6 +373,8 @@ TestCase {
         const appearance =
             ConfigSchema.defaultsForCategory("appearance")
         const bar = ConfigSchema.defaultsForCategory("bar")
+        const dashboard =
+            ConfigSchema.defaultsForCategory("dashboard")
 
         compare(appearance.themeMode, "auto")
         compare(appearance.paletteStyle, "auto")
@@ -391,6 +395,9 @@ TestCase {
         compare(bar.barShowDashboardButton, true)
         compare(bar.barRightWidgetOrder.length, 6)
         verify(bar.themeMode === undefined)
+        compare(dashboard.dashboardUseUserAvatarImage, true)
+        compare(dashboard.dashboardUserAvatarPath, "")
+        verify(dashboard.barHeight === undefined)
     }
 
     function test_resetAllMatchesDefaults() {
@@ -424,6 +431,9 @@ TestCase {
             barWidgetPillsEnabled: false,
             barShowAudioLabel: false,
             barShowNetworkLabel: false,
+            dashboardUseUserAvatarImage: false,
+            dashboardUserAvatarPath:
+                "  file:///tmp/avatar.png  ",
             dashboardShowMedia: false,
             notificationPopupPosition: "bottom-left",
             osdSize: 1.2,
@@ -440,6 +450,11 @@ TestCase {
         compare(restored.barWidgetPillsEnabled, false)
         compare(restored.barShowAudioLabel, false)
         compare(restored.barShowNetworkLabel, false)
+        compare(restored.dashboardUseUserAvatarImage, false)
+        compare(
+            restored.dashboardUserAvatarPath,
+            "file:///tmp/avatar.png"
+        )
         compare(restored.dashboardShowMedia, false)
         compare(
             restored.notificationPopupPosition,

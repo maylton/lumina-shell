@@ -110,6 +110,10 @@ Singleton {
     property alias dashboardRememberCategory:
         stateAdapter.dashboardRememberCategory
     property alias dashboardDensity: stateAdapter.dashboardDensity
+    property alias dashboardUseUserAvatarImage:
+        stateAdapter.dashboardUseUserAvatarImage
+    property alias dashboardUserAvatarPath:
+        stateAdapter.dashboardUserAvatarPath
     property alias dashboardShowWeather:
         stateAdapter.dashboardShowWeather
     property alias dashboardShowCalendar:
@@ -584,6 +588,8 @@ Singleton {
             property bool dashboardRememberPage: true
             property bool dashboardRememberCategory: true
             property string dashboardDensity: "comfortable"
+            property bool dashboardUseUserAvatarImage: true
+            property string dashboardUserAvatarPath: ""
             property bool dashboardShowWeather: true
             property bool dashboardShowCalendar: true
             property bool dashboardShowMedia: true
@@ -752,6 +758,10 @@ Singleton {
                 barShowAudioLabel: root.barShowAudioLabel,
                 barShowNetworkLabel: root.barShowNetworkLabel,
                 dashboardDefaultPage: root.dashboardDefaultPage,
+                dashboardUseUserAvatarImage:
+                    root.dashboardUseUserAvatarImage,
+                dashboardUserAvatarPath:
+                    root.dashboardUserAvatarPath,
                 doNotDisturb: root.doNotDisturb,
                 osdEnabled: root.osdEnabled,
                 osdDuration: root.osdDuration,

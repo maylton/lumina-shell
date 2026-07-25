@@ -79,6 +79,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Dashboard, wallpaper, and session actions while preserving interactive and
   semantic feedback. Workspace pills remain visible because they communicate
   focused and active navigation state.
+- Account-backed user avatar as the final Dashboard entry point, shared with
+  the welcome card and resolved through AccountsService, `.face`, an optional
+  custom image, initials, and a Lumina fallback. Dashboard settings can
+  disable profile images without removing the entry point.
 - The wallpaper surface now ignores shell exclusion zones, allowing Transparent
   bars to reserve work area without exposing a compositor-colored strip or
   placing tiled windows behind bar controls.

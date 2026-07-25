@@ -38,7 +38,13 @@ The Niri event stream supplies a complete initial state followed by incremental 
 
 The stores replace their arrays after mutations so QML bindings receive deterministic change notifications.
 
-`SystemInfoStore` owns session identity metadata used by the dashboard. It resolves the login name from the process environment and the distribution name from `/etc/os-release`, with generic fallbacks when either source is unavailable.
+`SystemInfoStore` owns session identity metadata shared by the bar and
+Dashboard. It resolves the login name from the process environment, account
+display name and icon through AccountsService, local `.face` sources through
+readable file views, and the distribution name from `/etc/os-release`.
+`UserAvatar` applies the ordered image policy and falls back to detected
+initials without exposing failed image sources. Generic fallbacks keep the
+shell usable when AccountsService or any local image is unavailable.
 
 ### Output refresh policy
 
@@ -133,6 +139,12 @@ second quick-controls popup. `barShowNetworkLabel` and `barShowAudioLabel`
 control only their visible text; icons, service state, tooltips, accessibility,
 and activation remain intact. Responsive compaction takes precedence when the
 available width cannot safely retain secondary labels.
+
+`UserAvatarButton` is the final right-side Dashboard entry point. It retains
+the existing `dashboard` widget identifier and `ControlCenterStore` action so
+saved visibility/order preferences and overlay ownership do not change.
+`dashboardUseUserAvatarImage` and `dashboardUserAvatarPath` affect the shared
+bar and Dashboard avatar without duplicating account state.
 
 ## Process policy
 

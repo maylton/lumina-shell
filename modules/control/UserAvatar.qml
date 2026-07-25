@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell.Io
 import Quickshell.Widgets
 import qs.design
+import qs.stores.config
 import qs.stores.system
 
 Item {
@@ -11,17 +13,40 @@ Item {
     property real avatarSize: 36
     property real borderWidth: 1
     property color borderColor: luminaDesign.color.primary
-    property var candidates: SystemInfoStore.avatarCandidates
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string customAvatarPath:
+        ConfigStore.dashboardUserAvatarPath
+    readonly property var candidates: {
+        if (!ConfigStore.dashboardUseUserAvatarImage)
+            return []
+
+        const result = []
+        const systemCandidates = SystemInfoStore.avatarCandidates
+
+        for (var index = 0;
+            index < systemCandidates.length;
+            ++index) {
+            result.push(systemCandidates[index])
+        }
+
+        if (customAvatarAvailable
+            && result.indexOf(customAvatarPath) < 0) {
+            result.push(customAvatarPath)
+        }
+
+        return result
+    }
     readonly property bool imageReady:
         avatarImage.status === Image.Ready
     readonly property string fallbackText:
-        SystemInfoStore.userInitial.length > 0
+        SystemInfoStore.userName !== "User"
+            && SystemInfoStore.userInitial.length > 0
             ? SystemInfoStore.userInitial
             : "L"
 
     property int candidateIndex: 0
+    property bool customAvatarAvailable: false
 
     implicitWidth: avatarSize
     implicitHeight: avatarSize
@@ -42,6 +67,17 @@ Item {
         candidateIndex = 0
     }
 
+    function localPath(source) {
+        const value = String(source || "")
+
+        if (value.indexOf("file://") === 0)
+            return decodeURIComponent(value.slice(7))
+
+        return /^[a-z][a-z0-9+.-]*:/i.test(value)
+            ? ""
+            : value
+    }
+
     function advanceCandidate() {
         if (candidateIndex + 1 < candidates.length) {
             candidateIndex += 1
@@ -51,6 +87,19 @@ Item {
     }
 
     onCandidatesChanged: resetCandidate()
+
+    FileView {
+        id: customAvatarFile
+
+        path: root.localPath(root.customAvatarPath)
+        preload: ConfigStore.dashboardUseUserAvatarImage
+            && path.length > 0
+        printErrors: false
+        onPathChanged: root.customAvatarAvailable = false
+        onLoaded: root.customAvatarAvailable = true
+        onLoadFailed: error =>
+            root.customAvatarAvailable = false
+    }
 
     ClippingRectangle {
         anchors.fill: parent

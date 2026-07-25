@@ -32,7 +32,7 @@ SettingsPage {
             tray: "System tray",
             notifications: "Notifications",
             "system-status": "System status",
-            dashboard: "Dashboard",
+            dashboard: "User avatar",
             wallpaper: "Wallpaper",
             session: "Session"
         }
@@ -49,7 +49,7 @@ SettingsPage {
             tray: "StatusNotifier items",
             notifications: "Notification center",
             "system-status": "Network, audio, and battery",
-            dashboard: "Lumina quick controls",
+            dashboard: "Dashboard and session entry point",
             wallpaper: "Wallpaper picker",
             session: "Session and layout actions"
         }
@@ -522,8 +522,8 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Dashboard button"
-            description: "Show dedicated Lumina quick controls"
+            title: "User avatar"
+            description: "Show the personal Dashboard entry point"
             checked: ConfigStore.barShowDashboardButton
             onToggled: value => ConfigStore.setBarWidgetVisible(
                 "dashboard",

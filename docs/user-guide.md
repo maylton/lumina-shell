@@ -6,7 +6,8 @@ Lumina creates one instance of **Lumina's Material Expressive bar** for each
 connected output. Its default 56-pixel, edge-to-edge tonal surface places
 launcher, overview, transforming workspaces, and localized date/time on the
 left; a temporary Niri context capsule in the center; and tray, notifications,
-live system status, and the Lumina Dashboard button on the right.
+live system status, and the user avatar on the right. The avatar is the
+personal entry point for the Dashboard and its session actions.
 
 The focused workspace expands into an accent pill. Other active workspaces
 retain a quiet compact pill, while inactive workspaces recede to lightweight
@@ -70,6 +71,14 @@ cluster.
 Network and volume labels can be disabled independently while retaining their
 icons, live state, Dashboard action, tooltip, and accessible description.
 Responsive compact layouts may hide these labels regardless of the preference.
+
+Lumina resolves the profile image from the system account first, followed by
+`~/.face`, `~/.face.icon`, and the custom image selected under **Settings →
+Dashboard → Personal identity**. Missing or unreadable sources are skipped
+without displaying a broken image. If no image is available—or profile
+pictures are disabled—the avatar shows the detected account initials, with
+the Lumina initial as the final fallback. The same identity is reused by the
+Dashboard welcome card.
 
 Disabling **Widget backgrounds** removes resting pill surfaces from launcher,
 overview, date/time, context, tray, notifications, system status, Dashboard,

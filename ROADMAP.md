@@ -169,6 +169,9 @@ This sprint completes the 0.5 public-beta foundation:
   inline, and notifications use a compact stateful icon with an unread badge.
 - Network and volume text can be hidden independently without disabling their
   status icons, services, tooltips, or Dashboard access.
+- The final right-side Dashboard entry uses the detected account avatar with
+  AccountsService, `.face`, custom-image, initials, and Lumina fallbacks; its
+  image can be disabled without removing the button or session access.
 - Bar, Dashboard, and Settings distinguish spatial shape/bounds transitions
   from color/opacity effects, share semantic spacing roles, and remove
   expressive overshoot when reduced motion is enabled.

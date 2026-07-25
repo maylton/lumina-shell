@@ -79,6 +79,8 @@ function defaults() {
         dashboardRememberPage: true,
         dashboardRememberCategory: true,
         dashboardDensity: "comfortable",
+        dashboardUseUserAvatarImage: true,
+        dashboardUserAvatarPath: "",
         dashboardShowWeather: true,
         dashboardShowCalendar: true,
         dashboardShowMedia: true,
@@ -373,6 +375,9 @@ function normalize(source) {
         ["compact", "comfortable", "spacious"],
         base.dashboardDensity
     )
+    result.dashboardUserAvatarPath = String(
+        result.dashboardUserAvatarPath || ""
+    ).trim()
     result.behaviorTransitionScale = boundedNumber(
         result.behaviorTransitionScale,
         base.behaviorTransitionScale,
@@ -463,6 +468,7 @@ function normalize(source) {
         "barShowSeconds",
         "dashboardRememberPage",
         "dashboardRememberCategory",
+        "dashboardUseUserAvatarImage",
         "dashboardShowWeather",
         "dashboardShowCalendar",
         "dashboardShowMedia",
@@ -617,6 +623,8 @@ function defaultsForCategory(categoryName) {
             "dashboardRememberPage",
             "dashboardRememberCategory",
             "dashboardDensity",
+            "dashboardUseUserAvatarImage",
+            "dashboardUserAvatarPath",
             "dashboardShowWeather",
             "dashboardShowCalendar",
             "dashboardShowMedia",

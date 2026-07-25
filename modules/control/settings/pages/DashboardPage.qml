@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Dialogs
 import qs.modules.control.settings
 import qs.services.i18n
 import qs.stores.config
@@ -16,6 +17,119 @@ SettingsPage {
         "settings.page.dashboard.description",
         "Opening behavior, density, and visible daily cards"
     )
+
+    function avatarFileName(source) {
+        const value = decodeURIComponent(String(source || ""))
+        const separator = value.lastIndexOf("/")
+
+        return separator >= 0
+            ? value.slice(separator + 1)
+            : value
+    }
+
+    FileDialog {
+        id: avatarDialog
+
+        title: I18n.tr(
+            "settings.dashboard.avatar.dialogTitle",
+            "Choose a profile picture"
+        )
+        fileMode: FileDialog.OpenFile
+        nameFilters: [
+            "Images (*.png *.jpg *.jpeg *.webp *.bmp)",
+            "All files (*)"
+        ]
+        onAccepted: ConfigStore.setDashboardValue(
+            "dashboardUserAvatarPath",
+            String(selectedFile)
+        )
+    }
+
+    SettingsSection {
+        title: I18n.tr(
+            "settings.dashboard.avatar.section",
+            "Personal identity"
+        )
+        description: I18n.tr(
+            "settings.dashboard.avatar.sectionDescription",
+            "Shared by the bar entry point and Dashboard welcome card"
+        )
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: I18n.tr(
+                "settings.dashboard.avatar.useImage",
+                "Use profile picture"
+            )
+            description: I18n.tr(
+                "settings.dashboard.avatar.useImageDescription",
+                "Fall back to account initials when disabled"
+            )
+            iconName: "avatar-default-symbolic"
+            symbol: "●"
+            checked: ConfigStore.dashboardUseUserAvatarImage
+            onToggled: value => ConfigStore.setDashboardValue(
+                "dashboardUseUserAvatarImage",
+                value
+            )
+        }
+
+        SettingsActionRow {
+            width: parent.width
+            title: I18n.tr(
+                "settings.dashboard.avatar.customImage",
+                "Custom picture"
+            )
+            description: ConfigStore.dashboardUserAvatarPath
+                ? root.avatarFileName(
+                    ConfigStore.dashboardUserAvatarPath
+                )
+                : I18n.tr(
+                    "settings.dashboard.avatar.priority",
+                    "Used after the system account image and .face"
+                )
+            iconName: "image-x-generic-symbolic"
+            symbol: "▣"
+            actionLabel: ConfigStore.dashboardUserAvatarPath
+                ? I18n.tr(
+                    "settings.dashboard.avatar.change",
+                    "Change"
+                )
+                : I18n.tr(
+                    "settings.dashboard.avatar.choose",
+                    "Choose"
+                )
+            onActivated: avatarDialog.open()
+        }
+
+        SettingsActionRow {
+            width: parent.width
+            title: I18n.tr(
+                "settings.dashboard.avatar.systemImage",
+                "System account picture"
+            )
+            description: I18n.tr(
+                "settings.dashboard.avatar.systemImageDescription",
+                "Remove the custom fallback and use system sources"
+            )
+            available:
+                ConfigStore.dashboardUserAvatarPath.length > 0
+            availabilityText: I18n.tr(
+                "settings.dashboard.avatar.noCustomImage",
+                "No custom picture selected"
+            )
+            iconName: "edit-clear-symbolic"
+            symbol: "×"
+            actionLabel: I18n.tr(
+                "settings.dashboard.avatar.clear",
+                "Clear"
+            )
+            onActivated: ConfigStore.setDashboardValue(
+                "dashboardUserAvatarPath",
+                ""
+            )
+        }
+    }
 
     SettingsSection {
         title: "Opening"

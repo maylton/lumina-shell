@@ -18,8 +18,8 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   30-pixel desktop safety floor at the smallest 40-pixel/compact combination.
   Launcher,
   overview, workspaces, date/time, tray items,
-  notifications, system status, and Dashboard expose focus outlines, names,
-  descriptions, Enter, Space, and hover tooltips.
+  notifications, system status, and the user-avatar Dashboard entry expose
+  focus outlines, names, descriptions, Enter, Space, and hover tooltips.
 - The grouped tray button announces its active-item count, while the
   notification bell announces unread count and Do Not Disturb state.
 - The active workspace changes both shape and width, so selection does not
