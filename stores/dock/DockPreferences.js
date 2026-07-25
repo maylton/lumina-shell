@@ -1,6 +1,6 @@
 .pragma library
 
-var CURRENT_VERSION = 1
+var CURRENT_VERSION = 2
 
 function defaults() {
     return {
@@ -10,7 +10,7 @@ function defaults() {
         autoHide: true,
         showRunning: true,
         reserveSpace: false,
-        iconSize: 50,
+        iconSize: 36,
         margin: 10,
         favoriteAppIds: []
     }
@@ -57,6 +57,20 @@ function normalizeFavorites(value) {
     return result
 }
 
+function normalizedIconSize(input, fallback) {
+    var schemaVersion = Number(input.schemaVersion)
+    var requested = Number(input.iconSize)
+
+    // Version 1 used 50 px as its generated default. Move only that legacy
+    // default to the new 36 px baseline; preserve every customized value.
+    if ((!isFinite(schemaVersion) || schemaVersion < 2) && requested === 50)
+        return fallback
+
+    return Math.round(
+        boundedNumber(input.iconSize, fallback, 30, 72)
+    )
+}
+
 function normalize(source) {
     var input = source && typeof source === "object" ? source : {}
     var base = defaults()
@@ -72,9 +86,7 @@ function normalize(source) {
         autoHide: booleanValue(input.autoHide, base.autoHide),
         showRunning: booleanValue(input.showRunning, base.showRunning),
         reserveSpace: booleanValue(input.reserveSpace, base.reserveSpace),
-        iconSize: Math.round(
-            boundedNumber(input.iconSize, base.iconSize, 36, 72)
-        ),
+        iconSize: normalizedIconSize(input, base.iconSize),
         margin: Math.round(
             boundedNumber(input.margin, base.margin, 0, 24)
         ),
