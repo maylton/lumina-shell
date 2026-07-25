@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Audit and apply the schema-8 shell-surface migration transactionally.
 
-The migration is first executed in a detached temporary worktree. Tests and
+The migration is executed first in a detached temporary worktree. Tests and
 static integration checks run there before the real checkout is touched. Only
-an audited binary patch is then applied to the current branch. The helper never
-pushes automatically and removes itself from the final product commit.
+an audited staged binary patch is then applied to the current branch. The
+helper never pushes automatically and removes itself from the product commit.
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import textwrap
 
@@ -105,21 +104,21 @@ def extract_payload(source: str) -> str:
         raise RuntimeError("migration payload markers were not found") from error
 
     payload = textwrap.dedent(source[start:end])
-
-    incompatible_behavior = '''
+    payload = payload.replace(
+        '''
         Behavior on border.color {
             ColorAnimation {
                 duration: root.luminaDesign.motion.effectsDefault
                 easing.type: root.luminaDesign.motion.effectsEasing
             }
         }
-'''
-    payload = payload.replace(incompatible_behavior, "")
+''',
+        "",
+    )
     payload = payload.replace(
         "Path('.github/workflows/apply-shell-surface-style.yml').unlink()",
         "# Temporary-file cleanup is owned by the transactional wrapper.",
     )
-
     return payload
 
 
@@ -165,17 +164,16 @@ def refine_policy(worktree: Path) -> None:
 }
 ''',
     )
-
-    policy_text = policy.read_text(encoding="utf-8")
-    policy_text = policy_text.replace(
+    replace_exact(
+        policy,
         'return clamp(level * (lightMode ? 0.78 : 0.68), 0.40, 0.76)',
         'return clamp(level * (lightMode ? 0.78 : 0.68), 0.48, 0.76)',
     )
-    policy_text = policy_text.replace(
+    replace_exact(
+        policy,
         'return clamp(level * (lightMode ? 0.88 : 0.80), 0.48, 0.84)',
-        'return clamp(level * (lightMode ? 0.88 : 0.80), 0.54, 0.84)',
+        'return clamp(level * (lightMode ? 0.88 : 0.80), 0.55, 0.84)',
     )
-    policy.write_text(policy_text, encoding="utf-8")
 
     tests = worktree / "tests/tst_shell_surface_policy.qml"
     replace_exact(
@@ -215,9 +213,8 @@ def document_popup_policy(worktree: Path) -> None:
 ''',
     )
 
-    architecture = worktree / "docs/architecture.md"
     append_once(
-        architecture,
+        worktree / "docs/architecture.md",
         "The bar keeps its\nindependent background configuration.\n",
         '''
 
@@ -260,6 +257,8 @@ while calendar and tray popups continue to follow the bar's independent visual
 policy.
 '''
     if "### Shell surface styles" not in guide_text:
+        if "\n## Launcher\n" not in guide_text:
+            raise RuntimeError("docs/user-guide.md: Launcher marker was not found")
         guide_text = guide_text.replace("\n## Launcher\n", section + "\n## Launcher\n", 1)
     guide.write_text(guide_text, encoding="utf-8")
 
@@ -283,12 +282,11 @@ def require_text(path: Path, *patterns: str) -> None:
 
 
 def validate_generated_tree(worktree: Path) -> list[str]:
-    required_files = (
+    for relative in (
         "modules/control/ShellSurface.qml",
         "modules/control/ShellSurfacePolicy.js",
         "tests/tst_shell_surface_policy.qml",
-    )
-    for relative in required_files:
+    ):
         if not (worktree / relative).is_file():
             raise RuntimeError(f"required generated file is missing: {relative}")
 
@@ -321,23 +319,30 @@ def validate_generated_tree(worktree: Path) -> list[str]:
     require_text(
         worktree / "modules/control/ShellSurfacePolicy.js",
         "function renderedCompositeAlpha",
+        "0.48, 0.76",
+        "0.55, 0.84",
+    )
+    require_text(
+        worktree / "docs/user-guide.md",
+        "### Shell surface styles",
+        "Schema 8 writes are debounced",
     )
 
     integration_targets = {
-        "modules/control/ControlCenter.qml": ("dashboardSurface",),
-        "modules/launcher/Launcher.qml": ("launcherSurface",),
-        "modules/notifications/NotificationCenter.qml": ("centerSurface",),
-        "modules/session/SessionMenu.qml": ("menuSurface",),
-        "modules/wallpaper/WallpaperPicker.qml": ("pickerSurface",),
-        "modules/osd/Osd.qml": ("osdSurface",),
+        "modules/control/ControlCenter.qml": "dashboardSurface",
+        "modules/launcher/Launcher.qml": "launcherSurface",
+        "modules/notifications/NotificationCenter.qml": "centerSurface",
+        "modules/session/SessionMenu.qml": "menuSurface",
+        "modules/wallpaper/WallpaperPicker.qml": "pickerSurface",
+        "modules/osd/Osd.qml": "osdSurface",
     }
-    for relative, identifiers in integration_targets.items():
+    for relative, identifier in integration_targets.items():
         require_text(
             worktree / relative,
             "surfaceFormat.opaque: false",
             "BackgroundEffect.blurRegion",
             "ShellSurface {",
-            *identifiers,
+            identifier,
         )
 
     notification_popups = (
@@ -369,13 +374,12 @@ def validate_generated_tree(worktree: Path) -> list[str]:
                         f"{path.relative_to(worktree)}: {token}"
                     )
 
-    changed = output("git", "diff", "--name-only", "HEAD", cwd=worktree).splitlines()
-    protected_prefixes = (
-        "modules/bar/",
-        "modules/control/settings/pages/BarPage.qml",
-    )
+    changed = output(
+        "git", "diff", "--cached", "--name-only", "HEAD", cwd=worktree
+    ).splitlines()
     for path in changed:
-        if path.startswith(protected_prefixes):
+        if path.startswith("modules/bar/") \
+            or path == "modules/control/settings/pages/BarPage.qml":
             raise RuntimeError(f"shell migration unexpectedly modified bar code: {path}")
 
     expected = {
@@ -402,21 +406,25 @@ def validate_generated_tree(worktree: Path) -> list[str]:
         SELF_RELATIVE.as_posix(),
     }
     unexpected = sorted(set(changed) - expected)
+    missing = sorted(expected - set(changed))
     if unexpected:
         raise RuntimeError(
             "migration changed unexpected files:\n  " + "\n  ".join(unexpected)
         )
-
+    if missing:
+        raise RuntimeError(
+            "migration did not produce expected files:\n  " + "\n  ".join(missing)
+        )
     return changed
 
 
 def run_validation(worktree: Path) -> None:
-    print("Running translation, shell, schema, and policy tests in the worktree...")
+    print("Running translation, schema, and policy tests in the worktree...")
     run("./scripts/check-translations.sh", cwd=worktree)
     for script in sorted((worktree / "scripts").glob("*.sh")):
         run("bash", "-n", str(script), cwd=worktree)
     run("./scripts/test.sh", cwd=worktree)
-    run("git", "diff", "--check", cwd=worktree)
+    run("git", "diff", "--cached", "--check", cwd=worktree)
 
     environment_args = ["./scripts/check-environment.sh"]
     if os.environ.get("NIRI_SOCKET"):
@@ -432,6 +440,7 @@ def create_audited_patch(worktree: Path, patch_path: Path) -> None:
         run(
             "git",
             "diff",
+            "--cached",
             "--binary",
             "HEAD",
             cwd=worktree,
@@ -466,15 +475,12 @@ def main() -> None:
         raise SystemExit(
             f"Run this on {EXPECTED_BRANCH}; current branch is {branch or '<detached>'}."
         )
-
     dirty = output("git", "status", "--porcelain")
     if dirty:
         raise SystemExit("The working tree must be clean before migration.\n\n" + dirty)
 
     original_head = output("git", "rev-parse", "HEAD")
-    source = verify_payload()
-    payload = extract_payload(source)
-
+    payload = extract_payload(verify_payload())
     temporary_root = Path(tempfile.mkdtemp(prefix="lumina-shell-surface-audit-"))
     worktree = temporary_root / "worktree"
     patch_path = temporary_root / "shell-surface.patch"
@@ -488,6 +494,7 @@ def main() -> None:
         refine_policy(worktree)
         document_popup_policy(worktree)
         remove_temporary_files(worktree)
+        run("git", "add", "-A", cwd=worktree)
 
         changed = validate_generated_tree(worktree)
         run_validation(worktree)
@@ -512,7 +519,6 @@ def main() -> None:
     except Exception as error:
         if output("git", "rev-parse", "HEAD") == original_head:
             run("git", "reset", "--hard", original_head, check=False)
-            run("git", "clean", "-fd", check=False)
         raise SystemExit(f"Migration audit failed: {error}") from error
     finally:
         cleanup_worktree(worktree, temporary_root)
