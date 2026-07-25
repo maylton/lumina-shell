@@ -78,6 +78,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Runtime internationalization foundation and contributor catalogs.
 - [x] Configurable weather location and refresh behavior.
 - [x] Wi-Fi, wired-network, and Bluetooth management split into focused subpages with bounded lists.
+- [x] Bottom application drawer with pinned applications, a complete app grid, and localized search results.
 
 ## 0.7 — Extended Beta
 
@@ -140,6 +141,9 @@ This sprint completes the 0.5 public-beta foundation and begins the first 0.7 su
     full-width task-panel mode with centered icons, Niri window grouping,
     pinned desktop entries, auto-hide, click-through masking, shell-surface
     styling, and feature-scoped persistence.
+12. Aluminium-inspired bottom Launcher drawer with a visual handle, Dock
+    favorites, a complete application grid, localized Niri actions, and a
+    detailed search-result mode for applications, windows, and shell actions.
 
 ### Acceptance criteria
 
@@ -251,6 +255,10 @@ This sprint completes the 0.5 public-beta foundation and begins the first 0.7 su
 - Dock auto-hide uses a bottom-edge reveal region and a delayed collapse.
   Workspace reservation is applied only while the dock is always visible and
   includes any bottom-bar offset.
+- The Launcher opens as a centered bottom drawer above the bottom bar or Dock,
+  displays Dock favorites and an alphabetic application grid when idle, and
+  switches to localized application/window/action results while searching.
+  Right-click pinning uses the same explicit context menu in all Launcher modes.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves
@@ -283,3 +291,5 @@ This sprint completes the 0.5 public-beta foundation and begins the first 0.7 su
 10. [ ] Validate floating/task-panel switching, multi-output geometry, auto-hide,
     click-through masking, bottom-bar coexistence, window cycling, and workspace
     reservation on the native Niri runtime.
+11. [ ] Validate the Launcher drawer geometry, pinned row, app-grid scrolling,
+    keyboard navigation, and localized search results on the native runtime.
