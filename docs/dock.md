@@ -24,8 +24,13 @@ pinned application that is not running launches its desktop entry.
 
 The Launcher button is always the first item and uses Lumina's native rounded
 3×3 application-grid glyph. Running applications can be shown after pinned
-favorites. Right-clicking an application icon pins or unpins it. Favorites can
-also be removed or cleared from **Settings → Dock**.
+favorites.
+
+Right-clicking an application icon in the Dock opens a contextual action with
+**Pin to Dock** or **Unpin from Dock**. The right click itself never changes the
+favorite state. Installed-application results in the Launcher expose the same
+contextual action; window results and shell actions do not. Favorites can also
+be removed or cleared from **Settings → Dock**.
 
 ## Visibility and workspace reservation
 
@@ -35,7 +40,9 @@ panel uses the full bottom edge. Moving the pointer into the region reveals the
 surface; leaving it starts a short hide delay.
 
 Click-through masking keeps transparent areas of the full-width layer window
-from blocking normal application input.
+from blocking normal application input. While a Dock context menu is open, the
+small menu area accepts keyboard and pointer input and closes when the user
+chooses an action, presses Escape, or clicks elsewhere in the Dock window.
 
 Workspace reservation is available only when automatic hiding is disabled. It
 reserves the complete bottom strip needed by the dock. Floating mode adds an
@@ -67,7 +74,7 @@ expanding beyond the output width.
 The first implementation intentionally does not include:
 
 - drag-and-drop reordering;
-- application context menus beyond pin/unpin;
+- application context-menu actions beyond pin/unpin;
 - badges from application-specific APIs;
 - minimizing windows by clicking an already focused application;
 - per-output favorite lists or presentation modes.
