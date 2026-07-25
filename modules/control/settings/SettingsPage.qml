@@ -12,6 +12,8 @@ Flickable {
     required property string title
     required property string description
     property string anchorSection: ""
+    property string customSaveStatus: ""
+    property bool customSaveFailed: false
     default property alias pageData: pageBody.data
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -39,6 +41,13 @@ Flickable {
                     "settings.save.saved",
                     "Saved"
                 )
+    readonly property string displayedSaveStatus:
+        customSaveStatus || localizedSaveStatus
+    readonly property bool displayedSaveFailed:
+        customSaveStatus.length > 0
+            ? customSaveFailed
+            : Boolean(ConfigStore.lastError)
+                && !ConfigStore.lastSaveSucceeded
 
     clip: true
     contentWidth: width
@@ -134,9 +143,9 @@ Flickable {
                         "Reset page"
                     )
                     color: resetPage.activeFocus
-                        || resetMouse.containsMouse
-                            ? root.luminaDesign.color.onAccentContainer
-                            : root.luminaDesign.color.textMuted
+                    || resetMouse.containsMouse
+                        ? root.luminaDesign.color.onAccentContainer
+                        : root.luminaDesign.color.textMuted
                     font.pixelSize:
                         root.luminaDesign.typography.labelSmall
                     font.weight: Font.DemiBold
@@ -169,10 +178,10 @@ Flickable {
                     id: statusText
 
                     anchors.centerIn: parent
-                    text: root.localizedSaveStatus
-                    color: ConfigStore.lastSaveSucceeded
-                        ? root.luminaDesign.color.textMuted
-                        : root.luminaDesign.color.urgent
+                    text: root.displayedSaveStatus
+                    color: root.displayedSaveFailed
+                        ? root.luminaDesign.color.urgent
+                        : root.luminaDesign.color.textMuted
                     font.pixelSize:
                         root.luminaDesign.typography.labelSmall
                     font.weight: Font.DemiBold
@@ -187,5 +196,4 @@ Flickable {
             spacing: root.luminaDesign.spacing.controlSectionGap
         }
     }
-
 }
