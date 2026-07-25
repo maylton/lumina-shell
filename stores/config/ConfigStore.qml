@@ -43,6 +43,14 @@ Singleton {
     property alias cornerRadiusScale: stateAdapter.cornerRadiusScale
     property alias compactMode: stateAdapter.compactMode
     property alias barSurfaceMode: stateAdapter.barSurfaceMode
+    property alias barBackgroundMode:
+        stateAdapter.barBackgroundMode
+    property alias barSurfaceOpacity:
+        stateAdapter.barSurfaceOpacity
+    property alias barAutoScaleContents:
+        stateAdapter.barAutoScaleContents
+    property alias barContentScale:
+        stateAdapter.barContentScale
     property alias barContextMode: stateAdapter.barContextMode
     property alias barContextTimeout: stateAdapter.barContextTimeout
     property alias barStatusLayout: stateAdapter.barStatusLayout
@@ -529,6 +537,10 @@ Singleton {
             property real cornerRadiusScale: 1
             property bool compactMode: false
             property string barSurfaceMode: "edge-to-edge"
+            property string barBackgroundMode: "solid"
+            property real barSurfaceOpacity: 0.86
+            property bool barAutoScaleContents: true
+            property real barContentScale: 1
             property string barContextMode: "contextual"
             property int barContextTimeout: 3500
             property string barStatusLayout: "grouped"

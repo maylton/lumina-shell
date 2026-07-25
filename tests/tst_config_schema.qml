@@ -5,15 +5,19 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema5Bar() {
+    function test_defaultsUseSchema6Bar() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 5)
+        compare(state.schemaVersion, 6)
         compare(state.themeMode, "auto")
         compare(state.paletteStyle, "auto")
         verify(state.barVisualStyle === undefined)
         verify(state.barWidgetOrder === undefined)
         compare(state.barSurfaceMode, "edge-to-edge")
+        compare(state.barBackgroundMode, "solid")
+        compare(state.barSurfaceOpacity, 0.86)
+        compare(state.barAutoScaleContents, true)
+        compare(state.barContentScale, 1)
         compare(state.barContextMode, "contextual")
         compare(state.barStatusLayout, "grouped")
         compare(state.barTrayMode, "grouped")
@@ -40,7 +44,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 5)
+        compare(migrated.schemaVersion, 6)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -61,7 +65,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 5)
+        compare(migrated.schemaVersion, 6)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -99,6 +103,10 @@ TestCase {
         verify(migrated.barVisualStyle === undefined)
         verify(migrated.barWidgetOrder === undefined)
         compare(migrated.barSurfaceMode, "floating")
+        compare(migrated.barBackgroundMode, "solid")
+        compare(migrated.barSurfaceOpacity, 0.86)
+        compare(migrated.barAutoScaleContents, true)
+        compare(migrated.barContentScale, 1)
         compare(
             JSON.stringify(migrated.barLeftWidgetOrder),
             JSON.stringify([
@@ -117,6 +125,37 @@ TestCase {
                 "system-status",
                 "privacy",
                 "keyboard"
+            ])
+        )
+    }
+
+    function test_schema5TransparencyMigratesToBarSurface() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 5,
+            transparencyEnabled: true,
+            surfaceOpacity: 0.78,
+            barLeftWidgetOrder: [
+                "datetime",
+                "workspaces",
+                "launcher",
+                "overview"
+            ]
+        })
+
+        compare(migrated.schemaVersion, 6)
+        compare(migrated.transparencyEnabled, true)
+        compare(migrated.surfaceOpacity, 0.78)
+        compare(migrated.barBackgroundMode, "translucent")
+        compare(migrated.barSurfaceOpacity, 0.78)
+        compare(migrated.barAutoScaleContents, true)
+        compare(migrated.barContentScale, 1)
+        compare(
+            JSON.stringify(migrated.barLeftWidgetOrder),
+            JSON.stringify([
+                "datetime",
+                "workspaces",
+                "launcher",
+                "overview"
             ])
         )
     }
@@ -146,6 +185,8 @@ TestCase {
     function test_numericValuesAreClamped() {
         const state = ConfigSchema.normalize({
             surfaceOpacity: 0.1,
+            barSurfaceOpacity: -2,
+            barContentScale: 8,
             animationScale: 8,
             cornerRadiusScale: 0,
             barHeight: 500,
@@ -158,9 +199,11 @@ TestCase {
         })
 
         compare(state.surfaceOpacity, 0.72)
+        compare(state.barSurfaceOpacity, 0)
+        compare(state.barContentScale, 1.4)
         compare(state.animationScale, 2)
         compare(state.cornerRadiusScale, 0.6)
-        compare(state.barHeight, 72)
+        compare(state.barHeight, 80)
         compare(state.barMargin, 0)
         compare(state.barContextTimeout, 1000)
         compare(state.notificationPopupDuration, 3000)
@@ -172,6 +215,7 @@ TestCase {
     function test_barChoiceNormalization() {
         const valid = ConfigSchema.normalize({
             barSurfaceMode: "floating",
+            barBackgroundMode: "transparent",
             barContextMode: "always",
             barStatusLayout: "individual",
             barTrayMode: "inline",
@@ -179,6 +223,7 @@ TestCase {
         })
         const invalid = ConfigSchema.normalize({
             barSurfaceMode: "detached",
+            barBackgroundMode: "blurred",
             barContextMode: "polling",
             barStatusLayout: "stacked",
             barTrayMode: "floating",
@@ -186,11 +231,13 @@ TestCase {
         })
 
         compare(valid.barSurfaceMode, "floating")
+        compare(valid.barBackgroundMode, "transparent")
         compare(valid.barContextMode, "always")
         compare(valid.barStatusLayout, "individual")
         compare(valid.barTrayMode, "inline")
         compare(valid.barDateStyle, "full")
         compare(invalid.barSurfaceMode, "edge-to-edge")
+        compare(invalid.barBackgroundMode, "solid")
         compare(invalid.barContextMode, "contextual")
         compare(invalid.barStatusLayout, "grouped")
         compare(invalid.barTrayMode, "grouped")
@@ -307,6 +354,10 @@ TestCase {
         verify(bar.barVisualStyle === undefined)
         verify(bar.barWidgetOrder === undefined)
         compare(bar.barSurfaceMode, "edge-to-edge")
+        compare(bar.barBackgroundMode, "solid")
+        compare(bar.barSurfaceOpacity, 0.86)
+        compare(bar.barAutoScaleContents, true)
+        compare(bar.barContentScale, 1)
         compare(bar.barContextMode, "contextual")
         compare(bar.barTrayMode, "grouped")
         compare(bar.barShowAudioLabel, true)

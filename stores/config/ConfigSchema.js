@@ -1,6 +1,6 @@
 .pragma library
 
-var CURRENT_VERSION = 5
+var CURRENT_VERSION = 6
 
 function defaults() {
     return {
@@ -24,6 +24,10 @@ function defaults() {
         cornerRadiusScale: 1,
         compactMode: false,
         barSurfaceMode: "edge-to-edge",
+        barBackgroundMode: "solid",
+        barSurfaceOpacity: 0.86,
+        barAutoScaleContents: true,
+        barContentScale: 1,
         barContextMode: "contextual",
         barContextTimeout: 3500,
         barStatusLayout: "grouped",
@@ -291,6 +295,23 @@ function normalize(source) {
         ["edge-to-edge", "floating"],
         base.barSurfaceMode
     )
+    result.barBackgroundMode = choice(
+        result.barBackgroundMode,
+        ["solid", "translucent", "transparent"],
+        base.barBackgroundMode
+    )
+    result.barSurfaceOpacity = boundedNumber(
+        result.barSurfaceOpacity,
+        base.barSurfaceOpacity,
+        0,
+        1
+    )
+    result.barContentScale = boundedNumber(
+        result.barContentScale,
+        base.barContentScale,
+        0.8,
+        1.4
+    )
     result.barContextMode = choice(
         result.barContextMode,
         ["always", "contextual", "hidden"],
@@ -320,7 +341,7 @@ function normalize(source) {
         base.barPosition
     )
     result.barHeight = Math.round(
-        boundedNumber(result.barHeight, base.barHeight, 40, 72)
+        boundedNumber(result.barHeight, base.barHeight, 40, 80)
     )
     result.barMargin = Math.round(
         boundedNumber(result.barMargin, base.barMargin, 0, 18)
@@ -411,6 +432,7 @@ function normalize(source) {
         "transparencyEnabled",
         "animationsEnabled",
         "compactMode",
+        "barAutoScaleContents",
         "barShowLauncher",
         "barShowOverview",
         "barShowWindowTitle",
@@ -495,7 +517,33 @@ function normalize(source) {
 }
 
 function migrate(source) {
-    return normalize(source)
+    var input = source && typeof source === "object"
+        ? clone(source)
+        : {}
+    var version = Number(input.schemaVersion)
+
+    if (!isFinite(version))
+        version = 0
+
+    if (version < 6) {
+        if (input.transparencyEnabled === true) {
+            input.barBackgroundMode = "translucent"
+            input.barSurfaceOpacity = boundedNumber(
+                input.surfaceOpacity,
+                defaults().surfaceOpacity,
+                0,
+                1
+            )
+        } else {
+            input.barBackgroundMode = "solid"
+            input.barSurfaceOpacity = 0.86
+        }
+
+        input.barAutoScaleContents = true
+        input.barContentScale = 1
+    }
+
+    return normalize(input)
 }
 
 function defaultsForCategory(categoryName) {
@@ -518,6 +566,10 @@ function defaultsForCategory(categoryName) {
         ],
         bar: [
             "barSurfaceMode",
+            "barBackgroundMode",
+            "barSurfaceOpacity",
+            "barAutoScaleContents",
+            "barContentScale",
             "barContextMode",
             "barContextTimeout",
             "barStatusLayout",
