@@ -72,6 +72,7 @@ Documentation:
 - [Architecture](docs/architecture.md)
 - [Compatibility](docs/compatibility.md)
 - [Accessibility](docs/accessibility.md)
+- [Translations](docs/translations.md)
 
 ## Repository structure
 
@@ -82,6 +83,7 @@ lumina-shell/
 ├── modules/
 ├── services/
 ├── stores/
+├── i18n/
 ├── docs/
 ├── scripts/
 └── ROADMAP.md

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 import qs.stores.control
@@ -52,8 +53,14 @@ Item {
 
             Text {
                 text: ControlCenterStore.activePage === "settings"
-                    ? "Shell configuration"
-                    : "Desktop dashboard"
+                    ? I18n.tr(
+                        "control.header.settingsSubtitle",
+                        "Shell configuration"
+                    )
+                    : I18n.tr(
+                        "control.header.dashboardSubtitle",
+                        "Desktop dashboard"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }

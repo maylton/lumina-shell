@@ -2,13 +2,17 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "OSD"
-    description: "On-screen feedback for hardware and session events"
+    title: I18n.tr("settings.category.osd.label", "OSD")
+    description: I18n.tr(
+        "settings.page.osd.description",
+        "On-screen feedback for hardware and session events"
+    )
 
     SettingsSection {
         title: "Presentation"

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.services.i18n
 import qs.stores.config
 import qs.stores.control
 
@@ -23,6 +24,21 @@ Flickable {
         "osd",
         "session"
     ].indexOf(ControlCenterStore.settingsCategory) >= 0
+    readonly property string localizedSaveStatus:
+        ConfigStore.lastError && !ConfigStore.lastSaveSucceeded
+            ? I18n.tr(
+                "settings.save.failed",
+                "Could not save"
+            )
+            : ConfigStore.saving || ConfigStore.dirty
+                ? I18n.tr(
+                    "settings.save.saving",
+                    "Saving…"
+                )
+                : I18n.tr(
+                    "settings.save.saved",
+                    "Saved"
+                )
 
     clip: true
     contentWidth: width
@@ -80,10 +96,15 @@ Flickable {
                 border.color: root.luminaDesign.color.primary
 
                 Accessible.role: Accessible.Button
-                Accessible.name: "Restore this category"
-                Accessible.description:
-                    "Restore defaults for "
-                        + ControlCenterStore.settingsCategory
+                Accessible.name: I18n.tr(
+                    "settings.restoreCategory",
+                    "Restore this category"
+                )
+                Accessible.description: I18n.tr(
+                    "settings.restoreDefaultsFor",
+                    "Restore defaults for %1",
+                    [ControlCenterStore.settingsCategory]
+                )
                 Accessible.focusable: visible
                 Accessible.focused: activeFocus
                 Accessible.onPressAction: activate()
@@ -108,7 +129,10 @@ Flickable {
                     id: resetLabel
 
                     anchors.centerIn: parent
-                    text: "Reset page"
+                    text: I18n.tr(
+                        "settings.resetPage",
+                        "Reset page"
+                    )
                     color: resetPage.activeFocus
                         || resetMouse.containsMouse
                             ? root.luminaDesign.color.onAccentContainer
@@ -145,7 +169,7 @@ Flickable {
                     id: statusText
 
                     anchors.centerIn: parent
-                    text: ConfigStore.saveStatusLabel
+                    text: root.localizedSaveStatus
                     color: ConfigStore.lastSaveSucceeded
                         ? root.luminaDesign.color.textMuted
                         : root.luminaDesign.color.urgent

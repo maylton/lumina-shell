@@ -75,6 +75,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] Accessibility baseline.
 - [x] User and contributor documentation.
 - [x] Recovery from invalid configuration.
+- [x] Runtime internationalization foundation and contributor catalogs.
 
 ## 0.7 — Extended Beta
 
@@ -95,7 +96,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [ ] Feature freeze.
 - [ ] Configuration migration tests.
 - [ ] Packaging for CachyOS and Arch Linux.
-- [ ] Translation infrastructure.
+- [ ] Complete translation coverage and release catalogs.
 - [ ] Critical bug and performance pass.
 
 ## 1.0 — Stable
@@ -161,6 +162,8 @@ This sprint completes the 0.5 public-beta foundation:
   expressive overshoot when reduced motion is enabled.
 - Related Settings rows share tonal group surfaces, internal dividers, and one
   expressive outer shape without changing their controls or persisted state.
+- Runtime locale detection, regional fallback, live catalog reload, and
+  translation validation support incremental community localization.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves

@@ -46,6 +46,15 @@ Run the pure QML service tests with:
 ./scripts/test.sh
 ```
 
+## Translations
+
+New user-visible strings should use the runtime `I18n` service with a stable
+message ID and an English fallback. Translation catalogs live in `i18n/` and
+are validated as part of `./scripts/test.sh`.
+
+See [docs/translations.md](docs/translations.md) for locale naming, catalog
+fallback, placeholders, live reload, and the contribution workflow.
+
 ## Manual validation
 
 On a Wayland development host:

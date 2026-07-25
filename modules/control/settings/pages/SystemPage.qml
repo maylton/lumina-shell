@@ -6,6 +6,7 @@ import qs.services.audio
 import qs.services.brightness
 import qs.services.config
 import qs.services.connectivity
+import qs.services.i18n
 import qs.services.niri
 import qs.services.power
 import qs.services.system
@@ -15,8 +16,14 @@ import qs.stores.settings
 SettingsPage {
     id: root
 
-    title: "System"
-    description: "Integrations, environment diagnostics, and recovery"
+    title: I18n.tr(
+        "settings.category.system.label",
+        "System"
+    )
+    description: I18n.tr(
+        "settings.page.system.description",
+        "Integrations, environment diagnostics, and recovery"
+    )
 
     SettingsSection {
         title: "Runtime"

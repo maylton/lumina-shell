@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.services.i18n
 import qs.stores.control
 
 Item {
@@ -41,13 +42,19 @@ Item {
                     id: "dashboard",
                     iconName: "",
                     symbol: "🚀",
-                    label: "Dashboard"
+                    label: I18n.tr(
+                        "control.tab.dashboard",
+                        "Dashboard"
+                    )
                 },
                 {
                     id: "settings",
                     iconName: "",
                     symbol: "⚙",
-                    label: "Settings"
+                    label: I18n.tr(
+                        "control.tab.settings",
+                        "Settings"
+                    )
                 }
             ]
 

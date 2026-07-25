@@ -231,6 +231,21 @@ Visual components never construct shell command strings.
 not a second visual surface. IPC can open a category directly; `wallpaper`
 temporarily normalizes to Appearance.
 
+## Internationalization
+
+`I18n` resolves `LUMINA_LOCALE` or the Qt system locale to a supported regional
+catalog under `i18n/`. Catalogs are flat UTF-8 JSON objects keyed by stable
+message IDs. Every lookup carries an English source fallback, so incomplete,
+missing, or invalid translations do not prevent the shell from loading.
+
+The service watches the active catalog during development and exposes status
+and reload IPC operations. `scripts/check-translations.sh` validates catalog
+shape, rejects keys absent from the source catalog, and confirms that every
+`I18n.tr()` ID referenced by QML exists in `en-US.json`. Initial migration
+covers the unified Control Center tabs and header, Settings navigation, page
+headers, save state, reset actions, and their accessibility labels. Other
+surfaces can migrate incrementally without changing service or store state.
+
 ## Persistent configuration
 
 `ConfigStore` persists user state through an atomic Quickshell `FileView` and

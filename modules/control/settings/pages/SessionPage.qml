@@ -2,14 +2,21 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.services.session
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "Session"
-    description: "Visibility and confirmation for existing session actions"
+    title: I18n.tr(
+        "settings.category.session.label",
+        "Session"
+    )
+    description: I18n.tr(
+        "settings.page.session.description",
+        "Visibility and confirmation for existing session actions"
+    )
 
     SettingsSection {
         title: "Available actions"

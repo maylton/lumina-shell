@@ -2,13 +2,17 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "Bar"
-    description: "Surface, context, status, and widgets per output"
+    title: I18n.tr("settings.category.bar.label", "Bar")
+    description: I18n.tr(
+        "settings.page.bar.description",
+        "Surface, context, status, and widgets per output"
+    )
 
     function widgetLabel(widgetId) {
         const labels = {

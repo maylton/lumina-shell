@@ -2,13 +2,20 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "Dashboard"
-    description: "Opening behavior, density, and visible daily cards"
+    title: I18n.tr(
+        "settings.category.dashboard.label",
+        "Dashboard"
+    )
+    description: I18n.tr(
+        "settings.page.dashboard.description",
+        "Opening behavior, density, and visible daily cards"
+    )
 
     SettingsSection {
         title: "Opening"

@@ -2,13 +2,20 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "Behavior"
-    description: "Focus, dismissal, and motion across Lumina overlays"
+    title: I18n.tr(
+        "settings.category.behavior.label",
+        "Behavior"
+    )
+    description: I18n.tr(
+        "settings.page.behavior.description",
+        "Focus, dismissal, and motion across Lumina overlays"
+    )
 
     SettingsSection {
         title: "Control Center"

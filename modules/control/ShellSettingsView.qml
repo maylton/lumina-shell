@@ -4,6 +4,7 @@ import QtQuick
 import qs.design
 import qs.modules.control.settings
 import qs.modules.control.settings.pages
+import qs.services.i18n
 import qs.stores.control
 
 FocusScope {
@@ -28,64 +29,118 @@ FocusScope {
     readonly property var categories: [
         {
             id: "appearance",
-            label: "Appearance",
-            description: "Colors and wallpaper",
+            label: I18n.tr(
+                "settings.category.appearance.label",
+                "Appearance"
+            ),
+            description: I18n.tr(
+                "settings.category.appearance.description",
+                "Colors and wallpaper"
+            ),
             iconName: "applications-graphics-symbolic",
             symbol: "✦"
         },
         {
             id: "bar",
-            label: "Bar",
-            description: "Layout and widgets",
+            label: I18n.tr(
+                "settings.category.bar.label",
+                "Bar"
+            ),
+            description: I18n.tr(
+                "settings.category.bar.description",
+                "Layout and widgets"
+            ),
             iconName: "view-more-horizontal-symbolic",
             symbol: "≡"
         },
         {
             id: "dashboard",
-            label: "Dashboard",
-            description: "Cards and opening",
+            label: I18n.tr(
+                "settings.category.dashboard.label",
+                "Dashboard"
+            ),
+            description: I18n.tr(
+                "settings.category.dashboard.description",
+                "Cards and opening"
+            ),
             iconName: "view-grid-symbolic",
             symbol: "▦"
         },
         {
             id: "behavior",
-            label: "Behavior",
-            description: "Focus and motion",
+            label: I18n.tr(
+                "settings.category.behavior.label",
+                "Behavior"
+            ),
+            description: I18n.tr(
+                "settings.category.behavior.description",
+                "Focus and motion"
+            ),
             iconName: "preferences-system-symbolic",
             symbol: "⚙"
         },
         {
             id: "notifications",
-            label: "Notifications",
-            description: "Popups and history",
+            label: I18n.tr(
+                "settings.category.notifications.label",
+                "Notifications"
+            ),
+            description: I18n.tr(
+                "settings.category.notifications.description",
+                "Popups and history"
+            ),
             iconName: "preferences-system-notifications-symbolic",
             symbol: "◐"
         },
         {
             id: "osd",
-            label: "OSD",
-            description: "Feedback and timing",
+            label: I18n.tr(
+                "settings.category.osd.label",
+                "OSD"
+            ),
+            description: I18n.tr(
+                "settings.category.osd.description",
+                "Feedback and timing"
+            ),
             iconName: "video-display-symbolic",
             symbol: "▰"
         },
         {
             id: "session",
-            label: "Session",
-            description: "Actions and safety",
+            label: I18n.tr(
+                "settings.category.session.label",
+                "Session"
+            ),
+            description: I18n.tr(
+                "settings.category.session.description",
+                "Actions and safety"
+            ),
             iconName: "system-shutdown-symbolic",
             symbol: "⏻"
         },
         {
             id: "system",
-            label: "System",
-            description: "Health and recovery",
+            label: I18n.tr(
+                "settings.category.system.label",
+                "System"
+            ),
+            description: I18n.tr(
+                "settings.category.system.description",
+                "Health and recovery"
+            ),
             iconName: "computer-symbolic",
             symbol: "●"
         },
         {
             id: "about",
-            label: "About",
-            description: "Project information",
+            label: I18n.tr(
+                "settings.category.about.label",
+                "About"
+            ),
+            description: I18n.tr(
+                "settings.category.about.description",
+                "Project information"
+            ),
             iconName: "help-about-symbolic",
             symbol: "i"
         }

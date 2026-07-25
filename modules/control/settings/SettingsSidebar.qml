@@ -4,6 +4,7 @@ import QtQuick
 import qs.design
 import qs.modules.control
 import qs.services.config
+import qs.services.i18n
 import qs.stores.config
 import qs.stores.control
 
@@ -15,7 +16,10 @@ DashboardCard {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
-    accessibleName: "Settings categories"
+    accessibleName: I18n.tr(
+        "settings.sidebar.accessibleName",
+        "Settings categories"
+    )
     radius: luminaDesign.shape.extraLarge
     border.width: 0
 
@@ -57,7 +61,10 @@ DashboardCard {
             }
 
             Accessible.role: Accessible.Button
-            Accessible.name: "Edit config"
+            Accessible.name: I18n.tr(
+                "settings.sidebar.editConfig",
+                "Edit config"
+            )
             Accessible.description: ConfigStore.statePath
             Accessible.focusable: true
             Accessible.focused: activeFocus
@@ -90,7 +97,10 @@ DashboardCard {
 
                 Text {
                     visible: !root.compact
-                    text: "Edit config"
+                    text: I18n.tr(
+                        "settings.sidebar.editConfig",
+                        "Edit config"
+                    )
                     color:
                         root.luminaDesign.color.onAccentContainer
                     font.pixelSize:
@@ -159,7 +169,10 @@ DashboardCard {
             border.color: root.luminaDesign.color.primary
 
             Accessible.role: Accessible.Button
-            Accessible.name: "Open config directory"
+            Accessible.name: I18n.tr(
+                "settings.sidebar.openConfigFolderAccessible",
+                "Open config directory"
+            )
             Accessible.description:
                 ConfigFileService.configDirectory
             Accessible.onPressAction:
@@ -190,7 +203,10 @@ DashboardCard {
 
                 Text {
                     visible: !root.compact
-                    text: "Open config folder"
+                    text: I18n.tr(
+                        "settings.sidebar.openConfigFolder",
+                        "Open config folder"
+                    )
                     color: root.luminaDesign.color.textMuted
                     font.pixelSize:
                         root.luminaDesign.typography.labelSmall

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.design
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.services.wallpaper
 import qs.stores.config
 
@@ -42,8 +43,14 @@ SettingsPage {
         return "Auto"
     }
 
-    title: "Appearance"
-    description: "Colors, wallpaper, and the visual language of Lumina"
+    title: I18n.tr(
+        "settings.category.appearance.label",
+        "Appearance"
+    )
+    description: I18n.tr(
+        "settings.page.appearance.description",
+        "Colors, wallpaper, and the visual language of Lumina"
+    )
 
     SettingsSection {
         title: "Theme mode"

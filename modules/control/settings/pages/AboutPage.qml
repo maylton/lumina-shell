@@ -3,13 +3,17 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.modules.control.settings
 import qs.services.config
+import qs.services.i18n
 import qs.services.system
 
 SettingsPage {
     id: root
 
-    title: "About"
-    description: "Lumina Shell project and local documentation"
+    title: I18n.tr("settings.category.about.label", "About")
+    description: I18n.tr(
+        "settings.page.about.description",
+        "Lumina Shell project and local documentation"
+    )
 
     SettingsSection {
         title: "Lumina Shell"

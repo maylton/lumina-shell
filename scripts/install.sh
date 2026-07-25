@@ -83,6 +83,7 @@ install_paths=(
     ROADMAP.md
     design
     docs
+    i18n
     modules
     qmldir
     scripts

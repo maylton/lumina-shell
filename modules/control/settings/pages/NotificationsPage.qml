@@ -2,14 +2,21 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 
 SettingsPage {
     id: root
 
-    title: "Notifications"
-    description: "Popup placement, timing, history, and interruptions"
+    title: I18n.tr(
+        "settings.category.notifications.label",
+        "Notifications"
+    )
+    description: I18n.tr(
+        "settings.page.notifications.description",
+        "Popup placement, timing, history, and interruptions"
+    )
 
     SettingsSection {
         title: "Interruptions"
