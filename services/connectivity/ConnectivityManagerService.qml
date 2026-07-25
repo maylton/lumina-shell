@@ -10,6 +10,7 @@ Singleton {
     id: root
 
     readonly property bool busy: actionProcess.running
+        || chmodSecretProcess.running
         || wifiCreateProcess.running
         || wifiSecretActivateProcess.running
         || wifiScanProcess.running
@@ -26,6 +27,7 @@ Singleton {
     property string busyAction: ""
     property string pendingWifiProfile: ""
     property string pendingWifiSsid: ""
+    property bool pendingWifiSaved: false
     property bool clearSecretAfterAction: false
 
     function profileTypeMatches(profile, kind) {
@@ -108,8 +110,11 @@ Singleton {
     function refreshBluetooth() {
         if (!bluetoothAllProcess.running)
             bluetoothAllProcess.exec(["bluetoothctl", "devices"])
-        if (!bluetoothPairedProcess.running)
-            bluetoothPairedProcess.exec(["bluetoothctl", "paired-devices"])
+        if (!bluetoothPairedProcess.running) {
+            bluetoothPairedProcess.exec([
+                "bluetoothctl", "devices", "Paired"
+            ])
+        }
         if (!bluetoothConnectedProcess.running) {
             bluetoothConnectedProcess.exec([
                 "bluetoothctl", "devices", "Connected"
@@ -147,10 +152,11 @@ Singleton {
     }
 
     function scanWifi() {
-        if (!ConnectivityService.wifiEnabled || wifiScanProcess.running)
+        if (!ConnectivityService.wifiEnabled || busy)
             return
 
         busyAction = "wifi-scan"
+        statusMessage = ""
         lastError = ""
         wifiScanProcess.exec(["nmcli", "device", "wifi", "rescan"])
     }
@@ -183,7 +189,11 @@ Singleton {
             return
         }
 
+        busyAction = "wifi-connect"
+        statusMessage = ""
+        lastError = ""
         pendingWifiSsid = requestedSsid
+        pendingWifiSaved = Boolean(saved)
         pendingWifiProfile = saved
             ? saved.uuid
             : "Lumina " + requestedSsid
@@ -191,10 +201,19 @@ Singleton {
             "802-11-wireless-security.psk:" + secret + "\n"
         )
         chmodSecretProcess.exec(["chmod", "600", secretPath])
+    }
 
-        if (saved) {
+    function continueProtectedWifiConnection() {
+        if (!pendingWifiProfile || !pendingWifiSsid) {
+            lastError = "Protected Wi-Fi connection state was incomplete"
+            busyAction = ""
+            clearSecret()
+            return
+        }
+
+        if (pendingWifiSaved) {
             wifiSecretActivateProcess.exec([
-                "nmcli", "connection", "up", "uuid", saved.uuid,
+                "nmcli", "connection", "up", "uuid", pendingWifiProfile,
                 "passwd-file", secretPath
             ])
         } else {
@@ -203,7 +222,7 @@ Singleton {
                 "type", "wifi",
                 "ifname", "*",
                 "con-name", pendingWifiProfile,
-                "ssid", requestedSsid,
+                "ssid", pendingWifiSsid,
                 "wifi-sec.key-mgmt", "wpa-psk",
                 "connection.autoconnect", "yes"
             ])
@@ -279,10 +298,11 @@ Singleton {
     }
 
     function scanBluetooth() {
-        if (!ConnectivityService.bluetoothEnabled || bluetoothScanProcess.running)
+        if (!ConnectivityService.bluetoothEnabled || busy)
             return
 
         busyAction = "bluetooth-scan"
+        statusMessage = ""
         lastError = ""
         bluetoothScanProcess.exec([
             "bluetoothctl", "--timeout", "12", "scan", "on"
@@ -329,6 +349,12 @@ Singleton {
         )
     }
 
+    function resetPendingWifi() {
+        pendingWifiProfile = ""
+        pendingWifiSsid = ""
+        pendingWifiSaved = false
+    }
+
     function clearSecret() {
         secretFile.setText("")
         if (!removeSecretProcess.running)
@@ -356,7 +382,23 @@ Singleton {
         printErrors: false
     }
 
-    Process { id: chmodSecretProcess }
+    Process {
+        id: chmodSecretProcess
+        stderr: StdioCollector { id: chmodSecretError }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                root.continueProtectedWifiConnection()
+                return
+            }
+
+            root.lastError = String(chmodSecretError.text || "").trim()
+                || "Could not secure the temporary network secret"
+            root.busyAction = ""
+            root.resetPendingWifi()
+            root.clearSecret()
+        }
+    }
+
     Process { id: removeSecretProcess }
 
     Process {
@@ -412,6 +454,8 @@ Singleton {
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 root.lastError = String(wifiCreateError.text || "").trim()
+                root.busyAction = ""
+                root.resetPendingWifi()
                 root.clearSecret()
                 return
             }
@@ -429,8 +473,8 @@ Singleton {
         stderr: StdioCollector { id: wifiSecretError }
         onExited: (exitCode, exitStatus) => {
             root.clearSecret()
-            root.pendingWifiProfile = ""
-            root.pendingWifiSsid = ""
+            root.resetPendingWifi()
+            root.busyAction = ""
             root.statusMessage = exitCode === 0
                 ? String(wifiSecretOutput.text || "").trim()
                 : ""
@@ -465,19 +509,19 @@ Singleton {
     Process {
         id: bluetoothAllProcess
         stdout: StdioCollector { id: bluetoothAllOutput }
-        onExited: root.rebuildBluetoothDevices()
+        onExited: (exitCode, exitStatus) => root.rebuildBluetoothDevices()
     }
 
     Process {
         id: bluetoothPairedProcess
         stdout: StdioCollector { id: bluetoothPairedOutput }
-        onExited: root.rebuildBluetoothDevices()
+        onExited: (exitCode, exitStatus) => root.rebuildBluetoothDevices()
     }
 
     Process {
         id: bluetoothConnectedProcess
         stdout: StdioCollector { id: bluetoothConnectedOutput }
-        onExited: root.rebuildBluetoothDevices()
+        onExited: (exitCode, exitStatus) => root.rebuildBluetoothDevices()
     }
 
     Process {
