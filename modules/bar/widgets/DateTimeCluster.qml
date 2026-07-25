@@ -42,10 +42,8 @@ Rectangle {
         ? luminaDesign.shape.full
         : luminaDesign.shape.large
     scale: dateTimeMouse.pressed
-        ? 0.94
-        : dateTimeMouse.containsMouse
-            ? 1.02
-            : 1
+        ? 0.96
+        : 1
     color: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : luminaDesign.color.surfaceMuted
@@ -78,21 +76,33 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Behavior on radius {
         NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on implicitWidth {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialDefault
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
@@ -100,7 +110,7 @@ Rectangle {
         id: dateTimeContent
 
         anchors.centerIn: parent
-        spacing: root.luminaDesign.spacing.small
+        spacing: root.luminaDesign.spacing.barItemGap
 
         Text {
             anchors.verticalCenter: parent.verticalCenter

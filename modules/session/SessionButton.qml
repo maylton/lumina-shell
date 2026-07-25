@@ -21,10 +21,8 @@ Rectangle {
         ? luminaDesign.color.accentContainer
         : "transparent"
     scale: sessionMouse.pressed
-        ? 0.94
-        : sessionMouse.containsMouse
-            ? 1.03
-            : 1.0
+        ? 0.96
+        : 1.0
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
     activeFocusOnTab: true
@@ -56,14 +54,24 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 

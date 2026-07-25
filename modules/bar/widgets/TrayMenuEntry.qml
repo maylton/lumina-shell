@@ -69,14 +69,17 @@ Item {
 
         Behavior on color {
             ColorAnimation {
-                duration: root.luminaDesign.motion.fast
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type:
+                    root.luminaDesign.motion.effectsEasing
             }
         }
 
         Behavior on scale {
             NumberAnimation {
-                duration: root.luminaDesign.motion.fast
-                easing.type: Easing.OutCubic
+                duration: root.luminaDesign.motion.press
+                easing.type:
+                    root.luminaDesign.motion.effectsEasing
             }
         }
 

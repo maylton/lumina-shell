@@ -33,7 +33,7 @@ Item {
             width,
             leftArea.x + leftArea.width,
             width - rightArea.x,
-            luminaDesign.spacing.extraLarge
+            luminaDesign.spacing.barClusterGap
         )
     readonly property var leftRegistry: ({
         launcher: launcherComponent,
@@ -79,7 +79,7 @@ Item {
 
         anchors {
             left: parent.left
-            leftMargin: root.luminaDesign.spacing.extraLarge
+            leftMargin: root.luminaDesign.spacing.barContentInset
             verticalCenter: parent.verticalCenter
         }
 
@@ -117,12 +117,12 @@ Item {
 
         anchors {
             right: parent.right
-            rightMargin: root.luminaDesign.spacing.extraLarge
+            rightMargin: root.luminaDesign.spacing.barContentInset
             verticalCenter: parent.verticalCenter
         }
 
         clusterSpacing: Math.max(
-            root.luminaDesign.spacing.extraSmall,
+            root.luminaDesign.spacing.barItemGap,
             Math.round(ConfigStore.barWidgetSpacing * 0.65)
         )
 

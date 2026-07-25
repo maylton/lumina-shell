@@ -14,10 +14,8 @@ Rectangle {
         ? luminaDesign.shape.full
         : luminaDesign.shape.medium
     scale: overviewMouse.pressed
-        ? 0.94
-        : overviewMouse.containsMouse
-            ? 1.03
-            : 1.0
+        ? 0.96
+        : 1.0
     color: NiriService.overviewOpen || overviewMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : luminaDesign.color.surfaceMuted
@@ -50,21 +48,24 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Behavior on radius {
         NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 

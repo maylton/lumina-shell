@@ -81,9 +81,7 @@ Rectangle {
             : luminaDesign.color.surfaceMuted
     scale: statusMouse.pressed
         ? 0.96
-        : statusMouse.containsMouse
-            ? 1.01
-            : 1
+        : 1
     activeFocusOnTab: visible
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -111,21 +109,33 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Behavior on radius {
         NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on implicitWidth {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialDefault
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
@@ -134,8 +144,18 @@ Rectangle {
 
         anchors.centerIn: parent
         spacing: root.individual
-            ? root.luminaDesign.spacing.small
+            ? root.luminaDesign.spacing.barItemGap
             : root.luminaDesign.spacing.medium
+
+        Behavior on spacing {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.spatialDefault
+                easing.type:
+                    root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
+            }
+        }
 
         SystemStatusItem {
             visible: root.showNetwork

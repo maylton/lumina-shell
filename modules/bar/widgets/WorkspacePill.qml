@@ -20,10 +20,8 @@ Rectangle {
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: luminaDesign.shape.full
     scale: workspaceMouse.pressed
-        ? 0.92
-        : workspaceMouse.containsMouse
-            ? 1.04
-            : 1.0
+        ? 0.96
+        : 1.0
     color: "transparent"
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -61,14 +59,16 @@ Rectangle {
     Behavior on implicitWidth {
         NumberAnimation {
             duration: root.luminaDesign.motion.workspaceTransform
-            easing.type: Easing.OutCubic
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
@@ -106,27 +106,34 @@ Rectangle {
         Behavior on width {
             NumberAnimation {
                 duration: root.luminaDesign.motion.workspaceTransform
-                easing.type: Easing.OutCubic
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
             }
         }
 
         Behavior on height {
             NumberAnimation {
                 duration: root.luminaDesign.motion.workspaceTransform
-                easing.type: Easing.OutCubic
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
             }
         }
 
         Behavior on color {
             ColorAnimation {
-                duration: root.luminaDesign.motion.fast
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type: root.luminaDesign.motion.effectsEasing
             }
         }
 
         Behavior on radius {
             NumberAnimation {
                 duration: root.luminaDesign.motion.workspaceTransform
-                easing.type: Easing.OutCubic
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
             }
         }
 
@@ -147,7 +154,9 @@ Rectangle {
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.luminaDesign.motion.fast
+                    duration: root.luminaDesign.motion.effectsFast
+                    easing.type:
+                        root.luminaDesign.motion.effectsEasing
                 }
             }
         }

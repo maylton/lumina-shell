@@ -77,15 +77,17 @@ PopupWindow {
 
         Behavior on opacity {
             NumberAnimation {
-                duration: root.luminaDesign.motion.medium
-                easing.type: Easing.OutCubic
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
             }
         }
 
         Behavior on scale {
             NumberAnimation {
-                duration: root.luminaDesign.motion.medium
-                easing.type: Easing.OutBack
+                duration: root.luminaDesign.motion.spatialDefault
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
             }
         }
 

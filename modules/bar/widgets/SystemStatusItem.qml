@@ -22,13 +22,32 @@ Rectangle {
         ? luminaDesign.color.surfaceMuted
         : "transparent"
 
+    Behavior on implicitWidth {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialDefault
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
+        }
+    }
+
     Row {
         id: statusContent
 
         anchors.centerIn: parent
         spacing: root.showLabel
-            ? root.luminaDesign.spacing.small
+            ? root.luminaDesign.spacing.barItemGap
             : 0
+
+        Behavior on spacing {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.spatialDefault
+                easing.type:
+                    root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
+            }
+        }
 
         DashboardIcon {
             anchors.verticalCenter: parent.verticalCenter

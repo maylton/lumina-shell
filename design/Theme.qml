@@ -134,6 +134,9 @@ QtObject {
             medium: ConfigStore.compactMode ? 8 : 10,
             large: ConfigStore.compactMode ? 11 : 14,
             extraLarge: ConfigStore.compactMode ? 14 : 18,
+            barItemGap: ConfigStore.compactMode ? 4 : 6,
+            barClusterGap: ConfigStore.compactMode ? 12 : 18,
+            barContentInset: ConfigStore.compactMode ? 12 : 18,
             barPanelGap: ConfigStore.compactMode ? 10 : 14
         },
         size: {
@@ -180,8 +183,31 @@ QtObject {
             fast: Math.max(1, Math.round(120 * root.motionScale)),
             medium: Math.max(1, Math.round(220 * root.motionScale)),
             slow: Math.max(1, Math.round(380 * root.motionScale)),
+            effectsFast:
+                Math.max(1, Math.round(100 * root.motionScale)),
+            effectsDefault:
+                Math.max(1, Math.round(180 * root.motionScale)),
+            effectsSlow:
+                Math.max(1, Math.round(300 * root.motionScale)),
+            spatialFast:
+                Math.max(1, Math.round(180 * root.motionScale)),
+            spatialDefault:
+                Math.max(1, Math.round(300 * root.motionScale)),
+            spatialSlow:
+                Math.max(1, Math.round(450 * root.motionScale)),
+            press:
+                Math.max(1, Math.round(90 * root.motionScale)),
             workspaceTransform:
-                Math.max(1, Math.round(210 * root.motionScale))
+                Math.max(1, Math.round(300 * root.motionScale)),
+            effectsEasing: Easing.OutCubic,
+            spatialEasing: ConfigStore.reduceMotion
+                || !ConfigStore.animationsEnabled
+                    ? Easing.OutCubic
+                    : Easing.OutBack,
+            spatialOvershoot: ConfigStore.reduceMotion
+                || !ConfigStore.animationsEnabled
+                    ? 0
+                    : 0.55
         }
     })
 }
