@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.services.i18n
 import qs.services.weather
 import qs.stores.system
 import qs.stores.time
@@ -11,6 +12,14 @@ Item {
 
     property bool showWeather: true
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string weatherUpdating: I18n.tr(
+        "dashboard.weather.updating",
+        "Updating weather"
+    )
+    readonly property string weatherUnavailable: I18n.tr(
+        "dashboard.weather.unavailable",
+        "Weather unavailable"
+    )
 
     DashboardCard {
         id: welcomeCard
@@ -22,7 +31,10 @@ Item {
         }
 
         height: 152
-        accessibleName: "Welcome"
+        accessibleName: I18n.tr(
+            "dashboard.welcome.accessibleName",
+            "Welcome"
+        )
         emphasized: true
 
         Column {
@@ -40,9 +52,11 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: "Welcome, "
-                    + SystemInfoStore.displayName
-                    + "!"
+                text: I18n.tr(
+                    "dashboard.welcome.greeting",
+                    "Welcome, %1!",
+                    [SystemInfoStore.displayName]
+                )
                 color: root.luminaDesign.color.onSurface
                 elide: Text.ElideRight
                 font.pixelSize: root.luminaDesign.typography.titleLarge
@@ -69,7 +83,10 @@ Item {
             topMargin: root.luminaDesign.spacing.controlCardGap
         }
 
-        accessibleName: "Date and weather"
+        accessibleName: I18n.tr(
+            "dashboard.dateWeather.accessibleName",
+            "Date and weather"
+        )
 
         Column {
             anchors.centerIn: parent
@@ -89,7 +106,7 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: Qt.formatDate(
+                text: Qt.locale(I18n.locale).toString(
                     CalendarStore.currentDate,
                     "dddd, d MMMM yyyy"
                 )
@@ -112,8 +129,8 @@ Item {
                         + ", "
                         + WeatherService.locationName
                     : WeatherService.loading
-                        ? "Updating weather"
-                        : "Weather unavailable"
+                        ? root.weatherUpdating
+                        : root.weatherUnavailable
 
                 Row {
                     anchors {
@@ -168,8 +185,8 @@ Item {
                             text: WeatherService.available
                                 ? WeatherService.condition
                                 : WeatherService.loading
-                                    ? "Updating weather"
-                                    : "Weather unavailable"
+                                    ? root.weatherUpdating
+                                    : root.weatherUnavailable
                             color: root.luminaDesign.color.onSurface
                             elide: Text.ElideRight
                             font.pixelSize:
