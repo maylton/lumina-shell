@@ -5,13 +5,22 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema4() {
+    function test_defaultsUseSchema5ExpressiveBar() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 4)
+        compare(state.schemaVersion, 5)
         compare(state.themeMode, "auto")
         compare(state.paletteStyle, "auto")
+        compare(state.barVisualStyle, "expressive")
+        compare(state.barSurfaceMode, "edge-to-edge")
+        compare(state.barContextMode, "contextual")
+        compare(state.barStatusLayout, "grouped")
+        compare(state.barContextTimeout, 3500)
         compare(state.barHeight, 48)
+        compare(state.barShowWallpaperButton, false)
+        compare(state.barShowSessionButton, false)
+        compare(state.barLeftWidgetOrder.length, 4)
+        compare(state.barRightWidgetOrder.length, 6)
         compare(state.notificationPopupMaximum, 3)
         compare(state.osdDuration, 1800)
         verify(state.dashboardCardOrder.length > 0)
@@ -27,7 +36,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 4)
+        compare(migrated.schemaVersion, 5)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -35,6 +44,31 @@ TestCase {
         compare(migrated.showStatusDetails, false)
         compare(migrated.themeMode, "auto")
         compare(migrated.paletteStyle, "auto")
+    }
+
+    function test_schema4MigrationPreservesClassicBarValues() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 4,
+            barPosition: "bottom",
+            barHeight: 56,
+            barMargin: 9,
+            barWidgetSpacing: 14,
+            barShowClock: false,
+            barWidgetOrder: ["clock", "tray"]
+        })
+
+        compare(migrated.schemaVersion, 5)
+        compare(migrated.barPosition, "bottom")
+        compare(migrated.barHeight, 56)
+        compare(migrated.barMargin, 9)
+        compare(migrated.barWidgetSpacing, 14)
+        compare(migrated.barShowClock, false)
+        compare(
+            JSON.stringify(migrated.barWidgetOrder),
+            JSON.stringify(["clock", "tray"])
+        )
+        compare(migrated.barVisualStyle, "expressive")
+        compare(migrated.barSurfaceMode, "edge-to-edge")
     }
 
     function test_paletteStyleNormalization() {
@@ -66,6 +100,7 @@ TestCase {
             cornerRadiusScale: 0,
             barHeight: 500,
             barMargin: -4,
+            barContextTimeout: 50,
             notificationPopupDuration: 100,
             notificationPopupMaximum: 50,
             osdDuration: 9000,
@@ -77,10 +112,95 @@ TestCase {
         compare(state.cornerRadiusScale, 0.6)
         compare(state.barHeight, 72)
         compare(state.barMargin, 0)
+        compare(state.barContextTimeout, 1000)
         compare(state.notificationPopupDuration, 3000)
         compare(state.notificationPopupMaximum, 5)
         compare(state.osdDuration, 5000)
         compare(state.osdSize, 1.4)
+    }
+
+    function test_expressiveBarChoiceNormalization() {
+        const valid = ConfigSchema.normalize({
+            barVisualStyle: "classic",
+            barSurfaceMode: "floating",
+            barContextMode: "always",
+            barStatusLayout: "individual",
+            barDateStyle: "full"
+        })
+        const invalid = ConfigSchema.normalize({
+            barVisualStyle: "glass",
+            barSurfaceMode: "detached",
+            barContextMode: "polling",
+            barStatusLayout: "stacked",
+            barDateStyle: "numeric"
+        })
+
+        compare(valid.barVisualStyle, "classic")
+        compare(valid.barSurfaceMode, "floating")
+        compare(valid.barContextMode, "always")
+        compare(valid.barStatusLayout, "individual")
+        compare(valid.barDateStyle, "full")
+        compare(invalid.barVisualStyle, "expressive")
+        compare(invalid.barSurfaceMode, "edge-to-edge")
+        compare(invalid.barContextMode, "contextual")
+        compare(invalid.barStatusLayout, "grouped")
+        compare(invalid.barDateStyle, "short")
+    }
+
+    function test_barWidgetOrdersAreUniqueAndComplete() {
+        const state = ConfigSchema.normalize({
+            barLeftWidgetOrder: [
+                "workspaces",
+                "unknown",
+                "workspaces",
+                "launcher"
+            ],
+            barRightWidgetOrder: [
+                "dashboard",
+                "session",
+                "dashboard",
+                "invalid"
+            ]
+        })
+
+        compare(
+            JSON.stringify(state.barLeftWidgetOrder),
+            JSON.stringify([
+                "workspaces",
+                "launcher",
+                "overview",
+                "datetime"
+            ])
+        )
+        compare(
+            JSON.stringify(state.barRightWidgetOrder),
+            JSON.stringify([
+                "dashboard",
+                "session",
+                "privacy",
+                "keyboard",
+                "tray",
+                "notifications",
+                "system-status"
+            ])
+        )
+    }
+
+    function test_emptyBarWidgetOrdersRestoreRequiredIds() {
+        const state = ConfigSchema.normalize({
+            barLeftWidgetOrder: [],
+            barRightWidgetOrder: "invalid"
+        })
+        const base = ConfigSchema.defaults()
+
+        compare(
+            JSON.stringify(state.barLeftWidgetOrder),
+            JSON.stringify(base.barLeftWidgetOrder)
+        )
+        compare(
+            JSON.stringify(state.barRightWidgetOrder),
+            JSON.stringify(base.barRightWidgetOrder)
+        )
     }
 
     function test_resetCategoryIsScoped() {
@@ -92,6 +212,10 @@ TestCase {
         compare(appearance.paletteStyle, "auto")
         verify(appearance.barHeight === undefined)
         compare(bar.barHeight, 48)
+        compare(bar.barVisualStyle, "expressive")
+        compare(bar.barContextMode, "contextual")
+        compare(bar.barShowDashboardButton, true)
+        compare(bar.barRightWidgetOrder.length, 6)
         verify(bar.themeMode === undefined)
     }
 

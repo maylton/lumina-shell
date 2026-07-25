@@ -42,10 +42,17 @@ Singleton {
     property alias animationScale: stateAdapter.animationScale
     property alias cornerRadiusScale: stateAdapter.cornerRadiusScale
     property alias compactMode: stateAdapter.compactMode
+    property alias barVisualStyle: stateAdapter.barVisualStyle
+    property alias barSurfaceMode: stateAdapter.barSurfaceMode
+    property alias barContextMode: stateAdapter.barContextMode
+    property alias barContextTimeout: stateAdapter.barContextTimeout
+    property alias barStatusLayout: stateAdapter.barStatusLayout
     property alias barPosition: stateAdapter.barPosition
     property alias barHeight: stateAdapter.barHeight
     property alias barMargin: stateAdapter.barMargin
     property alias barWidgetSpacing: stateAdapter.barWidgetSpacing
+    property alias barShowLauncher: stateAdapter.barShowLauncher
+    property alias barShowOverview: stateAdapter.barShowOverview
     property alias barShowWindowTitle:
         stateAdapter.barShowWindowTitle
     property alias barCenterWindowTitle:
@@ -54,11 +61,35 @@ Singleton {
     property alias barShowWorkspaces: stateAdapter.barShowWorkspaces
     property alias barShowColumnIndicator:
         stateAdapter.barShowColumnIndicator
+    property alias barShowDate: stateAdapter.barShowDate
+    property alias barDateStyle: stateAdapter.barDateStyle
+    property alias barShowKeyboardLayout:
+        stateAdapter.barShowKeyboardLayout
+    property alias barShowPrivacyIndicators:
+        stateAdapter.barShowPrivacyIndicators
     property alias barShowTray: stateAdapter.barShowTray
+    property alias barShowNotifications:
+        stateAdapter.barShowNotifications
+    property alias barShowDashboardButton:
+        stateAdapter.barShowDashboardButton
+    property alias barShowAudioStatus:
+        stateAdapter.barShowAudioStatus
+    property alias barShowNetworkStatus:
+        stateAdapter.barShowNetworkStatus
+    property alias barShowBatteryStatus:
+        stateAdapter.barShowBatteryStatus
+    property alias barShowWallpaperButton:
+        stateAdapter.barShowWallpaperButton
+    property alias barShowSessionButton:
+        stateAdapter.barShowSessionButton
     property alias barShowClock: stateAdapter.barShowClock
     property alias barClock24Hour: stateAdapter.barClock24Hour
     property alias barShowSeconds: stateAdapter.barShowSeconds
     property alias barWidgetOrder: stateAdapter.barWidgetOrder
+    property alias barLeftWidgetOrder:
+        stateAdapter.barLeftWidgetOrder
+    property alias barRightWidgetOrder:
+        stateAdapter.barRightWidgetOrder
     property alias dashboardDefaultPage:
         stateAdapter.dashboardDefaultPage
     property alias dashboardRememberPage:
@@ -403,21 +434,43 @@ Singleton {
             property real animationScale: 1
             property real cornerRadiusScale: 1
             property bool compactMode: false
+            property string barVisualStyle: "expressive"
+            property string barSurfaceMode: "edge-to-edge"
+            property string barContextMode: "contextual"
+            property int barContextTimeout: 3500
+            property string barStatusLayout: "grouped"
             property string barPosition: "top"
             property int barHeight: 48
             property int barMargin: 5
             property int barWidgetSpacing: 10
+            property bool barShowLauncher: true
+            property bool barShowOverview: true
             property bool barShowWindowTitle: true
             property bool barCenterWindowTitle: true
             property bool barShowAppId: true
             property bool barShowWorkspaces: true
             property bool barShowColumnIndicator: true
+            property bool barShowDate: true
+            property string barDateStyle: "short"
+            property bool barShowKeyboardLayout: true
+            property bool barShowPrivacyIndicators: true
             property bool barShowTray: true
+            property bool barShowNotifications: true
+            property bool barShowDashboardButton: true
+            property bool barShowAudioStatus: true
+            property bool barShowNetworkStatus: true
+            property bool barShowBatteryStatus: true
+            property bool barShowWallpaperButton: false
+            property bool barShowSessionButton: false
             property bool barShowClock: true
             property bool barClock24Hour: true
             property bool barShowSeconds: false
             property var barWidgetOrder:
                 ConfigSchema.defaults().barWidgetOrder
+            property var barLeftWidgetOrder:
+                ConfigSchema.defaults().barLeftWidgetOrder
+            property var barRightWidgetOrder:
+                ConfigSchema.defaults().barRightWidgetOrder
             property string dashboardDefaultPage: "dashboard"
             property bool dashboardRememberPage: true
             property bool dashboardRememberCategory: true
@@ -577,6 +630,10 @@ Singleton {
                 dynamicTheme: root.dynamicTheme,
                 paletteStyle: root.paletteStyle,
                 barPosition: root.barPosition,
+                barVisualStyle: root.barVisualStyle,
+                barSurfaceMode: root.barSurfaceMode,
+                barContextMode: root.barContextMode,
+                barStatusLayout: root.barStatusLayout,
                 dashboardDefaultPage: root.dashboardDefaultPage,
                 doNotDisturb: root.doNotDisturb,
                 osdEnabled: root.osdEnabled,

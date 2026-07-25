@@ -1,6 +1,6 @@
 .pragma library
 
-var CURRENT_VERSION = 4
+var CURRENT_VERSION = 5
 
 function defaults() {
     return {
@@ -23,16 +23,34 @@ function defaults() {
         animationScale: 1,
         cornerRadiusScale: 1,
         compactMode: false,
+        barVisualStyle: "expressive",
+        barSurfaceMode: "edge-to-edge",
+        barContextMode: "contextual",
+        barContextTimeout: 3500,
+        barStatusLayout: "grouped",
         barPosition: "top",
         barHeight: 48,
         barMargin: 5,
         barWidgetSpacing: 10,
+        barShowLauncher: true,
+        barShowOverview: true,
         barShowWindowTitle: true,
         barCenterWindowTitle: true,
         barShowAppId: true,
         barShowWorkspaces: true,
         barShowColumnIndicator: true,
+        barShowDate: true,
+        barDateStyle: "short",
+        barShowKeyboardLayout: true,
+        barShowPrivacyIndicators: true,
         barShowTray: true,
+        barShowNotifications: true,
+        barShowDashboardButton: true,
+        barShowAudioStatus: true,
+        barShowNetworkStatus: true,
+        barShowBatteryStatus: true,
+        barShowWallpaperButton: false,
+        barShowSessionButton: false,
         barShowClock: true,
         barClock24Hour: true,
         barShowSeconds: false,
@@ -44,6 +62,20 @@ function defaults() {
             "wallpaper",
             "session",
             "clock"
+        ],
+        barLeftWidgetOrder: [
+            "launcher",
+            "overview",
+            "workspaces",
+            "datetime"
+        ],
+        barRightWidgetOrder: [
+            "privacy",
+            "keyboard",
+            "tray",
+            "notifications",
+            "system-status",
+            "dashboard"
         ],
         dashboardDefaultPage: "dashboard",
         dashboardRememberPage: true,
@@ -153,6 +185,34 @@ function booleanValue(value, fallback) {
     return typeof value === "boolean" ? value : fallback
 }
 
+function normalizedOrder(value, requiredIds, optionalIds) {
+    var input = Array.isArray(value) ? value : []
+    var required = Array.isArray(requiredIds) ? requiredIds : []
+    var optional = Array.isArray(optionalIds) ? optionalIds : []
+    var allowed = required.concat(optional)
+    var result = []
+
+    for (var index = 0; index < input.length; ++index) {
+        var id = String(input[index] || "")
+
+        if (allowed.indexOf(id) < 0 || result.indexOf(id) >= 0)
+            continue
+
+        result.push(id)
+    }
+
+    for (var requiredIndex = 0;
+        requiredIndex < required.length;
+        ++requiredIndex) {
+        var requiredId = required[requiredIndex]
+
+        if (result.indexOf(requiredId) < 0)
+            result.push(requiredId)
+    }
+
+    return result
+}
+
 function normalize(source) {
     var input = source && typeof source === "object" ? source : {}
     var result = {}
@@ -212,6 +272,34 @@ function normalize(source) {
         0.6,
         1.5
     )
+    result.barVisualStyle = choice(
+        result.barVisualStyle,
+        ["expressive", "classic"],
+        base.barVisualStyle
+    )
+    result.barSurfaceMode = choice(
+        result.barSurfaceMode,
+        ["edge-to-edge", "floating"],
+        base.barSurfaceMode
+    )
+    result.barContextMode = choice(
+        result.barContextMode,
+        ["always", "contextual", "hidden"],
+        base.barContextMode
+    )
+    result.barContextTimeout = Math.round(
+        boundedNumber(
+            result.barContextTimeout,
+            base.barContextTimeout,
+            1000,
+            15000
+        )
+    )
+    result.barStatusLayout = choice(
+        result.barStatusLayout,
+        ["grouped", "individual"],
+        base.barStatusLayout
+    )
     result.barPosition = choice(
         result.barPosition,
         ["top", "bottom"],
@@ -230,6 +318,11 @@ function normalize(source) {
             2,
             24
         )
+    )
+    result.barDateStyle = choice(
+        result.barDateStyle,
+        ["short", "weekday", "full"],
+        base.barDateStyle
     )
     result.dashboardDefaultPage = choice(
         result.dashboardDefaultPage,
@@ -304,12 +397,24 @@ function normalize(source) {
         "transparencyEnabled",
         "animationsEnabled",
         "compactMode",
+        "barShowLauncher",
+        "barShowOverview",
         "barShowWindowTitle",
         "barCenterWindowTitle",
         "barShowAppId",
         "barShowWorkspaces",
         "barShowColumnIndicator",
+        "barShowDate",
+        "barShowKeyboardLayout",
+        "barShowPrivacyIndicators",
         "barShowTray",
+        "barShowNotifications",
+        "barShowDashboardButton",
+        "barShowAudioStatus",
+        "barShowNetworkStatus",
+        "barShowBatteryStatus",
+        "barShowWallpaperButton",
+        "barShowSessionButton",
         "barShowClock",
         "barClock24Hour",
         "barShowSeconds",
@@ -354,6 +459,17 @@ function normalize(source) {
     if (!Array.isArray(result.barWidgetOrder))
         result.barWidgetOrder = base.barWidgetOrder.slice()
 
+    result.barLeftWidgetOrder = normalizedOrder(
+        result.barLeftWidgetOrder,
+        base.barLeftWidgetOrder,
+        []
+    )
+    result.barRightWidgetOrder = normalizedOrder(
+        result.barRightWidgetOrder,
+        base.barRightWidgetOrder,
+        ["wallpaper", "session"]
+    )
+
     if (!Array.isArray(result.dashboardCardOrder))
         result.dashboardCardOrder = base.dashboardCardOrder.slice()
 
@@ -386,20 +502,40 @@ function defaultsForCategory(categoryName) {
             "wallpaperDirectory"
         ],
         bar: [
+            "barVisualStyle",
+            "barSurfaceMode",
+            "barContextMode",
+            "barContextTimeout",
+            "barStatusLayout",
             "barPosition",
             "barHeight",
             "barMargin",
             "barWidgetSpacing",
+            "barShowLauncher",
+            "barShowOverview",
             "barShowWindowTitle",
             "barCenterWindowTitle",
             "barShowAppId",
             "barShowWorkspaces",
             "barShowColumnIndicator",
+            "barShowDate",
+            "barDateStyle",
+            "barShowKeyboardLayout",
+            "barShowPrivacyIndicators",
             "barShowTray",
+            "barShowNotifications",
+            "barShowDashboardButton",
+            "barShowAudioStatus",
+            "barShowNetworkStatus",
+            "barShowBatteryStatus",
+            "barShowWallpaperButton",
+            "barShowSessionButton",
             "barShowClock",
             "barClock24Hour",
             "barShowSeconds",
             "barWidgetOrder",
+            "barLeftWidgetOrder",
+            "barRightWidgetOrder",
             "showStatusDetails"
         ],
         dashboard: [
