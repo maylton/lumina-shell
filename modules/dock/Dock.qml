@@ -80,8 +80,16 @@ Scope {
                 property real contextAnchorX: width / 2
 
                 function closeContextMenu() {
+                    const wasOpen = dockPinMenu.opened
                     dockPinMenu.close()
                     contextItem = null
+
+                    if (wasOpen
+                        && DockPreferences.autoHide
+                        && !revealHover.hovered
+                        && !surfaceHover.hovered) {
+                        hideTimer.restart()
+                    }
                 }
 
                 function openContextMenu(item, sourceItem) {
@@ -191,13 +199,19 @@ Scope {
                     target: DockPreferences
 
                     function onAutoHideChanged() {
+                        panel.closeContextMenu()
                         panel.revealRequested = !DockPreferences.autoHide
                         hideTimer.stop()
+                    }
+
+                    function onModeChanged() {
+                        panel.closeContextMenu()
                     }
 
                     function onEnabledChanged() {
                         if (!DockPreferences.enabled) {
                             panel.closeContextMenu()
+                            hideTimer.stop()
                             panel.revealRequested = !DockPreferences.autoHide
                         }
                     }
