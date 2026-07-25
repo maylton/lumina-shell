@@ -30,10 +30,10 @@ QtObject {
             ConfigStore.barContentScale,
             ConfigStore.compactMode
         )
-    readonly property real barSpacingScale:
-        BarScalePolicy.moderatedScale(barContentScale, 0.55)
-    readonly property real barTypographyScale:
-        BarScalePolicy.moderatedScale(barContentScale, 0.68)
+    readonly property real barSpacingScale: barContentScale
+    readonly property real barTypographyScale: barContentScale
+    readonly property real barShapeScale:
+        barContentScale * radiusScale
 
     property color primaryColor: lightMode ? "#305EA8" : "#ADC6FF"
     property color accentContainerColor:
@@ -140,6 +140,24 @@ QtObject {
             extraLarge: Math.round(32 * root.radiusScale),
             extraLargeIncreased: Math.round(40 * root.radiusScale),
             extraExtraLarge: Math.round(48 * root.radiusScale),
+            barSmall: BarScalePolicy.scaled(
+                8,
+                root.barShapeScale,
+                4,
+                12
+            ),
+            barMedium: BarScalePolicy.scaled(
+                16,
+                root.barShapeScale,
+                8,
+                24
+            ),
+            barLarge: BarScalePolicy.scaled(
+                24,
+                root.barShapeScale,
+                12,
+                36
+            ),
             workspaceResting: Math.round(12 * root.radiusScale),
             workspaceActive: 999,
             full: 999
@@ -153,40 +171,45 @@ QtObject {
             barItemGap: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 4 : 6,
                 root.barSpacingScale,
-                3,
+                2,
                 9
             ),
             barClusterGap: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 12 : 18,
                 root.barSpacingScale,
-                10,
-                24
+                8,
+                26
             ),
             barContentInset: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 12 : 18,
                 root.barSpacingScale,
-                10,
-                24
+                8,
+                26
             ),
             barHorizontalPadding: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 12 : 16,
                 root.barSpacingScale,
-                10,
-                22
+                7,
+                23
             ),
             barWidgetPadding: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 8 : 10,
                 root.barSpacingScale,
-                7,
-                14
+                5,
+                15
             ),
             barConfiguredWidgetGap: BarScalePolicy.scaled(
                 ConfigStore.barWidgetSpacing,
                 root.barSpacingScale,
                 2,
-                32
+                35
             ),
-            barPanelGap: ConfigStore.compactMode ? 10 : 14,
+            barPanelGap: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 10 : 14,
+                root.barSpacingScale,
+                7,
+                20
+            ),
             controlItemGap: ConfigStore.compactMode ? 10 : 14,
             controlCardGap: ConfigStore.compactMode ? 12 : 18,
             controlSectionGap: ConfigStore.compactMode ? 14 : 20,
@@ -205,62 +228,62 @@ QtObject {
             barTouchTarget: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 38 : 40,
                 root.barContentScale,
-                36,
-                52
+                30,
+                57
             ),
             barIcon: BarScalePolicy.scaled(
                 18,
                 root.barContentScale,
-                16,
-                24
+                12,
+                26
             ),
             barSmallIcon: BarScalePolicy.scaled(
                 16,
                 root.barContentScale,
-                14,
-                21
+                11,
+                23
             ),
             barTrayIcon: BarScalePolicy.scaled(
                 18,
                 root.barContentScale,
-                16,
-                24
+                12,
+                26
             ),
             barWorkspaceMarker: BarScalePolicy.scaled(
                 10,
                 root.barContentScale,
-                8,
-                14
+                7,
+                15
             ),
             barWorkspaceActiveHeight: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 34 : 38,
                 root.barContentScale,
-                32,
-                50
+                25,
+                54
             ),
             barStatusIcon: BarScalePolicy.scaled(
                 17,
                 root.barContentScale,
-                15,
-                23
+                11,
+                25
             ),
             barBadgeHeight: BarScalePolicy.scaled(
                 17,
                 root.barContentScale,
-                15,
-                22
+                11,
+                24
             ),
             barBadgePadding: BarScalePolicy.scaled(
                 7,
                 root.barSpacingScale,
-                5,
+                4,
                 10
             ),
             barStatusDot: BarScalePolicy.scaled(
                 8,
                 root.barContentScale,
-                6,
-                11
+                5,
+                12
             ),
             barDividerDot: BarScalePolicy.scaled(
                 3,
@@ -299,38 +322,38 @@ QtObject {
             barClock: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 14 : 15,
                 root.barTypographyScale,
-                13,
-                19
+                10,
+                22
             ),
             barSecondary: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 11 : 12,
                 root.barTypographyScale,
-                10,
-                15
+                8,
+                17
             ),
             barWorkspace: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 11 : 12,
                 root.barTypographyScale,
-                10,
-                15
+                8,
+                17
             ),
             barContextPrimary: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 12 : 13,
                 root.barTypographyScale,
-                11,
-                17
+                9,
+                19
             ),
             barContextSecondary: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 10 : 11,
                 root.barTypographyScale,
-                10,
-                14
+                8,
+                16
             ),
             barBadge: BarScalePolicy.scaled(
                 10,
                 root.barTypographyScale,
-                9,
-                12
+                7,
+                14
             ),
             titleMedium: 14,
             titleLarge: 20

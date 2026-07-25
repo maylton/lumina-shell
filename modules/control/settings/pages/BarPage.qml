@@ -199,8 +199,22 @@ SettingsPage {
                 "Calculated automatically from "
                 + ConfigStore.barHeight
                 + " px bar height"
-            from: 0.8
-            to: 1.4
+            from: ConfigStore.barAutoScaleContents
+                ? BarScalePolicy.effectiveScale(
+                    40,
+                    true,
+                    1,
+                    ConfigStore.compactMode
+                )
+                : 0.8
+            to: ConfigStore.barAutoScaleContents
+                ? BarScalePolicy.effectiveScale(
+                    80,
+                    true,
+                    1,
+                    ConfigStore.compactMode
+                )
+                : 1.4
             stepSize: 0.05
             value: ConfigStore.barAutoScaleContents
                 ? root.effectiveBarContentScale
