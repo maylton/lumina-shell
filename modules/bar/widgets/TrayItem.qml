@@ -10,7 +10,6 @@ Rectangle {
     id: root
 
     required property var trayItem
-    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property string itemTitle: {
@@ -37,12 +36,8 @@ Rectangle {
         trayMenu.show()
     }
 
-    implicitWidth: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitWidth: luminaDesign.size.barTouchTarget
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: needsAttention
         ? luminaDesign.shape.full
         : luminaDesign.shape.medium

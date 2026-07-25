@@ -9,18 +9,13 @@ Rectangle {
     id: root
 
     required property string outputName
-    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: LauncherStore.open
         && LauncherStore.activeOutputName === outputName
 
-    implicitWidth: expressive
-        ? luminaDesign.size.barTouchTarget
-        : launcherLabel.implicitWidth + 20
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitWidth: luminaDesign.size.barTouchTarget
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     scale: launcherMouse.pressed
         ? 0.94
@@ -72,25 +67,12 @@ Rectangle {
 
     DashboardIcon {
         anchors.centerIn: parent
-        visible: root.expressive
         iconName: "system-search-symbolic"
         fallbackSymbol: "⌕"
         iconColor: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
         iconSize: 18
-    }
-
-    Text {
-        id: launcherLabel
-        anchors.centerIn: parent
-        visible: !root.expressive
-        text: "Apps"
-        color: root.expanded
-            ? root.luminaDesign.color.onAccentContainer
-            : root.luminaDesign.color.onSurface
-        font.pixelSize: root.luminaDesign.typography.labelMedium
-        font.weight: Font.DemiBold
     }
 
     MouseArea {

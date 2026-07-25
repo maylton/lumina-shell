@@ -8,7 +8,6 @@ Rectangle {
     id: root
 
     required property string outputName
-    property string visualStyle: "expressive"
     property string barPosition: ConfigStore.barPosition
     property bool showDate: ConfigStore.barShowDate
     property bool compact: false
@@ -37,17 +36,11 @@ Rectangle {
         CalendarStore.currentDate,
         Locale.LongFormat
     )
-    readonly property bool expressive: visualStyle === "expressive"
-
-    implicitWidth: dateTimeLabel.implicitWidth + (expressive ? 24 : 20)
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitWidth: dateTimeLabel.implicitWidth + 24
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded
         ? luminaDesign.shape.full
-        : expressive
-            ? luminaDesign.shape.large
-            : luminaDesign.shape.medium
+        : luminaDesign.shape.large
     scale: dateTimeMouse.pressed
         ? 0.94
         : dateTimeMouse.containsMouse
@@ -113,9 +106,7 @@ Rectangle {
         color: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
-        font.pixelSize: root.expressive
-            ? root.luminaDesign.typography.bodyMedium
-            : root.luminaDesign.typography.titleMedium
+        font.pixelSize: root.luminaDesign.typography.bodyMedium
         font.weight: Font.DemiBold
     }
 

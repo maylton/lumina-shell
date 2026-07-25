@@ -129,16 +129,13 @@ Item {
 
         LauncherButton {
             outputName: root.outputName
-            expressive: true
         }
     }
 
     Component {
         id: overviewComponent
 
-        OverviewButton {
-            expressive: true
-        }
+        OverviewButton {}
     }
 
     Component {
@@ -147,7 +144,6 @@ Item {
         WorkspaceStrip {
             workspaces: root.visibleWorkspaces
             itemSpacing: ConfigStore.barWidgetSpacing
-            visualStyle: "expressive"
         }
     }
 
@@ -156,7 +152,6 @@ Item {
 
         DateTimeCluster {
             compact: root.compactLayout
-            visualStyle: "expressive"
             barPosition: ConfigStore.barPosition
             outputName: root.outputName.length > 0
                 ? root.outputName
@@ -179,9 +174,7 @@ Item {
     Component {
         id: trayComponent
 
-        TrayWidget {
-            expressive: true
-        }
+        TrayWidget {}
     }
 
     Component {
@@ -189,7 +182,6 @@ Item {
 
         NotificationButton {
             outputName: root.outputName
-            expressive: true
         }
     }
 
@@ -215,7 +207,6 @@ Item {
 
         WallpaperButton {
             outputName: root.outputName
-            expressive: true
         }
     }
 
@@ -224,7 +215,6 @@ Item {
 
         SessionButton {
             outputName: root.outputName
-            expressive: true
         }
     }
 }

@@ -9,16 +9,13 @@ Rectangle {
     id: root
 
     required property string outputName
-    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: SessionMenuStore.activeOutputName
         === outputName
 
     implicitWidth: sessionLabel.implicitWidth + 20
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || sessionMouse.containsMouse
         ? luminaDesign.color.accentContainer

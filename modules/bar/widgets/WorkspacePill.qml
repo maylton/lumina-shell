@@ -7,33 +7,23 @@ Rectangle {
     id: root
 
     required property var workspace
-    property string visualStyle: "classic"
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property bool expressive: visualStyle === "expressive"
     readonly property bool selected: Boolean(workspace.is_focused)
     readonly property bool active: Boolean(workspace.is_active)
 
-    implicitWidth: expressive
-        ? selected || active
-            ? workspaceLabel.implicitWidth + 28
-            : Math.max(
-                luminaDesign.size.barTouchTarget,
-                workspaceLabel.implicitWidth + 16
-            )
-        : workspaceLabel.implicitWidth + 18
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitWidth: selected || active
+        ? workspaceLabel.implicitWidth + 28
+        : Math.max(
+            luminaDesign.size.barTouchTarget,
+            workspaceLabel.implicitWidth + 16
+        )
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: selected
         ? luminaDesign.shape.workspaceActive
         : active
-            ? expressive
-                ? luminaDesign.shape.large
-                : luminaDesign.shape.large
-            : expressive
-                ? luminaDesign.shape.workspaceResting
-                : luminaDesign.shape.small
+            ? luminaDesign.shape.large
+            : luminaDesign.shape.workspaceResting
     scale: workspaceMouse.pressed
         ? 0.92
         : workspaceMouse.containsMouse

@@ -8,7 +8,7 @@ SettingsPage {
     id: root
 
     title: "Bar"
-    description: "Expressive layout, behavior, and widgets per output"
+    description: "Surface, context, status, and widgets per output"
 
     function widgetLabel(widgetId) {
         const labels = {
@@ -55,42 +55,6 @@ SettingsPage {
         }
 
         return result
-    }
-
-    SettingsSection {
-        title: "Visual style"
-        description: "Switch presets immediately without restarting"
-
-        Row {
-            width: parent.width
-            height: 126
-            spacing: root.luminaDesign.spacing.medium
-
-            BarStylePreview {
-                width: (parent.width - parent.spacing) / 2
-                height: parent.height
-                label: "Expressive Desktop"
-                visualStyle: "expressive"
-                selected:
-                    ConfigStore.barVisualStyle === "expressive"
-                onActivated: ConfigStore.setBarValue(
-                    "barVisualStyle",
-                    "expressive"
-                )
-            }
-
-            BarStylePreview {
-                width: (parent.width - parent.spacing) / 2
-                height: parent.height
-                label: "Lumina Classic"
-                visualStyle: "classic"
-                selected: ConfigStore.barVisualStyle === "classic"
-                onActivated: ConfigStore.setBarValue(
-                    "barVisualStyle",
-                    "classic"
-                )
-            }
-        }
     }
 
     SettingsSection {
@@ -143,9 +107,7 @@ SettingsPage {
             width: parent.width
             title: "Outer margin"
             description: "Space around a floating bar"
-            available:
-                ConfigStore.barSurfaceMode === "floating"
-                || ConfigStore.barVisualStyle === "classic"
+            available: ConfigStore.barSurfaceMode === "floating"
             availabilityText:
                 "Edge-to-edge mode does not use an outer margin"
             from: 0

@@ -8,7 +8,6 @@ Rectangle {
     id: root
 
     required property string outputName
-    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: NotificationService.centerOutputName
@@ -16,9 +15,7 @@ Rectangle {
 
     implicitWidth: notificationLabel.implicitWidth + 20
         + (NotificationService.unreadCount > 0 ? badge.width + 4 : 0)
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     scale: notificationMouse.pressed
         ? 0.94

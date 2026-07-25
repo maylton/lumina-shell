@@ -8,16 +8,13 @@ Rectangle {
     id: root
 
     required property string outputName
-    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: WallpaperService.pickerOutputName
         === outputName
 
     implicitWidth: wallpaperLabel.implicitWidth + 20
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || wallpaperMouse.containsMouse
         ? luminaDesign.color.accentContainer

@@ -6,16 +6,10 @@ import qs.services.niri
 Rectangle {
     id: root
 
-    property bool expressive: false
-
     readonly property var luminaDesign: Theme.luminaTokens
 
-    implicitWidth: expressive
-        ? luminaDesign.size.barTouchTarget
-        : overviewLabel.implicitWidth + 20
-    implicitHeight: expressive
-        ? luminaDesign.size.barTouchTarget
-        : luminaDesign.size.chipHeight
+    implicitWidth: luminaDesign.size.barTouchTarget
+    implicitHeight: luminaDesign.size.barTouchTarget
     radius: NiriService.overviewOpen
         ? luminaDesign.shape.full
         : luminaDesign.shape.medium
@@ -76,25 +70,12 @@ Rectangle {
 
     DashboardIcon {
         anchors.centerIn: parent
-        visible: root.expressive
         iconName: "view-grid-symbolic"
         fallbackSymbol: "▦"
         iconColor: NiriService.overviewOpen
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
         iconSize: 18
-    }
-
-    Text {
-        id: overviewLabel
-        anchors.centerIn: parent
-        visible: !root.expressive
-        text: NiriService.overviewOpen ? "Close overview" : "Overview"
-        color: NiriService.overviewOpen
-            ? root.luminaDesign.color.onAccentContainer
-            : root.luminaDesign.color.onSurface
-        font.pixelSize: root.luminaDesign.typography.labelMedium
-        font.weight: Font.DemiBold
     }
 
     MouseArea {
