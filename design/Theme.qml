@@ -183,6 +183,14 @@ QtObject {
             titleMedium: 14,
             titleLarge: 20
         },
+        progress: {
+            trackThickness: 4,
+            waveAmplitude: 3,
+            waveLength: 40,
+            waveHeight: 10,
+            trackGap: 4,
+            stopSize: 4
+        },
         motion: {
             fast: Math.max(1, Math.round(120 * root.motionScale)),
             medium: Math.max(1, Math.round(220 * root.motionScale)),

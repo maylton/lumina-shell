@@ -69,6 +69,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Replaced the Dashboard media player's flat progress bar with a determinate
+  Material Expressive wavy indicator, including active/track gap, shrinking
+  stop indicator, playback motion, and reduced-motion handling.
 - Split shell motion into semantic spatial and effects families, with
   coordinated shape/bounds transitions, short state effects, and an
   overshoot-free reduced-motion path.

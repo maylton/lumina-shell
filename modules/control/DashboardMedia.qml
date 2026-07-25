@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.media
+import qs.stores.control
 
 DashboardCard {
     id: root
@@ -122,7 +123,7 @@ DashboardCard {
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }
 
-            Rectangle {
+            WavyProgressIndicator {
                 id: progressTrack
 
                 anchors {
@@ -132,28 +133,15 @@ DashboardCard {
                     bottomMargin: root.luminaDesign.spacing.small
                 }
 
-                height: 5
-                radius: height / 2
-                color: root.luminaDesign.color.surfaceMuted
-                clip: true
-
-                Rectangle {
-                    width: parent.width * (
-                        MediaService.hasSession && MediaService.length > 0
-                            ? Math.max(
-                                0,
-                                Math.min(
-                                    1,
-                                    MediaService.position
-                                        / MediaService.length
-                                )
-                            )
-                            : 0
-                    )
-                    height: parent.height
-                    radius: parent.radius
-                    color: root.luminaDesign.color.primary
-                }
+                progress:
+                    MediaService.hasSession
+                        && MediaService.length > 0
+                    ? MediaService.position / MediaService.length
+                    : 0
+                wavy: MediaService.hasSession
+                moving: MediaService.playing
+                    && ControlCenterStore.open
+                    && ControlCenterStore.activePage === "dashboard"
             }
 
             Row {

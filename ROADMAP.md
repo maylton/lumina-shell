@@ -159,6 +159,8 @@ This sprint completes the 0.5 public-beta foundation:
 - Bar, Dashboard, and Settings distinguish spatial shape/bounds transitions
   from color/opacity effects, share semantic spacing roles, and remove
   expressive overshoot when reduced motion is enabled.
+- Dashboard media progress uses a determinate Material Expressive wavy
+  indicator driven by the existing MPRIS position and playback state.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
 - Schema v4 bar preferences migrate to schema v5 without losing valid

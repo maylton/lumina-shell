@@ -307,6 +307,13 @@ enabling reduced motion shortens every family through the existing global
 motion scale and removes spatial overshoot while preserving focus, shape, and
 selected-state feedback.
 
+Determinate media progress uses a reusable linear wavy indicator. Its active
+path follows the Material Expressive stroke, amplitude, wavelength, track-gap,
+and stop-indicator proportions; MPRIS position updates animate smoothly, and
+the wave advances only while playback and the Dashboard are active. Paused
+playback preserves a static waveform, while reduced motion disables phase
+movement without removing progress information.
+
 The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
 
 Other Quickshell desktops, including Sleex, are useful architectural references for modular widgets and centralized adaptive theming. Lumina does not inherit their compositor assumptions or visual identity: it remains Niri-first and develops its own Material Expressive component language.
