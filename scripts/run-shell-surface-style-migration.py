@@ -41,7 +41,72 @@ def normalize_literal_block(
     return payload.replace(old, new, 1)
 
 
+def upgrade_payload_replace_once(payload: str) -> str:
+    """Allow one unique match whose only difference is leading indentation."""
+    strict = """def replace_once(path, old, new):
+    content = read(path)
+    count = content.count(old)
+    if count != 1:
+        raise RuntimeError(f'{path}: expected one match, found {count}: {old[:80]!r}')
+    write(path, content.replace(old, new, 1))
+"""
+    flexible = """def replace_once(path, old, new):
+    content = read(path)
+    count = content.count(old)
+
+    if count == 1:
+        write(path, content.replace(old, new, 1))
+        return
+
+    old_lines = old.splitlines(keepends=True)
+    content_lines = content.splitlines(keepends=True)
+    matches = []
+
+    def without_indent(line):
+        return line.lstrip(' \\t')
+
+    if old_lines:
+        for start_line in range(0, len(content_lines) - len(old_lines) + 1):
+            candidate = content_lines[
+                start_line:start_line + len(old_lines)
+            ]
+            if all(
+                without_indent(candidate[index])
+                    == without_indent(old_lines[index])
+                for index in range(len(old_lines))
+            ):
+                matches.append(start_line)
+
+    if len(matches) != 1:
+        raise RuntimeError(
+            f'{path}: expected one exact or indentation-only match, '
+            f'found exact={count}, indentation={len(matches)}: {old[:80]!r}'
+        )
+
+    start_line = matches[0]
+    start_offset = sum(len(line) for line in content_lines[:start_line])
+    end_offset = start_offset + sum(
+        len(line)
+        for line in content_lines[
+            start_line:start_line + len(old_lines)
+        ]
+    )
+    write(path, content[:start_offset] + new + content[end_offset:])
+"""
+
+    count = payload.count(strict)
+    if count != 1:
+        raise RuntimeError(
+            "Could not upgrade payload replace_once: "
+            f"expected one definition, found {count}."
+        )
+
+    return payload.replace(strict, flexible, 1)
+
+
 def normalize_payload(payload: str) -> str:
+    payload = upgrade_payload_replace_once(payload)
+
     ambiguous_boolean_removal = '''replace_once(
     'stores/config/ConfigSchema.js',
     '        "transparencyEnabled",\\n',
