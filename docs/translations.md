@@ -70,6 +70,24 @@ English and Brazilian Portuguese catalogs. New widget settings should add
 their user-visible strings to the source catalog without changing widget IDs
 or persisted configuration keys.
 
+## Feature-scoped dictionaries
+
+Shared interface text should normally use the runtime JSON catalogs. A small
+number of feature-scoped dictionaries currently remain close to their owning
+integration:
+
+- `modules/dock/DockStrings.js` contains Dock preferences and contextual
+  Pin/Unpin actions;
+- `services/i18n/LauncherStrings.js` contains app-drawer section labels,
+  localized result kinds, and Niri action names and descriptions;
+- `services/i18n/SettingsStrings.js` contains the reusable restart feedback
+  shown by Settings rows.
+
+Each dictionary must provide both English and Brazilian Portuguese values.
+Their locale fallback is covered by `tests/tst_supplemental_i18n.qml`. New
+cross-feature strings should still be added to the JSON catalogs rather than
+creating another dictionary.
+
 ## Locale selection
 
 Lumina normalizes the Qt system locale and selects an exact regional catalog
