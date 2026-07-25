@@ -63,13 +63,14 @@ Scope {
                 }
 
                 screen: modelData
-                implicitHeight: root.luminaDesign.size.barHeight
-                exclusiveZone: root.luminaDesign.size.barHeight
+                implicitHeight: ConfigStore.barHeight
+                exclusiveZone: ConfigStore.barHeight
                 color: "transparent"
                 focusable: false
 
                 anchors {
-                    top: true
+                    top: ConfigStore.barPosition === "top"
+                    bottom: ConfigStore.barPosition === "bottom"
                     left: true
                     right: true
                 }
@@ -82,7 +83,7 @@ Scope {
 
                     anchors {
                         fill: parent
-                        margins: 5
+                        margins: ConfigStore.barMargin
                     }
 
                     radius: root.luminaDesign.shape.large
@@ -99,7 +100,7 @@ Scope {
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: root.luminaDesign.spacing.small
+                        spacing: ConfigStore.barWidgetSpacing
 
                         LauncherButton {
                             anchors.verticalCenter: parent.verticalCenter
@@ -164,7 +165,9 @@ Scope {
                         }
 
                         Repeater {
-                            model: panel.visibleWorkspaces
+                            model: ConfigStore.barShowWorkspaces
+                                ? panel.visibleWorkspaces
+                                : []
 
                             delegate: Rectangle {
                                 id: workspaceChip
@@ -241,6 +244,7 @@ Scope {
                         id: focusedWindow
 
                         anchors.centerIn: parent
+                        visible: ConfigStore.barShowWindowTitle
                         width: Math.max(
                             120,
                             background.width - leftArea.width - rightArea.width - 64
@@ -249,7 +253,10 @@ Scope {
 
                         Text {
                             width: parent.width
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment:
+                                ConfigStore.barCenterWindowTitle
+                                    ? Text.AlignHCenter
+                                    : Text.AlignLeft
                             text: panel.activeWindowTitle
                             color: root.luminaDesign.color.onSurface
                             elide: Text.ElideRight
@@ -259,9 +266,13 @@ Scope {
 
                         Text {
                             width: parent.width
-                            horizontalAlignment: Text.AlignHCenter
+                            horizontalAlignment:
+                                ConfigStore.barCenterWindowTitle
+                                    ? Text.AlignHCenter
+                                    : Text.AlignLeft
                             text: panel.activeWindowAppId
-                            visible: text.length > 0
+                            visible: ConfigStore.barShowAppId
+                                && text.length > 0
                             color: root.luminaDesign.color.textMuted
                             elide: Text.ElideRight
                             font.pixelSize: root.luminaDesign.typography.labelSmall
@@ -277,12 +288,14 @@ Scope {
                             verticalCenter: parent.verticalCenter
                         }
 
-                        spacing: root.luminaDesign.spacing.medium
+                        spacing: ConfigStore.barWidgetSpacing
 
                         Rectangle {
                             id: columnChip
 
-                            visible: panel.columnLabel.length > 0
+                            visible:
+                                ConfigStore.barShowColumnIndicator
+                                && panel.columnLabel.length > 0
                             width: visible ? columnLabelText.implicitWidth + 18 : 0
                             height: root.luminaDesign.size.chipHeight
                             radius: root.luminaDesign.shape.full
@@ -369,6 +382,7 @@ Scope {
 
                         TrayWidget {
                             anchors.verticalCenter: parent.verticalCenter
+                            visible: ConfigStore.barShowTray
                         }
 
                         ControlButton {
@@ -393,6 +407,7 @@ Scope {
 
                         ClockWidget {
                             anchors.verticalCenter: parent.verticalCenter
+                            visible: ConfigStore.barShowClock
                             outputName: panel.outputName.length > 0
                                 ? panel.outputName
                                 : "screen"

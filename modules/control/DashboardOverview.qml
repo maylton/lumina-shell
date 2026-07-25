@@ -9,6 +9,7 @@ import qs.stores.time
 Item {
     id: root
 
+    property bool showWeather: true
     readonly property var luminaDesign: Theme.luminaTokens
 
     DashboardCard {
@@ -110,7 +111,8 @@ Item {
 
             Item {
                 width: parent.width
-                height: 42
+                height: root.showWeather ? 42 : 0
+                visible: root.showWeather
 
                 Accessible.role: Accessible.Pane
                 Accessible.name: WeatherService.available

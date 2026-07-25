@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.stores.config
 
 FocusScope {
     id: root
@@ -22,9 +23,15 @@ FocusScope {
             bottom: parent.bottom
         }
 
-        width: (
-            parent.width - root.luminaDesign.spacing.medium * 2
-        ) * 0.27
+        readonly property bool hasContent:
+            ConfigStore.dashboardShowOverview
+            || ConfigStore.dashboardShowControls
+
+        width: hasContent
+            ? (parent.width - root.luminaDesign.spacing.medium * 2)
+                * 0.27
+            : 0
+        visible: hasContent
 
         DashboardOverview {
             id: overview
@@ -35,16 +42,25 @@ FocusScope {
                 top: parent.top
             }
 
-            height: parent.height * 0.45
+            visible: ConfigStore.dashboardShowOverview
+            showWeather: ConfigStore.dashboardShowWeather
+            height: !visible
+                ? 0
+                : ConfigStore.dashboardShowControls
+                    ? parent.height * 0.45
+                    : parent.height
         }
 
         DashboardControls {
+            visible: ConfigStore.dashboardShowControls
             anchors {
                 left: parent.left
                 right: parent.right
                 top: overview.bottom
                 bottom: parent.bottom
-                topMargin: root.luminaDesign.spacing.medium
+                topMargin: overview.visible
+                    ? root.luminaDesign.spacing.medium
+                    : 0
             }
         }
     }
@@ -56,22 +72,36 @@ FocusScope {
             left: leftColumn.right
             top: parent.top
             bottom: parent.bottom
-            leftMargin: root.luminaDesign.spacing.medium
+            leftMargin: leftColumn.visible
+                ? root.luminaDesign.spacing.medium
+                : 0
         }
 
-        width: (
-            parent.width - root.luminaDesign.spacing.medium * 2
-        ) * 0.41
+        visible: ConfigStore.dashboardShowNotifications
+        width: visible
+            ? (parent.width - root.luminaDesign.spacing.medium * 2)
+                * 0.41
+            : 0
         compact: true
     }
 
     Item {
+        id: rightColumn
+
+        readonly property int visibleCardCount:
+            (ConfigStore.dashboardShowMedia ? 1 : 0)
+            + (ConfigStore.dashboardShowSystem ? 1 : 0)
+            + (ConfigStore.dashboardShowCalendar ? 1 : 0)
+
         anchors {
             left: homeNotifications.right
             right: parent.right
             top: parent.top
             bottom: parent.bottom
-            leftMargin: root.luminaDesign.spacing.medium
+            leftMargin: homeNotifications.visible
+                || leftColumn.visible
+                    ? root.luminaDesign.spacing.medium
+                    : 0
         }
 
         DashboardMedia {
@@ -83,7 +113,13 @@ FocusScope {
                 top: parent.top
             }
 
-            height: parent.height * 0.24
+            visible: ConfigStore.dashboardShowMedia
+            height: visible
+                ? (parent.height
+                    - root.luminaDesign.spacing.medium
+                        * (rightColumn.visibleCardCount - 1))
+                    / Math.max(1, rightColumn.visibleCardCount)
+                : 0
         }
 
         DashboardStatus {
@@ -93,10 +129,18 @@ FocusScope {
                 left: parent.left
                 right: parent.right
                 top: mediaCard.bottom
-                topMargin: root.luminaDesign.spacing.medium
+                topMargin: mediaCard.visible
+                    ? root.luminaDesign.spacing.medium
+                    : 0
             }
 
-            height: parent.height * 0.29
+            visible: ConfigStore.dashboardShowSystem
+            height: visible
+                ? (parent.height
+                    - root.luminaDesign.spacing.medium
+                        * (rightColumn.visibleCardCount - 1))
+                    / Math.max(1, rightColumn.visibleCardCount)
+                : 0
         }
 
         DashboardCalendar {
@@ -105,8 +149,12 @@ FocusScope {
                 right: parent.right
                 top: statusCard.bottom
                 bottom: parent.bottom
-                topMargin: root.luminaDesign.spacing.medium
+                topMargin: statusCard.visible || mediaCard.visible
+                    ? root.luminaDesign.spacing.medium
+                    : 0
             }
+
+            visible: ConfigStore.dashboardShowCalendar
         }
     }
 }

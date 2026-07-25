@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQml
 import Quickshell
+import qs.stores.config
 import qs.stores.shell
 
 Singleton {
@@ -9,7 +10,12 @@ Singleton {
 
     readonly property var locale: Qt.locale()
     readonly property date currentDate: systemClock.date
-    readonly property string formattedTime: Qt.formatDateTime(currentDate, "HH:mm")
+    readonly property string formattedTime: Qt.formatDateTime(
+        currentDate,
+        ConfigStore.barClock24Hour
+            ? ConfigStore.barShowSeconds ? "HH:mm:ss" : "HH:mm"
+            : ConfigStore.barShowSeconds ? "h:mm:ss AP" : "h:mm AP"
+    )
     readonly property string todayKey: dateKey(currentDate)
     readonly property int firstDayOfWeek: Number(locale.firstDayOfWeek)
     readonly property var weekdayLabels: buildWeekdayLabels(locale, firstDayOfWeek)
@@ -159,7 +165,9 @@ Singleton {
 
     SystemClock {
         id: systemClock
-        precision: SystemClock.Minutes
+        precision: ConfigStore.barShowSeconds
+            ? SystemClock.Seconds
+            : SystemClock.Minutes
     }
 
     Connections {

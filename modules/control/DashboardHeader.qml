@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.notifications
+import qs.stores.config
 import qs.stores.control
 import qs.stores.session
 
@@ -76,6 +77,7 @@ Item {
         }
 
         DashboardAction {
+            visible: ConfigStore.dashboardShowSessionActions
             iconName: "system-shutdown-symbolic"
             symbol: "⏻"
             label: "Open session controls"
