@@ -37,7 +37,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - UPower battery and power-profile integration.
 - Native MPRIS media controls.
 - NetworkManager and BlueZ connectivity status.
-- Volume, microphone, brightness, and lock-state OSDs.
+- Volume, brightness, and lock-state OSDs.
 - Material Expressive per-output control center.
 - Graphical settings for appearance, OSD, notifications, and wallpapers.
 - Schema v3 persistence with invalid-JSON backup and recovery.
@@ -123,6 +123,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Pointer activation in the Dock and graphical Settings now clears transient
+  focus after the action, so keyboard-focus outlines remain specific to Tab
+  navigation. Widget dialogs restore their source focus only when opened from
+  the keyboard, and the Dock Launcher grid now uses a neutral foreground color.
 - Weather no longer infers a city from the system timezone. Automatic mode now
   resolves an approximate city from the public IP and never stores the IP.
 - Refined the bar into Android-inspired bounded background blur adapted to
