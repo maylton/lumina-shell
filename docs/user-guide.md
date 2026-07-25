@@ -29,7 +29,8 @@ The Bar settings page controls:
 - automatic content scaling from the selected height or a manual 80–140%
   scale;
 - active widgets grouped as Left, Center, and Right, with reorder, remove, and
-  an Add widgets menu that shows only available removed widgets;
+  an Add widgets menu in every region that shows only available removed
+  widgets and reports when all regional widgets are active;
 - one gear per active widget, opening an internal settings dialog with a
   reset scoped to that widget;
 - individual backgrounds and labels, workspace label/marker styles,

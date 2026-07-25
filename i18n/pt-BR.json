@@ -63,6 +63,8 @@
   "settings.bar.catalog.workspaces.description": "Workspaces disponíveis nesta saída",
   "settings.bar.catalog.workspaces.title": "Workspaces",
   "settings.bar.widget.add": "Adicionar widgets",
+  "settings.bar.widget.addDescription": "Escolha um widget removido para esta região",
+  "settings.bar.widget.addEmpty": "Todos os widgets desta região estão ativos",
   "settings.bar.widget.addNamed": "Adicionar %1",
   "settings.bar.widget.close": "Fechar configurações do widget",
   "settings.bar.widget.configure": "Configurar %1",

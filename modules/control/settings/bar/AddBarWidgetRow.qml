@@ -14,9 +14,9 @@ Rectangle {
     signal addWidget(string widgetId)
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool hasWidgets: widgets.length > 0
 
-    visible: widgets.length > 0
-    implicitHeight: visible ? 56 : 0
+    implicitHeight: 56
     radius: luminaDesign.shape.largeIncreased
     color: addMouse.containsMouse || activeFocus
         ? luminaDesign.color.accentContainer
@@ -30,7 +30,16 @@ Rectangle {
         "settings.bar.widget.add",
         "Add widgets"
     )
-    Accessible.focusable: visible
+    Accessible.description: hasWidgets
+        ? I18n.tr(
+            "settings.bar.widget.addDescription",
+            "Choose a removed widget for this region"
+        )
+        : I18n.tr(
+            "settings.bar.widget.addEmpty",
+            "All widgets for this region are active"
+        )
+    Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: togglePopup()
 
@@ -126,7 +135,7 @@ Rectangle {
             : 0
         width: Math.min(360, root.width)
         height: Math.min(
-            root.widgets.length * 66
+            Math.max(96, root.widgets.length * 66)
                 + root.luminaDesign.spacing.medium * 2,
             340
         )
@@ -162,6 +171,25 @@ Rectangle {
 
                 width: parent.width
                 spacing: root.luminaDesign.spacing.small
+
+                Text {
+                    width: parent.width
+                    visible: !root.hasWidgets
+                    text: I18n.tr(
+                        "settings.bar.widget.addEmpty",
+                        "All widgets for this region are active"
+                    )
+                    color: root.luminaDesign.color.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.WordWrap
+                    font.pixelSize:
+                        root.luminaDesign.typography.labelMedium
+                    topPadding:
+                        root.luminaDesign.spacing.controlItemGap
+                    bottomPadding:
+                        root.luminaDesign.spacing.controlItemGap
+                }
 
                 Repeater {
                     id: addRepeater
