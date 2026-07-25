@@ -17,8 +17,13 @@ the current public network address. Lumina does not save the IP address. It
 stores only the resolved city, region, coordinates, and cache timestamp under
 the Quickshell cache directory.
 
+Automatic lookup uses a resilient provider chain. Lumina first requests
+`ipwho.is`, then falls back to `ipapi.co` when the first endpoint cannot be
+resolved, times out, or returns an incomplete response. Only after both live
+providers fail does Lumina reuse a valid cached location.
+
 The cached automatic location is valid for 24 hours and is used when the
-location provider is temporarily unavailable. Selecting **Refresh** forces a
+location providers are temporarily unavailable. Selecting **Refresh** forces a
 new automatic lookup. VPNs, proxies, mobile networks, and corporate gateways
 may report a nearby city or the location of their public exit node.
 
