@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import qs.stores.config
+import "../modules/bar/BarScalePolicy.js" as BarScalePolicy
 
 QtObject {
     id: root
@@ -22,6 +23,17 @@ QtObject {
                     * ConfigStore.behaviorTransitionScale
     readonly property real radiusScale:
         ConfigStore.cornerRadiusScale
+    readonly property real barContentScale:
+        BarScalePolicy.effectiveScale(
+            ConfigStore.barHeight,
+            ConfigStore.barAutoScaleContents,
+            ConfigStore.barContentScale,
+            ConfigStore.compactMode
+        )
+    readonly property real barSpacingScale:
+        BarScalePolicy.moderatedScale(barContentScale, 0.55)
+    readonly property real barTypographyScale:
+        BarScalePolicy.moderatedScale(barContentScale, 0.68)
 
     property color primaryColor: lightMode ? "#305EA8" : "#ADC6FF"
     property color accentContainerColor:
@@ -138,9 +150,36 @@ QtObject {
             medium: ConfigStore.compactMode ? 8 : 10,
             large: ConfigStore.compactMode ? 11 : 14,
             extraLarge: ConfigStore.compactMode ? 14 : 18,
-            barItemGap: ConfigStore.compactMode ? 4 : 6,
-            barClusterGap: ConfigStore.compactMode ? 12 : 18,
-            barContentInset: ConfigStore.compactMode ? 12 : 18,
+            barItemGap: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 4 : 6,
+                root.barSpacingScale,
+                3,
+                9
+            ),
+            barClusterGap: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 12 : 18,
+                root.barSpacingScale,
+                10,
+                24
+            ),
+            barContentInset: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 12 : 18,
+                root.barSpacingScale,
+                10,
+                24
+            ),
+            barHorizontalPadding: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 8 : 12,
+                root.barSpacingScale,
+                7,
+                16
+            ),
+            barWidgetPadding: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 6 : 8,
+                root.barSpacingScale,
+                5,
+                11
+            ),
             barPanelGap: ConfigStore.compactMode ? 10 : 14,
             controlItemGap: ConfigStore.compactMode ? 10 : 14,
             controlCardGap: ConfigStore.compactMode ? 12 : 18,
@@ -156,7 +195,49 @@ QtObject {
                         : 0
                 ),
             expressiveBarHeight: 56,
-            barTouchTarget: ConfigStore.compactMode ? 36 : 40,
+            barContentScale: root.barContentScale,
+            barTouchTarget: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 38 : 40,
+                root.barContentScale,
+                36,
+                52
+            ),
+            barIcon: BarScalePolicy.scaled(
+                18,
+                root.barContentScale,
+                16,
+                24
+            ),
+            barSmallIcon: BarScalePolicy.scaled(
+                16,
+                root.barContentScale,
+                14,
+                21
+            ),
+            barTrayIcon: BarScalePolicy.scaled(
+                18,
+                root.barContentScale,
+                16,
+                24
+            ),
+            barWorkspaceMarker: BarScalePolicy.scaled(
+                10,
+                root.barContentScale,
+                8,
+                14
+            ),
+            barWorkspaceActiveHeight: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 34 : 38,
+                root.barContentScale,
+                32,
+                50
+            ),
+            barStatusIcon: BarScalePolicy.scaled(
+                17,
+                root.barContentScale,
+                15,
+                23
+            ),
             calendarWidth: 336,
             chipHeight: ConfigStore.compactMode ? 28 : 30,
             controlCenterHeight: 920,
@@ -185,8 +266,36 @@ QtObject {
             labelSmall: 10,
             labelMedium: 12,
             bodyMedium: 13,
-            barClock: ConfigStore.compactMode ? 14 : 15,
-            barSecondary: 12,
+            barClock: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 14 : 15,
+                root.barTypographyScale,
+                13,
+                19
+            ),
+            barSecondary: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 11 : 12,
+                root.barTypographyScale,
+                10,
+                15
+            ),
+            barWorkspace: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 11 : 12,
+                root.barTypographyScale,
+                10,
+                15
+            ),
+            barContextPrimary: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 12 : 13,
+                root.barTypographyScale,
+                11,
+                17
+            ),
+            barContextSecondary: BarScalePolicy.scaled(
+                ConfigStore.compactMode ? 10 : 11,
+                root.barTypographyScale,
+                10,
+                14
+            ),
             titleMedium: 14,
             titleLarge: 20
         },
