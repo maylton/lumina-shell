@@ -150,25 +150,6 @@ def normalize_payload(payload: str) -> str:
         ],
         "ConfigStore adapter replacement properties",
     )
-    payload = normalize_literal_block(
-        payload,
-        "'''    readonly property real surfaceAlpha:\n",
-        [
-            (
-                "  ConfigStore.transparencyEnabled\n",
-                "        ConfigStore.transparencyEnabled\n",
-            ),
-            (
-                "  ? ConfigStore.surfaceOpacity\n",
-                "            ? ConfigStore.surfaceOpacity\n",
-            ),
-            (
-                "  : 1\n",
-                "            : 1\n",
-            ),
-        ],
-        "Theme surfaceAlpha source",
-    )
 
     return payload
 
