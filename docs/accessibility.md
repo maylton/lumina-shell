@@ -27,8 +27,10 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
 - Transparent-bar mode keeps interactive widgets on subtle tonal state
   surfaces rather than reducing text or icon opacity; focus outlines and
   selected states remain unchanged.
-- Bar widget-order rows provide separate keyboard-focusable Show/Hide, Move
-  up, and Move down controls.
+- Active bar-widget rows provide separate keyboard-focusable Configure, Move
+  up, Move down, and Remove controls. Add widgets exposes only removed widgets
+  on the requested side. The modal individual-settings popup contains focus,
+  closes with Escape or outside press, and restores focus to its invoking gear.
 
 Focused controls use a visible primary-color outline. Disabled controls are
 removed from keyboard traversal and retain an explanatory label such as

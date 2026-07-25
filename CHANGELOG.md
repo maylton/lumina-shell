@@ -86,8 +86,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The wallpaper surface now ignores shell exclusion zones, allowing Transparent
   bars to reserve work area without exposing a compositor-colored strip or
   placing tiled windows behind bar controls.
+- Schema v7 individual bar-widget settings with safe schema-v6 migration,
+  strict nested normalization, immutable updates, scoped widget reset, and
+  preservation of existing visibility and order.
+- A central bar-widget catalog plus active-only Left, Center, and Right
+  management. Removed widgets move to a bounded Add widgets menu and retain
+  their settings.
+- Internal Material Expressive settings dialogs for launcher, overview,
+  workspaces, date/time, context, tray, notifications, system status, user
+  avatar, wallpaper, and session widgets.
 
 ### Changed
+
+- Simplified Bar settings to global surface controls followed by active widget
+  rows with configure, reorder, and remove actions. Hidden widgets no longer
+  occupy the main list or make reorder controls skip.
+- Replaced the global widget-background switch with per-widget presentation,
+  and added real service-backed text modes for network, audio, and battery.
 
 - Extended state-aware circle-to-squircle morphs to circular Dashboard actions,
   selected calendar days and navigation, and Settings widget-order controls,

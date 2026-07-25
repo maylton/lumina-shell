@@ -113,16 +113,17 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 This sprint completes the 0.5 public-beta foundation:
 
-1. Graphical configuration with schema v6 persistence and safe schema v3/v4/v5
-   migration.
+1. Graphical configuration with schema v7 persistence and safe schema
+   v3/v4/v5/v6 migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
 5. Keyboard, focus, and assistive-technology metadata baseline.
 6. User, installation, compatibility, and contributor documentation.
-7. Lumina's Material Expressive bar refinement with schema v6 migration,
-   per-output context, configurable widget ordering, independent background,
-   responsive content scaling, and edge-to-edge or floating geometry.
+7. Lumina's Material Expressive bar refinement with schema v7 migration,
+   per-output context, active-widget management, individual widget settings,
+   independent background, responsive content scaling, and edge-to-edge or
+   floating geometry.
 
 ### Acceptance criteria
 
@@ -168,9 +169,13 @@ This sprint completes the 0.5 public-beta foundation:
 - Circular Dashboard and Settings actions use the same state model for
   pressed, checked, and selected states while component-specific controls keep
   their own Material shapes.
-- One persistent bar preference can remove resting pill backgrounds from
-  non-workspace widgets while preserving hover, focus, open, urgent, and error
-  feedback; workspace state pills remain visible.
+- Every supported bar widget owns normalized individual presentation settings,
+  including its resting background where applicable, while workspace state
+  pills continue to communicate focused and active navigation.
+- Bar settings list only active widgets under Left, Center, and Right; removed
+  widgets move to an Add widgets menu, active-only reordering preserves hidden
+  order, and each gear opens one keyboard-accessible internal settings dialog
+  with a scoped reset.
 - System tray items can be grouped in a compact popover or kept visible
   inline, and notifications use a compact stateful icon with an unread badge.
 - Network and volume text can be hidden independently without disabling their
@@ -196,9 +201,10 @@ This sprint completes the 0.5 public-beta foundation:
   through its responsive scale policy.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
-- Schema v4 bar preferences migrate through schema v5, and schema v5 migrates
-  to schema v6 without losing valid widget ordering, global transparency, or
-  existing shell preferences; retired bar keys are ignored safely.
+- Schema v4 bar preferences migrate through schema v5 and schema v6 into
+  schema v7 without losing valid widget ordering, visibility, global
+  transparency, or existing shell preferences; retired widget-specific keys
+  are ignored safely after migration.
 - Privacy and keyboard-layout indicators remain hidden until their native
   event sources can be validated.
 

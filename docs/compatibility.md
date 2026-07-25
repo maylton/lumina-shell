@@ -107,11 +107,12 @@ not poll shell commands or treat an unmuted microphone as “in use.”
 
 ## Configuration recovery
 
-Schema v3/v4-to-v5 and v5-to-v6 migration, retired bar-key handling,
+Schema v3/v4-to-v5, v5-to-v6, and v6-to-v7 migration, retired bar-key handling,
 normalization, serialization, scoped reset, widget-order deduplication,
-bar-scale policy, surface-alpha policy, and malformed-JSON recovery are
-covered by isolated tests. Invalid source is preserved at the adjacent
-`.invalid` path before defaults are written atomically.
+active-only reorder, catalog integrity, bar-scale policy, surface-alpha policy,
+and malformed-JSON recovery are covered by isolated tests. Invalid source is
+preserved at the adjacent `.invalid` path before defaults are written
+atomically.
 
 ## Accessibility validation
 

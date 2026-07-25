@@ -104,12 +104,23 @@ Edge-to-edge and floating are geometry modes of this same implementation. The
 default edge-to-edge surface is 56 pixels high with 40-pixel interaction
 targets.
 
-`barWidgetPillsEnabled` is a shared presentation preference consumed by
-eligible non-workspace bar widgets. It controls only resting container colors;
-active/open, pointer, focus, urgent, and error states remain component-owned.
-`WorkspacePill` intentionally ignores the preference because its focused and
-active backgrounds encode navigation state. Popup windows do not inherit the
-preference, so disabling bar pills cannot make menus or tooltips transparent.
+Schema 7 stores individual widget presentation under `barWidgetSettings`.
+`BarWidgetCatalog.js` is the single inventory for supported left, center, and
+right widgets, their metadata, defaults, and settings component. Privacy and
+keyboard indicators are deliberately absent until a native event source is
+validated. Each widget consumes only its own normalized settings. Active/open,
+pointer, focus, urgent, and error states remain component-owned, and popup
+windows never inherit a widget's resting-background preference.
+
+Bar settings derive three active-only lists from the existing visibility and
+order state. Moving an active widget swaps it only with an adjacent active
+widget, preserving hidden slots and preventing duplicate or unknown IDs.
+Removing a widget keeps its individual settings and moves it to the bounded
+Add widgets menu for its allowed side. The center inventory contains only the
+context capsule; removing it maps to Hidden and adding it restores Contextual
+mode. A modal in-process `Controls.Popup` loads the catalog's settings page,
+contains keyboard focus, closes on Escape or outside press, restores focus to
+the invoking gear, and resets only the selected widget.
 
 `BarScalePolicy` derives automatic content scale directly as
 `clamp(barHeight, 40, 80) / 56`, so the supported automatic range is about
@@ -135,10 +146,11 @@ bar.
 `SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
 `PowerService` directly and opens the existing Dashboard through
 `ControlCenterStore`. Missing capabilities are omitted. It never creates a
-second quick-controls popup. `barShowNetworkLabel` and `barShowAudioLabel`
-control only their visible text; icons, service state, tooltips, accessibility,
-and activation remain intact. Responsive compaction takes precedence when the
-available width cannot safely retain secondary labels.
+second quick-controls popup. Per-widget network, audio, and battery text modes
+choose icon-only, real summary/percentage, or a service-backed state; icons,
+service state, tooltips, accessibility, and activation remain intact.
+Responsive compaction takes precedence when the available width cannot safely
+retain secondary labels.
 
 `UserAvatarButton` is the final right-side Dashboard entry point. It retains
 the existing `dashboard` widget identifier and `ControlCenterStore` action so
@@ -171,8 +183,8 @@ The bar presents failures through the Niri status indicator for six seconds. A l
 Lumina consumes Quickshell's shared `SystemTray.items` object model and creates
 one visual view per output. Registration and item state remain process-global,
 so adding more bars does not create duplicate activation or menu actions. The
-persistent `barTrayMode` preference chooses between a compact per-output
-popover and direct inline presentation without copying item state.
+tray widget's schema-7 `mode` chooses between a compact per-output popover and
+direct inline presentation without copying item state.
 
 Each tray item owns its hover, pressed, attention, tooltip, activation,
 secondary activation, scrolling, and menu behavior in either presentation.
@@ -317,10 +329,11 @@ surfaces can migrate incrementally without changing service or store state.
 
 `ConfigStore` persists user state through an atomic Quickshell `FileView` and
 `JsonAdapter`. Schema 4 added semantic appearance, dashboard, behavior,
-notification, OSD, session, and navigation preferences. Schema 5 adds
+notification, OSD, session, and navigation preferences. Schema 5 added
 edge/floating bar surfaces, context policy, date/status options, widget
-visibility, and independent left/right orders. Schema 6 adds independent bar
-background mode/opacity and automatic or manual content scaling.
+visibility, and independent left/right orders. Schema 6 added independent bar
+background mode/opacity and automatic or manual content scaling. Schema 7 adds
+the normalized `barWidgetSettings` map and active-widget management APIs.
 
 The default path is `Quickshell.stateDir/lumina-state.json`.
 `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
@@ -333,6 +346,10 @@ layout-selection and single-order keys are ignored safely and disappear the
 next time the adapter writes the configuration. Schema v6 migrates schema v5
 global transparency into an equivalent initial bar background, then separates
 future bar changes from `transparencyEnabled` and `surfaceOpacity`.
+Schema v7 reads the original schema-v6 JSON before the adapter writes, maps
+legacy pill, context, date/time, tray, status, and avatar preferences into
+catalog defaults, preserves visibility and order, ignores unknown nested keys,
+and retires old widget-specific public fields on the next save.
 
 Writes are debounced and only occur after initialization, so loading,
 migration, and slider movement cannot continuously rewrite the file.

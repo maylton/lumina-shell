@@ -47,6 +47,13 @@ text: I18n.tr(
 Add every new ID to `i18n/en-US.json`. Add translations to other catalogs
 when available; do not block a feature because one locale is incomplete.
 
+Bar widget catalog titles and descriptions use stable
+`settings.bar.catalog.<widget-id>.*` keys. Active-widget management, add,
+reorder, remove, dialog, and scoped-reset labels are available in both the
+English and Brazilian Portuguese catalogs. New widget settings should add
+their user-visible strings to the source catalog without changing widget IDs
+or persisted configuration keys.
+
 ## Locale selection
 
 Lumina normalizes the Qt system locale and selects an exact regional catalog

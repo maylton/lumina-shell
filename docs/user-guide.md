@@ -28,14 +28,14 @@ The Bar settings page controls:
   height, margin, spacing, and compact mode;
 - automatic content scaling from the selected height or a manual 80–140%
   scale;
-- Always, Contextual, or Hidden Niri context and the contextual timeout;
-- title, application ID, column, localized date style, 12/24-hour time, and
-  seconds;
-- grouped or individual status, individual service visibility, optional
-  network/volume text, and a grouped tray menu or always-visible tray icons;
-- one global switch for resting non-workspace widget pill backgrounds, without
-  removing hover, focus, open, urgency, or error feedback;
-- independent left/right widget order with Move up, Move down, and Show/Hide.
+- active widgets grouped as Left, Center, and Right, with reorder, remove, and
+  an Add widgets menu that shows only available removed widgets;
+- one gear per active widget, opening an internal settings dialog with a
+  reset scoped to that widget;
+- individual backgrounds and labels, workspace label/marker styles,
+  inline/stacked localized date and time, context fields and timeout, tray
+  mode/count, notification badges/DND state, service-backed status text modes,
+  avatar presentation, and optional action labels.
 
 Automatic scaling uses 56 pixels as its 100% reference and proportionally
 updates widget surfaces, icons, text, workspace shapes, padding, gaps, badges,
@@ -49,8 +49,8 @@ Appearance controls continue to affect Dashboard, Settings, and other shell
 surfaces, while **Bar → Surface → Background opacity** changes only Blur and
 Frosted Glass. Blur is a clean native background blur with a tonal tint.
 Frosted Glass adds a subtle grain, optical highlight, and stronger glass edge.
-Transparent mode keeps widgets on their own subtle tonal surfaces for
-contrast. On Niri 26.04, Blur and Frosted Glass request native background blur
+Transparent mode leaves each widget's configured resting background
+independent. On Niri 26.04, Blur and Frosted Glass request native background blur
 limited to the bar surface. All four modes reserve desktop work area, so tiled
 windows do not appear behind bar controls. Lumina's wallpaper surface ignores
 shell exclusion zones and continues beneath the reserved strip, allowing
@@ -80,13 +80,11 @@ pictures are disabled—the avatar shows the detected account initials, with
 the Lumina initial as the final fallback. The same identity is reused by the
 Dashboard welcome card.
 
-Disabling **Widget backgrounds** removes resting pill surfaces from launcher,
-overview, date/time, context, tray, notifications, system status, Dashboard,
-and optional actions at once. Workspaces are intentionally excluded: focused
-and active workspace pills retain their backgrounds so navigation state stays
-immediately identifiable. Interactive and semantic state layers still appear
-temporarily, and tray menus, tooltips, calendars, and other popups keep their
-own surfaces.
+Removing a widget never deletes its settings. It appears only in **Add
+widgets** for its supported side and returns at the end of that side when
+added. Reordering considers only active widgets, so hidden entries cannot make
+the arrows appear to skip. Workspaces always retain focused and active state
+surfaces even when the optional strip background is disabled.
 
 ## Launcher
 
@@ -152,9 +150,8 @@ active output or keyboard focus. The nine categories are:
 
 - **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
   motion, shape, and density;
-- **Bar:** background transparency, responsive scale, edge-to-edge or floating
-  geometry, Niri context, date and time, grouped status, optional actions, and
-  left/right widget ordering;
+- **Bar:** global surface/scale/geometry followed by active Left, Center, and
+  Right widgets with individual configuration dialogs;
 - **Dashboard:** opening behavior, density, and visible cards;
 - **Behavior:** outside-click dismissal, output fallback, destructive-action
   confirmation, and reduced motion;
@@ -183,11 +180,13 @@ Available category identifiers are `appearance`, `bar`, `dashboard`,
 reopening follows the configured memory policy; explicit IPC calls can select
 the page and category.
 
-Schema 6 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 3, 4, and 5 files migrate in place. Existing
+Schema 7 writes are debounced, so sliders update the shell without writing
+once per pointer movement. Schema 3, 4, 5, and 6 files migrate in place. Existing
 global transparency initializes the independent bar mode during schema-5
-migration without changing the global preference. Retired layout-selection
-and single-order fields are ignored safely and removed on the next save.
+migration without changing the global preference. Schema-6 widget preferences
+become individual settings without losing visibility or order. Retired
+layout-selection, single-order, and widget-specific fields are removed on the
+next save.
 Invalid JSON is still copied to the adjacent `.invalid` backup before defaults
 are restored.
 
