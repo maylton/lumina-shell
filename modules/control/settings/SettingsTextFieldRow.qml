@@ -15,7 +15,8 @@ SettingsRow {
 
     controlWidth: 240
     Accessible.role: Accessible.EditableText
-    Accessible.value: editor.text
+    Accessible.name: root.title
+    Accessible.description: root.description
 
     Rectangle {
         anchors.fill: parent
