@@ -196,6 +196,7 @@
   "settings.dashboard.avatar.systemImageDescription": "Remove the custom fallback and use system sources",
   "settings.dashboard.avatar.useImage": "Use profile picture",
   "settings.dashboard.avatar.useImageDescription": "Fall back to account initials when disabled",
+  "settings.dashboard.weather.enableOverviewFirst": "Enable the overview card first",
   "settings.page.about.description": "Lumina Shell project and local documentation",
   "settings.page.appearance.description": "Colors, wallpaper, and the visual language of Lumina",
   "settings.page.bar.description": "Surface, context, status, and widgets per output",
