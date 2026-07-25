@@ -124,6 +124,8 @@ This sprint completes the 0.5 public-beta foundation:
    per-output context, active-widget management, individual widget settings,
    independent background, responsive content scaling, and edge-to-edge or
    floating geometry.
+8. Maintained Brazilian Portuguese catalog with localized Dashboard and
+   Launcher surfaces and explicit product terminology.
 
 ### Acceptance criteria
 
@@ -213,6 +215,9 @@ This sprint completes the 0.5 public-beta foundation:
   bounded placement, outside dismissal, and keyboard navigation.
 - Runtime locale detection, regional fallback, live catalog reload, and
   translation validation support incremental community localization.
+- Brazilian Portuguese is a maintained complete catalog for all extracted
+  message IDs; Dashboard remains Dashboard, and the localized Dashboard and
+  Launcher update through the runtime catalog without changing persisted IDs.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves
@@ -234,3 +239,5 @@ This sprint completes the 0.5 public-beta foundation:
 3. [ ] Validate overlay hotplug behavior with two physical outputs.
 4. [x] Select the project license.
 5. [ ] Begin the 0.7 extended-beta work.
+6. [ ] Continue extracting hard-coded English from notifications, session,
+   wallpaper, calendar, OSD, and the remaining Settings pages.
