@@ -70,7 +70,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   independent background mode and opacity, automatic height-derived content
   scaling, and bounded manual scaling.
 - Solid, translucent, and transparent bar backgrounds that keep child widgets
-  and popup surfaces fully opaque without requiring a blur backend.
+  and popup surfaces fully opaque; translucent mode requests Niri's native
+  layer-shell background blur.
 
 ### Changed
 
@@ -125,6 +126,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Scale Material Expressive bar icons, typography, workspace states, status
   badges, padding, gaps, and interaction targets semantically across 40–80
   pixel heights while retaining a moderate compact-density adjustment.
-- Let translucent and transparent bars overlay the desktop instead of exposing
-  an empty exclusive work-area strip, and show the effective automatic content
-  scale while keeping manual adjustments on clear five-percent steps.
+- Show the effective automatic content scale while keeping manual adjustments
+  on clear five-percent steps.

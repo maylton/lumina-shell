@@ -43,11 +43,9 @@ Bar background opacity is separate from **Appearance → Transparency**. The
 Appearance controls continue to affect Dashboard, Settings, and other shell
 surfaces, while **Bar → Surface → Background opacity** changes only a
 translucent bar. Transparent mode keeps widgets on their own subtle tonal
-surfaces for contrast. Lumina intentionally offers no blur until a backend is
-validated for the supported Niri and Quickshell environment.
-Solid mode reserves desktop work area; translucent and transparent modes
-overlay windows so the composited background is the actual desktop content,
-not an empty reserved strip.
+surfaces for contrast. On Niri 26.04, Translucent also requests native
+background blur limited to the bar surface. All three modes reserve desktop
+work area, so tiled windows do not appear behind the bar.
 
 When automatic content scaling is enabled, Settings shows the calculated
 effective percentage as a read-only value. Disabling it exposes the manual

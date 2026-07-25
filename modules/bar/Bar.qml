@@ -6,7 +6,6 @@ import Quickshell.Wayland
 import qs.services.niri
 import qs.stores.config
 import qs.stores.niri
-import "BarSurfacePolicy.js" as BarSurfacePolicy
 
 Scope {
     id: root
@@ -67,10 +66,7 @@ Scope {
                 screen: modelData
                 implicitHeight: ConfigStore.barHeight
                     + (effectiveMargin * 2)
-                exclusiveZone: BarSurfacePolicy.exclusiveZone(
-                    ConfigStore.barBackgroundMode,
-                    implicitHeight
-                )
+                exclusiveZone: implicitHeight
                 color: "transparent"
                 focusable: false
 
@@ -84,7 +80,34 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.namespace: "lumina-bar"
 
+                BackgroundEffect.blurRegion:
+                    ConfigStore.barBackgroundMode === "translucent"
+                        ? barBlurRegion
+                        : null
+
+                Region {
+                    id: barBlurRegion
+
+                    Region {
+                        x: panel.effectiveMargin
+                        y: panel.effectiveMargin
+                        width: Math.max(
+                            0,
+                            panel.width - panel.effectiveMargin * 2
+                        )
+                        height: Math.max(
+                            0,
+                            panel.height - panel.effectiveMargin * 2
+                        )
+                        radius: panel.effectiveSurfaceMode === "floating"
+                            ? barSurface.radius
+                            : 0
+                    }
+                }
+
                 BarSurface {
+                    id: barSurface
+
                     anchors.fill: parent
                     outerMargin: panel.effectiveMargin
                     surfaceMode: panel.effectiveSurfaceMode

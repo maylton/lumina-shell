@@ -152,7 +152,8 @@ This sprint completes the 0.5 public-beta foundation:
   clock/date hierarchy, and expressive workspace state without shrinking
   interaction targets.
 - The bar supports solid, translucent, and transparent backgrounds independently
-  of global surface transparency, with opaque child content and no blur.
+  of global surface transparency, with opaque child content and native Niri
+  blur limited to the translucent bar region.
 - Bar height spans 40–80 pixels; automatic or bounded manual scaling adjusts
   semantic widget dimensions while retaining safe interaction targets and a
   single-line layout.

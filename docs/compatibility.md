@@ -73,15 +73,17 @@ used by Lumina. `themeMode: "auto"` therefore has a documented dark fallback;
 explicit Light and Dark use complete semantic token sets. Dynamic wallpaper
 colors continue to provide accent roles in either mode.
 
-Transparency changes semantic surface alpha directly. Blur is not offered
-because Lumina has no verified blur backend. Disabling animations or enabling
+Transparency changes semantic surface alpha directly. Translucent bar mode
+uses Niri 26.04's native `ext-background-effect` support through the
+Quickshell `BackgroundEffect` region API. Disabling animations or enabling
 reduced motion preserves focus feedback while minimizing transition duration.
 
 The bar has a separate schema-v6 background policy. Solid, translucent, and
 transparent modes alter only `BarSurface` background, divider, and floating
 border colors; Dashboard, Settings, bar children, calendars, and tray popups
-do not inherit `barSurfaceOpacity`. Automatic content scale is implemented
-semantically for 40–80 logical-pixel heights, not as a global transform.
+do not inherit `barSurfaceOpacity` or the bar blur region. All modes retain the
+layer-shell exclusive zone. Automatic content scale is implemented semantically
+for 40–80 logical-pixel heights, not as a global transform.
 Native visual passes for every height/mode combination at 1920×1080,
 mixed-scale, and multi-output configurations remain explicit follow-ups.
 
