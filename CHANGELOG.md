@@ -8,11 +8,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Added dedicated Weather settings with enable/disable behavior, approximate
+  GeoIP location, manual-city lookup, feature-scoped persistence, a 24-hour
+  coordinate cache, selectable refresh intervals, and immediate refresh.
+- Added a Connectivity settings page for Wi-Fi discovery and connection, saved
+  NetworkManager profiles, wired profiles, bounded Bluetooth discovery,
+  pairing, connection, and removal.
+- Added a reusable settings text-field row plus tested weather-preference and
+  connectivity-command parsing helpers.
+- Added service-owned protected Wi-Fi handling with a temporary `0600` secret
+  file passed to NetworkManager and removed after the connection attempt.
 - Added independent Solid, Android-inspired Blur, and Frosted Glass styles for
   primary shell surfaces. Blur is bounded to each rounded panel, Frosted adds a
   restrained highlight and static grain, and inner semantic content remains
   opaque.
-
 - Initial Quickshell project skeleton.
 - Minimal multi-output top bar.
 - Foundation design tokens.
@@ -39,7 +48,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - GPL-3.0-or-later project licensing with explicit third-party credits and contribution terms.
 - Unified Dashboard and Shell Settings views with direct category navigation
   and no duplicate overlay state.
-- Material Expressive settings sidebar with nine categories, reusable
+- Material Expressive settings sidebar with eleven categories, reusable
   accessible controls, light/dark previews, and local Edit config actions.
 - Schema v4 persistence with debounced save status, category reset, schema v3
   migration, validation clamps, and serialization tests.
@@ -109,11 +118,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Weather no longer infers a city from the system timezone. Automatic mode now
+  resolves an approximate city from the public IP and never stores the IP.
 - Refined the bar into Android-inspired bounded background blur adapted to
   Lumina and Niri: clean Blur uses neutral tint and contrast protection,
   Frosted Glass retains restrained highlight and static grain, and all modes
   animate client layers without changing compositor blur radius.
-
 - Removed the avatar-only color ring and image-shape morph from the bar entry
   point. The account picture stays circular while the shared button container
   owns hover, focus, pressed, and open states like adjacent bar widgets.
@@ -122,7 +132,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   occupy the main list or make reorder controls skip.
 - Replaced the global widget-background switch with per-widget presentation,
   and added real service-backed text modes for network, audio, and battery.
-
 - Extended state-aware circle-to-squircle morphs to circular Dashboard actions,
   selected calendar days and navigation, and Settings widget-order controls,
   while leaving non-circular and component-specific shapes unchanged.
