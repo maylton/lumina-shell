@@ -42,6 +42,16 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activated()
 
+    function activateFromPointer(button) {
+        root.forceActiveFocus()
+        root.focus = false
+
+        if (button === Qt.RightButton)
+            root.pinToggled()
+        else
+            root.activated()
+    }
+
     Keys.onSpacePressed: event => {
         root.activated()
         event.accepted = true
@@ -132,13 +142,6 @@ Rectangle {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: mouse => {
-            root.forceActiveFocus(Qt.MouseFocusReason)
-
-            if (mouse.button === Qt.RightButton)
-                root.pinToggled()
-            else
-                root.activated()
-        }
+        onClicked: mouse => root.activateFromPointer(mouse.button)
     }
 }
