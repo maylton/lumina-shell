@@ -16,6 +16,21 @@ SettingsPage {
     title: "Dock"
     description: DockPreferences.lastError
         || text("pageDescription")
+    customSaveStatus: DockPreferences.lastError
+        ? I18n.tr(
+            "settings.save.failed",
+            "Could not save"
+        )
+        : DockPreferences.saving || DockPreferences.dirty
+            ? I18n.tr(
+                "settings.save.saving",
+                "Saving…"
+            )
+            : I18n.tr(
+                "settings.save.saved",
+                "Saved"
+            )
+    customSaveFailed: DockPreferences.lastError.length > 0
 
     SettingsSection {
         title: root.text("visibility")
