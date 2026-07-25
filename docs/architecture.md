@@ -285,6 +285,24 @@ of clipping individual cards. Semantic 18-pixel card gaps, 22-pixel content
 insets, and a 42.5/57.5 overview-to-controls split preserve complete daily
 controls while giving media, status, and calendar cards more breathing room.
 
+
+Primary shell panels use the shared `ShellSurface` composition. Solid draws an
+opaque tonal container. Blur requests a shaped `BackgroundEffect.blurRegion`
+that exactly matches the rounded panel and overlays a clean neutral tint plus
+contrast protection. Frosted Glass uses the same bounded request, then adds a
+richer neutral tint, directional highlight, extremely subtle static grain, and
+a clearer glass edge. Child cards, controls, text, and icons remain opaque; no
+ancestor opacity is used. Launcher, Control Center, Notification Center,
+Wallpaper Picker, Session Menu, and OSD share this policy. The bar keeps its
+independent background configuration.
+
+
+Transient heads-up notification cards remain opaque semantic surfaces rather
+than requesting one large blur region across the gaps of their multi-card
+stack. Calendar and tray popups remain owned by the independent bar surface
+policy. This preserves urgency, avoids blur leaking through transparent gaps,
+and keeps shell and bar configuration boundaries explicit.
+
 Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do
 Not Disturb, dynamic color, battery status, and power profiles all call the
 same typed service methods used by IPC. `ControlCenterStore` owns `activePage`,
@@ -359,6 +377,8 @@ edge/floating bar surfaces, context policy, date/status options, widget
 visibility, and independent left/right orders. Schema 6 added independent bar
 background mode/opacity and automatic or manual content scaling. Schema 7 adds
 the normalized `barWidgetSettings` map and active-widget management APIs.
+Schema 8 replaces global alpha transparency with persisted Solid, Blur, and
+Frosted Glass shell surface styles plus bounded tint opacity.
 
 The default path is `Quickshell.stateDir/lumina-state.json`.
 `LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2

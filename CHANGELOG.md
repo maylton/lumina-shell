@@ -8,6 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Added independent Solid, Android-inspired Blur, and Frosted Glass styles for
+  primary shell surfaces. Blur is bounded to each rounded panel, Frosted adds a
+  restrained highlight and static grain, and inner semantic content remains
+  opaque.
+
 - Initial Quickshell project skeleton.
 - Minimal multi-output top bar.
 - Foundation design tokens.

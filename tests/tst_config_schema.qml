@@ -8,8 +8,12 @@ TestCase {
     function test_defaultsUseSchema7WidgetSettings() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 7)
+        compare(state.schemaVersion, 8)
         compare(state.themeMode, "auto")
+        compare(state.shellBackgroundMode, "solid")
+        compare(state.shellSurfaceOpacity, 0.82)
+        verify(state.transparencyEnabled === undefined)
+        verify(state.surfaceOpacity === undefined)
         compare(state.paletteStyle, "auto")
         verify(state.barVisualStyle === undefined)
         verify(state.barWidgetOrder === undefined)
@@ -52,7 +56,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -73,7 +77,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -150,9 +154,11 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 7)
-        compare(migrated.transparencyEnabled, true)
-        compare(migrated.surfaceOpacity, 0.78)
+        compare(migrated.schemaVersion, 8)
+        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.78)
         compare(migrated.barBackgroundMode, "blur")
         compare(migrated.barSurfaceOpacity, 0.78)
         compare(migrated.barAutoScaleContents, true)
@@ -189,7 +195,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -254,6 +260,22 @@ TestCase {
         )
     }
 
+    function test_schema7TransparencyMigratesToShellSurfaceStyle() {
+        const migrated = ConfigSchema.migrate({
+  schemaVersion: 7,
+  transparencyEnabled: true,
+  surfaceOpacity: 0.74,
+  barBackgroundMode: "frosted"
+        })
+
+        compare(migrated.schemaVersion, 8)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.74)
+        compare(migrated.barBackgroundMode, "frosted")
+        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
+    }
+
     function test_paletteStyleNormalization() {
         const expressive = ConfigSchema.normalize({
             paletteStyle: "expressive"
@@ -278,7 +300,7 @@ TestCase {
 
     function test_numericValuesAreClamped() {
         const state = ConfigSchema.normalize({
-            surfaceOpacity: 0.1,
+            shellSurfaceOpacity: 0.1,
             barSurfaceOpacity: -2,
             barContentScale: 8,
             animationScale: 8,
@@ -294,7 +316,7 @@ TestCase {
             osdSize: 3
         })
 
-        compare(state.surfaceOpacity, 0.72)
+        compare(state.shellSurfaceOpacity, 0.55)
         compare(state.barSurfaceOpacity, 0)
         compare(state.barContentScale, 1.4)
         compare(state.animationScale, 2)
@@ -380,7 +402,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barBackgroundMode, "blur")
     }
 

@@ -102,6 +102,21 @@ added. Reordering considers only active widgets, so hidden entries cannot make
 the arrows appear to skip. Workspaces always retain focused and active state
 surfaces even when the optional strip background is disabled.
 
+
+### Shell surface styles
+
+Appearance offers **Solid**, **Blur**, and **Frosted Glass** for primary shell
+panels independently of the bar. Blur uses a clean bounded compositor request
+with neutral tint and contrast protection. Frosted Glass adds a richer tint,
+directional highlight, and subtle static texture. The tint-opacity control does
+not change compositor blur radius or passes.
+
+Dashboard/Settings, Launcher, Notification Center, Wallpaper Picker, Session
+Menu, and OSD use the shared style. Their cards, text, icons, and controls remain
+opaque. Heads-up notification cards stay opaque for urgency and readability,
+while calendar and tray popups continue to follow the bar's independent visual
+policy.
+
 ## Launcher
 
 Open **Apps** from the bar and type to search:
@@ -164,8 +179,8 @@ Choose the settings action in the control-center header. Dashboard and
 settings are two views of the same overlay, so they cannot compete for the
 active output or keyboard focus. The nine categories are:
 
-- **Appearance:** theme mode, dynamic palette, wallpaper, transparency,
-  motion, shape, and density;
+- **Appearance:** theme mode, dynamic palette, wallpaper, shell surface
+  style, motion, shape, and density;
 - **Bar:** global surface/scale/geometry followed by active Left, Center, and
   Right widgets with individual configuration dialogs;
 - **Dashboard:** opening behavior, density, and visible cards;
@@ -196,8 +211,8 @@ Available category identifiers are `appearance`, `bar`, `dashboard`,
 reopening follows the configured memory policy; explicit IPC calls can select
 the page and category.
 
-Schema 7 writes are debounced, so sliders update the shell without writing
-once per pointer movement. Schema 3, 4, 5, and 6 files migrate in place. Existing
+Schema 8 writes are debounced, so sliders update the shell without writing
+once per pointer movement. Schema 3, 4, 5, 6, and 7 files migrate in place. Existing
 global transparency initializes the independent bar mode during schema-5
 migration without changing the global preference. Schema-6 widget preferences
 become individual settings without losing visibility or order. Retired

@@ -5,6 +5,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
+import qs.modules.control
+import qs.stores.config
+import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.stores.launcher
 
 Scope {
@@ -55,6 +58,7 @@ Scope {
                 screen: modelData
                 visible: launcherVisible
                 color: "transparent"
+                surfaceFormat.opaque: false
                 focusable: launcherVisible
                 exclusiveZone: 0
 
@@ -68,8 +72,27 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-launcher"
                 WlrLayershell.keyboardFocus: launcherVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
+          ? WlrKeyboardFocus.Exclusive
+          : WlrKeyboardFocus.None
+
+      BackgroundEffect.blurRegion:
+          ShellSurfacePolicy.requestsBackdropBlur(
+              ConfigStore.shellBackgroundMode
+          )
+              ? shellBlurRegion
+              : null
+
+      Region {
+          id: shellBlurRegion
+
+          Region {
+              x: launcherSurface.x
+              y: launcherSurface.y
+              width: launcherSurface.width
+              height: launcherSurface.height
+              radius: launcherSurface.radius
+          }
+      }
 
                 onVisibleChanged: {
                     if (visible) {
@@ -89,8 +112,8 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    id: launcherSurface
+                ShellSurface {
+          id: launcherSurface
 
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -111,9 +134,6 @@ Scope {
                             - root.luminaDesign.spacing.extraLarge * 2
                     )
                     radius: root.luminaDesign.shape.extraLarge
-                    color: root.luminaDesign.color.surfaceContainer
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outline
 
                     MouseArea {
                         anchors.fill: parent

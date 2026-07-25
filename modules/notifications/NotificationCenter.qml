@@ -8,6 +8,7 @@ import qs.design
 import qs.modules.control
 import qs.services.notifications
 import qs.stores.config
+import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 
 Scope {
     id: root
@@ -51,6 +52,7 @@ Scope {
                 screen: modelData
                 visible: centerVisible
                 color: "transparent"
+                surfaceFormat.opaque: false
                 focusable: centerVisible
                 exclusiveZone: 0
 
@@ -64,8 +66,27 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-notification-center"
                 WlrLayershell.keyboardFocus: centerVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
+          ? WlrKeyboardFocus.Exclusive
+          : WlrKeyboardFocus.None
+
+      BackgroundEffect.blurRegion:
+          ShellSurfacePolicy.requestsBackdropBlur(
+              ConfigStore.shellBackgroundMode
+          )
+              ? shellBlurRegion
+              : null
+
+      Region {
+          id: shellBlurRegion
+
+          Region {
+              x: centerSurface.x
+              y: centerSurface.y
+              width: centerSurface.width
+              height: centerSurface.height
+              radius: centerSurface.radius
+          }
+      }
 
                 FocusScope {
                     anchors.fill: parent
@@ -92,8 +113,8 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    id: centerSurface
+                ShellSurface {
+          id: centerSurface
 
                     readonly property real availableHeight: Math.max(
                         0,
@@ -148,10 +169,7 @@ Scope {
                             )
                     )
                     radius: root.luminaDesign.shape.extraLargeIncreased
-                    color: root.luminaDesign.color.surfaceContainer
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outline
-                    opacity: centerWindow.centerVisible ? 1 : 0
+          opacity: centerWindow.centerVisible ? 1 : 0
                     scale: centerWindow.centerVisible ? 1 : 0.97
 
                     Behavior on height {

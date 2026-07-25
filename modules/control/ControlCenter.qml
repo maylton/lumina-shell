@@ -10,6 +10,7 @@ import qs.stores.config
 import qs.stores.control
 import qs.stores.settings
 import qs.stores.time
+import "ShellSurfacePolicy.js" as ShellSurfacePolicy
 
 Scope {
     id: root
@@ -81,6 +82,7 @@ Scope {
                 screen: modelData
                 visible: centerVisible
                 color: "transparent"
+                surfaceFormat.opaque: false
                 focusable: centerVisible
                 exclusiveZone: 0
 
@@ -94,8 +96,27 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-control-center"
                 WlrLayershell.keyboardFocus: centerVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
+          ? WlrKeyboardFocus.Exclusive
+          : WlrKeyboardFocus.None
+
+      BackgroundEffect.blurRegion:
+          ShellSurfacePolicy.requestsBackdropBlur(
+              ConfigStore.shellBackgroundMode
+          )
+              ? shellBlurRegion
+              : null
+
+      Region {
+          id: shellBlurRegion
+
+          Region {
+              x: dashboardSurface.x
+              y: dashboardSurface.y
+              width: dashboardSurface.width
+              height: dashboardSurface.height
+              radius: dashboardSurface.radius
+          }
+      }
 
                 onCenterVisibleChanged: {
                     if (centerVisible) {
@@ -149,8 +170,8 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    id: dashboardSurface
+                ShellSurface {
+          id: dashboardSurface
 
                     anchors.centerIn: availableArea
                     width: Math.min(
@@ -162,10 +183,7 @@ Scope {
                         availableArea.height
                     )
                     radius: root.luminaDesign.shape.extraLarge
-                    color: root.luminaDesign.color.surfaceContainer
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outline
-                    clip: true
+          clip: true
 
                     MouseArea {
                         anchors.fill: parent

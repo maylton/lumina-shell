@@ -113,8 +113,8 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 This sprint completes the 0.5 public-beta foundation:
 
-1. Graphical configuration with schema v7 persistence and safe schema
-   v3/v4/v5/v6 migration.
+1. Graphical configuration with schema v8 persistence and safe schema
+   v3/v4/v5/v6/v7 migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
@@ -152,8 +152,13 @@ This sprint completes the 0.5 public-beta foundation:
 - The default edge-to-edge bar uses a substantial 56-pixel surface, clear
   clock/date hierarchy, and expressive workspace state without shrinking
   interaction targets.
+- Primary shell surfaces support Solid, Android-inspired Blur, and Frosted
+  Glass independently of the bar. Blur remains clean and grain-free; Frosted
+  adds a richer tint, directional highlight, and subtle static texture. Both
+  request native blur only inside their rounded panel bounds, while semantic
+  cards and controls remain opaque.
 - The bar supports solid, translucent, blur, frosted-glass, and transparent
-  backgrounds independently of global surface transparency. Only Blur and
+  backgrounds independently of shell surface style. Only Blur and
   Frosted request native Niri blur, bounded to the visible rounded surface;
   Translucent is alpha-only, children remain opaque, and all modes reserve work
   area while the wallpaper continues beneath the transparent surface.
@@ -215,10 +220,10 @@ This sprint completes the 0.5 public-beta foundation:
   through its responsive scale policy.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
-- Schema v4 bar preferences migrate through schema v5 and schema v6 into
-  schema v7 without losing valid widget ordering, visibility, global
-  transparency, or existing shell preferences; retired widget-specific keys
-  are ignored safely after migration.
+- Schema v4 bar preferences migrate through schema v5, schema v6, and
+  schema v7 into schema v8 without losing valid widget ordering, visibility,
+  shell style, or existing preferences; legacy global transparency becomes
+  bounded Blur and retired keys are ignored safely after migration.
 - Privacy and keyboard-layout indicators remain hidden until their native
   event sources can be validated.
 

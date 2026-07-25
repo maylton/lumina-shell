@@ -410,36 +410,43 @@ SettingsPage {
         title: "Shell style"
         description: "Changes apply immediately to Lumina surfaces"
 
-        SettingsSwitchRow {
-            width: parent.width
-            title: "Transparency"
-            description: checked
-                ? "Semantic surfaces use configured opacity"
-                : "Surfaces are fully opaque"
-            checked: ConfigStore.transparencyEnabled
-            onToggled: value =>
-                ConfigStore.setAppearanceValue(
-                    "transparencyEnabled",
-                    value
-                )
+        SettingsComboRow {
+  width: parent.width
+  title: "Surface style"
+  description: ConfigStore.shellBackgroundMode === "solid"
+      ? "Opaque tonal shell surfaces"
+      : ConfigStore.shellBackgroundMode === "blur"
+          ? "Android-inspired bounded live blur"
+          : "Blur with richer tint, highlight, and subtle texture"
+  options: [
+      { value: "solid", label: "Solid" },
+      { value: "blur", label: "Blur" },
+      { value: "frosted", label: "Frosted glass" }
+  ]
+  currentValue: ConfigStore.shellBackgroundMode
+  onSelected: value =>
+      ConfigStore.setAppearanceValue(
+          "shellBackgroundMode",
+          value
+      )
         }
 
         SettingsSliderRow {
-            width: parent.width
-            title: "Surface opacity"
-            description: "Minimum is limited for readable contrast"
-            available: ConfigStore.transparencyEnabled
-            availabilityText: "Enable transparency first"
-            from: 0.72
-            to: 1
-            stepSize: 0.02
-            value: ConfigStore.surfaceOpacity
-            valueLabel: Math.round(value * 100) + "%"
-            onValueEdited: value =>
-                ConfigStore.setAppearanceValue(
-                    "surfaceOpacity",
-                    value
-                )
+  width: parent.width
+  title: "Tint opacity"
+  description: "Controls the tonal protection above live blur"
+  available: ConfigStore.shellBackgroundMode !== "solid"
+  availabilityText: "Solid surfaces are fully opaque"
+  from: 0.55
+  to: 0.95
+  stepSize: 0.02
+  value: ConfigStore.shellSurfaceOpacity
+  valueLabel: Math.round(value * 100) + "%"
+  onValueEdited: value =>
+      ConfigStore.setAppearanceValue(
+          "shellSurfaceOpacity",
+          value
+      )
         }
 
         SettingsSwitchRow {
