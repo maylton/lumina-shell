@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.session
+import qs.stores.config
 import qs.stores.session
 
 Rectangle {
@@ -14,12 +15,15 @@ Rectangle {
     readonly property bool expanded: SessionMenuStore.activeOutputName
         === outputName
 
-    implicitWidth: sessionLabel.implicitWidth + 20
+    implicitWidth: sessionLabel.implicitWidth
+        + (luminaDesign.spacing.barWidgetPadding * 2)
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || sessionMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : "transparent"
+        : ConfigStore.barBackgroundMode === "transparent"
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     scale: sessionMouse.pressed
         ? 0.96
         : 1.0
@@ -83,7 +87,7 @@ Rectangle {
         color: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
-        font.pixelSize: root.luminaDesign.typography.labelMedium
+        font.pixelSize: root.luminaDesign.typography.barSecondary
         font.weight: Font.DemiBold
     }
 

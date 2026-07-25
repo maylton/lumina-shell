@@ -13,9 +13,11 @@ Rectangle {
     readonly property bool active: Boolean(workspace.is_active)
 
     implicitWidth: selected
-        ? workspaceLabel.implicitWidth + 32
+        ? workspaceLabel.implicitWidth
+            + (luminaDesign.spacing.barHorizontalPadding * 2)
         : active
-            ? workspaceLabel.implicitWidth + 24
+            ? workspaceLabel.implicitWidth
+                + (luminaDesign.spacing.barWidgetPadding * 2)
             : luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: luminaDesign.shape.full
@@ -79,17 +81,31 @@ Rectangle {
         width: root.selected
             ? root.width
             : root.active
-                ? workspaceLabel.implicitWidth + 24
+                ? workspaceLabel.implicitWidth
+                    + (
+                        root.luminaDesign.spacing.barWidgetPadding
+                        * 2
+                    )
                 : workspaceMouse.containsMouse
-                    ? 18
-                    : 10
+                    ? Math.round(
+                        root.luminaDesign.size.barWorkspaceMarker
+                        * 1.8
+                    )
+                    : root.luminaDesign.size.barWorkspaceMarker
         height: root.selected
-            ? root.height
+            ? root.luminaDesign.size.barWorkspaceActiveHeight
             : root.active
-                ? root.height - 6
+                ? Math.max(
+                    root.luminaDesign.size.barWorkspaceMarker * 2,
+                    root.luminaDesign.size.barWorkspaceActiveHeight
+                        - root.luminaDesign.spacing.barItemGap
+                )
                 : workspaceMouse.containsMouse
-                    ? 18
-                    : 10
+                    ? Math.round(
+                        root.luminaDesign.size.barWorkspaceMarker
+                        * 1.8
+                    )
+                    : root.luminaDesign.size.barWorkspaceMarker
         radius: root.selected
             ? root.luminaDesign.shape.workspaceActive
             : root.active
@@ -149,7 +165,8 @@ Rectangle {
                 : root.workspace.is_urgent
                     ? root.luminaDesign.color.urgent
                     : root.luminaDesign.color.onSurface
-            font.pixelSize: root.luminaDesign.typography.labelMedium
+            font.pixelSize:
+                root.luminaDesign.typography.barWorkspace
             font.weight: Font.DemiBold
 
             Behavior on opacity {

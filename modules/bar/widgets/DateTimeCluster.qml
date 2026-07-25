@@ -36,7 +36,8 @@ Rectangle {
         CalendarStore.currentDate,
         Locale.LongFormat
     )
-    implicitWidth: dateTimeContent.implicitWidth + 24
+    implicitWidth: dateTimeContent.implicitWidth
+        + (luminaDesign.spacing.barHorizontalPadding * 2)
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.shape.full
@@ -125,8 +126,8 @@ Rectangle {
         Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: dateLabel.visible
-            width: 3
-            height: 3
+            width: root.luminaDesign.size.barDividerDot
+            height: width
             radius: 2
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer

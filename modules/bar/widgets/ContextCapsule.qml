@@ -85,7 +85,11 @@ Rectangle {
         ? Math.max(
             0,
             Math.min(
-                contentImplicitWidth + 28,
+                contentImplicitWidth
+                    + (
+                        luminaDesign.spacing.barHorizontalPadding
+                        * 2
+                    ),
                 availableWidth
             )
         )
@@ -189,7 +193,14 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
 
-        width: Math.max(0, root.width - 28)
+        width: Math.max(
+            0,
+            root.width
+                - (
+                    root.luminaDesign.spacing.barHorizontalPadding
+                    * 2
+                )
+        )
         height: parent.height
         spacing: root.luminaDesign.spacing.small
 
@@ -207,7 +218,8 @@ Rectangle {
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.onSurface
             elide: Text.ElideRight
-            font.pixelSize: root.luminaDesign.typography.bodyMedium
+            font.pixelSize:
+                root.luminaDesign.typography.barContextPrimary
             font.weight: Font.DemiBold
         }
 
@@ -216,8 +228,8 @@ Rectangle {
 
             Layout.alignment: Qt.AlignVCenter
             visible: root.showSecondary
-            width: 3
-            height: 3
+            width: root.luminaDesign.size.barDividerDot
+            height: width
             radius: 2
             color: root.showActionError
                 ? root.luminaDesign.color.urgent
@@ -236,7 +248,7 @@ Rectangle {
                 : root.luminaDesign.color.textMuted
             elide: Text.ElideRight
             font.pixelSize:
-                root.luminaDesign.typography.barSecondary
+                root.luminaDesign.typography.barContextSecondary
             font.weight: Font.Medium
         }
     }

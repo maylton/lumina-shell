@@ -169,16 +169,22 @@ QtObject {
                 24
             ),
             barHorizontalPadding: BarScalePolicy.scaled(
-                ConfigStore.compactMode ? 8 : 12,
+                ConfigStore.compactMode ? 12 : 16,
                 root.barSpacingScale,
-                7,
-                16
+                10,
+                22
             ),
             barWidgetPadding: BarScalePolicy.scaled(
-                ConfigStore.compactMode ? 6 : 8,
+                ConfigStore.compactMode ? 8 : 10,
                 root.barSpacingScale,
-                5,
-                11
+                7,
+                14
+            ),
+            barConfiguredWidgetGap: BarScalePolicy.scaled(
+                ConfigStore.barWidgetSpacing,
+                root.barSpacingScale,
+                2,
+                32
             ),
             barPanelGap: ConfigStore.compactMode ? 10 : 14,
             controlItemGap: ConfigStore.compactMode ? 10 : 14,
@@ -238,6 +244,30 @@ QtObject {
                 15,
                 23
             ),
+            barBadgeHeight: BarScalePolicy.scaled(
+                17,
+                root.barContentScale,
+                15,
+                22
+            ),
+            barBadgePadding: BarScalePolicy.scaled(
+                7,
+                root.barSpacingScale,
+                5,
+                10
+            ),
+            barStatusDot: BarScalePolicy.scaled(
+                8,
+                root.barContentScale,
+                6,
+                11
+            ),
+            barDividerDot: BarScalePolicy.scaled(
+                3,
+                root.barContentScale,
+                2,
+                4
+            ),
             calendarWidth: 336,
             chipHeight: ConfigStore.compactMode ? 28 : 30,
             controlCenterHeight: 920,
@@ -295,6 +325,12 @@ QtObject {
                 root.barTypographyScale,
                 10,
                 14
+            ),
+            barBadge: BarScalePolicy.scaled(
+                10,
+                root.barTypographyScale,
+                9,
+                12
             ),
             titleMedium: 14,
             titleLarge: 20

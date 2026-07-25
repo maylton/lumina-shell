@@ -1,6 +1,7 @@
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.stores.config
 import qs.stores.control
 
 Rectangle {
@@ -19,7 +20,9 @@ Rectangle {
         : luminaDesign.shape.large
     color: expanded || dashboardMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : "transparent"
+        : ConfigStore.barBackgroundMode === "transparent"
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     scale: dashboardMouse.pressed
         ? 0.96
         : 1
@@ -85,7 +88,7 @@ Rectangle {
         iconColor: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.primary
-        iconSize: 18
+        iconSize: root.luminaDesign.size.barIcon
     }
 
     MouseArea {

@@ -76,7 +76,7 @@ Rectangle {
         iconColor: NiriService.overviewOpen
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
-        iconSize: 18
+        iconSize: root.luminaDesign.size.barIcon
     }
 
     MouseArea {

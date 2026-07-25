@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.services.wallpaper
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -13,12 +14,15 @@ Rectangle {
     readonly property bool expanded: WallpaperService.pickerOutputName
         === outputName
 
-    implicitWidth: wallpaperLabel.implicitWidth + 20
+    implicitWidth: wallpaperLabel.implicitWidth
+        + (luminaDesign.spacing.barWidgetPadding * 2)
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || wallpaperMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : "transparent"
+        : ConfigStore.barBackgroundMode === "transparent"
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     scale: wallpaperMouse.pressed
         ? 0.96
         : 1.0
@@ -74,7 +78,7 @@ Rectangle {
         color: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.onSurface
-        font.pixelSize: root.luminaDesign.typography.labelMedium
+        font.pixelSize: root.luminaDesign.typography.barSecondary
         font.weight: Font.DemiBold
     }
 

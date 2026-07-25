@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs.design
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -50,7 +51,9 @@ Rectangle {
             ? Qt.darker(luminaDesign.color.surfaceMuted, 1.12)
             : itemMouse.containsMouse
                 ? luminaDesign.color.surfaceMuted
-                : "transparent"
+                : ConfigStore.barBackgroundMode === "transparent"
+                    ? luminaDesign.color.surfaceMuted
+                    : "transparent"
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -107,8 +110,8 @@ Rectangle {
 
     Rectangle {
         anchors.centerIn: parent
-        width: root.luminaDesign.size.trayIcon
-        height: root.luminaDesign.size.trayIcon
+        width: root.luminaDesign.size.barTrayIcon
+        height: root.luminaDesign.size.barTrayIcon
         radius: root.luminaDesign.shape.small
         color: root.luminaDesign.color.surfaceMuted
         visible: String(trayIcon.source).length === 0
@@ -120,7 +123,7 @@ Rectangle {
                 ? root.itemTitle.charAt(0).toLocaleUpperCase()
                 : "•"
             color: root.luminaDesign.color.onSurface
-            font.pixelSize: root.luminaDesign.typography.labelSmall
+            font.pixelSize: root.luminaDesign.typography.barBadge
             font.weight: Font.DemiBold
         }
     }
@@ -129,8 +132,8 @@ Rectangle {
         id: trayIcon
 
         anchors.centerIn: parent
-        width: root.luminaDesign.size.trayIcon
-        height: root.luminaDesign.size.trayIcon
+        width: root.luminaDesign.size.barTrayIcon
+        height: root.luminaDesign.size.barTrayIcon
         source: root.trayItem ? String(root.trayItem.icon || "") : ""
         asynchronous: true
         mipmap: true
@@ -143,8 +146,8 @@ Rectangle {
             margins: 3
         }
 
-        width: root.luminaDesign.size.statusDot
-        height: root.luminaDesign.size.statusDot
+        width: root.luminaDesign.size.barStatusDot
+        height: root.luminaDesign.size.barStatusDot
         radius: width / 2
         visible: root.needsAttention
         color: root.luminaDesign.color.urgent

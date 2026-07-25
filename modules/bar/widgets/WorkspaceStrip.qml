@@ -11,7 +11,10 @@ Row {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
-    spacing: Math.min(itemSpacing, luminaDesign.spacing.small)
+    spacing: Math.min(
+        itemSpacing,
+        luminaDesign.spacing.barItemGap
+    )
 
     Repeater {
         model: root.workspaces

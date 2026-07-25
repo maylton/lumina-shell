@@ -15,7 +15,12 @@ Rectangle {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
-    implicitWidth: statusContent.implicitWidth + (individual ? 16 : 4)
+    implicitWidth: statusContent.implicitWidth
+        + (
+            individual
+                ? luminaDesign.spacing.barWidgetPadding * 2
+                : luminaDesign.spacing.barItemGap
+        )
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: individual ? luminaDesign.shape.large : 0
     color: individual
@@ -56,7 +61,7 @@ Rectangle {
             iconColor: root.alert
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.onSurface
-            iconSize: 17
+            iconSize: root.luminaDesign.size.barStatusIcon
         }
 
         Text {
@@ -66,7 +71,8 @@ Rectangle {
             color: root.alert
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.onSurface
-            font.pixelSize: root.luminaDesign.typography.bodyMedium
+            font.pixelSize:
+                root.luminaDesign.typography.barSecondary
             font.weight: Font.DemiBold
         }
     }

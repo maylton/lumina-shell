@@ -4,7 +4,8 @@ import qs.stores.config
 
 Row {
     readonly property var luminaDesign: Theme.luminaTokens
-    property real clusterSpacing: ConfigStore.barWidgetSpacing
+    property real clusterSpacing:
+        luminaDesign.spacing.barConfiguredWidgetGap
 
     spacing: clusterSpacing
 

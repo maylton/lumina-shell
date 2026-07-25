@@ -83,7 +83,8 @@ Item {
             verticalCenter: parent.verticalCenter
         }
 
-        clusterSpacing: ConfigStore.barWidgetSpacing
+        clusterSpacing:
+            root.luminaDesign.spacing.barConfiguredWidgetGap
 
         Repeater {
             model: ConfigStore.barLeftWidgetOrder
@@ -123,7 +124,10 @@ Item {
 
         clusterSpacing: Math.max(
             root.luminaDesign.spacing.barItemGap,
-            Math.round(ConfigStore.barWidgetSpacing * 0.65)
+            Math.round(
+                root.luminaDesign.spacing.barConfiguredWidgetGap
+                * 0.65
+            )
         )
 
         Repeater {
@@ -159,7 +163,8 @@ Item {
 
         WorkspaceStrip {
             workspaces: root.visibleWorkspaces
-            itemSpacing: ConfigStore.barWidgetSpacing
+            itemSpacing:
+                root.luminaDesign.spacing.barConfiguredWidgetGap
         }
     }
 

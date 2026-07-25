@@ -49,7 +49,9 @@ Item {
                 : root.luminaDesign.shape.medium
             color: trayPopup.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
-                : "transparent"
+                : ConfigStore.barBackgroundMode === "transparent"
+                    ? root.luminaDesign.color.surfaceMuted
+                    : "transparent"
             border.width: activeFocus ? 2 : 0
             border.color: root.luminaDesign.color.primary
             activeFocusOnTab: visible
@@ -103,7 +105,7 @@ Item {
                 iconColor: trayPopup.visible
                     ? root.luminaDesign.color.onAccentContainer
                     : root.luminaDesign.color.onSurface
-                iconSize: root.luminaDesign.size.trayIcon
+                iconSize: root.luminaDesign.size.barTrayIcon
             }
 
             Rectangle {
@@ -112,8 +114,12 @@ Item {
                     top: parent.top
                 }
                 visible: root.itemCount > 1
-                width: Math.max(15, trayCount.implicitWidth + 6)
-                height: 15
+                width: Math.max(
+                    root.luminaDesign.size.barBadgeHeight,
+                    trayCount.implicitWidth
+                        + root.luminaDesign.size.barBadgePadding
+                )
+                height: root.luminaDesign.size.barBadgeHeight
                 radius: root.luminaDesign.shape.full
                 color: root.luminaDesign.color.primary
 
@@ -125,7 +131,8 @@ Item {
                         ? "9+"
                         : String(root.itemCount)
                     color: root.luminaDesign.color.surfaceBase
-                    font.pixelSize: root.luminaDesign.typography.labelSmall
+                    font.pixelSize:
+                        root.luminaDesign.typography.barBadge
                     font.weight: Font.Bold
                 }
             }

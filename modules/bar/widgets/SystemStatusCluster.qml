@@ -68,7 +68,12 @@ Rectangle {
 
     visible: itemCount > 0
     implicitWidth: visible
-        ? statusRow.implicitWidth + (individual ? 0 : 20)
+        ? statusRow.implicitWidth
+            + (
+                individual
+                    ? 0
+                    : luminaDesign.spacing.barWidgetPadding * 2
+            )
         : 0
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded || statusMouse.containsMouse
@@ -145,7 +150,7 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.individual
             ? root.luminaDesign.spacing.barItemGap
-            : root.luminaDesign.spacing.medium
+            : root.luminaDesign.spacing.barWidgetPadding
 
         Behavior on spacing {
             NumberAnimation {

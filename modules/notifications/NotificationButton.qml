@@ -5,6 +5,7 @@ import qs.design
 import qs.modules.bar.widgets
 import qs.modules.control
 import qs.services.notifications
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -27,7 +28,9 @@ Rectangle {
         : 1.0
     color: expanded || notificationMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : "transparent"
+        : ConfigStore.barBackgroundMode === "transparent"
+            ? luminaDesign.color.surfaceMuted
+            : "transparent"
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
     activeFocusOnTab: true
@@ -94,14 +97,18 @@ Rectangle {
             : NotificationService.doNotDisturb
                 ? root.luminaDesign.color.textMuted
                 : root.luminaDesign.color.onSurface
-        iconSize: root.luminaDesign.size.trayIcon
+        iconSize: root.luminaDesign.size.barIcon
     }
 
     Rectangle {
         anchors.centerIn: notificationIcon
         visible: NotificationService.doNotDisturb
-        width: notificationIcon.width + 4
-        height: 2
+        width: notificationIcon.width
+            + root.luminaDesign.spacing.extraSmall
+        height: Math.max(
+            2,
+            Math.round(root.luminaDesign.size.barContentScale * 2)
+        )
         radius: 1
         rotation: -45
         color: root.expanded
@@ -118,8 +125,12 @@ Rectangle {
         }
 
         visible: NotificationService.unreadCount > 0
-        width: Math.max(17, badgeLabel.implicitWidth + 7)
-        height: 17
+        width: Math.max(
+            root.luminaDesign.size.barBadgeHeight,
+            badgeLabel.implicitWidth
+                + root.luminaDesign.size.barBadgePadding
+        )
+        height: root.luminaDesign.size.barBadgeHeight
         radius: root.luminaDesign.shape.full
         color: root.luminaDesign.color.urgent
 
@@ -131,7 +142,7 @@ Rectangle {
                 ? "99+"
                 : String(NotificationService.unreadCount)
             color: root.luminaDesign.color.surfaceBase
-            font.pixelSize: root.luminaDesign.typography.labelSmall
+            font.pixelSize: root.luminaDesign.typography.barBadge
             font.weight: Font.Bold
         }
     }
