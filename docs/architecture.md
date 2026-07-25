@@ -188,8 +188,10 @@ dimensions and two views. `DashboardView` combines the active workspace and
 output, clock, weather, daily controls, notification history, media,
 connectivity, power, and calendar. `ShellSettingsView` provides persistent
 configuration through focused category components. `ControlTabBar` switches
-between them with a short horizontal transition; every settings category owns
-its own scroll position.
+between them with a short spatial transition and a shared moving indicator.
+`SettingsPageFrame` keeps every category instantiated, preserves its scroll
+position, and coordinates direction, opacity, focus, and input state when the
+active category changes.
 
 Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do
 Not Disturb, dynamic color, battery status, and power profiles all call the
@@ -289,12 +291,21 @@ Design values are exposed through the single `Theme.luminaTokens` namespace:
   for resting, pressed, selected, and focused states;
 - shared spacing and sizing scales;
 - typography roles for labels, body text, and titles;
-- motion durations used consistently by interactive components.
+- semantic motion families used consistently by interactive components.
 
-The bar adds semantic touch-target, workspace resting/active shape, and
-workspace-transform motion tokens. Disabling animation or enabling reduced
-motion shortens transformations through the existing global motion scale
-while preserving focus and selected-state feedback.
+Motion follows the Material separation between spatial transitions and visual
+effects. `spatialFast`, `spatialDefault`, and `spatialSlow` coordinate changes
+to position, bounds, spacing, and corner shape. `effectsFast`,
+`effectsDefault`, and `effectsSlow` handle color and opacity without changing
+geometry. Prominent workspace, context, tab, and page transitions use a small
+expressive overshoot; pressed feedback uses the shorter `press` token.
+
+Spacing likewise has semantic roles for bar items, bar clusters, control-center
+cards, settings sections, and content insets. Components can therefore change
+density without introducing local one-off gaps. Disabling animation or
+enabling reduced motion shortens every family through the existing global
+motion scale and removes spatial overshoot while preserving focus, shape, and
+selected-state feedback.
 
 The token namespace also provides the future boundary for wallpaper-derived dynamic color. Visual modules consume semantic roles and must not know how the palette was generated.
 

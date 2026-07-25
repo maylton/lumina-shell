@@ -36,7 +36,9 @@ Controls expose Qt `Accessible` metadata and actions instead of relying on paint
 
 The non-interactive Niri context capsule exposes a static-text description and
 never enters the tab order. Reduced motion keeps selected shapes and focus
-outlines even when transitions are minimized.
+outlines even when transitions are minimized. It also removes expressive
+spatial overshoot; color and opacity remain brief enough to communicate state
+without becoming the only source of feedback.
 
 This baseline has been runtime-tested for QML validity and keyboard focus behavior. A formal screen-reader pass and contrast audit remain part of the stable-release accessibility work.
 

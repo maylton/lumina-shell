@@ -69,6 +69,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Split shell motion into semantic spatial and effects families, with
+  coordinated shape/bounds transitions, short state effects, and an
+  overshoot-free reduced-motion path.
+- Refined bar motion and spacing across workspaces, context, date/time, tray,
+  notifications, system status, and Dashboard entry without changing their
+  services or interactions.
+- Added directional Dashboard/Settings and settings-category transitions, a
+  shared moving tab indicator, persistent category instances, and consistent
+  card, section, item, and content spacing.
 - Reworked the notification center with adaptive height, lighter scrim,
   hierarchical header controls, an expressive empty state, and contained
   notification cards.

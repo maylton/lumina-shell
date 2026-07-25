@@ -156,6 +156,9 @@ This sprint completes the 0.5 public-beta foundation:
   inline, and notifications use a compact stateful icon with an unread badge.
 - Network and volume text can be hidden independently without disabling their
   status icons, services, tooltips, or Dashboard access.
+- Bar, Dashboard, and Settings distinguish spatial shape/bounds transitions
+  from color/opacity effects, share semantic spacing roles, and remove
+  expressive overshoot when reduced motion is enabled.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
 - Schema v4 bar preferences migrate to schema v5 without losing valid
