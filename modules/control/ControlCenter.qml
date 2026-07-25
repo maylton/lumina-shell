@@ -322,8 +322,6 @@ Scope {
                                             }
 
                                             height: parent.height * 0.45
-                                            outputName:
-                                                controlWindow.outputName
                                         }
 
                                         DashboardControls {

@@ -37,6 +37,8 @@ The Niri event stream supplies a complete initial state followed by incremental 
 
 The stores replace their arrays after mutations so QML bindings receive deterministic change notifications.
 
+`SystemInfoStore` owns session identity metadata used by the dashboard. It resolves the login name from the process environment and the distribution name from `/etc/os-release`, with generic fallbacks when either source is unavailable.
+
 ### Output refresh policy
 
 Niri 26.04 does not expose output changes through the event-stream event enum. Lumina therefore requests `niri msg --json outputs`:

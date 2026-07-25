@@ -26,7 +26,7 @@ Replace `DP-1` with the output reported by `niri msg outputs`. An unavailable na
 
 The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab provides:
 
-- the active workspace, output, time, date, and system uptime;
+- the detected user, Linux distribution, time, date, and system uptime;
 - current weather and the day's temperature range;
 - output and microphone levels;
 - display brightness when a backlight exists;
@@ -36,7 +36,7 @@ The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab
 - battery state and power profiles;
 - an inline calendar.
 
-The **Notifications** tab expands notification history while keeping the daily controls and system status available. The header contains shortcuts for refreshing Niri output state, opening settings and session controls, toggling connectivity, Do Not Disturb, dynamic color, and closing the dashboard.
+The **Notifications** tab expands notification history while keeping the daily controls and system status available. The header contains shortcuts for settings, session controls, Do Not Disturb, and closing the dashboard.
 
 Hardware controls degrade to an unavailable state instead of preventing the shell from starting.
 

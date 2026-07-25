@@ -1,20 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 import qs.design
 import qs.services.weather
-import qs.stores.niri
+import qs.stores.system
 import qs.stores.time
 
 Item {
     id: root
 
-    required property string outputName
-
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property var activeWorkspace:
-        WorkspaceStore.activeForOutput(outputName)
 
     DashboardCard {
         id: welcomeCard
@@ -45,9 +40,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: String(
-                        Quickshell.env("USER") || "L"
-                    ).charAt(0).toLocaleUpperCase()
+                    text: SystemInfoStore.userInitial
                     color: root.luminaDesign.color.onAccentContainer
                     font.pixelSize: 26
                     font.weight: Font.Bold
@@ -58,7 +51,7 @@ Item {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: "Welcome, "
-                    + String(Quickshell.env("USER") || "Lumina")
+                    + SystemInfoStore.userName
                     + "!"
                 color: root.luminaDesign.color.onSurface
                 elide: Text.ElideRight
@@ -69,10 +62,7 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: activeWorkspace
-                    ? "Workspace "
-                        + WorkspaceStore.labelFor(activeWorkspace)
-                    : outputName
+                text: SystemInfoStore.distributionName
                 color: root.luminaDesign.color.textMuted
                 elide: Text.ElideRight
                 font.pixelSize: root.luminaDesign.typography.labelMedium
