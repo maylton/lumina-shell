@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs.services.niri
 import qs.stores.config
 import qs.stores.niri
+import "BarSurfacePolicy.js" as BarSurfacePolicy
 
 Scope {
     id: root
@@ -40,6 +41,14 @@ Scope {
                     effectiveSurfaceMode === "floating"
                         ? ConfigStore.barMargin
                         : 0
+                readonly property var blurGeometry:
+                    BarSurfacePolicy.blurRegionGeometry(
+                        width,
+                        height,
+                        effectiveSurfaceMode,
+                        effectiveMargin,
+                        barSurface.radius
+                    )
                 readonly property string activeWindowTitle: WindowStore.titleFor(activeWindow)
                 readonly property string activeWindowAppId: WindowStore.appIdFor(activeWindow)
                 readonly property string columnLabel: WindowStore.columnLabelFor(activeWindow)
@@ -69,6 +78,7 @@ Scope {
                 exclusiveZone: implicitHeight
                 color: "transparent"
                 focusable: false
+                surfaceFormat.opaque: false
 
                 anchors {
                     top: ConfigStore.barPosition === "top"
@@ -81,11 +91,9 @@ Scope {
                 WlrLayershell.namespace: "lumina-bar"
 
                 BackgroundEffect.blurRegion:
-                    [
-                        "blur",
-                        "frosted",
-                        "translucent"
-                    ].indexOf(ConfigStore.barBackgroundMode) >= 0
+                    BarSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.barBackgroundMode
+                    )
                         ? barBlurRegion
                         : null
 
@@ -93,19 +101,11 @@ Scope {
                     id: barBlurRegion
 
                     Region {
-                        x: panel.effectiveMargin
-                        y: panel.effectiveMargin
-                        width: Math.max(
-                            0,
-                            panel.width - panel.effectiveMargin * 2
-                        )
-                        height: Math.max(
-                            0,
-                            panel.height - panel.effectiveMargin * 2
-                        )
-                        radius: panel.effectiveSurfaceMode === "floating"
-                            ? barSurface.radius
-                            : 0
+                        x: panel.blurGeometry.x
+                        y: panel.blurGeometry.y
+                        width: panel.blurGeometry.width
+                        height: panel.blurGeometry.height
+                        radius: panel.blurGeometry.radius
                     }
                 }
 
