@@ -11,6 +11,7 @@ Item {
     id: root
 
     property real avatarSize: 36
+    property real cornerRadius: avatarSize / 2
     property real borderWidth: 1
     property color borderColor: luminaDesign.color.primary
 
@@ -103,7 +104,7 @@ Item {
 
     ClippingRectangle {
         anchors.fill: parent
-        radius: root.luminaDesign.shape.full
+        radius: root.cornerRadius
         color: root.luminaDesign.color.accentContainer
         border.width: root.borderWidth
         border.color: root.borderColor

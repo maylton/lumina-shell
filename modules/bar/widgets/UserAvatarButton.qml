@@ -20,7 +20,9 @@ Rectangle {
     height: circleDiameter
     implicitWidth: circleDiameter
     implicitHeight: circleDiameter
-    radius: circleDiameter / 2
+    radius: expanded || avatarMouse.pressed
+        ? luminaDesign.shape.barIconActivated
+        : circleDiameter / 2
     color: expanded || avatarMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : ConfigStore.barWidgetPillsEnabled
@@ -66,6 +68,15 @@ Rectangle {
         }
     }
 
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
+        }
+    }
+
     Behavior on scale {
         NumberAnimation {
             duration: root.luminaDesign.motion.press
@@ -76,6 +87,7 @@ Rectangle {
     UserAvatar {
         anchors.centerIn: parent
         avatarSize: root.luminaDesign.size.barTouchTarget
+        cornerRadius: root.radius
         borderWidth: root.expanded
             || root.activeFocus
             || avatarMouse.containsMouse
@@ -89,7 +101,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         z: 2
-        radius: root.luminaDesign.shape.full
+        radius: root.radius
         color: "transparent"
         border.width: root.activeFocus ? 2 : 0
         border.color: root.luminaDesign.color.primary

@@ -152,6 +152,12 @@ QtObject {
                 8,
                 24
             ),
+            barIconActivated: BarScalePolicy.scaled(
+                12,
+                root.barShapeScale,
+                6,
+                18
+            ),
             barLarge: BarScalePolicy.scaled(
                 24,
                 root.barShapeScale,

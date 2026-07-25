@@ -162,6 +162,9 @@ This sprint completes the 0.5 public-beta foundation:
   layout.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
+- Circular bar controls morph into rounded squircles for pressed and expanded
+  states, return to true circles at rest, and honor the shared reduced-motion
+  behavior without changing their hit targets.
 - One persistent bar preference can remove resting pill backgrounds from
   non-workspace widgets while preserving hover, focus, open, urgent, and error
   feedback; workspace state pills remain visible.

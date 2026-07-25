@@ -21,7 +21,9 @@ Rectangle {
     height: circleDiameter
     implicitWidth: circleDiameter
     implicitHeight: circleDiameter
-    radius: circleDiameter / 2
+    radius: expanded || launcherMouse.pressed
+        ? luminaDesign.shape.barIconActivated
+        : circleDiameter / 2
     scale: launcherMouse.pressed
         ? 0.96
         : 1.0
@@ -54,6 +56,15 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

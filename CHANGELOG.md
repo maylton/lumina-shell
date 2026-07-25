@@ -89,6 +89,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Added Material Expressive state morphs to circular bar controls: launcher,
+  overview, notifications, grouped tray, and Dashboard avatar now transition
+  from circles to rounded squircles while pressed or expanded; inline tray
+  actions morph only for the duration of the press.
 - Increased the notification bell's optical size through a dedicated
   height-scaled bar token so its glyph matches adjacent controls without
   changing the shared circular target.
