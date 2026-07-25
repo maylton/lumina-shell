@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.design
 import qs.services.notifications
+import qs.stores.config
 
 Rectangle {
     id: root
@@ -18,7 +19,9 @@ Rectangle {
         if (requested > 0)
             return Math.max(3000, Math.min(requested, 15000))
 
-        return Number(entry.urgency) >= 2 ? 10000 : 6000
+        return Number(entry.urgency) >= 2
+            ? Math.max(10000, ConfigStore.notificationPopupDuration)
+            : ConfigStore.notificationPopupDuration
     }
 
     implicitHeight: cardContent.implicitHeight
@@ -80,7 +83,10 @@ Rectangle {
         spacing: root.luminaDesign.spacing.medium
 
         Image {
-            width: root.luminaDesign.size.notificationIcon
+            visible: ConfigStore.notificationShowImages
+            width: visible
+                ? root.luminaDesign.size.notificationIcon
+                : 0
             height: width
             source: String(root.entry.icon || "").indexOf("/") >= 0
                 ? String(root.entry.icon)
@@ -96,7 +102,9 @@ Rectangle {
 
         Column {
             width: parent.width
-                - root.luminaDesign.size.notificationIcon
+                - (ConfigStore.notificationShowImages
+                    ? root.luminaDesign.size.notificationIcon
+                    : 0)
                 - closeButton.width
                 - parent.spacing * 2
             spacing: 2

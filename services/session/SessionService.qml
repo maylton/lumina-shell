@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.niri
+import qs.stores.config
 
 Singleton {
     id: root
@@ -95,9 +96,30 @@ Singleton {
         if (!validAction(action) || running)
             return
 
-        pendingAction = action
-        status = "confirming"
-        lastError = ""
+        if (!requiresConfirmation(action)) {
+            pendingAction = action
+            confirm()
+        } else {
+            pendingAction = action
+            status = "confirming"
+            lastError = ""
+        }
+    }
+
+    function requiresConfirmation(actionName) {
+        if (!ConfigStore.destructiveConfirmations)
+            return false
+
+        switch (String(actionName)) {
+        case "logout":
+            return ConfigStore.sessionConfirmLogout
+        case "reboot":
+            return ConfigStore.sessionConfirmReboot
+        case "poweroff":
+            return ConfigStore.sessionConfirmPoweroff
+        default:
+            return false
+        }
     }
 
     function cancel() {

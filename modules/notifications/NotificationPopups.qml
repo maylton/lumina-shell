@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.design
 import qs.services.notifications
+import qs.stores.config
 
 Scope {
     id: root
@@ -35,14 +36,26 @@ Scope {
                 implicitHeight: popupStack.implicitHeight
 
                 anchors {
-                    top: true
-                    right: true
+                    top:
+                        ConfigStore.notificationPopupPosition
+                            .indexOf("top") === 0
+                    bottom:
+                        ConfigStore.notificationPopupPosition
+                            .indexOf("bottom") === 0
+                    left:
+                        ConfigStore.notificationPopupPosition
+                            .indexOf("left") > 0
+                    right:
+                        ConfigStore.notificationPopupPosition
+                            .indexOf("right") > 0
                 }
 
                 margins {
                     top: root.luminaDesign.size.barHeight
                         + root.luminaDesign.spacing.medium
                     right: root.luminaDesign.spacing.large
+                    bottom: root.luminaDesign.spacing.large
+                    left: root.luminaDesign.spacing.large
                 }
 
                 WlrLayershell.layer: WlrLayer.Overlay

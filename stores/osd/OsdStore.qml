@@ -75,12 +75,17 @@ Singleton {
     }
 
     function showOutputVolume(value, muted, requestedOutput) {
+        if (!ConfigStore.osdVolumeEnabled)
+            return
+
         const percentage = Math.round(Number(value || 0) * 100)
 
         show(
             "volume",
             muted ? "Audio muted" : "Output volume",
-            muted ? AudioService.outputName : percentage + "%",
+            ConfigStore.osdShowPercentage
+                ? muted ? AudioService.outputName : percentage + "%"
+                : "",
             muted ? "×" : "♪",
             muted ? 0 : value,
             true,
@@ -89,12 +94,17 @@ Singleton {
     }
 
     function showInputVolume(value, muted, requestedOutput) {
+        if (!ConfigStore.osdMicrophoneEnabled)
+            return
+
         const percentage = Math.round(Number(value || 0) * 100)
 
         show(
             "microphone",
             muted ? "Microphone muted" : "Microphone",
-            muted ? AudioService.inputName : percentage + "%",
+            ConfigStore.osdShowPercentage
+                ? muted ? AudioService.inputName : percentage + "%"
+                : "",
             muted ? "×" : "●",
             muted ? 0 : value,
             true,
@@ -103,10 +113,15 @@ Singleton {
     }
 
     function showBrightness(percentage, requestedOutput) {
+        if (!ConfigStore.osdBrightnessEnabled)
+            return
+
         show(
             "brightness",
             "Brightness",
-            Math.round(percentage) + "%",
+            ConfigStore.osdShowPercentage
+                ? Math.round(percentage) + "%"
+                : "",
             "☀",
             Number(percentage) / 100,
             true,

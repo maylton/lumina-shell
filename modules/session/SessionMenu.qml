@@ -8,6 +8,7 @@ import qs.design
 import qs.services.niri
 import qs.services.session
 import qs.stores.session
+import qs.stores.config
 import qs.stores.shell
 
 Scope {
@@ -107,6 +108,16 @@ Scope {
             destructive: true
         }
     ]
+    readonly property var visibleSessionActions:
+        sessionActions.filter(action => {
+            if (action.id === "lock")
+                return ConfigStore.sessionShowLock
+
+            if (action.id === "suspend")
+                return ConfigStore.sessionShowSuspend
+
+            return true
+        })
 
     function invokeLayout(actionId) {
         switch (String(actionId)) {
@@ -338,7 +349,7 @@ Scope {
                             rowSpacing: root.luminaDesign.spacing.small
 
                             Repeater {
-                                model: root.sessionActions
+                            model: root.visibleSessionActions
 
                                 delegate: SessionAction {
                                     required property var modelData

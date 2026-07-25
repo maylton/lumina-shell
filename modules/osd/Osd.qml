@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.design
 import qs.stores.osd
+import qs.stores.config
 
 Scope {
     id: root
@@ -27,18 +28,20 @@ Scope {
 
                 screen: modelData
                 visible: osdVisible
-                implicitWidth: 360
-                implicitHeight: 104
+                implicitWidth: Math.round(360 * ConfigStore.osdSize)
+                implicitHeight: Math.round(104 * ConfigStore.osdSize)
                 color: "transparent"
                 focusable: false
                 exclusiveZone: 0
 
                 anchors {
-                    bottom: true
+                    top: ConfigStore.osdPosition === "top"
+                    bottom: ConfigStore.osdPosition === "bottom"
                 }
 
                 margins {
                     bottom: 64
+                    top: 64
                 }
 
                 WlrLayershell.layer: WlrLayer.Overlay

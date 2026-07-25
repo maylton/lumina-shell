@@ -11,7 +11,8 @@ Singleton {
     id: root
 
     readonly property int historyLimit: 50
-    readonly property int popupLimit: 3
+    readonly property int popupLimit:
+        ConfigStore.notificationPopupMaximum
     readonly property bool doNotDisturb: ConfigStore.doNotDisturb
     readonly property string centerOutputName:
         OverlayStore.activeSurface === "notifications"
@@ -58,6 +59,11 @@ Singleton {
         }
 
         const screens = Quickshell.screens || []
+
+        const preferred = ConfigStore.notificationPreferredOutput
+
+        if (preferred !== "active" && outputExists(preferred))
+            return preferred
 
         return screens.length > 0 ? String(screens[0].name || "") : ""
     }
@@ -149,7 +155,7 @@ Singleton {
                 discarded.notification.tracked = false
         }
 
-        history = trimmed
+        history = ConfigStore.notificationKeepHistory ? trimmed : []
         popupOutputName = defaultOutputName()
 
         if (!doNotDisturb) {
