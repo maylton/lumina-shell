@@ -4,6 +4,13 @@ Lumina exposes network and Bluetooth management under **Settings →
 Connectivity**. Visual QML components do not execute system commands; the page
 submits typed requests to `ConnectivityManagerService`.
 
+The category is divided into three internal subpages: **Wi-Fi**, **Wired
+network**, and **Bluetooth**. Only the selected subpage is rendered and its
+integration is the only one refreshed by the detailed management layer. Nearby
+Wi-Fi networks, saved profiles, and Bluetooth device groups use bounded,
+independently scrollable lists so a busy radio environment does not make the
+whole Settings page grow indefinitely.
+
 ## Wi-Fi
 
 The page can:
@@ -39,10 +46,14 @@ The page can:
 
 - enable or disable the default adapter;
 - run a bounded discovery session;
-- list discovered, paired, and connected devices;
+- separate connected, paired, and newly found devices;
 - pair a new device;
 - connect or disconnect paired devices;
 - remove an inactive paired device.
+
+Each device group has its own bounded list. Connected and paired devices remain
+above newly discovered devices, so a large scan result cannot push the devices
+the user actually uses out of view.
 
 BlueZ remains the source of truth for adapter and device state. Pairing methods
 that require a graphical agent, confirmation code, or specialized profile may
@@ -62,3 +73,6 @@ Read the management-layer state with:
 qs ipc -p /path/to/lumina-shell call connectivity-manager status
 qs ipc -p /path/to/lumina-shell call connectivity-manager refresh
 ```
+
+The management status includes `activeSection`, which is empty while the
+category is closed and otherwise reports `wifi`, `wired`, or `bluetooth`.
