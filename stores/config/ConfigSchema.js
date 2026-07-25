@@ -118,9 +118,30 @@ function defaults() {
     }
 }
 
+function isArrayValue(value) {
+    return Array.isArray(value)
+        || (
+            value
+            && typeof value !== "string"
+            && typeof value.length === "number"
+        )
+}
+
+function arrayValue(value) {
+    if (!isArrayValue(value))
+        return []
+
+    var result = []
+
+    for (var index = 0; index < value.length; ++index)
+        result.push(value[index])
+
+    return result
+}
+
 function clone(value) {
-    if (Array.isArray(value))
-        return value.slice()
+    if (isArrayValue(value))
+        return arrayValue(value)
 
     if (value && typeof value === "object") {
         var copy = {}
@@ -176,9 +197,9 @@ function booleanValue(value, fallback) {
 }
 
 function normalizedOrder(value, requiredIds, optionalIds) {
-    var input = Array.isArray(value) ? value : []
-    var required = Array.isArray(requiredIds) ? requiredIds : []
-    var optional = Array.isArray(optionalIds) ? optionalIds : []
+    var input = arrayValue(value)
+    var required = arrayValue(requiredIds)
+    var optional = arrayValue(optionalIds)
     var allowed = required.concat(optional)
     var result = []
 
@@ -452,8 +473,10 @@ function normalize(source) {
         ["wallpaper", "session"]
     )
 
-    if (!Array.isArray(result.dashboardCardOrder))
+    if (!isArrayValue(result.dashboardCardOrder))
         result.dashboardCardOrder = base.dashboardCardOrder.slice()
+    else
+        result.dashboardCardOrder = arrayValue(result.dashboardCardOrder)
 
     if (!String(result.wallpaperDirectory || ""))
         result.wallpaperDirectory = base.wallpaperDirectory

@@ -185,7 +185,17 @@ Singleton {
     }
 
     function cloneList(source) {
-        return Array.isArray(source) ? source.slice() : []
+        const result = []
+
+        if (!source
+            || typeof source === "string"
+            || typeof source.length !== "number")
+            return result
+
+        for (var index = 0; index < source.length; ++index)
+            result.push(source[index])
+
+        return result
     }
 
     function snapshot() {

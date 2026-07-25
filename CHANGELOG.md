@@ -66,3 +66,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Removed the legacy alternate bar layout, preset selector, preview, and
   persisted style/single-order state. Lumina's Material Expressive bar is now
   the sole implementation while retaining edge-to-edge and floating modes.
+- Preserve left/right widget ordering when JsonAdapter exposes persisted
+  arrays as QML sequence values.

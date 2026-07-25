@@ -244,6 +244,48 @@ TestCase {
         )
     }
 
+    function test_arrayLikeWidgetOrdersArePreserved() {
+        const state = ConfigSchema.normalize({
+            barLeftWidgetOrder: {
+                0: "datetime",
+                1: "workspaces",
+                2: "launcher",
+                3: "overview",
+                length: 4
+            },
+            barRightWidgetOrder: {
+                0: "dashboard",
+                1: "system-status",
+                2: "notifications",
+                3: "tray",
+                4: "privacy",
+                5: "keyboard",
+                length: 6
+            }
+        })
+
+        compare(
+            JSON.stringify(state.barLeftWidgetOrder),
+            JSON.stringify([
+                "datetime",
+                "workspaces",
+                "launcher",
+                "overview"
+            ])
+        )
+        compare(
+            JSON.stringify(state.barRightWidgetOrder),
+            JSON.stringify([
+                "dashboard",
+                "system-status",
+                "notifications",
+                "tray",
+                "privacy",
+                "keyboard"
+            ])
+        )
+    }
+
     function test_resetCategoryIsScoped() {
         const appearance =
             ConfigSchema.defaultsForCategory("appearance")
