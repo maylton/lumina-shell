@@ -2,26 +2,22 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
-import qs.design
 import qs.modules.control.settings
 import qs.services.connectivity
 import qs.services.i18n
 import qs.stores.control
+import "connectivity" as ConnectivityViews
 
 SettingsPage {
     id: root
 
+    property string activeSection: "wifi"
     property var pendingNetwork: null
+
     readonly property bool managementActive:
         ControlCenterStore.open
         && ControlCenterStore.activePage === "settings"
         && ControlCenterStore.settingsCategory === "connectivity"
-    readonly property var wifiProfiles:
-        ConnectivityManagerService.wifiProfiles()
-    readonly property var wiredProfiles:
-        ConnectivityManagerService.wiredProfiles()
-    readonly property var wiredDevices:
-        ConnectivityManagerService.wiredDevices()
 
     title: I18n.tr(
         "settings.category.connectivity.label",
@@ -32,449 +28,89 @@ SettingsPage {
         "Wi-Fi, wired networking, and Bluetooth devices"
     )
 
-    onManagementActiveChanged:
-        ConnectivityManagerService.setActive(managementActive)
-    Component.onCompleted:
-        ConnectivityManagerService.setActive(managementActive)
+    function updateManagerSection() {
+        ConnectivityManagerService.setActiveSection(
+            managementActive ? activeSection : ""
+        )
+    }
+
+    function openPassword(network) {
+        pendingNetwork = network
+        passwordInput.text = ""
+        passwordPopup.open()
+        Qt.callLater(function() {
+            passwordInput.forceActiveFocus(Qt.PopupFocusReason)
+        })
+    }
+
+    onManagementActiveChanged: updateManagerSection()
+    onActiveSectionChanged: updateManagerSection()
+    Component.onCompleted: updateManagerSection()
     Component.onDestruction:
-        ConnectivityManagerService.setActive(false)
+        ConnectivityManagerService.setActiveSection("")
 
-    function networkNeedsPassword(network) {
-        const security = String(network && network.security || "").trim()
-        return security.length > 0 && security !== "--"
-    }
-
-    function savedProfile(network) {
-        return ConnectivityManagerService.savedWifiProfile(
-            network && network.ssid
-        )
-    }
-
-    function requestWifiConnection(network) {
-        if (!network)
-            return
-
-        if (network.active) {
-            ConnectivityManagerService.disconnectWifi()
-            return
-        }
-
-        const saved = savedProfile(network)
-        if (saved) {
-            ConnectivityManagerService.activateConnection(saved.uuid)
-            return
-        }
-
-        if (networkNeedsPassword(network)) {
-            pendingNetwork = network
-            passwordInput.text = ""
-            passwordPopup.open()
-            Qt.callLater(function() {
-                passwordInput.forceActiveFocus(Qt.PopupFocusReason)
-            })
-            return
-        }
-
-        ConnectivityManagerService.connectWifi(
-            network.ssid,
-            network.security,
-            ""
-        )
-    }
-
-    SettingsSection {
-        title: I18n.tr(
-            "settings.connectivity.wifi.section",
-            "Wi-Fi"
-        )
-        description: ConnectivityManagerService.lastError
-            || ConnectivityManagerService.statusMessage
-
-        SettingsSwitchRow {
-            width: parent.width
-            title: I18n.tr(
-                "settings.connectivity.wifi.enabled",
-                "Wi-Fi"
-            )
-            description: ConnectivityService.wifiConnected
-                ? ConnectivityService.wifiName
-                : ConnectivityService.wifiEnabled
-                    ? I18n.tr(
-                        "dashboard.status.wifi.notConnected",
-                        "Not connected"
-                    )
-                    : I18n.tr(
-                        "dashboard.status.disabled",
-                        "Disabled"
-                    )
-            iconName: ConnectivityService.wifiConnected
-                ? "network-wireless-signal-excellent-symbolic"
-                : ConnectivityService.wifiEnabled
-                    ? "network-wireless-symbolic"
-                    : "network-wireless-disabled-symbolic"
-            symbol: "◉"
-            available: ConnectivityService.wifiAvailable
-            checked: ConnectivityService.wifiEnabled
-            onToggled: value =>
-                ConnectivityManagerService.setWifiEnabled(value)
-        }
-
-        SettingsActionRow {
-            width: parent.width
-            title: I18n.tr(
-                "settings.connectivity.wifi.scan",
-                "Scan for networks"
-            )
-            description: I18n.tr(
-                "settings.connectivity.wifi.scanDescription",
-                "Refresh the nearby access point list"
-            )
-            iconName: "view-refresh-symbolic"
-            symbol: "↻"
-            actionLabel: ConnectivityManagerService.busyAction === "wifi-scan"
-                ? I18n.tr(
-                    "settings.connectivity.scanning",
-                    "Scanning"
+    SettingsSegmentedControl {
+        width: parent.width
+        height: 44
+        options: [
+            {
+                value: "wifi",
+                label: I18n.tr(
+                    "settings.connectivity.wifi.section",
+                    "Wi-Fi"
                 )
-                : I18n.tr(
-                    "settings.connectivity.scan",
-                    "Scan"
+            },
+            {
+                value: "wired",
+                label: I18n.tr(
+                    "settings.connectivity.wired.section",
+                    "Wired network"
                 )
-            available: ConnectivityService.wifiEnabled
-                && !ConnectivityManagerService.busy
-            onActivated: ConnectivityManagerService.scanWifi()
-        }
-
-        Repeater {
-            model: ConnectivityManagerService.wifiNetworks
-
-            delegate: SettingsActionRow {
-                required property var modelData
-
-                width: parent.width
-                title: modelData.ssid
-                description: modelData.active
-                    ? I18n.tr(
-                        "settings.connectivity.connected",
-                        "Connected"
-                    )
-                    : modelData.signal + "%"
-                        + (modelData.security
-                            && modelData.security !== "--"
-                            ? " · " + modelData.security
-                            : " · " + I18n.tr(
-                                "settings.connectivity.openNetwork",
-                                "Open network"
-                            ))
-                iconName: modelData.active
-                    ? "network-wireless-signal-excellent-symbolic"
-                    : "network-wireless-symbolic"
-                symbol: modelData.active ? "●" : "◉"
-                actionLabel: modelData.active
-                    ? I18n.tr(
-                        "settings.connectivity.disconnect",
-                        "Disconnect"
-                    )
-                    : I18n.tr(
-                        "settings.connectivity.connect",
-                        "Connect"
-                    )
-                available: !ConnectivityManagerService.busy
-                onActivated: root.requestWifiConnection(modelData)
+            },
+            {
+                value: "bluetooth",
+                label: I18n.tr(
+                    "settings.connectivity.bluetooth.section",
+                    "Bluetooth"
+                )
             }
+        ]
+        currentValue: root.activeSection
+        onSelected: value => root.activeSection = value
+    }
+
+    Loader {
+        width: parent.width
+        implicitHeight: item ? item.implicitHeight : 0
+        sourceComponent: root.activeSection === "wifi"
+            ? wifiComponent
+            : root.activeSection === "wired"
+                ? wiredComponent
+                : bluetoothComponent
+    }
+
+    Component {
+        id: wifiComponent
+
+        ConnectivityViews.WifiPage {
+            width: root.width
+            onPasswordRequested: network => root.openPassword(network)
         }
     }
 
-    SettingsSection {
-        visible: root.wifiProfiles.length > 0
-        title: I18n.tr(
-            "settings.connectivity.savedNetworks.section",
-            "Saved Wi-Fi networks"
-        )
-        description: I18n.tr(
-            "settings.connectivity.savedNetworks.description",
-            "Control automatic connection or forget a saved profile"
-        )
+    Component {
+        id: wiredComponent
 
-        Repeater {
-            model: root.wifiProfiles
-
-            delegate: Column {
-                required property var modelData
-
-                width: parent.width
-                spacing: 0
-
-                SettingsSwitchRow {
-                    width: parent.width
-                    title: modelData.name
-                    description: modelData.active
-                        ? I18n.tr(
-                            "settings.connectivity.connected",
-                            "Connected"
-                        )
-                        : I18n.tr(
-                            "settings.connectivity.autoconnectDescription",
-                            "Connect automatically when available"
-                        )
-                    checked: modelData.autoconnect
-                    available: !ConnectivityManagerService.busy
-                    onToggled: value =>
-                        ConnectivityManagerService.setAutoconnect(
-                            modelData.uuid,
-                            value
-                        )
-                }
-
-                SettingsActionRow {
-                    width: parent.width
-                    title: I18n.tr(
-                        "settings.connectivity.forgetNamed",
-                        "Forget %1",
-                        [modelData.name]
-                    )
-                    description: I18n.tr(
-                        "settings.connectivity.forgetDescription",
-                        "Remove the saved NetworkManager profile"
-                    )
-                    iconName: "edit-delete-symbolic"
-                    symbol: "×"
-                    actionLabel: I18n.tr(
-                        "settings.connectivity.forget",
-                        "Forget"
-                    )
-                    destructive: true
-                    available: !modelData.active
-                        && !ConnectivityManagerService.busy
-                    availabilityText: I18n.tr(
-                        "settings.connectivity.disconnectFirst",
-                        "Disconnect this profile first"
-                    )
-                    onActivated:
-                        ConnectivityManagerService.forgetConnection(
-                            modelData.uuid
-                        )
-                }
-            }
+        ConnectivityViews.WiredPage {
+            width: root.width
         }
     }
 
-    SettingsSection {
-        title: I18n.tr(
-            "settings.connectivity.wired.section",
-            "Wired network"
-        )
-        description: root.wiredDevices.length === 0
-            ? I18n.tr(
-                "settings.connectivity.wired.none",
-                "No managed Ethernet interface was found"
-            )
-            : root.wiredDevices.map(function(device) {
-                return device.device + " · " + device.state
-            }).join(", ")
+    Component {
+        id: bluetoothComponent
 
-        Repeater {
-            model: root.wiredProfiles
-
-            delegate: Column {
-                required property var modelData
-
-                width: parent.width
-                spacing: 0
-
-                SettingsActionRow {
-                    width: parent.width
-                    title: modelData.name
-                    description: modelData.active
-                        ? I18n.tr(
-                            "settings.connectivity.connected",
-                            "Connected"
-                        )
-                        : I18n.tr(
-                            "settings.connectivity.wired.profile",
-                            "Ethernet connection profile"
-                        )
-                    iconName: "network-wired-symbolic"
-                    symbol: "↔"
-                    actionLabel: modelData.active
-                        ? I18n.tr(
-                            "settings.connectivity.disconnect",
-                            "Disconnect"
-                        )
-                        : I18n.tr(
-                            "settings.connectivity.connect",
-                            "Connect"
-                        )
-                    available: !ConnectivityManagerService.busy
-                    onActivated: {
-                        if (modelData.active) {
-                            ConnectivityManagerService.deactivateConnection(
-                                modelData.uuid
-                            )
-                        } else {
-                            ConnectivityManagerService.activateConnection(
-                                modelData.uuid
-                            )
-                        }
-                    }
-                }
-
-                SettingsSwitchRow {
-                    width: parent.width
-                    title: I18n.tr(
-                        "settings.connectivity.autoconnect",
-                        "Automatic connection"
-                    )
-                    description: modelData.name
-                    checked: modelData.autoconnect
-                    available: !ConnectivityManagerService.busy
-                    onToggled: value =>
-                        ConnectivityManagerService.setAutoconnect(
-                            modelData.uuid,
-                            value
-                        )
-                }
-            }
-        }
-    }
-
-    SettingsSection {
-        title: I18n.tr(
-            "settings.connectivity.bluetooth.section",
-            "Bluetooth"
-        )
-
-        SettingsSwitchRow {
-            width: parent.width
-            title: I18n.tr(
-                "settings.connectivity.bluetooth.enabled",
-                "Bluetooth"
-            )
-            description: ConnectivityService.bluetoothSummary
-            iconName: ConnectivityService.bluetoothEnabled
-                ? "bluetooth-active-symbolic"
-                : "bluetooth-disabled-symbolic"
-            symbol: "ᛒ"
-            available: ConnectivityService.bluetoothAvailable
-            checked: ConnectivityService.bluetoothEnabled
-            onToggled: value =>
-                ConnectivityManagerService.setBluetoothEnabled(value)
-        }
-
-        SettingsActionRow {
-            width: parent.width
-            title: I18n.tr(
-                "settings.connectivity.bluetooth.scan",
-                "Find Bluetooth devices"
-            )
-            description: I18n.tr(
-                "settings.connectivity.bluetooth.scanDescription",
-                "Discovery runs for approximately twelve seconds"
-            )
-            iconName: "view-refresh-symbolic"
-            symbol: "↻"
-            actionLabel: ConnectivityManagerService.busyAction
-                === "bluetooth-scan"
-                ? I18n.tr(
-                    "settings.connectivity.scanning",
-                    "Scanning"
-                )
-                : I18n.tr(
-                    "settings.connectivity.scan",
-                    "Scan"
-                )
-            available: ConnectivityService.bluetoothEnabled
-                && !ConnectivityManagerService.busy
-            onActivated: ConnectivityManagerService.scanBluetooth()
-        }
-
-        Repeater {
-            model: ConnectivityManagerService.bluetoothDevices
-
-            delegate: Column {
-                required property var modelData
-
-                width: parent.width
-                spacing: 0
-
-                SettingsActionRow {
-                    width: parent.width
-                    title: modelData.name
-                    description: modelData.connected
-                        ? I18n.tr(
-                            "settings.connectivity.connected",
-                            "Connected"
-                        )
-                        : modelData.paired
-                            ? I18n.tr(
-                                "settings.connectivity.bluetooth.paired",
-                                "Paired"
-                            )
-                            : modelData.address
-                    iconName: modelData.connected
-                        ? "bluetooth-active-symbolic"
-                        : "bluetooth-symbolic"
-                    symbol: "ᛒ"
-                    actionLabel: modelData.connected
-                        ? I18n.tr(
-                            "settings.connectivity.disconnect",
-                            "Disconnect"
-                        )
-                        : modelData.paired
-                            ? I18n.tr(
-                                "settings.connectivity.connect",
-                                "Connect"
-                            )
-                            : I18n.tr(
-                                "settings.connectivity.bluetooth.pair",
-                                "Pair"
-                            )
-                    available: !ConnectivityManagerService.busy
-                    onActivated: {
-                        if (modelData.connected) {
-                            ConnectivityManagerService.disconnectBluetooth(
-                                modelData.address
-                            )
-                        } else if (modelData.paired) {
-                            ConnectivityManagerService.connectBluetooth(
-                                modelData.address
-                            )
-                        } else {
-                            ConnectivityManagerService.pairBluetooth(
-                                modelData.address
-                            )
-                        }
-                    }
-                }
-
-                SettingsActionRow {
-                    visible: modelData.paired
-                    width: parent.width
-                    title: I18n.tr(
-                        "settings.connectivity.bluetooth.forgetNamed",
-                        "Forget %1",
-                        [modelData.name]
-                    )
-                    description: modelData.address
-                    iconName: "edit-delete-symbolic"
-                    symbol: "×"
-                    actionLabel: I18n.tr(
-                        "settings.connectivity.forget",
-                        "Forget"
-                    )
-                    destructive: true
-                    available: !modelData.connected
-                        && !ConnectivityManagerService.busy
-                    availabilityText: I18n.tr(
-                        "settings.connectivity.disconnectFirst",
-                        "Disconnect this device first"
-                    )
-                    onActivated:
-                        ConnectivityManagerService.removeBluetooth(
-                            modelData.address
-                        )
-                }
-            }
+        ConnectivityViews.BluetoothPage {
+            width: root.width
         }
     }
 
