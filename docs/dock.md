@@ -22,9 +22,10 @@ Windows are grouped by application ID. Clicking a running application focuses
 its window; repeated clicks cycle through the application's windows. Clicking a
 pinned application that is not running launches its desktop entry.
 
-The Launcher button is always the first item. Running applications can be shown
-after pinned favorites. Right-clicking an application icon pins or unpins it.
-Favorites can also be removed or cleared from **Settings → Dock**.
+The Launcher button is always the first item and uses Lumina's native rounded
+3×3 application-grid glyph. Running applications can be shown after pinned
+favorites. Right-clicking an application icon pins or unpins it. Favorites can
+also be removed or cleared from **Settings → Dock**.
 
 ## Visibility and workspace reservation
 
@@ -37,9 +38,11 @@ Click-through masking keeps transparent areas of the full-width layer window
 from blocking normal application input.
 
 Workspace reservation is available only when automatic hiding is disabled. It
-reserves the complete bottom strip needed by the dock. When Lumina's bar is also
-at the bottom, the dock is placed above it and includes the bar offset in its
-reserved area.
+reserves the complete bottom strip needed by the dock. Floating mode adds an
+8-pixel visual gap above the dock so tiled windows do not touch its rounded
+surface. Task-panel mode remains flush with its normal reserved edge. When
+Lumina's bar is also at the bottom, the dock is placed above it and includes the
+bar offset in its reserved area.
 
 ## Appearance
 
@@ -53,8 +56,11 @@ Blur is requested only for the visible dock or panel geometry. The floating
 mode supports a configurable bottom margin. Task-panel mode is edge-to-edge and
 keeps application icons centered.
 
-Icon size is bounded from 36 to 72 pixels. Long application lists scroll
-horizontally rather than expanding beyond the output width.
+Icons use no pointer-hover background. Hover gently enlarges only the icon,
+while focus and running state remain visible through keyboard outlines and the
+bottom activity indicator. Icon size defaults to 36 pixels and is bounded from
+30 to 72 pixels. Long application lists scroll horizontally rather than
+expanding beyond the output width.
 
 ## Current scope
 
