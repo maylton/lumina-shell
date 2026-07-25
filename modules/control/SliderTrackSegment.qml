@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Shapes
 
 Item {
     id: root
@@ -15,83 +14,39 @@ Item {
         height / 2
     )
     readonly property real safeInsideRadius: Math.min(
-        insideRadius,
+        Math.max(0, insideRadius),
         width / 2,
         height / 2
     )
-    readonly property real startRadius: outerAtStart
-        ? outerRadius
-        : safeInsideRadius
-    readonly property real endRadius: outerAtStart
-        ? safeInsideRadius
-        : outerRadius
+    readonly property real innerExtent: Math.min(
+        width,
+        outerRadius + safeInsideRadius + 1
+    )
+    readonly property color opaqueSegmentColor: Qt.rgba(
+        segmentColor.r,
+        segmentColor.g,
+        segmentColor.b,
+        1
+    )
 
-    Shape {
+    opacity: segmentColor.a
+
+    Rectangle {
         anchors.fill: parent
+        radius: root.outerRadius
+        color: root.opaqueSegmentColor
         antialiasing: true
+    }
 
-        ShapePath {
-            fillColor: root.segmentColor
-            strokeColor: "transparent"
-            strokeWidth: -1
-            startX: root.startRadius
-            startY: 0
-
-            PathLine {
-                x: root.width - root.endRadius
-                y: 0
-            }
-
-            PathArc {
-                x: root.width
-                y: root.endRadius
-                radiusX: root.endRadius
-                radiusY: root.endRadius
-                direction: PathArc.Clockwise
-                useLargeArc: false
-            }
-
-            PathLine {
-                x: root.width
-                y: root.height - root.endRadius
-            }
-
-            PathArc {
-                x: root.width - root.endRadius
-                y: root.height
-                radiusX: root.endRadius
-                radiusY: root.endRadius
-                direction: PathArc.Clockwise
-                useLargeArc: false
-            }
-
-            PathLine {
-                x: root.startRadius
-                y: root.height
-            }
-
-            PathArc {
-                x: 0
-                y: root.height - root.startRadius
-                radiusX: root.startRadius
-                radiusY: root.startRadius
-                direction: PathArc.Clockwise
-                useLargeArc: false
-            }
-
-            PathLine {
-                x: 0
-                y: root.startRadius
-            }
-
-            PathArc {
-                x: root.startRadius
-                y: 0
-                radiusX: root.startRadius
-                radiusY: root.startRadius
-                direction: PathArc.Clockwise
-                useLargeArc: false
-            }
-        }
+    Rectangle {
+        width: root.innerExtent
+        height: parent.height
+        x: root.outerAtStart
+            ? parent.width - width
+            : 0
+        radius: root.safeInsideRadius
+        color: root.opaqueSegmentColor
+        antialiasing: true
+        visible: width > 0
     }
 }
