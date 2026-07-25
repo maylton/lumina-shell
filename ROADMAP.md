@@ -180,6 +180,9 @@ This sprint completes the 0.5 public-beta foundation:
   inline, and notifications use a compact stateful icon with an unread badge.
 - Network and volume text can be hidden independently without disabling their
   status icons, services, tooltips, or Dashboard access.
+- Laptop battery status uses a proportional rounded indicator without embedded
+  text, with optional percentage or power state beside the icon and correct
+  charging versus discharging semantics.
 - The final right-side Dashboard entry uses the detected account avatar with
   AccountsService, `.face`, custom-image, initials, and Lumina fallbacks; its
   image can be disabled without removing the button or session access.

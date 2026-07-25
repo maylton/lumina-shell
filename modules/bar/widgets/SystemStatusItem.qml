@@ -13,6 +13,9 @@ Rectangle {
     property bool showLabel: true
     property bool individual: false
     property bool alert: false
+    property bool expressiveBattery: false
+    property real batteryPercentage: 0
+    property bool batteryCharging: false
 
     readonly property var luminaDesign: Theme.luminaTokens
 
@@ -63,12 +66,22 @@ Rectangle {
 
         DashboardIcon {
             anchors.verticalCenter: parent.verticalCenter
+            visible: !root.expressiveBattery
             iconName: root.iconName
             fallbackSymbol: root.fallbackSymbol
             iconColor: root.alert
                 ? root.luminaDesign.color.urgent
                 : root.luminaDesign.color.onSurface
             iconSize: root.luminaDesign.size.barStatusIcon
+        }
+
+        ExpressiveBatteryIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.expressiveBattery
+            percentage: root.batteryPercentage
+            charging: root.batteryCharging
+            iconSize: root.luminaDesign.size.barStatusIcon
+            iconColor: root.luminaDesign.color.onSurface
         }
 
         Text {

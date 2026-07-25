@@ -5,6 +5,7 @@ import qs.services.connectivity
 import qs.services.power
 import qs.stores.config
 import qs.stores.control
+import "ExpressiveBatteryGeometry.js" as BatteryGeometry
 
 Rectangle {
     id: root
@@ -123,8 +124,7 @@ Rectangle {
                         ? "audio-volume-low-symbolic"
                         : "audio-volume-muted-symbolic"
     readonly property bool batteryCharging:
-        String(PowerService.batteryState).toLowerCase()
-            .indexOf("charging") >= 0
+        BatteryGeometry.isChargingState(PowerService.batteryState)
     readonly property string accessibleSummary: [
         showNetwork
             ? "Network " + ConnectivityService.networkSummary
@@ -273,12 +273,15 @@ Rectangle {
             individual: root.individual
             showLabel: !root.compact
                 && root.batteryTextMode !== "icon"
-            iconName: PowerService.batteryIcon.length > 0
-                ? PowerService.batteryIcon
-                : "battery-symbolic"
-            fallbackSymbol: root.batteryCharging ? "⚡" : "▰"
+            expressiveBattery: true
+            batteryPercentage: PowerService.batteryPercentage
+            batteryCharging: root.batteryCharging
             label: root.batteryLabel
             description: PowerService.batteryState
+            alert: BatteryGeometry.isLowBattery(
+                PowerService.batteryPercentage,
+                root.batteryCharging
+            )
         }
     }
 

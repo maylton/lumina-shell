@@ -1,6 +1,7 @@
 module qs.modules.bar.widgets
 ContextCapsule 1.0 ContextCapsule.qml
 DateTimeCluster 1.0 DateTimeCluster.qml
+ExpressiveBatteryIcon 1.0 ExpressiveBatteryIcon.qml
 KeyboardLayoutIndicator 1.0 KeyboardLayoutIndicator.qml
 OverviewButton 1.0 OverviewButton.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml

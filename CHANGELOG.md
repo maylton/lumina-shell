@@ -95,6 +95,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Internal Material Expressive settings dialogs for launcher, overview,
   workspaces, date/time, context, tray, notifications, system status, user
   avatar, wallpaper, and session widgets.
+- Android-inspired expressive battery status icon with proportional fill,
+  external charging bolt, low-level color state, and optional percentage or
+  power-state text beside the icon.
 
 ### Changed
 

@@ -18,7 +18,11 @@ The system-status cluster can group network, volume, and battery into one
 pill, or display them individually. Missing hardware is omitted. Clicking the
 cluster opens the existing Dashboard rather than another popup. Wallpaper and
 session actions remain in the Dashboard by default, but can be enabled on the
-bar.
+bar. On laptops, battery level uses a rounded horizontal indicator inspired by
+Android's system icon: the charge is conveyed by fill and color, never by text
+inside the shape. Its widget settings can hide text, show the percentage beside
+the icon, or show the current power state instead. Charging adds an external
+bolt, while a low non-charging battery uses the urgent color role.
 
 The Bar settings page controls:
 

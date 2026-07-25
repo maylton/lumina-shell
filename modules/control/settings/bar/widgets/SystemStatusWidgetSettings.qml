@@ -1,5 +1,6 @@
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 Column {
@@ -76,8 +77,8 @@ Column {
     }
 
     SettingsSection {
-        title: "Audio and battery"
-        description: "Choose the visible status and text"
+        title: "Audio"
+        description: "Choose the visible audio status and text"
 
         SettingsSwitchRow {
             width: parent.width
@@ -110,11 +111,28 @@ Column {
                 "system-status", "audioTextMode", value
             )
         }
+    }
+
+    SettingsSection {
+        title: I18n.tr(
+            "settings.bar.systemStatus.battery.title",
+            "Battery"
+        )
+        description: I18n.tr(
+            "settings.bar.systemStatus.battery.description",
+            "Android-inspired level icon with optional text beside it"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show battery"
-            description: "Show battery only when hardware is available"
+            title: I18n.tr(
+                "settings.bar.systemStatus.battery.show",
+                "Show battery"
+            )
+            description: I18n.tr(
+                "settings.bar.systemStatus.battery.showDescription",
+                "Show the battery only when hardware is available"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showBattery", true
             ))
@@ -125,15 +143,39 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Battery text"
-            description: "Show a percentage, state, or icon only"
+            title: I18n.tr(
+                "settings.bar.systemStatus.battery.text",
+                "Text beside icon"
+            )
+            description: I18n.tr(
+                "settings.bar.systemStatus.battery.textDescription",
+                "The battery shape never contains text"
+            )
             available: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showBattery", true
             ))
             options: [
-                { value: "icon", label: "Icon only" },
-                { value: "percentage", label: "Percentage" },
-                { value: "state", label: "State" }
+                {
+                    value: "icon",
+                    label: I18n.tr(
+                        "settings.bar.systemStatus.battery.iconOnly",
+                        "Icon only"
+                    )
+                },
+                {
+                    value: "percentage",
+                    label: I18n.tr(
+                        "settings.bar.systemStatus.battery.percentage",
+                        "Percentage beside icon"
+                    )
+                },
+                {
+                    value: "state",
+                    label: I18n.tr(
+                        "settings.bar.systemStatus.battery.state",
+                        "State beside icon"
+                    )
+                }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "system-status", "batteryTextMode", "percentage"
