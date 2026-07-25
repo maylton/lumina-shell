@@ -143,6 +143,10 @@ The bell button opens notification history and keeps the unread count in a
 compact badge. A crossed bell indicates Do Not Disturb, which suppresses popup
 surfaces while preserving history.
 
+The notification center grows from a compact empty state to a bounded,
+scrollable history surface. Recent items use contained cards, while urgency
+and unread state remain visible without turning the whole panel into an alert.
+
 Only one process can own `org.freedesktop.Notifications`. If Noctalia already owns it, Lumina waits without replacing or terminating Noctalia. Stop the other notification daemon before testing Lumina as the active daemon.
 
 ## Wallpapers and color

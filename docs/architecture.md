@@ -157,6 +157,12 @@ The service provides:
 
 Do Not Disturb suppresses new popup surfaces without discarding history. The notification center and popups each create a surface only on the selected output, and visual components call service methods instead of owning the D-Bus integration.
 
+The notification center anchors to the configured bar edge but sizes itself
+from its history content, with compact empty and bounded maximum heights.
+`ListView` keeps longer histories virtualized and scrollable. The same
+contained `NotificationCard` presentation is shared by history and transient
+popups, including urgency, actions, dismissal, and keyboard focus.
+
 ## Daily-control services
 
 Daily hardware state is split into typed singleton services:

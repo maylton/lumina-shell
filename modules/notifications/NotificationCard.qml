@@ -26,10 +26,10 @@ Rectangle {
 
     implicitHeight: cardContent.implicitHeight
         + root.luminaDesign.spacing.large * 2
-    radius: root.luminaDesign.shape.large
-    color: entry.read
-        ? root.luminaDesign.color.surfaceContainer
-        : root.luminaDesign.color.surfaceMuted
+    radius: cardMouse.containsMouse
+        ? root.luminaDesign.shape.largeIncreased
+        : root.luminaDesign.shape.large
+    color: root.luminaDesign.color.surfaceMuted
     border.width: Number(entry.urgency) >= 2 || cardMouse.containsMouse ? 1 : 0
     border.color: Number(entry.urgency) >= 2
         ? root.luminaDesign.color.urgent
@@ -43,6 +43,13 @@ Rectangle {
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.fast
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.medium
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -82,28 +89,40 @@ Rectangle {
 
         spacing: root.luminaDesign.spacing.medium
 
-        Image {
+        Rectangle {
+            id: iconContainer
+
             visible: ConfigStore.notificationShowImages
             width: visible
-                ? root.luminaDesign.size.notificationIcon
+                ? root.luminaDesign.size.notificationIcon + 6
                 : 0
             height: width
-            source: String(root.entry.icon || "").indexOf("/") >= 0
-                ? String(root.entry.icon)
-                : Quickshell.iconPath(
-                    String(root.entry.icon || "dialog-information"),
-                    "dialog-information"
-                )
-            sourceSize.width: width
-            sourceSize.height: height
-            asynchronous: true
-            fillMode: Image.PreserveAspectFit
+            radius: root.luminaDesign.shape.medium
+            color: root.entry.read
+                ? root.luminaDesign.color.surfaceContainer
+                : root.luminaDesign.color.accentContainer
+
+            Image {
+                anchors.centerIn: parent
+                width: root.luminaDesign.size.notificationIcon - 6
+                height: width
+                source: String(root.entry.icon || "").indexOf("/") >= 0
+                    ? String(root.entry.icon)
+                    : Quickshell.iconPath(
+                        String(root.entry.icon || "dialog-information"),
+                        "dialog-information"
+                    )
+                sourceSize.width: width
+                sourceSize.height: height
+                asynchronous: true
+                fillMode: Image.PreserveAspectFit
+            }
         }
 
         Column {
             width: parent.width
                 - (ConfigStore.notificationShowImages
-                    ? root.luminaDesign.size.notificationIcon
+                    ? iconContainer.width
                     : 0)
                 - closeButton.width
                 - parent.spacing * 2
@@ -118,7 +137,8 @@ Rectangle {
                     text: String(root.entry.appName || "Application")
                     color: root.luminaDesign.color.textMuted
                     elide: Text.ElideRight
-                    font.pixelSize: root.luminaDesign.typography.labelSmall
+                    font.pixelSize:
+                        root.luminaDesign.typography.labelMedium
                     font.weight: Font.DemiBold
                 }
 
@@ -139,7 +159,7 @@ Rectangle {
                 text: String(root.entry.summary || "Notification")
                 color: root.luminaDesign.color.onSurface
                 elide: Text.ElideRight
-                font.pixelSize: root.luminaDesign.typography.bodyMedium
+                font.pixelSize: root.luminaDesign.typography.titleMedium
                 font.weight: Font.DemiBold
             }
 
@@ -170,12 +190,12 @@ Rectangle {
                         required property var modelData
 
                         width: actionLabel.implicitWidth + 16
-                        height: 26
+                        height: 30
                         activeFocusOnTab: true
                         radius: root.luminaDesign.shape.full
                         color: actionMouse.containsMouse
                             ? root.luminaDesign.color.accentContainer
-                            : root.luminaDesign.color.surfaceMuted
+                            : root.luminaDesign.color.surfaceContainer
                         border.width: activeFocus ? 2 : 0
                         border.color: root.luminaDesign.color.primary
 
@@ -214,7 +234,8 @@ Rectangle {
                             color: actionMouse.containsMouse
                                 ? root.luminaDesign.color.onAccentContainer
                                 : root.luminaDesign.color.onSurface
-                            font.pixelSize: root.luminaDesign.typography.labelSmall
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
                             font.weight: Font.DemiBold
                         }
 
@@ -225,9 +246,7 @@ Rectangle {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                actionButton.forceActiveFocus(
-                                    Qt.MouseFocusReason
-                                )
+                                actionButton.focus = false
                                 NotificationService.invokeAction(
                                     root.entry,
                                     actionButton.modelData
@@ -242,8 +261,8 @@ Rectangle {
         Rectangle {
             id: closeButton
 
-            width: 26
-            height: 26
+            width: 30
+            height: 30
             activeFocusOnTab: true
             radius: root.luminaDesign.shape.full
             color: closeMouse.containsMouse
@@ -275,7 +294,7 @@ Rectangle {
                 color: closeMouse.containsMouse
                     ? root.luminaDesign.color.onAccentContainer
                     : root.luminaDesign.color.textMuted
-                font.pixelSize: root.luminaDesign.typography.titleLarge
+                font.pixelSize: 18
             }
 
             MouseArea {
@@ -285,11 +304,28 @@ Rectangle {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    closeButton.forceActiveFocus(Qt.MouseFocusReason)
+                    closeButton.focus = false
                     NotificationService.dismissNotification(root.entry)
                 }
             }
         }
+    }
+
+    Rectangle {
+        anchors {
+            left: parent.left
+            top: parent.top
+            bottom: parent.bottom
+            topMargin: root.luminaDesign.spacing.medium
+            bottomMargin: root.luminaDesign.spacing.medium
+        }
+
+        visible: !root.entry.read
+        width: 4
+        radius: root.luminaDesign.shape.full
+        color: Number(root.entry.urgency) >= 2
+            ? root.luminaDesign.color.urgent
+            : root.luminaDesign.color.primary
     }
 
     Column {

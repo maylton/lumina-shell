@@ -67,6 +67,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Reworked the notification center with adaptive height, lighter scrim,
+  hierarchical header controls, an expressive empty state, and contained
+  notification cards.
 - Launcher search no longer truncates application catalogs and broad queries
   to the first 12 ranked results.
 - Pointer activation no longer leaves a keyboard-focus outline on bar buttons
