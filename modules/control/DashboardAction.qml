@@ -17,10 +17,23 @@ Rectangle {
     signal activated
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool circular:
+        !wide && Math.abs(width - height) < 0.5
+    readonly property real circleRadius:
+        Math.min(width, height) / 2
+    readonly property real activatedRadius: Math.min(
+        circleRadius,
+        luminaDesign.shape.controlIconActivated
+            * Math.min(width, height) / 44
+    )
 
     implicitWidth: wide ? Math.max(90, actionLabel.implicitWidth + 32) : 44
     implicitHeight: 44
-    radius: luminaDesign.shape.full
+    radius: circular
+        ? checked || actionMouse.pressed
+            ? activatedRadius
+            : circleRadius
+        : luminaDesign.shape.full
     color: checked
         ? luminaDesign.color.accentContainer
         : actionMouse.containsMouse || activeFocus
@@ -55,6 +68,15 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on radius {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

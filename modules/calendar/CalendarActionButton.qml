@@ -8,17 +8,31 @@ Rectangle {
 
     property string label: ""
     property bool selected: false
+    property bool expressiveMorph: false
     property int horizontalPadding: 12
 
     signal clicked
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool circular:
+        Math.abs(width - height) < 0.5
+    readonly property real circleRadius:
+        Math.min(width, height) / 2
+    readonly property real activatedRadius: Math.min(
+        circleRadius,
+        luminaDesign.shape.controlIconActivated
+            * Math.min(width, height) / 44
+    )
 
     implicitWidth: buttonLabel.implicitWidth + horizontalPadding * 2
     implicitHeight: luminaDesign.size.chipHeight
-    radius: selected
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.medium
+    radius: expressiveMorph && circular
+        ? selected || buttonMouse.pressed
+            ? activatedRadius
+            : circleRadius
+        : selected
+            ? luminaDesign.shape.full
+            : luminaDesign.shape.medium
     scale: buttonMouse.pressed
         ? 0.96
         : 1.0

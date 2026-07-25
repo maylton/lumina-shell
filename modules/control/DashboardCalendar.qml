@@ -52,6 +52,7 @@ DashboardCard {
                 width: 34
                 height: 34
                 horizontalPadding: 0
+                expressiveMorph: true
                 label: "‹"
                 onClicked: CalendarStore.showPreviousMonth()
             }
@@ -70,6 +71,7 @@ DashboardCard {
                 width: 34
                 height: 34
                 horizontalPadding: 0
+                expressiveMorph: true
                 label: "›"
                 onClicked: CalendarStore.showNextMonth()
             }
@@ -160,7 +162,14 @@ DashboardCard {
 
                         width: root.daySize
                         height: root.daySize
-                        radius: root.luminaDesign.shape.full
+                        radius: modelData.isSelected
+                            || dayMouse.pressed
+                            ? Math.min(
+                                width / 2,
+                                root.luminaDesign.shape.controlIconActivated
+                                    * width / 44
+                            )
+                            : width / 2
                         activeFocusOnTab: modelData.enabled
                         color: modelData.isSelected
                             ? root.luminaDesign.color.accentContainer
@@ -170,6 +179,17 @@ DashboardCard {
                         border.width:
                             activeFocus || modelData.isToday ? 2 : 0
                         border.color: root.luminaDesign.color.primary
+
+                        Behavior on radius {
+                            NumberAnimation {
+                                duration:
+                                    root.luminaDesign.motion.spatialFast
+                                easing.type:
+                                    root.luminaDesign.motion.spatialEasing
+                                easing.overshoot:
+                                    root.luminaDesign.motion.spatialOvershoot
+                            }
+                        }
 
                         Accessible.role: Accessible.Button
                         Accessible.name: modelData.enabled

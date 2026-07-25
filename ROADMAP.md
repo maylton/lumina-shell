@@ -165,6 +165,9 @@ This sprint completes the 0.5 public-beta foundation:
 - Circular bar controls morph into rounded squircles for pressed and expanded
   states, return to true circles at rest, and honor the shared reduced-motion
   behavior without changing their hit targets.
+- Circular Dashboard and Settings actions use the same state model for
+  pressed, checked, and selected states while component-specific controls keep
+  their own Material shapes.
 - One persistent bar preference can remove resting pill backgrounds from
   non-workspace widgets while preserving hover, focus, open, urgent, and error
   feedback; workspace state pills remain visible.

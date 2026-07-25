@@ -89,6 +89,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Extended state-aware circle-to-squircle morphs to circular Dashboard actions,
+  selected calendar days and navigation, and Settings widget-order controls,
+  while leaving non-circular and component-specific shapes unchanged.
 - Added Material Expressive state morphs to circular bar controls: launcher,
   overview, notifications, grouped tray, and Dashboard avatar now transition
   from circles to rounded squircles while pressed or expanded; inline tray

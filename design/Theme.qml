@@ -135,6 +135,8 @@ QtObject {
             extraSmall: Math.round(4 * root.radiusScale),
             small: Math.round(8 * root.radiusScale),
             medium: Math.round(16 * root.radiusScale),
+            controlIconActivated:
+                Math.round(14 * root.radiusScale),
             large: Math.round(24 * root.radiusScale),
             largeIncreased: Math.round(28 * root.radiusScale),
             extraLarge: Math.round(32 * root.radiusScale),

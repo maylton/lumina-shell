@@ -136,7 +136,13 @@ Rectangle {
 
             width: 36
             height: 36
-            radius: root.luminaDesign.shape.large
+            radius: upMouse.pressed
+                ? Math.min(
+                    width / 2,
+                    root.luminaDesign.shape.controlIconActivated
+                        * width / 44
+                )
+                : width / 2
             color: root.luminaDesign.color.surfaceBase
             opacity: root.canMoveUp ? 1 : 0.4
             activeFocusOnTab: root.canMoveUp
@@ -144,6 +150,17 @@ Rectangle {
             border.color: activeFocus
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
+
+            Behavior on radius {
+                NumberAnimation {
+                    duration:
+                        root.luminaDesign.motion.spatialFast
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
+                }
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: "Move " + root.widgetTitle + " up"
@@ -175,6 +192,8 @@ Rectangle {
             }
 
             MouseArea {
+                id: upMouse
+
                 anchors.fill: parent
                 enabled: root.canMoveUp
                 cursorShape: enabled
@@ -192,7 +211,13 @@ Rectangle {
 
             width: 36
             height: 36
-            radius: root.luminaDesign.shape.large
+            radius: downMouse.pressed
+                ? Math.min(
+                    width / 2,
+                    root.luminaDesign.shape.controlIconActivated
+                        * width / 44
+                )
+                : width / 2
             color: root.luminaDesign.color.surfaceBase
             opacity: root.canMoveDown ? 1 : 0.4
             activeFocusOnTab: root.canMoveDown
@@ -200,6 +225,17 @@ Rectangle {
             border.color: activeFocus
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
+
+            Behavior on radius {
+                NumberAnimation {
+                    duration:
+                        root.luminaDesign.motion.spatialFast
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
+                }
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: "Move " + root.widgetTitle + " down"
@@ -231,6 +267,8 @@ Rectangle {
             }
 
             MouseArea {
+                id: downMouse
+
                 anchors.fill: parent
                 enabled: root.canMoveDown
                 cursorShape: enabled
