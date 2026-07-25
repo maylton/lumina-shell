@@ -63,25 +63,53 @@ SettingsPage {
 
     SettingsSection {
         title: "Surface"
-        description: ConfigStore.barSurfaceMode === "edge-to-edge"
-            ? "Edge-to-edge ignores the outer margin"
-            : "Floating reserves margin around the visible surface"
+        description: "Independent background and responsive bar geometry"
 
-        headerData: [
+        SettingsRow {
+            width: parent.width
+            title: "Background"
+            description: "Change only the bar surface"
+            controlWidth: 420
+
             SettingsSegmentedControl {
                 width: parent.width
                 height: 44
                 options: [
-                    { value: "edge-to-edge", label: "Edge-to-edge" },
-                    { value: "floating", label: "Floating" }
+                    { value: "solid", label: "Solid" },
+                    {
+                        value: "translucent",
+                        label: "Translucent"
+                    },
+                    {
+                        value: "transparent",
+                        label: "Transparent"
+                    }
                 ]
-                currentValue: ConfigStore.barSurfaceMode
+                currentValue: ConfigStore.barBackgroundMode
                 onSelected: value => ConfigStore.setBarValue(
-                    "barSurfaceMode",
+                    "barBackgroundMode",
                     value
                 )
             }
-        ]
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: "Background opacity"
+            description: "Opacity of the bar background only"
+            available:
+                ConfigStore.barBackgroundMode === "translucent"
+            availabilityText: "Choose Translucent background first"
+            from: 0
+            to: 1
+            stepSize: 0.02
+            value: ConfigStore.barSurfaceOpacity
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value => ConfigStore.setBarValue(
+                "barSurfaceOpacity",
+                value
+            )
+        }
 
         SettingsComboRow {
             width: parent.width
@@ -96,17 +124,68 @@ SettingsPage {
                 ConfigStore.setBarValue("barPosition", value)
         }
 
+        SettingsRow {
+            width: parent.width
+            title: "Surface geometry"
+            description: ConfigStore.barSurfaceMode === "edge-to-edge"
+                ? "Fill the screen edge"
+                : "Reserve space around the visible surface"
+            controlWidth: 340
+
+            SettingsSegmentedControl {
+                width: parent.width
+                height: 44
+                options: [
+                    { value: "edge-to-edge", label: "Edge-to-edge" },
+                    { value: "floating", label: "Floating" }
+                ]
+                currentValue: ConfigStore.barSurfaceMode
+                onSelected: value => ConfigStore.setBarValue(
+                    "barSurfaceMode",
+                    value
+                )
+            }
+        }
+
         SettingsSliderRow {
             width: parent.width
-            title: "Visible height"
+            title: "Bar height"
             description: "Expressive surface height, excluding margins"
             from: 40
-            to: 72
+            to: 80
             stepSize: 2
             value: ConfigStore.barHeight
             valueLabel: Math.round(value) + " px"
             onValueEdited: value =>
                 ConfigStore.setBarValue("barHeight", value)
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Scale contents automatically"
+            description: "Match icons, text, padding, and targets to height"
+            checked: ConfigStore.barAutoScaleContents
+            onToggled: value => ConfigStore.setBarValue(
+                "barAutoScaleContents",
+                value
+            )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: "Content scale"
+            description: "Manual scale for bar contents"
+            available: !ConfigStore.barAutoScaleContents
+            availabilityText: "Disable automatic content scaling first"
+            from: 0.8
+            to: 1.4
+            stepSize: 0.02
+            value: ConfigStore.barContentScale
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value => ConfigStore.setBarValue(
+                "barContentScale",
+                value
+            )
         }
 
         SettingsSliderRow {
@@ -127,21 +206,6 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Surface opacity"
-            description: "Shared tonal-surface opacity"
-            from: 0.72
-            to: 1
-            stepSize: 0.02
-            value: ConfigStore.surfaceOpacity
-            valueLabel: Math.round(value * 100) + "%"
-            onValueEdited: value => ConfigStore.setAppearanceValue(
-                "surfaceOpacity",
-                value
-            )
-        }
-
-        SettingsSliderRow {
-            width: parent.width
             title: "Widget spacing"
             description: "Horizontal distance between clusters"
             from: 2
@@ -158,7 +222,7 @@ SettingsPage {
         SettingsSwitchRow {
             width: parent.width
             title: "Compact mode"
-            description: "Reduce spacing while preserving touch targets"
+            description: "Reduce density without ignoring height or scale"
             checked: ConfigStore.compactMode
             onToggled: value => ConfigStore.setAppearanceValue(
                 "compactMode",
