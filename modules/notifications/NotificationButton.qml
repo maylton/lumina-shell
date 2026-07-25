@@ -15,14 +15,16 @@ Rectangle {
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: NotificationService.centerOutputName
         === outputName
+    readonly property real circleDiameter:
+        luminaDesign.size.barTouchTarget
 
     property bool tooltipVisible: false
 
-    implicitWidth: luminaDesign.size.barTouchTarget
-    implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded || notificationMouse.containsMouse
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.barLarge
+    width: circleDiameter
+    height: circleDiameter
+    implicitWidth: circleDiameter
+    implicitHeight: circleDiameter
+    radius: circleDiameter / 2
     scale: notificationMouse.pressed
         ? 0.96
         : 1.0
@@ -66,15 +68,6 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.spatialFast
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot:
-                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

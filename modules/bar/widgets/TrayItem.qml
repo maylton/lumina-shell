@@ -25,6 +25,8 @@ Rectangle {
         : ""
     readonly property bool needsAttention: trayItem
         && trayItem.status === Status.NeedsAttention
+    readonly property real circleDiameter:
+        luminaDesign.size.barTouchTarget
 
     property bool tooltipVisible: false
 
@@ -37,11 +39,11 @@ Rectangle {
         trayMenu.show()
     }
 
-    implicitWidth: luminaDesign.size.barTouchTarget
-    implicitHeight: luminaDesign.size.barTouchTarget
-    radius: needsAttention
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.barMedium
+    width: circleDiameter
+    height: circleDiameter
+    implicitWidth: circleDiameter
+    implicitHeight: circleDiameter
+    radius: circleDiameter / 2
     scale: itemMouse.pressed
         ? 0.96
         : 1.0
@@ -90,15 +92,6 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.spatialFast
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot:
-                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

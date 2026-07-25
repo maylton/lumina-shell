@@ -13,12 +13,14 @@ Rectangle {
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded:
         ControlCenterStore.activeOutputName === outputName
+    readonly property real circleDiameter:
+        luminaDesign.size.barTouchTarget
 
-    implicitWidth: luminaDesign.size.barTouchTarget
-    implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded || avatarMouse.containsMouse
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.barLarge
+    width: circleDiameter
+    height: circleDiameter
+    implicitWidth: circleDiameter
+    implicitHeight: circleDiameter
+    radius: circleDiameter / 2
     color: expanded || avatarMouse.containsMouse
         ? luminaDesign.color.accentContainer
         : ConfigStore.barWidgetPillsEnabled
@@ -61,15 +63,6 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.spatialFast
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot:
-                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

@@ -8,12 +8,14 @@ Rectangle {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property real circleDiameter:
+        luminaDesign.size.barTouchTarget
 
-    implicitWidth: luminaDesign.size.barTouchTarget
-    implicitHeight: luminaDesign.size.barTouchTarget
-    radius: NiriService.overviewOpen
-        ? luminaDesign.shape.full
-        : luminaDesign.shape.barMedium
+    width: circleDiameter
+    height: circleDiameter
+    implicitWidth: circleDiameter
+    implicitHeight: circleDiameter
+    radius: circleDiameter / 2
     scale: overviewMouse.pressed
         ? 0.96
         : 1.0
@@ -53,15 +55,6 @@ Rectangle {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.spatialFast
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot:
-                root.luminaDesign.motion.spatialOvershoot
         }
     }
 

@@ -89,6 +89,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Enforced true 1:1 circular geometry for icon-only bar controls, including
+  launcher, overview, tray, notifications, and the user avatar, without
+  changing stateful workspace or information capsules.
 - Made automatic bar sizing fully proportional to its 56-pixel reference:
   widget surfaces, icons, typography, spacing, badges, context thresholds, and
   expressive radii now follow `barHeight / 56` across the 40–80 pixel range,

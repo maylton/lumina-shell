@@ -44,9 +44,7 @@ Item {
             visible: root.grouped
             width: visible ? root.luminaDesign.size.barTouchTarget : 0
             height: root.luminaDesign.size.barTouchTarget
-            radius: trayPopup.visible
-                ? root.luminaDesign.shape.full
-                : root.luminaDesign.shape.barMedium
+            radius: height / 2
             color: trayPopup.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
                 : ConfigStore.barWidgetPillsEnabled
@@ -84,17 +82,6 @@ Item {
                         root.luminaDesign.motion.effectsFast
                     easing.type:
                         root.luminaDesign.motion.effectsEasing
-                }
-            }
-
-            Behavior on radius {
-                NumberAnimation {
-                    duration:
-                        root.luminaDesign.motion.spatialFast
-                    easing.type:
-                        root.luminaDesign.motion.spatialEasing
-                    easing.overshoot:
-                        root.luminaDesign.motion.spatialOvershoot
                 }
             }
 
