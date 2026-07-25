@@ -18,6 +18,54 @@ def replace_once(source: str, old: str, new: str, label: str) -> str:
     return source.replace(old, new, 1)
 
 
+def replace_exact_whitespace_aware(path: Path, old: str, new: str) -> None:
+    """Replace one block, allowing only leading/trailing whitespace drift."""
+    content = path.read_text(encoding="utf-8")
+    count = content.count(old)
+
+    if count == 1:
+        path.write_text(content.replace(old, new, 1), encoding="utf-8")
+        return
+
+    old_lines = old.splitlines(keepends=True)
+    content_lines = content.splitlines(keepends=True)
+    matches: list[int] = []
+
+    def normalized(line: str) -> str:
+        return line.strip()
+
+    if old_lines:
+        for start_line in range(0, len(content_lines) - len(old_lines) + 1):
+            candidate = content_lines[
+                start_line:start_line + len(old_lines)
+            ]
+            if all(
+                normalized(candidate[index]) == normalized(old_lines[index])
+                for index in range(len(old_lines))
+            ):
+                matches.append(start_line)
+
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"{path}: expected one exact or whitespace-only replacement "
+            f"target, found exact={count}, whitespace={len(matches)}: "
+            f"{old[:100]!r}"
+        )
+
+    start_line = matches[0]
+    start_offset = sum(len(line) for line in content_lines[:start_line])
+    end_offset = start_offset + sum(
+        len(line)
+        for line in content_lines[
+            start_line:start_line + len(old_lines)
+        ]
+    )
+    path.write_text(
+        content[:start_offset] + new + content[end_offset:],
+        encoding="utf-8",
+    )
+
+
 def normalize_literal_block(
     payload: str,
     first_line: str,
@@ -312,6 +360,7 @@ def apply_payload''',
         "normalize_payload": normalize_payload,
     }
     exec(compile(source, str(ORIGINAL), "exec"), namespace)
+    namespace["replace_exact"] = replace_exact_whitespace_aware
     namespace["main"]()
 
 
