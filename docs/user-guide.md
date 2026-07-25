@@ -42,16 +42,28 @@ policy.
 
 ## Launcher
 
-Open **Apps** from the bar and type to search installed applications, open Niri
-windows, layout actions, and shell actions. Use the arrow keys to move, Enter to
-activate, and Escape to close.
+Open **Apps** from the bar or Dock to reveal a centered bottom app drawer. With
+an empty query, the Launcher shows its handle, rounded search field, applications
+pinned to the Dock, and a scrollable **All apps** grid. It is positioned above a
+bottom bar and the optional Dock or task panel.
+
+Typing switches the content to detailed search results covering installed
+applications, open Niri windows, layout actions, and shell actions. Action names,
+result kinds, descriptions, empty states, and keyboard hints are localized in
+Brazilian Portuguese.
+
+Use the arrow keys to move through the application grid or result list, Enter
+to activate, and Escape to close. Right-click an installed application in the
+pinned row, app grid, or search results to open **Pin to Dock** or
+**Unpin from Dock**. Window and shell-action results are not pinnable.
 
 ```bash
 qs ipc -p /path/to/lumina-shell call launcher toggle DP-1
 ```
 
 Replace `DP-1` with an output reported by `niri msg outputs`. An unavailable
-name falls back to a connected output.
+name falls back to a connected output. Detailed behavior is documented in
+[launcher.md](launcher.md).
 
 ## Dock and task panel
 
@@ -67,8 +79,9 @@ focuses its window; repeated clicks cycle through multiple windows from the same
 application. Clicking a pinned item that is not running launches its desktop
 entry.
 
-Right-click an application icon to pin or unpin it. The Settings page can also
-remove individual favorites or clear the complete list.
+Right-click an application icon to open an explicit **Pin to Dock** or
+**Unpin from Dock** action. The Settings page can also remove individual
+favorites or clear the complete list.
 
 Automatic hiding leaves a small bottom-edge reveal region. The floating mode
 uses the center of the edge, while task-panel mode uses the complete bottom
