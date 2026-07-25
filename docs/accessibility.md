@@ -26,7 +26,10 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   depend on color. Urgency has a border and an assistive description.
 - Transparent-bar mode keeps interactive widgets on subtle tonal state
   surfaces rather than reducing text or icon opacity; focus outlines and
-  selected states remain unchanged.
+  selected states remain unchanged. Translucent, Blur, and Frosted modes keep
+  client-owned tonal contrast protection even when compositor blur is absent.
+  Surface changes never reduce the opacity of text, icons, widgets, or focus
+  indicators.
 - Active bar-widget rows provide separate keyboard-focusable Configure, Move
   up, Move down, and Remove controls. Add widgets exposes only removed widgets
   on the requested side. The modal individual-settings popup contains focus,

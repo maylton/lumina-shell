@@ -152,11 +152,15 @@ This sprint completes the 0.5 public-beta foundation:
 - The default edge-to-edge bar uses a substantial 56-pixel surface, clear
   clock/date hierarchy, and expressive workspace state without shrinking
   interaction targets.
-- The bar supports solid, blur, frosted-glass, and transparent backgrounds
-  independently of global surface transparency, with opaque child content and
-  native Niri blur limited to the blur and frosted-glass bar region. All modes
-  reserve work area while the background wallpaper ignores shell exclusion
-  zones and continues beneath the transparent surface.
+- The bar supports solid, translucent, blur, frosted-glass, and transparent
+  backgrounds independently of global surface transparency. Only Blur and
+  Frosted request native Niri blur, bounded to the visible rounded surface;
+  Translucent is alpha-only, children remain opaque, and all modes reserve work
+  area while the wallpaper continues beneath the transparent surface.
+- Android-inspired bounded background blur keeps clean Blur grain-free,
+  preserves Frosted as a richer style, exposes no fake compositor controls,
+  remains readable without rendered blur, and offers opt-in xray/live Niri
+  profiles without editing the user's configuration.
 - Bar height spans 40–80 pixels; automatic scaling uses the direct
   `barHeight / 56` ratio for widget geometry, icons, type, spacing, and shapes,
   while bounded manual scaling and small safety floors preserve a single-line

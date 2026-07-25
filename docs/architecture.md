@@ -74,28 +74,45 @@ selection, and the state passed directly to the sole `BarLayout`.
 Its background contract is independent from global shell transparency:
 
 - **solid:** forces the tonal container background to alpha 1;
-- **blur:** applies `barSurfaceOpacity` to a simple tonal tint over Niri's
-  native background blur;
-- **frosted glass:** combines the native blur with a tonal highlight, a subtle
-  grain texture, and a persistent glass edge;
+- **translucent:** draws an alpha-only tonal surface and never requests
+  compositor blur;
+- **blur:** requests native background blur and draws a clean neutral tint
+  plus subtle contrast protection;
+- **frosted glass:** requests the same bounded native blur, then adds a
+  stronger neutral tint, directional highlight, extremely subtle static
+  grain, and persistent glass edge;
 - **transparent:** removes the background, edge divider, and floating border.
 
-The `Rectangle` that owns children is never assigned an `opacity`, so bar
-widgets and popup surfaces remain fully opaque. Divider and floating-border
-policies are derived separately by `BarSurfacePolicy`. Color changes use the
-existing effects motion tokens. Every mode reserves the full layer-shell
-height, so tiled windows never sit behind bar controls. The wallpaper
-`PanelWindow` uses `ExclusionMode.Ignore`, allowing its image to cover the
-whole output beneath that reserved area; Transparent therefore reveals the
-wallpaper rather than a compositor-colored strip. In Blur and Frosted Glass
-modes, the bar `PanelWindow` requests Niri 26.04's native
-`ext-background-effect` blur through
-`BackgroundEffect.blurRegion`; the region matches only the visible
-edge-to-edge or rounded floating bar. Frosted Glass adds its tint, grain, and
-edge inside that same surface rather than creating another layer-shell window.
-Solid and Transparent do not request blur, and no child or popup region is
-included. Schema-v6 normalization maps the retired `translucent` value to
-`blur`.
+`BarSurface` paints ordered base, tint, contrast-protection, Frosted-only
+highlight/grain, content, and outline layers. No ancestor opacity is applied,
+so bar widgets and popup surfaces remain fully opaque. Semantic colors live in
+`Theme`; deterministic alpha, outline, fallback, and region calculations live
+in `BarSurfacePolicy`. Short color and opacity transitions use the existing
+effects motion tokens and do not animate a compositor-owned blur radius.
+
+Every mode reserves the full layer-shell height, so tiled windows never sit
+behind bar controls. The wallpaper `PanelWindow` uses
+`ExclusionMode.Ignore`, allowing its image to cover the whole output beneath
+that reserved area; Transparent therefore reveals the wallpaper rather than a
+compositor-colored strip.
+
+Only Blur and Frosted Glass make a `BackgroundEffect.blurRegion` request. The
+edge-to-edge region covers the visible bar with zero radius. The floating
+region excludes the outer margins and uses exactly `BarSurface.radius`. It
+never includes a popup, margin, or full-screen area. Solid, Translucent, and
+Transparent explicitly request no compositor blur. `PanelWindow.surfaceFormat`
+stays non-opaque from startup so all modes can change live without recreating
+the window.
+
+The validated Quickshell API exposes no reliable capability callback and no
+per-surface blur-radius control. Lumina therefore does not claim that a
+request is active and does not expose fake compositor sliders. If Niri ignores
+or disables the request, the client-owned tint and contrast layer remain
+readable. Pure `fallbackMode()` and `fallbackAlpha()` policy functions define
+the stronger Translucent fallback for a future reliable capability source
+without overwriting the selected preference. Schema-7 configurations may
+select the new alpha-only Translucent mode; schema-6 values named
+`translucent` retain their historical Blur meaning during migration.
 
 `BarLayout` implements Lumina's Material Expressive bar. Its left and right
 orders are registries of `Component` objects instantiated through `Loader`;

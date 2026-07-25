@@ -75,16 +75,22 @@ colors continue to provide accent roles in either mode.
 
 Transparency changes semantic surface alpha directly. Blur and Frosted Glass
 bar modes use Niri 26.04's native `ext-background-effect` support through the
-Quickshell `BackgroundEffect` region API. Frosted Glass adds a local tonal
-tint, edge highlight, and subtle grain; the available client API does not
-change Niri's compositor-wide blur algorithm. Disabling animations or
-enabling reduced motion preserves focus feedback while minimizing transition
-duration.
+Quickshell `BackgroundEffect` region API. The validated
+`noctalia-qs 0.0.12` API exposes shaped requests and a non-opaque surface
+format, but no reliable compositor-capability callback and no per-surface blur
+radius. Environment diagnostics can confirm the minimum API/version presence,
+not whether the effect is enabled by compositor configuration.
 
-The bar has a separate schema-v6 background policy. Solid, Blur, Frosted
-Glass, and Transparent alter only `BarSurface`; Dashboard, Settings, bar
-children, calendars, and tray popups do not inherit `barSurfaceOpacity` or
-the bar blur region. All modes retain the full layer-shell exclusive zone.
+The bar has a separate schema-7 background policy. Solid, Translucent, Blur,
+Frosted Glass, and Transparent alter only `BarSurface`; Dashboard, Settings,
+bar children, calendars, and tray popups do not inherit
+`barSurfaceOpacity` or the bar blur region. Translucent is alpha-only. Blur is
+clean and grain-free. Frosted Glass adds a stronger local tint, highlight, and
+low-alpha static grain. Client tint and contrast protection remain visible if
+the compositor does not render blur. Disabling animations or enabling reduced
+motion preserves focus feedback while minimizing transition duration.
+
+All modes retain the full layer-shell exclusive zone.
 The Lumina wallpaper surface explicitly ignores exclusion zones, so it still
 covers the output behind a Transparent bar while tiled windows remain outside
 the bar area.
@@ -92,6 +98,20 @@ Automatic content scale is implemented semantically for 40–80 logical-pixel
 heights, not as a global transform.
 Native visual passes for every height/mode combination at 1920×1080,
 mixed-scale, and multi-output configurations remain explicit follow-ups.
+
+### Native blur validation matrix
+
+The remaining visual pass must cover bright, dark, and detailed wallpapers;
+maximized light and dark applications; moving windows; overview open/closed;
+edge-to-edge/floating; top/bottom; light/dark/dynamic themes; 40/56/80-pixel
+bars; Niri's default xray blur; and the optional normal/live profile.
+
+Verify that Blur is clean rather than milky, Frosted is visibly richer,
+Translucent and Transparent never request blur, content remains readable,
+grain does not visibly repeat, rounded floating corners and margins bound the
+effect, mode changes do not flash, and GPU usage stays reasonable. Normal blur
+must update with moving windows; xray should retain its efficient
+wallpaper-only behavior.
 
 Local System/About actions resolve project files from `LUMINA_ROOT`, or the
 shell process working directory. Installed packages should set `LUMINA_ROOT`

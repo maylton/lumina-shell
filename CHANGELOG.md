@@ -69,11 +69,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Schema v6 bar appearance preferences with safe schema-v5 migration,
   independent background mode and opacity, automatic height-derived content
   scaling, and bounded manual scaling.
-- Solid, Blur, Frosted Glass, and Transparent bar backgrounds that keep child
-  widgets and popup surfaces fully opaque. Blur requests Niri's native
-  layer-shell background effect; Frosted Glass builds on it with a tonal tint,
-  subtle grain, and glass-edge highlight. Legacy `translucent` preferences
-  migrate to Blur.
+- Solid, Translucent, Blur, Frosted Glass, and Transparent bar backgrounds
+  that keep child widgets and popup surfaces fully opaque. Translucent is an
+  alpha-only tonal surface; only Blur and Frosted request Niri's native shaped
+  layer-shell effect. Schema-6 `translucent` preferences retain their
+  historical Blur meaning during migration.
+- Optional namespace-scoped Niri profiles for efficient xray or normal/live
+  blur, validated against Niri 26.04 without forcing blur or modifying the
+  user's compositor configuration.
 - Persistent global control for resting bar-widget pill backgrounds, covering
   launcher, overview, date/time, context, tray, notifications, system status,
   Dashboard, wallpaper, and session actions while preserving interactive and
@@ -100,6 +103,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   power-state text beside the icon.
 
 ### Changed
+
+- Refined the bar into Android-inspired bounded background blur adapted to
+  Lumina and Niri: clean Blur uses neutral tint and contrast protection,
+  Frosted Glass retains restrained highlight and static grain, and all modes
+  animate client layers without changing compositor blur radius.
 
 - Removed the avatar-only color ring and image-shape morph from the bar entry
   point. The account picture stays circular while the shared button container

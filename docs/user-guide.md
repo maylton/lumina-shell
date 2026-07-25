@@ -49,18 +49,29 @@ height range therefore maps to approximately 71–143%. Compact mode further
 reduces density without ignoring the chosen height or scale; a 30-pixel
 interaction floor applies only at the smallest combinations.
 
-Bar background opacity is separate from **Appearance → Transparency**. The
+Bar background tint opacity is separate from **Appearance → Transparency**. The
 Appearance controls continue to affect Dashboard, Settings, and other shell
-surfaces, while **Bar → Surface → Background opacity** changes only Blur and
-Frosted Glass. Blur is a clean native background blur with a tonal tint.
-Frosted Glass adds a subtle grain, optical highlight, and stronger glass edge.
-Transparent mode leaves each widget's configured resting background
-independent. On Niri 26.04, Blur and Frosted Glass request native background blur
-limited to the bar surface. All four modes reserve desktop work area, so tiled
-windows do not appear behind bar controls. Lumina's wallpaper surface ignores
-shell exclusion zones and continues beneath the reserved strip, allowing
-Transparent to reveal the wallpaper without exposing a second bar surface.
-Existing `translucent` preferences are loaded as Blur automatically.
+surfaces, while **Bar → Surface → Background tint opacity** changes only the
+client-owned bar tint:
+
+- **Solid:** opaque tonal background without compositor blur;
+- **Translucent:** transparent tonal surface without blur;
+- **Blur:** clean live background blur with a neutral protection layer;
+- **Frosted glass:** blur with richer tint, highlight, and subtle texture;
+- **Transparent:** no bar background, border, or divider.
+
+Only Blur and Frosted Glass request Niri's native blur, bounded to the visible
+bar. Translucent is the readable alpha-only fallback style and never requests
+blur. The compositor controls blur intensity; Lumina does not provide a fake
+radius or pass-count control. If the effect is disabled externally, Blur and
+Frosted retain enough client tint and contrast protection to remain readable,
+although the runtime cannot confirm that fallback condition automatically.
+
+All five modes reserve desktop work area, so tiled windows do not appear
+behind bar controls. Lumina's wallpaper continues beneath the reserved strip,
+allowing Transparent to reveal it without exposing a second bar surface.
+Schema-6 `translucent` values migrate to Blur to preserve their historical
+behavior; selecting Translucent now uses the new no-blur semantics.
 
 When automatic content scaling is enabled, Settings shows the calculated
 effective percentage as a read-only value. Disabling it exposes the manual
