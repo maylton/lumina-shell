@@ -81,7 +81,7 @@ SettingsPage {
 
     Loader {
         width: parent.width
-        implicitHeight: item ? item.implicitHeight : 0
+        height: item ? item.implicitHeight : 0
         sourceComponent: root.activeSection === "wifi"
             ? wifiComponent
             : root.activeSection === "wired"
