@@ -6,6 +6,7 @@ function defaults() {
     return {
         schemaVersion: CURRENT_VERSION,
         enabled: false,
+        mode: "floating",
         autoHide: true,
         showRunning: true,
         reserveSpace: false,
@@ -26,6 +27,11 @@ function boundedNumber(value, fallback, minimum, maximum) {
         numeric = fallback
 
     return Math.max(minimum, Math.min(maximum, numeric))
+}
+
+function choice(value, allowed, fallback) {
+    var requested = String(value || "")
+    return allowed.indexOf(requested) >= 0 ? requested : fallback
 }
 
 function normalizeIdentifier(value) {
@@ -58,6 +64,11 @@ function normalize(source) {
     return {
         schemaVersion: CURRENT_VERSION,
         enabled: booleanValue(input.enabled, base.enabled),
+        mode: choice(
+            input.mode,
+            ["floating", "task-panel"],
+            base.mode
+        ),
         autoHide: booleanValue(input.autoHide, base.autoHide),
         showRunning: booleanValue(input.showRunning, base.showRunning),
         reserveSpace: booleanValue(input.reserveSpace, base.reserveSpace),
