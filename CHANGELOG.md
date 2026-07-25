@@ -8,6 +8,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Added an Aluminium-inspired bottom application drawer with a visual handle,
+  rounded search field, reactive Dock favorites, a complete application grid,
+  detailed search results for applications, Niri windows, and shell actions,
+  and shared right-click Pin/Unpin menus.
 - Added an optional per-output application dock with a compact floating mode and
   a full-width task-panel mode with centered icons. Both presentations support
   pinned desktop entries, grouped Niri windows, focus cycling, auto-hide,
@@ -123,6 +127,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Completed Brazilian Portuguese coverage for Launcher result kinds, Niri action
+  names and descriptions, open-window fallbacks, and Settings restart feedback.
+- Launcher browsing now uses a centered app grid while typed queries retain the
+  detailed application/window/action result list and keyboard navigation.
 - Pointer activation in the Dock and graphical Settings now clears transient
   focus after the action, so keyboard-focus outlines remain specific to Tab
   navigation. Widget dialogs restore their source focus only when opened from
