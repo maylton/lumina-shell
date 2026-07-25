@@ -12,6 +12,16 @@ SettingsPage {
 
     required property string outputName
 
+    readonly property string currentWallpaper:
+        WallpaperService.wallpaperFor(outputName)
+
+    function wallpaperFileName(path) {
+        const value = String(path || "")
+        const separator = value.lastIndexOf("/")
+
+        return separator >= 0 ? value.slice(separator + 1) : value
+    }
+
     title: "Appearance"
     description: "Colors, wallpaper, and the visual language of Lumina"
 
@@ -80,59 +90,102 @@ SettingsPage {
 
     SettingsSection {
         title: "Wallpaper"
-        description: "Use the existing per-output picker and source directory"
+        description: "Current image and source directory for " + root.outputName
 
-        Rectangle {
+        Row {
             width: parent.width
-            height: 160
-            radius: root.luminaDesign.shape.large
-            color: root.luminaDesign.color.surfaceMuted
-            clip: true
-
-            Image {
-                anchors.fill: parent
-                source: WallpaperService.urlForPath(
-                    WallpaperService.wallpaperFor(root.outputName)
-                )
-                asynchronous: true
-                fillMode: Image.PreserveAspectCrop
-            }
+            height: 168
+            spacing: root.luminaDesign.spacing.extraLarge
 
             Rectangle {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
-                }
-                height: 42
-                color: root.luminaDesign.color.scrim
+                id: wallpaperPreview
 
-                Text {
+                width: Math.min(360, Math.round(parent.width * 0.38))
+                height: parent.height
+                radius: root.luminaDesign.shape.extraLarge
+                color: root.luminaDesign.color.surfaceMuted
+                clip: true
+
+                Image {
+                    anchors.fill: parent
+                    source: WallpaperService.urlForPath(
+                        root.currentWallpaper
+                    )
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+                }
+
+                Rectangle {
                     anchors {
                         left: parent.left
                         right: parent.right
-                        verticalCenter: parent.verticalCenter
-                        margins: root.luminaDesign.spacing.medium
+                        bottom: parent.bottom
                     }
-                    text: root.outputName + " · "
-                        + WallpaperService.wallpaperFor(root.outputName)
-                    color: "#FFFFFF"
-                    elide: Text.ElideMiddle
-                    font.pixelSize:
-                        root.luminaDesign.typography.labelSmall
-                    font.weight: Font.DemiBold
+                    height: 38
+                    color: root.luminaDesign.color.scrim
+
+                    Text {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            margins: root.luminaDesign.spacing.medium
+                        }
+                        text: root.outputName + " · "
+                            + root.wallpaperFileName(
+                                root.currentWallpaper
+                            )
+                        color: "#FFFFFF"
+                        elide: Text.ElideMiddle
+                        font.pixelSize:
+                            root.luminaDesign.typography.labelSmall
+                        font.weight: Font.DemiBold
+                    }
                 }
             }
-        }
 
-        SettingsActionRow {
-            width: parent.width
-            title: "Wallpaper for " + root.outputName
-            description: "Open the existing image picker for this output"
-            iconName: "preferences-desktop-wallpaper-symbolic"
-            symbol: "▧"
-            actionLabel: "Choose"
-            onActivated: WallpaperService.openPicker(root.outputName)
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                    - wallpaperPreview.width
+                    - parent.spacing
+                spacing: root.luminaDesign.spacing.medium
+
+                Column {
+                    width: parent.width
+                    spacing: 4
+
+                    Text {
+                        width: parent.width
+                        text: "Current wallpaper"
+                        color: root.luminaDesign.color.onSurface
+                        font.pixelSize:
+                            root.luminaDesign.typography.bodyMedium
+                        font.weight: Font.DemiBold
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: root.currentWallpaper
+                        color: root.luminaDesign.color.textMuted
+                        elide: Text.ElideMiddle
+                        font.pixelSize:
+                            root.luminaDesign.typography.labelSmall
+                    }
+                }
+
+                SettingsActionRow {
+                    width: parent.width
+                    height: 72
+                    title: "Wallpaper for " + root.outputName
+                    description: "Open the image picker for this output"
+                    iconName: "preferences-desktop-wallpaper-symbolic"
+                    symbol: "▧"
+                    actionLabel: "Choose"
+                    onActivated:
+                        WallpaperService.openPicker(root.outputName)
+                }
+            }
         }
 
         SettingsRow {
@@ -141,7 +194,7 @@ SettingsPage {
             description: ConfigStore.wallpaperDirectory
             iconName: "folder-pictures-symbolic"
             symbol: "▤"
-            controlWidth: 330
+            controlWidth: Math.min(320, width * 0.42)
 
             Rectangle {
                 anchors.fill: parent
