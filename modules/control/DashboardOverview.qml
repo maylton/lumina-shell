@@ -20,6 +20,97 @@ Item {
         "dashboard.weather.unavailable",
         "Weather unavailable"
     )
+    readonly property string weatherCondition:
+        translatedWeatherCondition(WeatherService.weatherCode)
+    readonly property string weatherRangeLabel: WeatherService.available
+        ? I18n.tr(
+            "dashboard.weather.range",
+            "H %1° · L %2°",
+            [
+                Math.round(WeatherService.maximumTemperature),
+                Math.round(WeatherService.minimumTemperature)
+            ]
+        )
+        : ""
+
+    function translatedWeatherCondition(code) {
+        const value = Number(code || 0)
+
+        if (value === 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.clear",
+                "Clear"
+            )
+        }
+
+        if ([1, 2].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.partlyCloudy",
+                "Partly cloudy"
+            )
+        }
+
+        if (value === 3) {
+            return I18n.tr(
+                "dashboard.weather.condition.overcast",
+                "Overcast"
+            )
+        }
+
+        if ([45, 48].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.fog",
+                "Fog"
+            )
+        }
+
+        if (value >= 51 && value <= 57) {
+            return I18n.tr(
+                "dashboard.weather.condition.drizzle",
+                "Drizzle"
+            )
+        }
+
+        if (value >= 61 && value <= 67) {
+            return I18n.tr(
+                "dashboard.weather.condition.rain",
+                "Rain"
+            )
+        }
+
+        if (value >= 71 && value <= 77) {
+            return I18n.tr(
+                "dashboard.weather.condition.snow",
+                "Snow"
+            )
+        }
+
+        if (value >= 80 && value <= 82) {
+            return I18n.tr(
+                "dashboard.weather.condition.rainShowers",
+                "Rain showers"
+            )
+        }
+
+        if ([85, 86].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.snowShowers",
+                "Snow showers"
+            )
+        }
+
+        if (value >= 95) {
+            return I18n.tr(
+                "dashboard.weather.condition.thunderstorm",
+                "Thunderstorm"
+            )
+        }
+
+        return I18n.tr(
+            "dashboard.weather.condition.current",
+            "Current conditions"
+        )
+    }
 
     DashboardCard {
         id: welcomeCard
@@ -123,7 +214,7 @@ Item {
 
                 Accessible.role: Accessible.Pane
                 Accessible.name: WeatherService.available
-                    ? WeatherService.condition
+                    ? root.weatherCondition
                         + ", "
                         + WeatherService.temperatureLabel
                         + ", "
@@ -183,7 +274,7 @@ Item {
                         Text {
                             width: parent.width
                             text: WeatherService.available
-                                ? WeatherService.condition
+                                ? root.weatherCondition
                                 : WeatherService.loading
                                     ? root.weatherUpdating
                                     : root.weatherUnavailable
@@ -198,7 +289,6 @@ Item {
                             width: parent.width
                             text: WeatherService.available
                                 ? WeatherService.locationName
-                                    + " · Open-Meteo"
                                 : WeatherService.lastError
                             color: root.luminaDesign.color.textMuted
                             elide: Text.ElideRight
@@ -211,7 +301,7 @@ Item {
                         id: weatherRange
 
                         anchors.verticalCenter: parent.verticalCenter
-                        text: WeatherService.rangeLabel
+                        text: root.weatherRangeLabel
                         color: root.luminaDesign.color.textMuted
                         font.pixelSize:
                             root.luminaDesign.typography.labelSmall
