@@ -34,6 +34,14 @@ Scope {
                     : WindowStore.focusedWindow
                 readonly property bool showActionError: NiriService.actionFeedbackVisible
                     && NiriService.lastActionError.length > 0
+                readonly property string effectiveSurfaceMode:
+                    ConfigStore.barVisualStyle === "classic"
+                        ? "floating"
+                        : ConfigStore.barSurfaceMode
+                readonly property int effectiveMargin:
+                    effectiveSurfaceMode === "floating"
+                        ? ConfigStore.barMargin
+                        : 0
                 readonly property string activeWindowTitle: WindowStore.titleFor(activeWindow)
                 readonly property string activeWindowAppId: WindowStore.appIdFor(activeWindow)
                 readonly property string columnLabel: WindowStore.columnLabelFor(activeWindow)
@@ -55,7 +63,8 @@ Scope {
 
                 screen: modelData
                 implicitHeight: ConfigStore.barHeight
-                exclusiveZone: ConfigStore.barHeight
+                    + (effectiveMargin * 2)
+                exclusiveZone: implicitHeight
                 color: "transparent"
                 focusable: false
 
@@ -71,17 +80,43 @@ Scope {
 
                 BarSurface {
                     anchors.fill: parent
-                    outerMargin: ConfigStore.barMargin
+                    outerMargin: panel.effectiveMargin
+                    surfaceMode: panel.effectiveSurfaceMode
+                    barPosition: ConfigStore.barPosition
 
-                    ClassicBarLayout {
+                    Loader {
                         anchors.fill: parent
-                        outputName: panel.outputName
-                        visibleWorkspaces: panel.visibleWorkspaces
-                        activeWindowTitle: panel.activeWindowTitle
-                        activeWindowAppId: panel.activeWindowAppId
-                        columnLabel: panel.columnLabel
-                        outputSummary: panel.outputSummary
-                        showActionError: panel.showActionError
+                        sourceComponent:
+                            ConfigStore.barVisualStyle === "classic"
+                                ? classicLayout
+                                : expressiveLayout
+                    }
+
+                    Component {
+                        id: classicLayout
+
+                        ClassicBarLayout {
+                            outputName: panel.outputName
+                            visibleWorkspaces: panel.visibleWorkspaces
+                            activeWindowTitle: panel.activeWindowTitle
+                            activeWindowAppId: panel.activeWindowAppId
+                            columnLabel: panel.columnLabel
+                            outputSummary: panel.outputSummary
+                            showActionError: panel.showActionError
+                        }
+                    }
+
+                    Component {
+                        id: expressiveLayout
+
+                        ExpressiveBarLayout {
+                            outputName: panel.outputName
+                            visibleWorkspaces: panel.visibleWorkspaces
+                            activeWindowTitle: panel.activeWindowTitle
+                            activeWindowAppId: panel.activeWindowAppId
+                            columnLabel: panel.columnLabel
+                            showActionError: panel.showActionError
+                        }
                     }
                 }
             }
