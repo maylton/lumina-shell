@@ -78,7 +78,7 @@ SettingsPage {
             width: parent.width
             title: "Background"
             description: "Change only the bar surface"
-            controlWidth: 420
+            controlWidth: 560
 
             SettingsSegmentedControl {
                 width: parent.width
@@ -86,8 +86,12 @@ SettingsPage {
                 options: [
                     { value: "solid", label: "Solid" },
                     {
-                        value: "translucent",
-                        label: "Translucent"
+                        value: "blur",
+                        label: "Blur"
+                    },
+                    {
+                        value: "frosted",
+                        label: "Frosted glass"
                     },
                     {
                         value: "transparent",
@@ -107,8 +111,10 @@ SettingsPage {
             title: "Background opacity"
             description: "Opacity of the bar background only"
             available:
-                ConfigStore.barBackgroundMode === "translucent"
-            availabilityText: "Choose Translucent background first"
+                ["blur", "frosted"].indexOf(
+                    ConfigStore.barBackgroundMode
+                ) >= 0
+            availabilityText: "Choose Blur or Frosted glass first"
             from: 0
             to: 1
             stepSize: 0.02

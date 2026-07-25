@@ -145,7 +145,7 @@ TestCase {
         compare(migrated.schemaVersion, 6)
         compare(migrated.transparencyEnabled, true)
         compare(migrated.surfaceOpacity, 0.78)
-        compare(migrated.barBackgroundMode, "translucent")
+        compare(migrated.barBackgroundMode, "blur")
         compare(migrated.barSurfaceOpacity, 0.78)
         compare(migrated.barAutoScaleContents, true)
         compare(migrated.barContentScale, 1)
@@ -235,7 +235,7 @@ TestCase {
     function test_barChoiceNormalization() {
         const valid = ConfigSchema.normalize({
             barSurfaceMode: "floating",
-            barBackgroundMode: "transparent",
+            barBackgroundMode: "frosted",
             barContextMode: "always",
             barStatusLayout: "individual",
             barTrayMode: "inline",
@@ -249,13 +249,17 @@ TestCase {
             barTrayMode: "floating",
             barDateStyle: "numeric"
         })
+        const legacy = ConfigSchema.normalize({
+            barBackgroundMode: "translucent"
+        })
 
         compare(valid.barSurfaceMode, "floating")
-        compare(valid.barBackgroundMode, "transparent")
+        compare(valid.barBackgroundMode, "frosted")
         compare(valid.barContextMode, "always")
         compare(valid.barStatusLayout, "individual")
         compare(valid.barTrayMode, "inline")
         compare(valid.barDateStyle, "full")
+        compare(legacy.barBackgroundMode, "blur")
         compare(invalid.barSurfaceMode, "edge-to-edge")
         compare(invalid.barBackgroundMode, "solid")
         compare(invalid.barContextMode, "contextual")

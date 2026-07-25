@@ -81,7 +81,11 @@ Scope {
                 WlrLayershell.namespace: "lumina-bar"
 
                 BackgroundEffect.blurRegion:
-                    ConfigStore.barBackgroundMode === "translucent"
+                    [
+                        "blur",
+                        "frosted",
+                        "translucent"
+                    ].indexOf(ConfigStore.barBackgroundMode) >= 0
                         ? barBlurRegion
                         : null
 

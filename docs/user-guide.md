@@ -21,7 +21,7 @@ bar.
 
 The Bar settings page controls:
 
-- a solid, translucent, or transparent bar background and independent
+- a Solid, Blur, Frosted Glass, or Transparent bar background and independent
   background opacity;
 - top or bottom position, edge-to-edge or floating geometry, 40–80 pixel
   height, margin, spacing, and compact mode;
@@ -41,11 +41,14 @@ height or scale; interaction targets never shrink below 36 logical pixels.
 
 Bar background opacity is separate from **Appearance → Transparency**. The
 Appearance controls continue to affect Dashboard, Settings, and other shell
-surfaces, while **Bar → Surface → Background opacity** changes only a
-translucent bar. Transparent mode keeps widgets on their own subtle tonal
-surfaces for contrast. On Niri 26.04, Translucent also requests native
-background blur limited to the bar surface. All three modes reserve desktop
-work area, so tiled windows do not appear behind the bar.
+surfaces, while **Bar → Surface → Background opacity** changes only Blur and
+Frosted Glass. Blur is a clean native background blur with a tonal tint.
+Frosted Glass adds a subtle grain, optical highlight, and stronger glass edge.
+Transparent mode keeps widgets on their own subtle tonal surfaces for
+contrast. On Niri 26.04, Blur and Frosted Glass request native background blur
+limited to the bar surface. All four modes reserve desktop work area, so tiled
+windows do not appear behind the bar. Existing `translucent` preferences are
+loaded as Blur automatically.
 
 When automatic content scaling is enabled, Settings shows the calculated
 effective percentage as a read-only value. Disabling it exposes the manual

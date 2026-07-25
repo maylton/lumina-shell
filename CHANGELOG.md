@@ -69,9 +69,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Schema v6 bar appearance preferences with safe schema-v5 migration,
   independent background mode and opacity, automatic height-derived content
   scaling, and bounded manual scaling.
-- Solid, translucent, and transparent bar backgrounds that keep child widgets
-  and popup surfaces fully opaque; translucent mode requests Niri's native
-  layer-shell background blur.
+- Solid, Blur, Frosted Glass, and Transparent bar backgrounds that keep child
+  widgets and popup surfaces fully opaque. Blur requests Niri's native
+  layer-shell background effect; Frosted Glass builds on it with a tonal tint,
+  subtle grain, and glass-edge highlight. Legacy `translucent` preferences
+  migrate to Blur.
 
 ### Changed
 

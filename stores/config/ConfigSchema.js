@@ -295,9 +295,12 @@ function normalize(source) {
         ["edge-to-edge", "floating"],
         base.barSurfaceMode
     )
+    if (String(result.barBackgroundMode) === "translucent")
+        result.barBackgroundMode = "blur"
+
     result.barBackgroundMode = choice(
         result.barBackgroundMode,
-        ["solid", "translucent", "transparent"],
+        ["solid", "blur", "frosted", "transparent"],
         base.barBackgroundMode
     )
     result.barSurfaceOpacity = boundedNumber(
@@ -527,7 +530,7 @@ function migrate(source) {
 
     if (version < 6) {
         if (input.transparencyEnabled === true) {
-            input.barBackgroundMode = "translucent"
+            input.barBackgroundMode = "blur"
             input.barSurfaceOpacity = boundedNumber(
                 input.surfaceOpacity,
                 defaults().surfaceOpacity,
