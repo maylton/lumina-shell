@@ -93,7 +93,7 @@ SettingsPage {
         SettingsSliderRow {
             width: parent.width
             title: "Visible height"
-            description: "Surface height, excluding floating margins"
+            description: "Expressive surface height, excluding margins"
             from: 40
             to: 72
             stepSize: 2

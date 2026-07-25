@@ -28,7 +28,7 @@ function defaults() {
         barContextTimeout: 3500,
         barStatusLayout: "grouped",
         barPosition: "top",
-        barHeight: 48,
+        barHeight: 56,
         barMargin: 5,
         barWidgetSpacing: 10,
         barShowLauncher: true,

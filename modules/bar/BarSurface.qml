@@ -38,6 +38,6 @@ Rectangle {
         }
         height: 1
         color: root.luminaDesign.color.outline
-        opacity: 0.45
+        opacity: 0.24
     }
 }

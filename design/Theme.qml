@@ -144,8 +144,8 @@ QtObject {
                         ? ConfigStore.barMargin * 2
                         : 0
                 ),
-            expressiveBarHeight: 48,
-            barTouchTarget: ConfigStore.compactMode ? 34 : 36,
+            expressiveBarHeight: 56,
+            barTouchTarget: ConfigStore.compactMode ? 36 : 40,
             calendarWidth: 336,
             chipHeight: ConfigStore.compactMode ? 28 : 30,
             controlCenterHeight: 840,

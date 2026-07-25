@@ -529,7 +529,7 @@ Singleton {
             property int barContextTimeout: 3500
             property string barStatusLayout: "grouped"
             property string barPosition: "top"
-            property int barHeight: 48
+            property int barHeight: 56
             property int barMargin: 5
             property int barWidgetSpacing: 10
             property bool barShowLauncher: true
