@@ -4,128 +4,166 @@ import QtQuick
 import qs.design
 import qs.stores.control
 
-Row {
+Item {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property real tabSpacing: luminaDesign.spacing.medium
 
     height: 44
-    spacing: luminaDesign.spacing.medium
 
-    Repeater {
-        model: [
-            {
-                id: "dashboard",
-                iconName: "view-grid-symbolic",
-                symbol: "✦",
-                label: "Dashboard"
-            },
-            {
-                id: "settings",
-                iconName: "preferences-system-symbolic",
-                symbol: "⚙",
-                label: "Settings"
-            }
-        ]
+    Rectangle {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        height: 1
+        color: root.luminaDesign.color.outline
+        opacity: 0.48
+    }
 
-        delegate: Rectangle {
-            id: tabButton
+    Row {
+        anchors.fill: parent
+        spacing: root.tabSpacing
 
-            required property var modelData
-            readonly property bool selected:
-                ControlCenterStore.activePage === modelData.id
+        Repeater {
+            model: [
+                {
+                    id: "dashboard",
+                    iconName: "view-grid-symbolic",
+                    symbol: "✦",
+                    label: "Dashboard"
+                },
+                {
+                    id: "settings",
+                    iconName: "preferences-system-symbolic",
+                    symbol: "⚙",
+                    label: "Settings"
+                }
+            ]
 
-            width: (root.width - root.spacing) / 2
-            height: root.height
-            color: "transparent"
-            activeFocusOnTab: true
+            delegate: Rectangle {
+                id: tabButton
 
-            Accessible.role: Accessible.PageTab
-            Accessible.name: modelData.label
-            Accessible.selected: selected
-            Accessible.focusable: true
-            Accessible.focused: activeFocus
-            Accessible.onPressAction: activate()
+                required property var modelData
+                readonly property bool selected:
+                    ControlCenterStore.activePage === modelData.id
 
-            function activate() {
-                ControlCenterStore.setPage(modelData.id)
-            }
+                width: (root.width - root.tabSpacing) / 2
+                height: root.height
+                color: "transparent"
+                activeFocusOnTab: true
 
-            Keys.onSpacePressed: event => {
-                activate()
-                event.accepted = true
-            }
+                Accessible.role: Accessible.PageTab
+                Accessible.name: modelData.label
+                Accessible.selected: selected
+                Accessible.focusable: true
+                Accessible.focused: activeFocus
+                Accessible.onPressAction: activate()
 
-            Keys.onReturnPressed: event => {
-                activate()
-                event.accepted = true
-            }
+                function activate() {
+                    ControlCenterStore.setPage(modelData.id)
+                }
 
-            Rectangle {
-                id: tabPill
+                Keys.onSpacePressed: event => {
+                    activate()
+                    event.accepted = true
+                }
 
-                anchors.centerIn: parent
-                width: tabContent.implicitWidth
-                    + root.luminaDesign.spacing.extraLarge * 2
-                height: 36
-                radius: tabButton.selected
-                    ? root.luminaDesign.shape.full
-                    : root.luminaDesign.shape.large
-                color: tabButton.selected
-                    ? root.luminaDesign.color.accentContainer
-                    : tabMouse.containsMouse || tabButton.activeFocus
-                        ? root.luminaDesign.color.surfaceMuted
-                        : "transparent"
-                border.width: tabButton.activeFocus ? 2 : 0
-                border.color: root.luminaDesign.color.primary
+                Keys.onReturnPressed: event => {
+                    activate()
+                    event.accepted = true
+                }
 
-                Behavior on radius {
-                    NumberAnimation {
-                        duration: root.luminaDesign.motion.medium
-                        easing.type: Easing.OutCubic
+                Rectangle {
+                    id: tabPill
+
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                        top: parent.top
+                        topMargin: 2
+                    }
+                    width: tabContent.implicitWidth
+                        + root.luminaDesign.spacing.extraLarge * 2
+                    height: 34
+                    radius: tabButton.selected
+                        ? root.luminaDesign.shape.full
+                        : root.luminaDesign.shape.large
+                    color: tabButton.selected
+                        ? root.luminaDesign.color.accentContainer
+                        : tabMouse.containsMouse || tabButton.activeFocus
+                            ? root.luminaDesign.color.surfaceMuted
+                            : "transparent"
+                    border.width: tabButton.activeFocus ? 2 : 0
+                    border.color: root.luminaDesign.color.primary
+
+                    Behavior on radius {
+                        NumberAnimation {
+                            duration: root.luminaDesign.motion.medium
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Row {
+                        id: tabContent
+
+                        anchors.centerIn: parent
+                        spacing: root.luminaDesign.spacing.small
+
+                        DashboardIcon {
+                            width: 16
+                            height: 16
+                            iconName: tabButton.modelData.iconName
+                            fallbackSymbol: tabButton.modelData.symbol
+                            iconColor: tabButton.selected
+                                ? root.luminaDesign.color.onAccentContainer
+                                : root.luminaDesign.color.textMuted
+                            iconSize: 16
+                        }
+
+                        Text {
+                            text: tabButton.modelData.label
+                            color: tabButton.selected
+                                ? root.luminaDesign.color.onAccentContainer
+                                : root.luminaDesign.color.textMuted
+                            font.pixelSize:
+                                root.luminaDesign.typography.bodyMedium
+                            font.weight: tabButton.selected
+                                ? Font.Bold
+                                : Font.Medium
+                        }
                     }
                 }
 
-                Row {
-                    id: tabContent
-
-                    anchors.centerIn: parent
-                    spacing: root.luminaDesign.spacing.small
-
-                    DashboardIcon {
-                        width: 16
-                        height: 16
-                        iconName: tabButton.modelData.iconName
-                        fallbackSymbol: tabButton.modelData.symbol
-                        iconColor: tabButton.selected
-                            ? root.luminaDesign.color.onAccentContainer
-                            : root.luminaDesign.color.textMuted
-                        iconSize: 16
+                Rectangle {
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
                     }
+                    height: tabButton.selected ? 4 : 0
+                    radius: root.luminaDesign.shape.full
+                    color: root.luminaDesign.color.primary
 
-                    Text {
-                        text: tabButton.modelData.label
-                        color: tabButton.selected
-                            ? root.luminaDesign.color.onAccentContainer
-                            : root.luminaDesign.color.textMuted
-                        font.pixelSize:
-                            root.luminaDesign.typography.bodyMedium
-                        font.weight: tabButton.selected
-                            ? Font.Bold
-                            : Font.Medium
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: root.luminaDesign.motion.fast
+                            easing.type: Easing.OutCubic
+                        }
                     }
                 }
-            }
 
-            MouseArea {
-                id: tabMouse
+                MouseArea {
+                    id: tabMouse
 
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    tabButton.forceActiveFocus(Qt.MouseFocusReason)
-                    tabButton.activate()
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        tabButton.forceActiveFocus(Qt.MouseFocusReason)
+                        tabButton.activate()
+                    }
                 }
             }
         }
