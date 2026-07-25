@@ -27,7 +27,7 @@ Rectangle {
 
     width: iconSize + 12
     height: iconSize + 12
-    radius: pressedMouse.pressed
+    radius: itemMouse.pressed
         ? luminaDesign.shape.medium
         : focused || itemMouse.containsMouse
             ? luminaDesign.shape.large
@@ -37,7 +37,7 @@ Rectangle {
         : itemMouse.containsMouse
             ? luminaDesign.color.surfaceMuted
             : "transparent"
-    scale: pressedMouse.pressed
+    scale: itemMouse.pressed
         ? 0.94
         : itemMouse.containsMouse
             ? 1.07
@@ -161,14 +161,5 @@ Rectangle {
             else
                 root.activated()
         }
-    }
-
-    MouseArea {
-        id: pressedMouse
-
-        anchors.fill: parent
-        acceptedButtons: Qt.NoButton
-        hoverEnabled: false
-        enabled: false
     }
 }
