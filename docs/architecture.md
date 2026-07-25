@@ -118,6 +118,7 @@ Daily hardware state is split into typed singleton services:
 - `PowerService` consumes native UPower battery state and the power-profiles daemon.
 - `MediaService` selects the currently playing MPRIS client, falling back to the first available player.
 - `ConnectivityService` consumes the native NetworkManager and BlueZ models for network, Wi-Fi, adapter, and connected-device status.
+- `WeatherService` resolves an explicit location or the system timezone through Open-Meteo geocoding, then refreshes current conditions and a three-day forecast every 30 minutes.
 
 Every service exposes a read-only `status` IPC operation for diagnostics. Visual components only call typed service methods and never execute the underlying system tools.
 
@@ -125,7 +126,7 @@ Every service exposes a read-only `status` IPC operation for diagnostics. Visual
 
 `OsdStore` reduces volume, microphone, brightness, session-lock, and explicit lock-key events into one timed presentation state. The OSD resolves the focused Niri output, never requests keyboard focus, and closes if that output disappears. The `osd` IPC target allows compositor key bindings to publish lock-key state without embedding input-device assumptions in the shell.
 
-The Material control center is a centered desktop dashboard with a responsive three-column composition. Its dashboard tab combines the active workspace and output, clock, daily controls, notification history, media, connectivity, power, and calendar. A dedicated notifications tab expands history without creating a second service owner. The presentation is split into focused `Dashboard*` components while service and store boundaries remain unchanged.
+The Material control center is a centered desktop dashboard with a responsive three-column composition. Its dashboard tab combines the active workspace and output, clock, weather, daily controls, notification history, media, connectivity, power, and calendar. A dedicated notifications tab expands history without creating a second service owner. The presentation is split into focused `Dashboard*` components while service and store boundaries remain unchanged.
 
 Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do Not Disturb, dynamic color, battery status, and power profiles all call the same typed service methods used by IPC. `ControlCenterStore` owns the selected dashboard tab and uptime presentation and participates in `OverlayStore`, so the dashboard cannot compete with launcher, notification, wallpaper, settings, or session surfaces for keyboard focus.
 

@@ -27,3 +27,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Keyboard navigation and Qt accessibility metadata baseline.
 - Installation, user, accessibility, and contributor documentation.
 - Centered control-center dashboard with overview, notification, media, status, control, and calendar cards.
+- Optional Open-Meteo conditions and daily temperature range in the dashboard.

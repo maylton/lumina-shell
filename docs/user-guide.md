@@ -27,6 +27,7 @@ Replace `DP-1` with the output reported by `niri msg outputs`. An unavailable na
 The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab provides:
 
 - the active workspace, output, time, date, and system uptime;
+- current weather and the day's temperature range;
 - output and microphone levels;
 - display brightness when a backlight exists;
 - notification history and Do Not Disturb;
@@ -38,6 +39,14 @@ The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab
 The **Notifications** tab expands notification history while keeping the daily controls and system status available. The header contains shortcuts for refreshing Niri output state, opening settings and session controls, toggling connectivity, Do Not Disturb, dynamic color, and closing the dashboard.
 
 Hardware controls degrade to an unavailable state instead of preventing the shell from starting.
+
+Weather data comes from Open-Meteo. Lumina uses the city represented by the system timezone by default. To select a more precise place, start the shell with a city, postal code, or place name:
+
+```bash
+LUMINA_WEATHER_LOCATION="Fortaleza" qs -p .
+```
+
+The integration refreshes every 30 minutes and remains unavailable without affecting the rest of the shell when the network or location lookup fails.
 
 The control center can also be opened and switched through IPC:
 
@@ -100,6 +109,7 @@ qs ipc -p /path/to/lumina-shell call brightness status
 qs ipc -p /path/to/lumina-shell call power status
 qs ipc -p /path/to/lumina-shell call media status
 qs ipc -p /path/to/lumina-shell call connectivity status
+qs ipc -p /path/to/lumina-shell call weather status
 qs ipc -p /path/to/lumina-shell call config status
 ```
 

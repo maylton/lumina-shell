@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.design
 import qs.services.niri
+import qs.services.weather
 import qs.stores.niri
 import qs.stores.time
 
@@ -90,12 +91,12 @@ Item {
             topMargin: root.luminaDesign.spacing.medium
         }
 
-        accessibleName: "Date and output"
+        accessibleName: "Date, weather, and output"
 
         Column {
             anchors.centerIn: parent
             width: parent.width - root.luminaDesign.spacing.extraLarge * 2
-            spacing: root.luminaDesign.spacing.medium
+            spacing: root.luminaDesign.spacing.small
 
             Text {
                 width: parent.width
@@ -117,6 +118,111 @@ Item {
                 wrapMode: Text.Wrap
                 font.pixelSize: root.luminaDesign.typography.titleMedium
                 font.weight: Font.DemiBold
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 42
+                radius: root.luminaDesign.shape.large
+                color: root.luminaDesign.color.surfaceMuted
+
+                Accessible.role: Accessible.Pane
+                Accessible.name: WeatherService.available
+                    ? WeatherService.condition
+                        + ", "
+                        + WeatherService.temperatureLabel
+                        + ", "
+                        + WeatherService.locationName
+                    : WeatherService.loading
+                        ? "Updating weather"
+                        : "Weather unavailable"
+
+                Row {
+                    anchors {
+                        fill: parent
+                        margins: root.luminaDesign.spacing.medium
+                    }
+
+                    spacing: root.luminaDesign.spacing.medium
+
+                    DashboardIcon {
+                        id: weatherIcon
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 22
+                        height: 22
+                        iconName: WeatherService.available
+                            ? WeatherService.iconName
+                            : "weather-severe-alert-symbolic"
+                        fallbackSymbol: WeatherService.available ? "☁" : "!"
+                        iconColor: WeatherService.available
+                            ? root.luminaDesign.color.primary
+                            : root.luminaDesign.color.textMuted
+                        iconSize: 20
+                    }
+
+                    Text {
+                        id: weatherTemperature
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: WeatherService.available
+                            ? WeatherService.temperatureLabel
+                            : WeatherService.loading
+                                ? "…"
+                                : "—"
+                        color: root.luminaDesign.color.onSurface
+                        font.pixelSize:
+                            root.luminaDesign.typography.titleLarge
+                        font.weight: Font.Bold
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                            - weatherIcon.width
+                            - weatherTemperature.width
+                            - weatherRange.width
+                            - parent.spacing * 3
+                        spacing: 0
+
+                        Text {
+                            width: parent.width
+                            text: WeatherService.available
+                                ? WeatherService.condition
+                                : WeatherService.loading
+                                    ? "Updating weather"
+                                    : "Weather unavailable"
+                            color: root.luminaDesign.color.onSurface
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: WeatherService.available
+                                ? WeatherService.locationName
+                                    + " · Open-Meteo"
+                                : WeatherService.lastError
+                            color: root.luminaDesign.color.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelSmall
+                        }
+                    }
+
+                    Text {
+                        id: weatherRange
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: WeatherService.rangeLabel
+                        color: root.luminaDesign.color.textMuted
+                        font.pixelSize:
+                            root.luminaDesign.typography.labelSmall
+                        font.weight: Font.DemiBold
+                    }
+                }
             }
 
             Rectangle {

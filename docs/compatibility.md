@@ -51,6 +51,10 @@ This host has no laptop battery or `backlight` class device. Both capabilities c
 
 The `noctalia-qs 0.0.12` networking model does not type the active wired device in `Networking.devices`. Lumina therefore uses the native global connectivity state as the wired fallback when no Wi-Fi network is active.
 
+## Weather
+
+The optional weather card uses `curl` to query Open-Meteo geocoding and forecast endpoints without an API key. By default, Lumina derives a city from the system timezone through `timedatectl`; `LUMINA_WEATHER_LOCATION` overrides that query when the timezone city is not precise enough. Network, geocoding, and command failures leave the rest of the dashboard available.
+
 ## Configuration recovery
 
 Schema v3 migration and malformed-JSON recovery were validated with an isolated `LUMINA_STATE_PATH`. The invalid source was preserved at the adjacent `.invalid` path before defaults were written atomically.

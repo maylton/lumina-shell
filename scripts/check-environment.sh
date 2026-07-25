@@ -144,6 +144,8 @@ check_optional_command powerprofilesctl
 check_optional_command wpctl
 check_optional_command nmcli
 check_optional_command bluetoothctl
+check_optional_command curl
+check_optional_command timedatectl
 
 check_pipewire "$require_daily"
 check_system_service org.freedesktop.UPower UPower "$require_daily"
