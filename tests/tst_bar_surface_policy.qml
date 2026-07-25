@@ -5,6 +5,19 @@ import "../modules/bar/BarSurfacePolicy.js" as BarSurfacePolicy
 TestCase {
     name: "BarSurfacePolicy"
 
+    function test_onlyTransparentModeOverlaysTheWorkspace() {
+        compare(BarSurfacePolicy.exclusiveZone("solid", 56), 56)
+        compare(BarSurfacePolicy.exclusiveZone("blur", 56), 56)
+        compare(BarSurfacePolicy.exclusiveZone("frosted", 56), 56)
+        compare(BarSurfacePolicy.exclusiveZone("transparent", 56), 0)
+    }
+
+    function test_exclusiveZoneSanitizesHeight() {
+        compare(BarSurfacePolicy.exclusiveZone("solid", 56.4), 56)
+        compare(BarSurfacePolicy.exclusiveZone("solid", -4), 0)
+        compare(BarSurfacePolicy.exclusiveZone("solid", "invalid"), 0)
+    }
+
     function test_backgroundModesOnlyChangeSurfaceAlpha() {
         compare(BarSurfacePolicy.backgroundAlpha("solid", 0.2), 1)
         compare(BarSurfacePolicy.backgroundAlpha("blur", 0.86), 0.86)

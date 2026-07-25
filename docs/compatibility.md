@@ -84,7 +84,9 @@ duration.
 The bar has a separate schema-v6 background policy. Solid, Blur, Frosted
 Glass, and Transparent alter only `BarSurface`; Dashboard, Settings, bar
 children, calendars, and tray popups do not inherit `barSurfaceOpacity` or
-the bar blur region. All modes retain the layer-shell exclusive zone.
+the bar blur region. Solid, Blur, and Frosted Glass retain the full
+layer-shell exclusive zone. Transparent uses overlay geometry because a
+reserved transparent strip can reveal only the wallpaper, not tiled windows.
 Automatic content scale is implemented semantically for 40–80 logical-pixel
 heights, not as a global transform.
 Native visual passes for every height/mode combination at 1920×1080,

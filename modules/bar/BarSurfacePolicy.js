@@ -9,6 +9,18 @@ function clampOpacity(value) {
     return Math.max(0, Math.min(1, opacity))
 }
 
+function exclusiveZone(mode, surfaceHeight) {
+    var height = Number(surfaceHeight)
+
+    if (!isFinite(height))
+        height = 0
+
+    if (mode === "transparent")
+        return 0
+
+    return Math.max(0, Math.round(height))
+}
+
 function backgroundAlpha(mode, opacity) {
     if (mode === "transparent")
         return 0
