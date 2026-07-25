@@ -58,6 +58,7 @@ Singleton {
             diagnosticsPath,
             "--require-niri"
         ])
+        diagnosticsGuard.restart()
     }
 
     Component.onCompleted: refresh()
@@ -73,6 +74,27 @@ Singleton {
             root.niriVersion = exitCode === 0
                 ? root.cleanVersion(niriVersionOutput.text, "Unknown")
                 : "Unavailable"
+        }
+    }
+
+    Timer {
+        id: diagnosticsGuard
+
+        interval: 1600
+        repeat: false
+        onTriggered: {
+            if (root.running || root.diagnosticsStatus !== "Running")
+                return
+
+            root.diagnosticsOutput =
+                String(diagStdout.text || "").trim()
+            root.diagnosticsError =
+                String(diagStderr.text || "").trim()
+            root.diagnosticsStatus = root.diagnosticsError
+                ? "Failed"
+                : root.diagnosticsOutput
+                    ? "Passed"
+                    : "Could not start"
         }
     }
 
@@ -111,18 +133,19 @@ Singleton {
         id: diagnosticsProcess
 
         stdout: StdioCollector {
-            id: diagnosticsOutput
+            id: diagStdout
         }
 
         stderr: StdioCollector {
-            id: diagnosticsError
+            id: diagStderr
         }
 
         onExited: (exitCode, exitStatus) => {
+            diagnosticsGuard.stop()
             root.diagnosticsOutput =
-                String(diagnosticsOutput.text || "").trim()
+                String(diagStdout.text || "").trim()
             root.diagnosticsError =
-                String(diagnosticsError.text || "").trim()
+                String(diagStderr.text || "").trim()
             root.diagnosticsStatus = exitCode === 0
                 ? "Passed"
                 : "Failed (" + exitCode + ")"

@@ -221,6 +221,7 @@ Singleton {
 
         saveTimer.stop()
         saving = true
+        saveSettleTimer.restart()
         stateFile.writeAdapter()
     }
 
@@ -468,6 +469,7 @@ Singleton {
         }
 
         onSaveFailed: error => {
+            saveSettleTimer.stop()
             root.saving = false
             root.dirty = true
             root.lastSaveSucceeded = false
@@ -477,6 +479,7 @@ Singleton {
         }
 
         onSaved: {
+            saveSettleTimer.stop()
             root.saving = false
             root.dirty = false
             root.lastSavedAt = Date.now()
@@ -501,6 +504,24 @@ Singleton {
         interval: 220
         repeat: false
         onTriggered: root.saveNow()
+    }
+
+    Timer {
+        id: saveSettleTimer
+
+        interval: 1200
+        repeat: false
+        onTriggered: {
+            if (!root.saving || !root.lastSaveSucceeded)
+                return
+
+            // FileView may coalesce an unchanged adapter write without
+            // emitting saved. Treat that no-op as settled, not perpetually
+            // saving.
+            root.saving = false
+            root.dirty = false
+            root.lastSavedAt = Date.now()
+        }
     }
 
     IpcHandler {
