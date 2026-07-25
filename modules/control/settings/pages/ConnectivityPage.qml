@@ -29,9 +29,15 @@ SettingsPage {
     )
 
     function updateManagerSection() {
-        ConnectivityManagerService.setActiveSection(
-            managementActive ? activeSection : ""
-        )
+        ConnectivityManagerService.setActive(managementActive)
+
+        if (!managementActive)
+            return
+
+        if (activeSection === "bluetooth")
+            ConnectivityManagerService.refreshBluetooth()
+        else
+            ConnectivityManagerService.refreshNetwork()
     }
 
     function openPassword(network) {
@@ -47,7 +53,7 @@ SettingsPage {
     onActiveSectionChanged: updateManagerSection()
     Component.onCompleted: updateManagerSection()
     Component.onDestruction:
-        ConnectivityManagerService.setActiveSection("")
+        ConnectivityManagerService.setActive(false)
 
     SettingsSegmentedControl {
         width: parent.width
