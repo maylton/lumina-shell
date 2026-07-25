@@ -57,10 +57,12 @@ Scope {
                         maximumFloatingWidth,
                         desiredFloatingWidth
                     )
+                readonly property bool pointerInside:
+                    revealHover.hovered || surfaceHover.hovered
                 readonly property bool expanded:
                     !DockPreferences.autoHide
                     || revealRequested
-                    || dockHover.hovered
+                    || pointerInside
 
                 property bool revealRequested: !DockPreferences.autoHide
 
@@ -132,32 +134,13 @@ Scope {
                     }
                 }
 
-                Item {
-                    id: hoverTracker
-
-                    anchors.fill: parent
-
-                    HoverHandler {
-                        id: dockHover
-
-                        onHoveredChanged: {
-                            if (hovered) {
-                                hideTimer.stop()
-                                panel.revealRequested = true
-                            } else if (DockPreferences.autoHide) {
-                                hideTimer.restart()
-                            }
-                        }
-                    }
-                }
-
                 Timer {
                     id: hideTimer
 
                     interval: 650
                     repeat: false
                     onTriggered: {
-                        if (DockPreferences.autoHide && !dockHover.hovered)
+                        if (DockPreferences.autoHide && !panel.pointerInside)
                             panel.revealRequested = false
                     }
                 }
@@ -193,6 +176,20 @@ Scope {
                             Math.max(260, panel.surfaceWidth)
                         )
                     height: 7
+
+                    HoverHandler {
+                        id: revealHover
+
+                        onHoveredChanged: {
+                            if (hovered) {
+                                hideTimer.stop()
+                                panel.revealRequested = true
+                            } else if (DockPreferences.autoHide
+                                && !surfaceHover.hovered) {
+                                hideTimer.restart()
+                            }
+                        }
+                    }
                 }
 
                 ShellSurface {
@@ -212,6 +209,20 @@ Scope {
                     radius: panel.taskPanel
                         ? root.luminaDesign.shape.none
                         : root.luminaDesign.shape.extraLarge
+
+                    HoverHandler {
+                        id: surfaceHover
+
+                        onHoveredChanged: {
+                            if (hovered) {
+                                hideTimer.stop()
+                                panel.revealRequested = true
+                            } else if (DockPreferences.autoHide
+                                && !revealHover.hovered) {
+                                hideTimer.restart()
+                            }
+                        }
+                    }
 
                     Flickable {
                         id: dockFlick
