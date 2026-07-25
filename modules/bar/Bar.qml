@@ -45,6 +45,10 @@ Scope {
                 readonly property string activeWindowTitle: WindowStore.titleFor(activeWindow)
                 readonly property string activeWindowAppId: WindowStore.appIdFor(activeWindow)
                 readonly property string columnLabel: WindowStore.columnLabelFor(activeWindow)
+                readonly property string activeWorkspaceLabel:
+                    activeWorkspace
+                        ? WorkspaceStore.labelFor(activeWorkspace)
+                        : "Desktop"
                 readonly property string outputSummary: {
                     const name = outputName || (niriOutput ? String(niriOutput.name) : "Output")
 
@@ -115,6 +119,7 @@ Scope {
                             activeWindowTitle: panel.activeWindowTitle
                             activeWindowAppId: panel.activeWindowAppId
                             columnLabel: panel.columnLabel
+                            workspaceLabel: panel.activeWorkspaceLabel
                             showActionError: panel.showActionError
                         }
                     }

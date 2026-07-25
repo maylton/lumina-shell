@@ -6,6 +6,7 @@ import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.session
 import qs.modules.wallpaper
+import qs.services.niri
 import qs.stores.config
 
 Item {
@@ -16,6 +17,7 @@ Item {
     required property string activeWindowTitle
     required property string activeWindowAppId
     required property string columnLabel
+    required property string workspaceLabel
     required property bool showActionError
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -61,46 +63,20 @@ Item {
         }
     }
 
-    Rectangle {
-        id: contextPreview
-
-        readonly property string contextText: root.showActionError
-            ? "Niri action failed"
-            : root.activeWindowTitle
+    ContextCapsule {
+        id: contextCapsule
 
         anchors.centerIn: parent
-        visible: ConfigStore.barContextMode !== "hidden"
-            && contextText.length > 0
-            && width >= 80
-        width: Math.max(
+        availableWidth: Math.max(
             0,
-            Math.min(
-                contextLabel.implicitWidth + 24,
-                root.width - leftArea.width - rightArea.width - 64
-            )
+            root.width - leftArea.width - rightArea.width - 64
         )
-        height: root.luminaDesign.size.chipHeight
-        radius: root.luminaDesign.shape.full
-        color: root.luminaDesign.color.surfaceMuted
-
-        Text {
-            id: contextLabel
-
-            anchors {
-                fill: parent
-                leftMargin: 12
-                rightMargin: 12
-            }
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            text: contextPreview.contextText
-            color: root.showActionError
-                ? root.luminaDesign.color.urgent
-                : root.luminaDesign.color.onSurface
-            elide: Text.ElideRight
-            font.pixelSize: root.luminaDesign.typography.bodyMedium
-            font.weight: Font.DemiBold
-        }
+        activeWindowTitle: root.activeWindowTitle
+        activeWindowAppId: root.activeWindowAppId
+        columnLabel: root.columnLabel
+        workspaceLabel: root.workspaceLabel
+        showActionError: root.showActionError
+        actionError: NiriService.lastActionError
     }
 
     BarCluster {

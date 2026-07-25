@@ -1,6 +1,7 @@
 module qs.modules.bar.widgets
 ClassicNiriStatus 1.0 ClassicNiriStatus.qml
 ClockWidget 1.0 ClockWidget.qml
+ContextCapsule 1.0 ContextCapsule.qml
 DateTimeCluster 1.0 DateTimeCluster.qml
 OverviewButton 1.0 OverviewButton.qml
 TrayItem 1.0 TrayItem.qml
