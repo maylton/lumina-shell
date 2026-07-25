@@ -141,6 +141,7 @@ Rectangle {
             visible: root.showNetwork
             individual: root.individual
             showLabel: !root.compact
+                && ConfigStore.barShowNetworkLabel
             iconName: root.networkIcon
             fallbackSymbol:
                 ConnectivityService.networkSummary === "Offline"
@@ -156,6 +157,7 @@ Rectangle {
             visible: root.showAudio
             individual: root.individual
             showLabel: !root.compact
+                && ConfigStore.barShowAudioLabel
             iconName: root.audioIcon
             fallbackSymbol: AudioService.outputMuted ? "×" : "♪"
             label: AudioService.outputMuted

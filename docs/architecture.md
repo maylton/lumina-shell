@@ -85,7 +85,10 @@ bar.
 `SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
 `PowerService` directly and opens the existing Dashboard through
 `ControlCenterStore`. Missing capabilities are omitted. It never creates a
-second quick-controls popup.
+second quick-controls popup. `barShowNetworkLabel` and `barShowAudioLabel`
+control only their visible text; icons, service state, tooltips, accessibility,
+and activation remain intact. Responsive compaction takes precedence when the
+available width cannot safely retain secondary labels.
 
 ## Process policy
 

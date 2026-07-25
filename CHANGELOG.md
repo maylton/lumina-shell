@@ -64,6 +64,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   always-visible inline icons.
 - Compact notification bell with unread badge, Do Not Disturb state, tooltip,
   and accessible status.
+- Persistent Bar settings to hide network and volume text independently while
+  preserving their status icons and interactions.
 
 ### Changed
 

@@ -26,8 +26,8 @@ The Bar settings page controls:
 - Always, Contextual, or Hidden Niri context and the contextual timeout;
 - title, application ID, column, localized date style, 12/24-hour time, and
   seconds;
-- grouped or individual status, individual service visibility, and a grouped
-  tray menu or always-visible tray icons;
+- grouped or individual status, individual service visibility, optional
+  network/volume text, and a grouped tray menu or always-visible tray icons;
 - independent left/right widget order with Move up, Move down, and Show/Hide.
 
 Context is event-driven and independent per output. In Contextual mode, a
@@ -36,6 +36,10 @@ for the configured duration. Narrow layouts first remove secondary text and
 optional actions; the central context derives its maximum width from the
 smaller side clearance, so it elides or recedes instead of overlapping either
 cluster.
+
+Network and volume labels can be disabled independently while retaining their
+icons, live state, Dashboard action, tooltip, and accessible description.
+Responsive compact layouts may hide these labels regardless of the preference.
 
 ## Launcher
 

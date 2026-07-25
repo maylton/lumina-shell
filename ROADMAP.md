@@ -154,6 +154,8 @@ This sprint completes the 0.5 public-beta foundation:
   Dashboard clusters remain single-line and output-aware.
 - System tray items can be grouped in a compact popover or kept visible
   inline, and notifications use a compact stateful icon with an unread badge.
+- Network and volume text can be hidden independently without disabling their
+  status icons, services, tooltips, or Dashboard access.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
 - Schema v4 bar preferences migrate to schema v5 without losing valid

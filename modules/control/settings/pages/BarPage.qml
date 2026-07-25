@@ -309,11 +309,37 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
+            title: "Volume text"
+            description: "Show percentage or muted state beside the icon"
+            available: ConfigStore.barShowAudioStatus
+            availabilityText: "Enable the audio widget first"
+            checked: ConfigStore.barShowAudioLabel
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowAudioLabel",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
             title: "Network"
             description: "Connected network or offline state"
             checked: ConfigStore.barShowNetworkStatus
             onToggled: value => ConfigStore.setBarValue(
                 "barShowNetworkStatus",
+                value
+            )
+        }
+
+        SettingsSwitchRow {
+            width: parent.width
+            title: "Network text"
+            description: "Show connection name or state beside the icon"
+            available: ConfigStore.barShowNetworkStatus
+            availabilityText: "Enable the network widget first"
+            checked: ConfigStore.barShowNetworkLabel
+            onToggled: value => ConfigStore.setBarValue(
+                "barShowNetworkLabel",
                 value
             )
         }

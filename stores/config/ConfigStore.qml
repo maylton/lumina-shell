@@ -74,8 +74,12 @@ Singleton {
         stateAdapter.barShowDashboardButton
     property alias barShowAudioStatus:
         stateAdapter.barShowAudioStatus
+    property alias barShowAudioLabel:
+        stateAdapter.barShowAudioLabel
     property alias barShowNetworkStatus:
         stateAdapter.barShowNetworkStatus
+    property alias barShowNetworkLabel:
+        stateAdapter.barShowNetworkLabel
     property alias barShowBatteryStatus:
         stateAdapter.barShowBatteryStatus
     property alias barShowWallpaperButton:
@@ -548,7 +552,9 @@ Singleton {
             property bool barShowNotifications: true
             property bool barShowDashboardButton: true
             property bool barShowAudioStatus: true
+            property bool barShowAudioLabel: true
             property bool barShowNetworkStatus: true
+            property bool barShowNetworkLabel: true
             property bool barShowBatteryStatus: true
             property bool barShowWallpaperButton: false
             property bool barShowSessionButton: false
@@ -722,6 +728,8 @@ Singleton {
                 barContextMode: root.barContextMode,
                 barStatusLayout: root.barStatusLayout,
                 barTrayMode: root.barTrayMode,
+                barShowAudioLabel: root.barShowAudioLabel,
+                barShowNetworkLabel: root.barShowNetworkLabel,
                 dashboardDefaultPage: root.dashboardDefaultPage,
                 doNotDisturb: root.doNotDisturb,
                 osdEnabled: root.osdEnabled,

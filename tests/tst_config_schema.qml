@@ -17,6 +17,8 @@ TestCase {
         compare(state.barContextMode, "contextual")
         compare(state.barStatusLayout, "grouped")
         compare(state.barTrayMode, "grouped")
+        compare(state.barShowAudioLabel, true)
+        compare(state.barShowNetworkLabel, true)
         compare(state.barContextTimeout, 3500)
         compare(state.barHeight, 56)
         compare(state.barShowWallpaperButton, false)
@@ -68,6 +70,8 @@ TestCase {
         verify(migrated.barWidgetOrder === undefined)
         verify(migrated.barVisualStyle === undefined)
         compare(migrated.barSurfaceMode, "edge-to-edge")
+        compare(migrated.barShowAudioLabel, true)
+        compare(migrated.barShowNetworkLabel, true)
     }
 
     function test_schema5LegacyBarKeysAreIgnored() {
@@ -305,6 +309,8 @@ TestCase {
         compare(bar.barSurfaceMode, "edge-to-edge")
         compare(bar.barContextMode, "contextual")
         compare(bar.barTrayMode, "grouped")
+        compare(bar.barShowAudioLabel, true)
+        compare(bar.barShowNetworkLabel, true)
         compare(bar.barShowDashboardButton, true)
         compare(bar.barRightWidgetOrder.length, 6)
         verify(bar.themeMode === undefined)
@@ -338,6 +344,8 @@ TestCase {
             paletteStyle: "fruit-salad",
             barPosition: "bottom",
             barTrayMode: "inline",
+            barShowAudioLabel: false,
+            barShowNetworkLabel: false,
             dashboardShowMedia: false,
             notificationPopupPosition: "bottom-left",
             osdSize: 1.2,
@@ -351,6 +359,8 @@ TestCase {
         compare(restored.paletteStyle, "fruit-salad")
         compare(restored.barPosition, "bottom")
         compare(restored.barTrayMode, "inline")
+        compare(restored.barShowAudioLabel, false)
+        compare(restored.barShowNetworkLabel, false)
         compare(restored.dashboardShowMedia, false)
         compare(
             restored.notificationPopupPosition,
