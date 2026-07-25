@@ -89,6 +89,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Increased the notification bell's optical size through a dedicated
+  height-scaled bar token so its glyph matches adjacent controls without
+  changing the shared circular target.
 - Enforced true 1:1 circular geometry for icon-only bar controls, including
   launcher, overview, tray, notifications, and the user avatar, without
   changing stateful workspace or information capsules.

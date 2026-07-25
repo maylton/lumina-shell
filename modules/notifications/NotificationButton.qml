@@ -91,7 +91,7 @@ Rectangle {
             : NotificationService.doNotDisturb
                 ? root.luminaDesign.color.textMuted
                 : root.luminaDesign.color.onSurface
-        iconSize: root.luminaDesign.size.barIcon
+        iconSize: root.luminaDesign.size.barNotificationIcon
     }
 
     Rectangle {

@@ -237,6 +237,12 @@ QtObject {
                 12,
                 26
             ),
+            barNotificationIcon: BarScalePolicy.scaled(
+                22,
+                root.barContentScale,
+                15,
+                32
+            ),
             barSmallIcon: BarScalePolicy.scaled(
                 16,
                 root.barContentScale,
