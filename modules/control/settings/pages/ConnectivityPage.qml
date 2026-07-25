@@ -6,11 +6,16 @@ import qs.design
 import qs.modules.control.settings
 import qs.services.connectivity
 import qs.services.i18n
+import qs.stores.control
 
 SettingsPage {
     id: root
 
     property var pendingNetwork: null
+    readonly property bool managementActive:
+        ControlCenterStore.open
+        && ControlCenterStore.activePage === "settings"
+        && ControlCenterStore.settingsCategory === "connectivity"
     readonly property var wifiProfiles:
         ConnectivityManagerService.wifiProfiles()
     readonly property var wiredProfiles:
@@ -26,6 +31,13 @@ SettingsPage {
         "settings.page.connectivity.description",
         "Wi-Fi, wired networking, and Bluetooth devices"
     )
+
+    onManagementActiveChanged:
+        ConnectivityManagerService.setActive(managementActive)
+    Component.onCompleted:
+        ConnectivityManagerService.setActive(managementActive)
+    Component.onDestruction:
+        ConnectivityManagerService.setActive(false)
 
     function networkNeedsPassword(network) {
         const security = String(network && network.security || "").trim()
