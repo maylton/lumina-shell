@@ -80,8 +80,7 @@ SettingsRow {
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
 
-            onInteractionStarted:
-                root.forceActiveFocus(Qt.MouseFocusReason)
+            onInteractionStarted: root.releasePointerFocus()
             onValueRequested: normalized =>
                 root.editNormalized(normalized)
         }
