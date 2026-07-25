@@ -2,6 +2,7 @@ module qs.modules.control
 ControlButton 1.0 ControlButton.qml
 ControlCenter 1.0 ControlCenter.qml
 ControlSlider 1.0 ControlSlider.qml
+MaterialSlider 1.0 MaterialSlider.qml
 SliderTrackSegment 1.0 SliderTrackSegment.qml
 ControlTabBar 1.0 ControlTabBar.qml
 DashboardAction 1.0 DashboardAction.qml
