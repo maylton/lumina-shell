@@ -41,10 +41,19 @@ Scope {
                         : 0
                 readonly property int effectiveMargin:
                     taskPanel ? 0 : DockPreferences.margin
+                readonly property int reservedWindowGap:
+                    !taskPanel
+                    && DockPreferences.reserveSpace
+                    && !DockPreferences.autoHide
+                        ? 8
+                        : 0
                 readonly property int surfaceHeight:
                     DockPreferences.iconSize + 24
                 readonly property int expandedHeight:
-                    bottomBarOffset + surfaceHeight + effectiveMargin
+                    bottomBarOffset
+                        + surfaceHeight
+                        + effectiveMargin
+                        + reservedWindowGap
                 readonly property int collapsedHeight:
                     bottomBarOffset + 7
                 readonly property int desiredFloatingWidth:
@@ -255,19 +264,8 @@ Scope {
 
                                 width: DockPreferences.iconSize + 12
                                 height: width
-                                radius: launcherMouse.pressed
-                                    ? root.luminaDesign.shape.medium
-                                    : launcherMouse.containsMouse
-                                        ? root.luminaDesign.shape.large
-                                        : root.luminaDesign.shape.full
-                                color: launcherMouse.containsMouse
-                                    ? root.luminaDesign.color.accentContainer
-                                    : "transparent"
-                                scale: launcherMouse.pressed
-                                    ? 0.94
-                                    : launcherMouse.containsMouse
-                                        ? 1.07
-                                        : 1
+                                radius: root.luminaDesign.shape.full
+                                color: "transparent"
                                 activeFocusOnTab: true
                                 border.width: activeFocus ? 2 : 0
                                 border.color:
@@ -286,30 +284,6 @@ Scope {
                                 Accessible.onPressAction:
                                     LauncherStore.toggle(panel.outputName)
 
-                                Behavior on radius {
-                                    NumberAnimation {
-                                        duration: root.luminaDesign.motion.spatialFast
-                                        easing.type:
-                                            root.luminaDesign.motion.spatialEasing
-                                        easing.overshoot:
-                                            root.luminaDesign.motion.spatialOvershoot
-                                    }
-                                }
-
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: root.luminaDesign.motion.effectsFast
-                                    }
-                                }
-
-                                Behavior on scale {
-                                    NumberAnimation {
-                                        duration: root.luminaDesign.motion.press
-                                        easing.type:
-                                            root.luminaDesign.motion.effectsEasing
-                                    }
-                                }
-
                                 Keys.onSpacePressed: event => {
                                     LauncherStore.toggle(panel.outputName)
                                     event.accepted = true
@@ -320,18 +294,66 @@ Scope {
                                     event.accepted = true
                                 }
 
-                                Image {
+                                Item {
+                                    id: launcherGlyph
+
                                     anchors.centerIn: parent
-                                    width: DockPreferences.iconSize
-                                    height: width
-                                    source: Quickshell.iconPath(
-                                        "system-search-symbolic",
-                                        "application-x-executable"
+                                    width: Math.round(
+                                        DockPreferences.iconSize * 0.68
                                     )
-                                    sourceSize.width: width
-                                    sourceSize.height: height
-                                    fillMode: Image.PreserveAspectFit
-                                    asynchronous: true
+                                    height: width
+                                    scale: launcherMouse.pressed
+                                        ? 0.95
+                                        : launcherMouse.containsMouse
+                                            ? 1.05
+                                            : 1
+
+                                    Behavior on scale {
+                                        NumberAnimation {
+                                            duration:
+                                                root.luminaDesign.motion.press
+                                            easing.type:
+                                                root.luminaDesign.motion.effectsEasing
+                                        }
+                                    }
+
+                                    Grid {
+                                        id: launcherGrid
+
+                                        readonly property int cellSize:
+                                            Math.max(
+                                                4,
+                                                Math.floor(
+                                                    (launcherGlyph.width
+                                                        - spacing * 2) / 3
+                                                )
+                                            )
+
+                                        anchors.centerIn: parent
+                                        rows: 3
+                                        columns: 3
+                                        spacing: Math.max(
+                                            2,
+                                            Math.round(
+                                                launcherGlyph.width * 0.08
+                                            )
+                                        )
+
+                                        Repeater {
+                                            model: 9
+
+                                            delegate: Rectangle {
+                                                width: launcherGrid.cellSize
+                                                height: width
+                                                radius: Math.max(
+                                                    1,
+                                                    Math.round(width * 0.24)
+                                                )
+                                                color:
+                                                    root.luminaDesign.color.primary
+                                            }
+                                        }
+                                    }
                                 }
 
                                 MouseArea {
