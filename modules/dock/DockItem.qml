@@ -27,21 +27,8 @@ Rectangle {
 
     width: iconSize + 12
     height: iconSize + 12
-    radius: itemMouse.pressed
-        ? luminaDesign.shape.medium
-        : focused || itemMouse.containsMouse
-            ? luminaDesign.shape.large
-            : luminaDesign.shape.full
-    color: focused
-        ? luminaDesign.color.accentContainer
-        : itemMouse.containsMouse
-            ? luminaDesign.color.surfaceMuted
-            : "transparent"
-    scale: itemMouse.pressed
-        ? 0.94
-        : itemMouse.containsMouse
-            ? 1.07
-            : 1
+    radius: luminaDesign.shape.full
+    color: "transparent"
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -55,28 +42,6 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activated()
 
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.spatialFast
-            easing.type: root.luminaDesign.motion.spatialEasing
-            easing.overshoot: root.luminaDesign.motion.spatialOvershoot
-        }
-    }
-
-    Behavior on color {
-        ColorAnimation {
-            duration: root.luminaDesign.motion.effectsFast
-            easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.press
-            easing.type: root.luminaDesign.motion.effectsEasing
-        }
-    }
-
     Keys.onSpacePressed: event => {
         root.activated()
         event.accepted = true
@@ -88,9 +53,16 @@ Rectangle {
     }
 
     Image {
+        id: appIcon
+
         anchors.centerIn: parent
         width: root.iconSize
         height: root.iconSize
+        scale: itemMouse.pressed
+            ? 0.95
+            : itemMouse.containsMouse
+                ? 1.05
+                : 1
         source: Quickshell.iconPath(
             String(root.item && root.item.icon
                 || "application-x-executable"),
@@ -101,6 +73,13 @@ Rectangle {
         asynchronous: true
         fillMode: Image.PreserveAspectFit
         smooth: true
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.press
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
     }
 
     Rectangle {
