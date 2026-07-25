@@ -60,9 +60,16 @@ Singleton {
     }
 
     function finishLoad(source) {
-        applyValues(DockPreferencesLogic.normalize(source))
+        const normalized = DockPreferencesLogic.normalize(source)
+        applyValues(normalized)
         initialized = true
         dirty = false
+
+        if (!source
+            || Number(source.schemaVersion) !== normalized.schemaVersion
+            || Number(source.iconSize) !== normalized.iconSize) {
+            scheduleSave()
+        }
     }
 
     function scheduleSave() {
@@ -172,7 +179,7 @@ Singleton {
             property bool autoHide: true
             property bool showRunning: true
             property bool reserveSpace: false
-            property int iconSize: 50
+            property int iconSize: 36
             property int margin: 10
             property var favoriteAppIds: []
         }
