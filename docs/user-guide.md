@@ -26,8 +26,8 @@ bolt, while a low non-charging battery uses the urgent color role.
 
 The Bar settings page controls:
 
-- a Solid, Blur, Frosted Glass, or Transparent bar background and independent
-  background opacity;
+- a Solid, Translucent, Blur, Frosted Glass, or Transparent bar background
+  and independent background-tint opacity;
 - top or bottom position, edge-to-edge or floating geometry, 40–80 pixel
   height, margin, spacing, and compact mode;
 - automatic content scaling from the selected height or a manual 80–140%
