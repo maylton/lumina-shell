@@ -132,15 +132,21 @@ Scope {
                     }
                 }
 
-                HoverHandler {
-                    id: dockHover
+                Item {
+                    id: hoverTracker
 
-                    onHoveredChanged: {
-                        if (hovered) {
-                            hideTimer.stop()
-                            panel.revealRequested = true
-                        } else if (DockPreferences.autoHide) {
-                            hideTimer.restart()
+                    anchors.fill: parent
+
+                    HoverHandler {
+                        id: dockHover
+
+                        onHoveredChanged: {
+                            if (hovered) {
+                                hideTimer.stop()
+                                panel.revealRequested = true
+                            } else if (DockPreferences.autoHide) {
+                                hideTimer.restart()
+                            }
                         }
                     }
                 }
