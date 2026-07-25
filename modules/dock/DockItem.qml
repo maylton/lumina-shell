@@ -13,7 +13,7 @@ Rectangle {
     required property int iconSize
 
     signal activated
-    signal pinToggled
+    signal contextMenuRequested(var sourceItem)
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool focused: Boolean(item && item.focused)
@@ -47,7 +47,7 @@ Rectangle {
         root.focus = false
 
         if (button === Qt.RightButton)
-            root.pinToggled()
+            root.contextMenuRequested(root)
         else
             root.activated()
     }
