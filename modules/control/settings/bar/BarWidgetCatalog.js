@@ -74,7 +74,7 @@ var entries = [
         id: "context",
         title: "Window context",
         description: "Focused window and Niri layout context",
-        icon: "window-symbolic",
+        icon: "view-grid-symbolic",
         side: CENTER,
         configurable: true,
         available: true,
@@ -243,4 +243,3 @@ function defaultSettings() {
 
     return result
 }
-

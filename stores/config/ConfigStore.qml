@@ -83,47 +83,6 @@ Singleton {
     property alias barWidgetSettings:
         stateAdapter.barWidgetSettings
 
-    readonly property string barContextMode:
-        widgetSetting("context", "mode", "contextual")
-    readonly property int barContextTimeout:
-        Number(widgetSetting("context", "timeout", 3500))
-    readonly property string barStatusLayout:
-        widgetSetting("system-status", "layout", "grouped")
-    readonly property string barTrayMode:
-        widgetSetting("tray", "mode", "grouped")
-    readonly property bool barShowWindowTitle:
-        Boolean(widgetSetting("context", "showWindowTitle", true))
-    readonly property bool barShowAppId:
-        Boolean(widgetSetting("context", "showApplicationId", true))
-    readonly property bool barShowColumnIndicator:
-        Boolean(widgetSetting("context", "showColumn", true))
-    readonly property bool barShowDate:
-        widgetSetting("datetime", "dateMode", "short") !== "hidden"
-    readonly property string barDateStyle:
-        widgetSetting("datetime", "dateMode", "short")
-    readonly property bool barClock24Hour:
-        widgetSetting("datetime", "hourFormat", "24") !== "12"
-    readonly property bool barShowSeconds:
-        Boolean(widgetSetting("datetime", "showSeconds", false))
-    readonly property bool barShowAudioStatus:
-        Boolean(widgetSetting("system-status", "showAudio", true))
-    readonly property bool barShowAudioLabel:
-        widgetSetting(
-            "system-status",
-            "audioTextMode",
-            "percentage"
-        ) !== "icon"
-    readonly property bool barShowNetworkStatus:
-        Boolean(widgetSetting("system-status", "showNetwork", true))
-    readonly property bool barShowNetworkLabel:
-        widgetSetting(
-            "system-status",
-            "networkTextMode",
-            "summary"
-        ) !== "icon"
-    readonly property bool barShowBatteryStatus:
-        Boolean(widgetSetting("system-status", "showBattery", true))
-    readonly property bool barWidgetPillsEnabled: true
     property alias dashboardDefaultPage:
         stateAdapter.dashboardDefaultPage
     property alias dashboardRememberPage:
@@ -890,12 +849,7 @@ Singleton {
                 barHeight: root.barHeight,
                 barAutoScaleContents: root.barAutoScaleContents,
                 barContentScale: root.barContentScale,
-                barWidgetPillsEnabled: root.barWidgetPillsEnabled,
-                barContextMode: root.barContextMode,
-                barStatusLayout: root.barStatusLayout,
-                barTrayMode: root.barTrayMode,
-                barShowAudioLabel: root.barShowAudioLabel,
-                barShowNetworkLabel: root.barShowNetworkLabel,
+                barWidgetSettings: root.barWidgetSettings,
                 dashboardDefaultPage: root.dashboardDefaultPage,
                 dashboardUseUserAvatarImage:
                     root.dashboardUseUserAvatarImage,

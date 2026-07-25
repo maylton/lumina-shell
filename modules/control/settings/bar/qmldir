@@ -1,0 +1,6 @@
+module qs.modules.control.settings.bar
+ActiveBarWidgetRow 1.0 ActiveBarWidgetRow.qml
+AddBarWidgetRow 1.0 AddBarWidgetRow.qml
+BarWidgetActionButton 1.0 BarWidgetActionButton.qml
+BarWidgetSettingsDialog 1.0 BarWidgetSettingsDialog.qml
+

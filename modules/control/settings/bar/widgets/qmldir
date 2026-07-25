@@ -1,0 +1,13 @@
+module qs.modules.control.settings.bar.widgets
+LauncherWidgetSettings 1.0 LauncherWidgetSettings.qml
+OverviewWidgetSettings 1.0 OverviewWidgetSettings.qml
+WorkspacesWidgetSettings 1.0 WorkspacesWidgetSettings.qml
+DateTimeWidgetSettings 1.0 DateTimeWidgetSettings.qml
+ContextWidgetSettings 1.0 ContextWidgetSettings.qml
+TrayWidgetSettings 1.0 TrayWidgetSettings.qml
+NotificationsWidgetSettings 1.0 NotificationsWidgetSettings.qml
+SystemStatusWidgetSettings 1.0 SystemStatusWidgetSettings.qml
+UserAvatarWidgetSettings 1.0 UserAvatarWidgetSettings.qml
+WallpaperWidgetSettings 1.0 WallpaperWidgetSettings.qml
+SessionWidgetSettings 1.0 SessionWidgetSettings.qml
+

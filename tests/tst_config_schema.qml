@@ -168,6 +168,92 @@ TestCase {
         )
     }
 
+    function test_schema6MigratesIndividualWidgetSettings() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 6,
+            barWidgetPillsEnabled: false,
+            barContextMode: "always",
+            barContextTimeout: 8000,
+            barShowWindowTitle: false,
+            barShowAppId: false,
+            barShowColumnIndicator: false,
+            barShowDate: false,
+            barClock24Hour: false,
+            barShowSeconds: true,
+            barTrayMode: "inline",
+            barStatusLayout: "individual",
+            barShowNetworkStatus: false,
+            barShowAudioStatus: true,
+            barShowBatteryStatus: false,
+            barShowAudioLabel: false,
+            barShowDashboardButton: false
+        })
+
+        compare(migrated.schemaVersion, 7)
+        compare(migrated.barWidgetSettings.launcher.showBackground, false)
+        compare(migrated.barWidgetSettings.context.mode, "always")
+        compare(migrated.barWidgetSettings.context.timeout, 8000)
+        compare(
+            migrated.barWidgetSettings.context.showWindowTitle,
+            false
+        )
+        compare(
+            migrated.barWidgetSettings.context.showApplicationId,
+            false
+        )
+        compare(migrated.barWidgetSettings.context.showColumn, false)
+        compare(migrated.barWidgetSettings.datetime.dateMode, "hidden")
+        compare(migrated.barWidgetSettings.datetime.hourFormat, "12")
+        compare(migrated.barWidgetSettings.datetime.showSeconds, true)
+        compare(migrated.barWidgetSettings.tray.mode, "inline")
+        compare(
+            migrated.barWidgetSettings["system-status"].layout,
+            "individual"
+        )
+        compare(
+            migrated.barWidgetSettings["system-status"].showNetwork,
+            false
+        )
+        compare(
+            migrated.barWidgetSettings["system-status"].audioTextMode,
+            "icon"
+        )
+        compare(
+            migrated.barWidgetSettings["system-status"].showBattery,
+            false
+        )
+        compare(migrated.barShowSystemStatus, true)
+        compare(migrated.barShowDashboardButton, false)
+        verify(migrated.barWidgetPillsEnabled === undefined)
+        verify(migrated.barContextMode === undefined)
+        verify(migrated.barTrayMode === undefined)
+    }
+
+    function test_widgetSettingsIgnoreUnknownKeysAndInvalidValues() {
+        const state = ConfigSchema.normalize({
+            barWidgetSettings: {
+                unknown: { enabled: true },
+                datetime: {
+                    hourFormat: "decimal",
+                    showSeconds: "yes",
+                    extra: "ignored"
+                },
+                "system-status": {
+                    networkTextMode: "fictional"
+                }
+            }
+        })
+
+        verify(state.barWidgetSettings.unknown === undefined)
+        compare(state.barWidgetSettings.datetime.hourFormat, "24")
+        compare(state.barWidgetSettings.datetime.showSeconds, false)
+        verify(state.barWidgetSettings.datetime.extra === undefined)
+        compare(
+            state.barWidgetSettings["system-status"].networkTextMode,
+            "summary"
+        )
+    }
+
     function test_paletteStyleNormalization() {
         const expressive = ConfigSchema.normalize({
             paletteStyle: "expressive"
