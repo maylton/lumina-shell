@@ -25,6 +25,22 @@ Singleton {
         return String(fallback || "")
     }
 
+    function normalizedFavoriteIdentifier(identifier) {
+        return String(identifier || "").trim()
+    }
+
+    function isPinnedIdentifier(identifier) {
+        const requested = normalizedFavoriteIdentifier(identifier)
+        return requested.length > 0
+            && DockPreferences.favoriteAppIds.indexOf(requested) >= 0
+    }
+
+    function togglePinnedIdentifier(identifier) {
+        const requested = normalizedFavoriteIdentifier(identifier)
+        if (requested)
+            DockPreferences.toggleFavorite(requested)
+    }
+
     function titleForFavorite(identifier) {
         const entry = entryFor(identifier)
         return entry && entry.name
@@ -108,7 +124,6 @@ Singleton {
                 continue
 
             result.push(itemFrom(identifier, entry, group, true))
-
             if (group)
                 consumedGroups[group.key] = true
         }
@@ -155,8 +170,6 @@ Singleton {
         if (!item)
             return
 
-        const identifier = String(item.favoriteId || "").trim()
-        if (identifier)
-            DockPreferences.toggleFavorite(identifier)
+        togglePinnedIdentifier(item.favoriteId)
     }
 }
