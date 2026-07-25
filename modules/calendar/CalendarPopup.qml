@@ -33,10 +33,10 @@ PopupWindow {
         ? Edges.Bottom | Edges.Left
         : Edges.Top | Edges.Left
     anchor.margins.top: barPosition === "top"
-        ? luminaDesign.spacing.small
+        ? luminaDesign.spacing.barPanelGap
         : 0
     anchor.margins.bottom: barPosition === "bottom"
-        ? luminaDesign.spacing.small
+        ? luminaDesign.spacing.barPanelGap
         : 0
     anchor.adjustment: PopupAdjustment.All
 

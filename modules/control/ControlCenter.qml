@@ -127,20 +127,37 @@ Scope {
                     }
                 }
 
+                Item {
+                    id: availableArea
+
+                    anchors {
+                        fill: parent
+                        topMargin:
+                            ConfigStore.barPosition === "top"
+                                ? root.luminaDesign.size.barWindowHeight
+                                    + root.luminaDesign.spacing.barPanelGap
+                                : root.luminaDesign.spacing.barPanelGap
+                        bottomMargin:
+                            ConfigStore.barPosition === "bottom"
+                                ? root.luminaDesign.size.barWindowHeight
+                                    + root.luminaDesign.spacing.barPanelGap
+                                : root.luminaDesign.spacing.barPanelGap
+                        leftMargin: controlWindow.safeMargin
+                        rightMargin: controlWindow.safeMargin
+                    }
+                }
+
                 Rectangle {
                     id: dashboardSurface
 
-                    anchors.centerIn: parent
+                    anchors.centerIn: availableArea
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,
-                        controlWindow.width
-                            - controlWindow.safeMargin * 2
+                        availableArea.width
                     )
                     height: Math.min(
                         root.luminaDesign.size.controlCenterHeight,
-                        controlWindow.height
-                            - root.luminaDesign.size.barHeight
-                            - controlWindow.safeMargin * 2
+                        availableArea.height
                     )
                     radius: root.luminaDesign.shape.extraLarge
                     color: root.luminaDesign.color.surfaceContainer

@@ -51,10 +51,17 @@ Scope {
                 }
 
                 margins {
-                    top: root.luminaDesign.size.barHeight
-                        + root.luminaDesign.spacing.medium
+                    top:
+                        ConfigStore.barPosition === "top"
+                            ? root.luminaDesign.size.barWindowHeight
+                                + root.luminaDesign.spacing.barPanelGap
+                            : root.luminaDesign.spacing.barPanelGap
                     right: root.luminaDesign.spacing.large
-                    bottom: root.luminaDesign.spacing.large
+                    bottom:
+                        ConfigStore.barPosition === "bottom"
+                            ? root.luminaDesign.size.barWindowHeight
+                                + root.luminaDesign.spacing.barPanelGap
+                            : root.luminaDesign.spacing.barPanelGap
                     left: root.luminaDesign.spacing.large
                 }
 

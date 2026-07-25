@@ -133,10 +133,18 @@ QtObject {
             small: ConfigStore.compactMode ? 4 : 6,
             medium: ConfigStore.compactMode ? 8 : 10,
             large: ConfigStore.compactMode ? 11 : 14,
-            extraLarge: ConfigStore.compactMode ? 14 : 18
+            extraLarge: ConfigStore.compactMode ? 14 : 18,
+            barPanelGap: ConfigStore.compactMode ? 10 : 14
         },
         size: {
             barHeight: ConfigStore.barHeight,
+            barWindowHeight: ConfigStore.barHeight
+                + (
+                    ConfigStore.barVisualStyle === "classic"
+                    || ConfigStore.barSurfaceMode === "floating"
+                        ? ConfigStore.barMargin * 2
+                        : 0
+                ),
             expressiveBarHeight: 48,
             barTouchTarget: ConfigStore.compactMode ? 34 : 36,
             calendarWidth: 336,

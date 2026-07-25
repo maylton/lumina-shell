@@ -53,3 +53,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   services, dedicated Dashboard access, and responsive optional actions.
 - Expanded Bar settings with preset previews, surface/context/status controls,
   optional actions, accessible ordering, and immediate persistence.
+- Consistent semantic spacing between the bar and calendars, tray popups,
+  notifications, and the unified control-center surface on either edge.

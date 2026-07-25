@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.services.notifications
+import qs.stores.config
 
 Scope {
     id: root
@@ -92,10 +93,17 @@ Scope {
                         top: parent.top
                         bottom: parent.bottom
                         right: parent.right
-                        topMargin: root.luminaDesign.size.barHeight
-                            + root.luminaDesign.spacing.medium
+                        topMargin:
+                            ConfigStore.barPosition === "top"
+                                ? root.luminaDesign.size.barWindowHeight
+                                    + root.luminaDesign.spacing.barPanelGap
+                                : root.luminaDesign.spacing.barPanelGap
                         rightMargin: root.luminaDesign.spacing.medium
-                        bottomMargin: root.luminaDesign.spacing.medium
+                        bottomMargin:
+                            ConfigStore.barPosition === "bottom"
+                                ? root.luminaDesign.size.barWindowHeight
+                                    + root.luminaDesign.spacing.barPanelGap
+                                : root.luminaDesign.spacing.barPanelGap
                     }
 
                     width: Math.min(
