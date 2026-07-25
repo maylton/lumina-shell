@@ -470,13 +470,20 @@ SettingsPage {
         id: passwordPopup
 
         parent: root
-        anchors.centerIn: parent
+        x: Math.max(0, (root.width - width) / 2)
+        y: Math.max(0, (root.height - height) / 2)
         width: Math.min(420, root.width - 40)
         height: 220
+        padding: 0
         modal: true
         focus: true
         closePolicy: Controls.Popup.CloseOnEscape
             | Controls.Popup.CloseOnPressOutside
+
+        onClosed: {
+            passwordInput.text = ""
+            root.pendingNetwork = null
+        }
 
         background: Rectangle {
             radius: root.luminaDesign.shape.extraLarge
@@ -490,7 +497,7 @@ SettingsPage {
 
             Text {
                 width: parent.width
-                - root.luminaDesign.spacing.extraLarge * 2
+                    - root.luminaDesign.spacing.extraLarge * 2
                 x: root.luminaDesign.spacing.extraLarge
                 text: I18n.tr(
                     "settings.connectivity.wifi.passwordFor",
@@ -583,8 +590,6 @@ SettingsPage {
                             root.pendingNetwork.security,
                             passwordInput.text
                         )
-                        passwordInput.text = ""
-                        root.pendingNetwork = null
                         passwordPopup.close()
                     }
 
