@@ -29,10 +29,10 @@ DashboardCard {
     Column {
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
-        spacing: root.luminaDesign.spacing.small
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Row {
             width: parent.width

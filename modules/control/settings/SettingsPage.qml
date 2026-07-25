@@ -27,7 +27,7 @@ Flickable {
     clip: true
     contentWidth: width
     contentHeight: pageColumn.implicitHeight
-        + luminaDesign.spacing.extraLarge
+        + luminaDesign.spacing.controlContentInset
     boundsBehavior: Flickable.StopAtBounds
     flickDeceleration: 2600
 
@@ -35,7 +35,7 @@ Flickable {
         id: pageColumn
 
         width: root.width
-        spacing: root.luminaDesign.spacing.large
+        spacing: root.luminaDesign.spacing.controlSectionGap
 
         Row {
             width: parent.width
@@ -44,7 +44,7 @@ Flickable {
             Column {
                 width: parent.width - saveStatus.width
                     - resetPage.width
-                    - root.luminaDesign.spacing.large * 2
+                    - root.luminaDesign.spacing.controlSectionGap * 2
                 spacing: 3
 
                 Text {
@@ -160,7 +160,7 @@ Flickable {
             id: pageBody
 
             width: parent.width
-            spacing: root.luminaDesign.spacing.large
+            spacing: root.luminaDesign.spacing.controlSectionGap
         }
     }
 

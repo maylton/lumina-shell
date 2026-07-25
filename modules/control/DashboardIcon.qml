@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.impl as ControlsImpl
 import Quickshell
+import qs.design
 
 Item {
     id: root
@@ -14,6 +15,7 @@ Item {
     property real iconSize: 18
     property real fallbackScale: 1
 
+    readonly property var luminaDesign: Theme.luminaTokens
     readonly property string iconSource: customSource.length > 0
         ? customSource
         : iconName.length > 0
@@ -24,6 +26,13 @@ Item {
 
     implicitWidth: iconSize
     implicitHeight: iconSize
+
+    Behavior on iconColor {
+        ColorAnimation {
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
 
     ControlsImpl.IconImage {
         id: sourceIcon

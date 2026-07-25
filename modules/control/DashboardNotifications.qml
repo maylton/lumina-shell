@@ -16,10 +16,10 @@ DashboardCard {
     Column {
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Row {
             width: parent.width
@@ -73,7 +73,7 @@ DashboardCard {
 
             width: parent.width
             height: parent.height - 38 - parent.spacing
-            spacing: root.luminaDesign.spacing.medium
+            spacing: root.luminaDesign.spacing.controlItemGap
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             model: ScriptModel {

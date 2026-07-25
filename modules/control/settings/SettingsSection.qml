@@ -14,7 +14,7 @@ Rectangle {
 
     width: parent ? parent.width : 0
     implicitHeight: sectionColumn.implicitHeight
-        + luminaDesign.spacing.extraLarge * 2
+        + luminaDesign.spacing.controlContentInset * 2
     radius: luminaDesign.shape.extraLarge
     color: luminaDesign.color.surfaceBase
     border.width: 0
@@ -30,10 +30,10 @@ Rectangle {
             left: parent.left
             right: parent.right
             top: parent.top
-            margins: root.luminaDesign.spacing.extraLarge
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Column {
             width: parent.width
@@ -62,7 +62,7 @@ Rectangle {
             id: body
 
             width: parent.width
-            spacing: root.luminaDesign.spacing.small
+            spacing: root.luminaDesign.spacing.controlItemGap
         }
     }
 }

@@ -8,7 +8,12 @@ Item {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property real tabSpacing: luminaDesign.spacing.medium
+    readonly property real tabSpacing:
+        luminaDesign.spacing.controlItemGap
+    readonly property int selectedIndex:
+        ControlCenterStore.activePage === "settings" ? 1 : 0
+    readonly property real tabWidth:
+        (width - tabSpacing) / 2
     readonly property string rocketIconSource: Qt.resolvedUrl(
         "../../assets/icons/rocket-symbolic.svg"
     )
@@ -53,7 +58,7 @@ Item {
                 readonly property bool selected:
                     ControlCenterStore.activePage === modelData.id
 
-                width: (root.width - root.tabSpacing) / 2
+                width: root.tabWidth
                 height: root.height
                 color: "transparent"
                 activeFocusOnTab: true
@@ -124,27 +129,14 @@ Item {
                         font.weight: tabButton.selected
                             ? Font.Bold
                             : Font.Medium
-                    }
-                }
 
-                Rectangle {
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        bottom: parent.bottom
-                    }
-                    height: tabButton.selected
-                        ? 4
-                        : tabButton.activeFocus
-                            ? 2
-                            : 0
-                    radius: root.luminaDesign.shape.full
-                    color: root.luminaDesign.color.primary
-
-                    Behavior on height {
-                        NumberAnimation {
-                            duration: root.luminaDesign.motion.fast
-                            easing.type: Easing.OutCubic
+                        Behavior on color {
+                            ColorAnimation {
+                                duration:
+                                    root.luminaDesign.motion.effectsFast
+                                easing.type:
+                                    root.luminaDesign.motion.effectsEasing
+                            }
                         }
                     }
                 }
@@ -160,6 +152,35 @@ Item {
                         tabButton.activate()
                     }
                 }
+            }
+        }
+    }
+
+    Rectangle {
+        id: selectionIndicator
+
+        x: root.selectedIndex * (root.tabWidth + root.tabSpacing)
+        y: root.height - height
+        width: root.tabWidth
+        height: 4
+        radius: root.luminaDesign.shape.full
+        color: root.luminaDesign.color.primary
+
+        Behavior on x {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.pageTransition
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
+            }
+        }
+
+        Behavior on width {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.spatialDefault
+                easing.type: root.luminaDesign.motion.spatialEasing
+                easing.overshoot:
+                    root.luminaDesign.motion.spatialOvershoot
             }
         }
     }

@@ -4,6 +4,7 @@ SettingsActionRow 1.0 SettingsActionRow.qml
 SettingsComboRow 1.0 SettingsComboRow.qml
 SettingsNavigationItem 1.0 SettingsNavigationItem.qml
 SettingsPage 1.0 SettingsPage.qml
+SettingsPageFrame 1.0 SettingsPageFrame.qml
 SettingsRow 1.0 SettingsRow.qml
 SettingsSection 1.0 SettingsSection.qml
 SettingsSegmentedControl 1.0 SettingsSegmentedControl.qml

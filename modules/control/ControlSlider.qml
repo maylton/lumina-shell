@@ -126,8 +126,12 @@ Rectangle {
 
             Behavior on width {
                 NumberAnimation {
-                    duration: root.luminaDesign.motion.fast
-                    easing.type: Easing.OutCubic
+                    duration:
+                        root.luminaDesign.motion.spatialFast
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
                 }
             }
         }

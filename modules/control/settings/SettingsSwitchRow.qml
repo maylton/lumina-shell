@@ -32,7 +32,8 @@ SettingsRow {
 
         Behavior on color {
             ColorAnimation {
-                duration: root.luminaDesign.motion.fast
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
             }
         }
 
@@ -50,14 +51,22 @@ SettingsRow {
 
             Behavior on x {
                 NumberAnimation {
-                    duration: root.luminaDesign.motion.medium
-                    easing.type: Easing.OutCubic
+                    duration:
+                        root.luminaDesign.motion.spatialDefault
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
                 }
             }
 
             Behavior on width {
                 NumberAnimation {
-                    duration: root.luminaDesign.motion.fast
+                    duration: root.luminaDesign.motion.spatialFast
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
                 }
             }
         }

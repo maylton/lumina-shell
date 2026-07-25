@@ -27,8 +27,9 @@ Item {
 
         Column {
             anchors.centerIn: parent
-            width: parent.width - root.luminaDesign.spacing.extraLarge * 2
-            spacing: root.luminaDesign.spacing.small
+            width: parent.width
+                - root.luminaDesign.spacing.controlContentInset * 2
+            spacing: root.luminaDesign.spacing.controlItemGap
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -77,15 +78,16 @@ Item {
             right: parent.right
             top: welcomeCard.bottom
             bottom: parent.bottom
-            topMargin: root.luminaDesign.spacing.medium
+            topMargin: root.luminaDesign.spacing.controlCardGap
         }
 
         accessibleName: "Date and weather"
 
         Column {
             anchors.centerIn: parent
-            width: parent.width - root.luminaDesign.spacing.extraLarge * 2
-            spacing: root.luminaDesign.spacing.medium
+            width: parent.width
+                - root.luminaDesign.spacing.controlContentInset * 2
+            spacing: root.luminaDesign.spacing.controlItemGap
 
             Text {
                 width: parent.width

@@ -22,10 +22,10 @@ DashboardCard {
     Column {
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.medium
+            margins: root.luminaDesign.spacing.controlItemGap
         }
 
-        spacing: root.luminaDesign.spacing.small
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Rectangle {
             id: editButton
@@ -47,8 +47,12 @@ DashboardCard {
 
             Behavior on radius {
                 NumberAnimation {
-                    duration: root.luminaDesign.motion.medium
-                    easing.type: Easing.OutCubic
+                    duration:
+                        root.luminaDesign.motion.spatialFast
+                    easing.type:
+                        root.luminaDesign.motion.spatialEasing
+                    easing.overshoot:
+                        root.luminaDesign.motion.spatialOvershoot
                 }
             }
 
@@ -72,7 +76,7 @@ DashboardCard {
 
             Row {
                 anchors.centerIn: parent
-                spacing: root.luminaDesign.spacing.medium
+                spacing: root.luminaDesign.spacing.controlItemGap
 
                 DashboardIcon {
                     width: 20

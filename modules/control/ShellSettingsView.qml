@@ -14,6 +14,15 @@ FocusScope {
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool compactSidebar: width < 900
+    readonly property int activeCategoryIndex: {
+        for (var index = 0; index < categories.length; ++index) {
+            if (categories[index].id
+                === ControlCenterStore.settingsCategory)
+                return index
+        }
+
+        return 0
+    }
     readonly property real sidebarWidth:
         compactSidebar ? 68 : Math.min(250, Math.max(220, width * 0.22))
     readonly property var categories: [
@@ -86,7 +95,7 @@ FocusScope {
 
     Row {
         anchors.fill: parent
-        spacing: root.luminaDesign.spacing.large
+        spacing: root.luminaDesign.spacing.controlCardGap
 
         SettingsSidebar {
             width: root.sidebarWidth
@@ -100,70 +109,126 @@ FocusScope {
             height: parent.height
             clip: true
 
-            AppearancePage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                outputName: root.outputName
-                visible:
+                categoryId: "appearance"
+                categoryIndex: 0
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory
                         === "appearance"
-                enabled: visible
+
+                AppearancePage {
+                    anchors.fill: parent
+                    outputName: root.outputName
+                }
             }
 
-            BarPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible: ControlCenterStore.settingsCategory === "bar"
-                enabled: visible
+                categoryId: "bar"
+                categoryIndex: 1
+                activeIndex: root.activeCategoryIndex
+                pageActive:
+                    ControlCenterStore.settingsCategory === "bar"
+
+                BarPage {
+                    anchors.fill: parent
+                }
             }
 
-            DashboardPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "dashboard"
+                categoryIndex: 2
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory
                         === "dashboard"
-                enabled: visible
+
+                DashboardPage {
+                    anchors.fill: parent
+                }
             }
 
-            BehaviorPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "behavior"
+                categoryIndex: 3
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory
                         === "behavior"
-                enabled: visible
+
+                BehaviorPage {
+                    anchors.fill: parent
+                }
             }
 
-            NotificationsPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "notifications"
+                categoryIndex: 4
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory
                         === "notifications"
-                enabled: visible
+
+                NotificationsPage {
+                    anchors.fill: parent
+                }
             }
 
-            OsdPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible: ControlCenterStore.settingsCategory === "osd"
-                enabled: visible
+                categoryId: "osd"
+                categoryIndex: 5
+                activeIndex: root.activeCategoryIndex
+                pageActive:
+                    ControlCenterStore.settingsCategory === "osd"
+
+                OsdPage {
+                    anchors.fill: parent
+                }
             }
 
-            SessionPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "session"
+                categoryIndex: 6
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory === "session"
-                enabled: visible
+
+                SessionPage {
+                    anchors.fill: parent
+                }
             }
 
-            SystemPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "system"
+                categoryIndex: 7
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory === "system"
-                enabled: visible
+
+                SystemPage {
+                    anchors.fill: parent
+                }
             }
 
-            AboutPage {
+            SettingsPageFrame {
                 anchors.fill: parent
-                visible:
+                categoryId: "about"
+                categoryIndex: 8
+                activeIndex: root.activeCategoryIndex
+                pageActive:
                     ControlCenterStore.settingsCategory === "about"
-                enabled: visible
+
+                AboutPage {
+                    anchors.fill: parent
+                }
             }
         }
     }

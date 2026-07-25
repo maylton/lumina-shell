@@ -33,7 +33,7 @@ DashboardCard {
 
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
         Row {

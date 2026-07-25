@@ -28,7 +28,8 @@ FocusScope {
             || ConfigStore.dashboardShowControls
 
         width: hasContent
-            ? (parent.width - root.luminaDesign.spacing.medium * 2)
+            ? (parent.width
+                - root.luminaDesign.spacing.controlCardGap * 2)
                 * 0.27
             : 0
         visible: hasContent
@@ -59,7 +60,7 @@ FocusScope {
                 top: overview.bottom
                 bottom: parent.bottom
                 topMargin: overview.visible
-                    ? root.luminaDesign.spacing.medium
+                    ? root.luminaDesign.spacing.controlCardGap
                     : 0
             }
         }
@@ -73,13 +74,14 @@ FocusScope {
             top: parent.top
             bottom: parent.bottom
             leftMargin: leftColumn.visible
-                ? root.luminaDesign.spacing.medium
+                ? root.luminaDesign.spacing.controlCardGap
                 : 0
         }
 
         visible: ConfigStore.dashboardShowNotifications
         width: visible
-            ? (parent.width - root.luminaDesign.spacing.medium * 2)
+            ? (parent.width
+                - root.luminaDesign.spacing.controlCardGap * 2)
                 * 0.41
             : 0
         compact: true
@@ -100,7 +102,7 @@ FocusScope {
             bottom: parent.bottom
             leftMargin: homeNotifications.visible
                 || leftColumn.visible
-                    ? root.luminaDesign.spacing.medium
+                    ? root.luminaDesign.spacing.controlCardGap
                     : 0
         }
 
@@ -116,7 +118,7 @@ FocusScope {
             visible: ConfigStore.dashboardShowMedia
             height: visible
                 ? (parent.height
-                    - root.luminaDesign.spacing.medium
+                    - root.luminaDesign.spacing.controlCardGap
                         * (rightColumn.visibleCardCount - 1))
                     / Math.max(1, rightColumn.visibleCardCount)
                 : 0
@@ -130,14 +132,14 @@ FocusScope {
                 right: parent.right
                 top: mediaCard.bottom
                 topMargin: mediaCard.visible
-                    ? root.luminaDesign.spacing.medium
+                    ? root.luminaDesign.spacing.controlCardGap
                     : 0
             }
 
             visible: ConfigStore.dashboardShowSystem
             height: visible
                 ? (parent.height
-                    - root.luminaDesign.spacing.medium
+                    - root.luminaDesign.spacing.controlCardGap
                         * (rightColumn.visibleCardCount - 1))
                     / Math.max(1, rightColumn.visibleCardCount)
                 : 0
@@ -150,7 +152,7 @@ FocusScope {
                 top: statusCard.bottom
                 bottom: parent.bottom
                 topMargin: statusCard.visible || mediaCard.visible
-                    ? root.luminaDesign.spacing.medium
+                    ? root.luminaDesign.spacing.controlCardGap
                     : 0
             }
 

@@ -137,7 +137,11 @@ QtObject {
             barItemGap: ConfigStore.compactMode ? 4 : 6,
             barClusterGap: ConfigStore.compactMode ? 12 : 18,
             barContentInset: ConfigStore.compactMode ? 12 : 18,
-            barPanelGap: ConfigStore.compactMode ? 10 : 14
+            barPanelGap: ConfigStore.compactMode ? 10 : 14,
+            controlItemGap: ConfigStore.compactMode ? 8 : 12,
+            controlCardGap: ConfigStore.compactMode ? 10 : 14,
+            controlSectionGap: ConfigStore.compactMode ? 14 : 20,
+            controlContentInset: ConfigStore.compactMode ? 14 : 20
         },
         size: {
             barHeight: ConfigStore.barHeight,
@@ -197,6 +201,8 @@ QtObject {
                 Math.max(1, Math.round(450 * root.motionScale)),
             press:
                 Math.max(1, Math.round(90 * root.motionScale)),
+            pageTransition:
+                Math.max(1, Math.round(360 * root.motionScale)),
             workspaceTransform:
                 Math.max(1, Math.round(300 * root.motionScale)),
             effectsEasing: Easing.OutCubic,

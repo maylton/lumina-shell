@@ -24,10 +24,10 @@ DashboardCard {
 
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
-        spacing: root.luminaDesign.spacing.large
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Rectangle {
             id: albumArt

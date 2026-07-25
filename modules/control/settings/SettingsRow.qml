@@ -31,6 +31,7 @@ Rectangle {
             ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.06)
             : luminaDesign.color.surfaceMuted
     opacity: enabled && available ? 1 : 0.56
+    scale: rowMouse.pressed ? 0.99 : 1
     activeFocusOnTab: available
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -58,20 +59,31 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Behavior on radius {
         NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.spatialFast
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on opacity {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsDefault
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
@@ -86,7 +98,7 @@ Rectangle {
             margins: 12
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         DashboardIcon {
             anchors.verticalCenter: parent.verticalCenter

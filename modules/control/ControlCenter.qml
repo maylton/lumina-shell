@@ -172,10 +172,11 @@ Scope {
                     Column {
                         anchors {
                             fill: parent
-                            margins: root.luminaDesign.spacing.extraLarge
+                            margins:
+                                root.luminaDesign.spacing.controlContentInset
                         }
 
-                        spacing: root.luminaDesign.spacing.small
+                        spacing: root.luminaDesign.spacing.controlItemGap
 
                         DashboardHeader {
                             width: parent.width
@@ -216,7 +217,10 @@ Scope {
                                     height: parent.height
                                     x: pageActive
                                         ? 0
-                                        : -Math.round(width * 0.06)
+                                        : -Math.min(
+                                            48,
+                                            Math.round(width * 0.04)
+                                        )
                                     opacity: pageActive ? 1 : 0
                                     visible: pageActive || opacity > 0.01
                                     enabled: pageActive
@@ -227,15 +231,20 @@ Scope {
                                     Behavior on x {
                                         NumberAnimation {
                                             duration:
-                                                root.luminaDesign.motion.medium
-                                            easing.type: Easing.OutCubic
+                                                root.luminaDesign.motion.pageTransition
+                                            easing.type:
+                                                root.luminaDesign.motion.spatialEasing
+                                            easing.overshoot:
+                                                root.luminaDesign.motion.spatialOvershoot
                                         }
                                     }
 
                                     Behavior on opacity {
                                         NumberAnimation {
                                             duration:
-                                                root.luminaDesign.motion.fast
+                                                root.luminaDesign.motion.effectsDefault
+                                            easing.type:
+                                                root.luminaDesign.motion.effectsEasing
                                         }
                                     }
                                 }
@@ -249,7 +258,10 @@ Scope {
                                     height: parent.height
                                     x: pageActive
                                         ? 0
-                                        : Math.round(width * 0.06)
+                                        : Math.min(
+                                            48,
+                                            Math.round(width * 0.04)
+                                        )
                                     opacity: pageActive ? 1 : 0
                                     visible: pageActive || opacity > 0.01
                                     enabled: pageActive
@@ -260,15 +272,20 @@ Scope {
                                     Behavior on x {
                                         NumberAnimation {
                                             duration:
-                                                root.luminaDesign.motion.medium
-                                            easing.type: Easing.OutCubic
+                                                root.luminaDesign.motion.pageTransition
+                                            easing.type:
+                                                root.luminaDesign.motion.spatialEasing
+                                            easing.overshoot:
+                                                root.luminaDesign.motion.spatialOvershoot
                                         }
                                     }
 
                                     Behavior on opacity {
                                         NumberAnimation {
                                             duration:
-                                                root.luminaDesign.motion.fast
+                                                root.luminaDesign.motion.effectsDefault
+                                            easing.type:
+                                                root.luminaDesign.motion.effectsEasing
                                         }
                                     }
                                 }

@@ -50,24 +50,34 @@ Rectangle {
 
     Behavior on radius {
         NumberAnimation {
-            duration: root.luminaDesign.motion.medium
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.spatialDefault
+            easing.type: root.luminaDesign.motion.spatialEasing
+            easing.overshoot:
+                root.luminaDesign.motion.spatialOvershoot
         }
     }
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsDefault
+            easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Row {
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlItemGap
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         DashboardIcon {
             anchors.verticalCenter: parent.verticalCenter

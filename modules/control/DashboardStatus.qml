@@ -13,10 +13,10 @@ DashboardCard {
     Column {
         anchors {
             fill: parent
-            margins: root.luminaDesign.spacing.large
+            margins: root.luminaDesign.spacing.controlContentInset
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.controlItemGap
 
         Row {
             width: parent.width
@@ -32,7 +32,7 @@ DashboardCard {
 
         Row {
             width: parent.width
-            spacing: root.luminaDesign.spacing.medium
+            spacing: root.luminaDesign.spacing.controlItemGap
 
             QuickToggle {
                 width: (parent.width - parent.spacing) / 2
