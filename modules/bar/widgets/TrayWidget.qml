@@ -139,7 +139,7 @@ Item {
                     root.tooltipVisible = false
                 }
                 onClicked: {
-                    groupButton.forceActiveFocus(Qt.MouseFocusReason)
+                    groupButton.focus = false
                     trayPopup.toggle()
                 }
             }

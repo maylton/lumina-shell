@@ -144,7 +144,7 @@ Rectangle {
             root.tooltipVisible = false
         }
         onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.focus = false
             NotificationService.toggleCenter(root.outputName)
         }
     }

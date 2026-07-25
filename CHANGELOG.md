@@ -67,6 +67,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Pointer activation no longer leaves a keyboard-focus outline on bar buttons
+  after their panel or popup closes.
 - Raised the default edge-to-edge bar to 56 pixels with 40-pixel interaction
   targets, stronger clock hierarchy, lighter inactive workspaces, and a more
   restrained edge divider.

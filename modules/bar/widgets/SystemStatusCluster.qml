@@ -185,7 +185,7 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.focus = false
             root.activate()
         }
     }
