@@ -1,6 +1,7 @@
 .pragma library
+.import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
 
-var CURRENT_VERSION = 6
+var CURRENT_VERSION = 7
 
 function defaults() {
     return {
@@ -28,39 +29,22 @@ function defaults() {
         barSurfaceOpacity: 0.86,
         barAutoScaleContents: true,
         barContentScale: 1,
-        barContextMode: "contextual",
-        barContextTimeout: 3500,
-        barStatusLayout: "grouped",
         barPosition: "top",
         barHeight: 56,
         barMargin: 5,
         barWidgetSpacing: 10,
-        barWidgetPillsEnabled: true,
         barShowLauncher: true,
         barShowOverview: true,
-        barShowWindowTitle: true,
-        barCenterWindowTitle: true,
-        barShowAppId: true,
         barShowWorkspaces: true,
-        barShowColumnIndicator: true,
-        barShowDate: true,
-        barDateStyle: "short",
         barShowKeyboardLayout: true,
         barShowPrivacyIndicators: true,
         barShowTray: true,
-        barTrayMode: "grouped",
         barShowNotifications: true,
         barShowDashboardButton: true,
-        barShowAudioStatus: true,
-        barShowAudioLabel: true,
-        barShowNetworkStatus: true,
-        barShowNetworkLabel: true,
-        barShowBatteryStatus: true,
+        barShowSystemStatus: true,
         barShowWallpaperButton: false,
         barShowSessionButton: false,
         barShowClock: true,
-        barClock24Hour: true,
-        barShowSeconds: false,
         barLeftWidgetOrder: [
             "launcher",
             "overview",
@@ -68,13 +52,12 @@ function defaults() {
             "datetime"
         ],
         barRightWidgetOrder: [
-            "privacy",
-            "keyboard",
             "tray",
             "notifications",
             "system-status",
             "dashboard"
         ],
+        barWidgetSettings: BarWidgetCatalog.defaultSettings(),
         dashboardDefaultPage: "dashboard",
         dashboardRememberPage: true,
         dashboardRememberCategory: true,
@@ -151,13 +134,13 @@ function arrayValue(value) {
 
 function clone(value) {
     if (isArrayValue(value))
-        return arrayValue(value)
+        return arrayValue(value).map(clone)
 
     if (value && typeof value === "object") {
         var copy = {}
 
         for (var key in value)
-            copy[key] = value[key]
+            copy[key] = clone(value[key])
 
         return copy
     }
@@ -204,6 +187,107 @@ function normalizeSettingsCategory(value) {
 
 function booleanValue(value, fallback) {
     return typeof value === "boolean" ? value : fallback
+}
+
+function normalizeWidgetEntry(widgetId, value, fallback) {
+    var input = value
+        && !Array.isArray(value)
+        && typeof value === "object"
+        ? value
+        : {}
+    var result = clone(fallback)
+
+    function bool(key) {
+        result[key] = booleanValue(input[key], fallback[key])
+    }
+
+    function enumValue(key, allowed) {
+        result[key] = choice(input[key], allowed, fallback[key])
+    }
+
+    bool("showBackground")
+
+    if (["launcher", "overview", "wallpaper", "session"]
+        .indexOf(widgetId) >= 0) {
+        bool("showLabel")
+    } else if (widgetId === "workspaces") {
+        enumValue("labelMode", ["active", "all", "none"])
+        enumValue("inactiveStyle", ["dot", "number"])
+    } else if (widgetId === "datetime") {
+        enumValue("clockLayout", ["inline", "stacked"])
+        enumValue("hourFormat", ["system", "12", "24"])
+        bool("showSeconds")
+        enumValue(
+            "dateMode",
+            ["hidden", "short", "weekday", "full"]
+        )
+        bool("showSeparator")
+    } else if (widgetId === "context") {
+        enumValue("mode", ["always", "contextual", "hidden"])
+        result.timeout = Math.round(
+            boundedNumber(
+                input.timeout,
+                fallback.timeout,
+                1000,
+                15000
+            )
+        )
+        bool("showWindowTitle")
+        bool("showWorkspace")
+        bool("showApplicationId")
+        bool("showColumn")
+    } else if (widgetId === "tray") {
+        enumValue("mode", ["grouped", "inline"])
+        bool("showCount")
+    } else if (widgetId === "notifications") {
+        bool("showUnreadBadge")
+        bool("showDoNotDisturbState")
+    } else if (widgetId === "system-status") {
+        enumValue("layout", ["grouped", "individual"])
+        bool("showNetwork")
+        enumValue(
+            "networkTextMode",
+            ["icon", "summary", "name", "type"]
+        )
+        bool("showAudio")
+        enumValue(
+            "audioTextMode",
+            ["icon", "percentage", "state"]
+        )
+        bool("showBattery")
+        enumValue(
+            "batteryTextMode",
+            ["icon", "percentage", "state"]
+        )
+    } else if (widgetId === "dashboard") {
+        enumValue(
+            "avatarDisplay",
+            ["automatic", "image", "initials"]
+        )
+        bool("showUserName")
+    }
+
+    return result
+}
+
+function normalizeWidgetSettings(value) {
+    var input = value
+        && !Array.isArray(value)
+        && typeof value === "object"
+        ? value
+        : {}
+    var defaultsByWidget = BarWidgetCatalog.defaultSettings()
+    var result = {}
+
+    for (var widgetId in defaultsByWidget) {
+        result[widgetId] = normalizeWidgetEntry(
+            widgetId,
+            input[widgetId],
+            defaultsByWidget[widgetId]
+        )
+    }
+
+    return result
 }
 
 function normalizedOrder(value, requiredIds, optionalIds) {
@@ -318,29 +402,6 @@ function normalize(source) {
         0.8,
         1.4
     )
-    result.barContextMode = choice(
-        result.barContextMode,
-        ["always", "contextual", "hidden"],
-        base.barContextMode
-    )
-    result.barContextTimeout = Math.round(
-        boundedNumber(
-            result.barContextTimeout,
-            base.barContextTimeout,
-            1000,
-            15000
-        )
-    )
-    result.barStatusLayout = choice(
-        result.barStatusLayout,
-        ["grouped", "individual"],
-        base.barStatusLayout
-    )
-    result.barTrayMode = choice(
-        result.barTrayMode,
-        ["grouped", "inline"],
-        base.barTrayMode
-    )
     result.barPosition = choice(
         result.barPosition,
         ["top", "bottom"],
@@ -360,10 +421,8 @@ function normalize(source) {
             24
         )
     )
-    result.barDateStyle = choice(
-        result.barDateStyle,
-        ["short", "weekday", "full"],
-        base.barDateStyle
+    result.barWidgetSettings = normalizeWidgetSettings(
+        result.barWidgetSettings
     )
     result.dashboardDefaultPage = choice(
         result.dashboardDefaultPage,
@@ -442,30 +501,18 @@ function normalize(source) {
         "animationsEnabled",
         "compactMode",
         "barAutoScaleContents",
-        "barWidgetPillsEnabled",
         "barShowLauncher",
         "barShowOverview",
-        "barShowWindowTitle",
-        "barCenterWindowTitle",
-        "barShowAppId",
         "barShowWorkspaces",
-        "barShowColumnIndicator",
-        "barShowDate",
         "barShowKeyboardLayout",
         "barShowPrivacyIndicators",
         "barShowTray",
         "barShowNotifications",
         "barShowDashboardButton",
-        "barShowAudioStatus",
-        "barShowAudioLabel",
-        "barShowNetworkStatus",
-        "barShowNetworkLabel",
-        "barShowBatteryStatus",
+        "barShowSystemStatus",
         "barShowWallpaperButton",
         "barShowSessionButton",
         "barShowClock",
-        "barClock24Hour",
-        "barShowSeconds",
         "dashboardRememberPage",
         "dashboardRememberCategory",
         "dashboardUseUserAvatarImage",
@@ -554,6 +601,118 @@ function migrate(source) {
         input.barContentScale = 1
     }
 
+    if (version < 7) {
+        var widgetSettings = BarWidgetCatalog.defaultSettings()
+        var pillsEnabled = booleanValue(
+            input.barWidgetPillsEnabled,
+            true
+        )
+        var backgroundWidgets = [
+            "launcher",
+            "overview",
+            "datetime",
+            "context",
+            "tray",
+            "notifications",
+            "system-status",
+            "dashboard",
+            "wallpaper",
+            "session"
+        ]
+
+        for (var backgroundIndex = 0;
+            backgroundIndex < backgroundWidgets.length;
+            ++backgroundIndex) {
+            widgetSettings[
+                backgroundWidgets[backgroundIndex]
+            ].showBackground = pillsEnabled
+        }
+
+        widgetSettings.context.mode = choice(
+            input.barContextMode,
+            ["always", "contextual", "hidden"],
+            widgetSettings.context.mode
+        )
+        widgetSettings.context.timeout = Math.round(
+            boundedNumber(
+                input.barContextTimeout,
+                widgetSettings.context.timeout,
+                1000,
+                15000
+            )
+        )
+        widgetSettings.context.showWindowTitle = booleanValue(
+            input.barShowWindowTitle,
+            widgetSettings.context.showWindowTitle
+        )
+        widgetSettings.context.showApplicationId = booleanValue(
+            input.barShowAppId,
+            widgetSettings.context.showApplicationId
+        )
+        widgetSettings.context.showColumn = booleanValue(
+            input.barShowColumnIndicator,
+            widgetSettings.context.showColumn
+        )
+        widgetSettings.datetime.hourFormat = booleanValue(
+            input.barClock24Hour,
+            true
+        ) ? "24" : "12"
+        widgetSettings.datetime.showSeconds = booleanValue(
+            input.barShowSeconds,
+            widgetSettings.datetime.showSeconds
+        )
+        widgetSettings.datetime.dateMode = booleanValue(
+            input.barShowDate,
+            true
+        )
+            ? choice(
+                input.barDateStyle,
+                ["short", "weekday", "full"],
+                widgetSettings.datetime.dateMode
+            )
+            : "hidden"
+        widgetSettings.tray.mode = choice(
+            input.barTrayMode,
+            ["grouped", "inline"],
+            widgetSettings.tray.mode
+        )
+        widgetSettings["system-status"].layout = choice(
+            input.barStatusLayout,
+            ["grouped", "individual"],
+            widgetSettings["system-status"].layout
+        )
+        widgetSettings["system-status"].showNetwork = booleanValue(
+            input.barShowNetworkStatus,
+            widgetSettings["system-status"].showNetwork
+        )
+        widgetSettings["system-status"].networkTextMode =
+            booleanValue(input.barShowNetworkLabel, true)
+                ? "summary"
+                : "icon"
+        widgetSettings["system-status"].showAudio = booleanValue(
+            input.barShowAudioStatus,
+            widgetSettings["system-status"].showAudio
+        )
+        widgetSettings["system-status"].audioTextMode =
+            booleanValue(input.barShowAudioLabel, true)
+                ? "percentage"
+                : "icon"
+        widgetSettings["system-status"].showBattery = booleanValue(
+            input.barShowBatteryStatus,
+            widgetSettings["system-status"].showBattery
+        )
+        widgetSettings.dashboard.avatarDisplay = booleanValue(
+            input.dashboardUseUserAvatarImage,
+            true
+        ) ? "image" : "initials"
+
+        input.barShowSystemStatus =
+            booleanValue(input.barShowNetworkStatus, true)
+            || booleanValue(input.barShowAudioStatus, true)
+            || booleanValue(input.barShowBatteryStatus, true)
+        input.barWidgetSettings = widgetSettings
+    }
+
     return normalize(input)
 }
 
@@ -581,41 +740,25 @@ function defaultsForCategory(categoryName) {
             "barSurfaceOpacity",
             "barAutoScaleContents",
             "barContentScale",
-            "barContextMode",
-            "barContextTimeout",
-            "barStatusLayout",
             "barPosition",
             "barHeight",
             "barMargin",
             "barWidgetSpacing",
-            "barWidgetPillsEnabled",
             "barShowLauncher",
             "barShowOverview",
-            "barShowWindowTitle",
-            "barCenterWindowTitle",
-            "barShowAppId",
             "barShowWorkspaces",
-            "barShowColumnIndicator",
-            "barShowDate",
-            "barDateStyle",
             "barShowKeyboardLayout",
             "barShowPrivacyIndicators",
             "barShowTray",
-            "barTrayMode",
             "barShowNotifications",
             "barShowDashboardButton",
-            "barShowAudioStatus",
-            "barShowAudioLabel",
-            "barShowNetworkStatus",
-            "barShowNetworkLabel",
-            "barShowBatteryStatus",
+            "barShowSystemStatus",
             "barShowWallpaperButton",
             "barShowSessionButton",
             "barShowClock",
-            "barClock24Hour",
-            "barShowSeconds",
             "barLeftWidgetOrder",
             "barRightWidgetOrder",
+            "barWidgetSettings",
             "showStatusDetails"
         ],
         dashboard: [

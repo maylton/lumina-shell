@@ -4,6 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "ConfigSchema.js" as ConfigSchema
+import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
+import "../../modules/control/settings/bar/BarWidgetState.js" as BarWidgetState
 
 Singleton {
     id: root
@@ -51,58 +53,77 @@ Singleton {
         stateAdapter.barAutoScaleContents
     property alias barContentScale:
         stateAdapter.barContentScale
-    property alias barContextMode: stateAdapter.barContextMode
-    property alias barContextTimeout: stateAdapter.barContextTimeout
-    property alias barStatusLayout: stateAdapter.barStatusLayout
     property alias barPosition: stateAdapter.barPosition
     property alias barHeight: stateAdapter.barHeight
     property alias barMargin: stateAdapter.barMargin
     property alias barWidgetSpacing: stateAdapter.barWidgetSpacing
-    property alias barWidgetPillsEnabled:
-        stateAdapter.barWidgetPillsEnabled
     property alias barShowLauncher: stateAdapter.barShowLauncher
     property alias barShowOverview: stateAdapter.barShowOverview
-    property alias barShowWindowTitle:
-        stateAdapter.barShowWindowTitle
-    property alias barCenterWindowTitle:
-        stateAdapter.barCenterWindowTitle
-    property alias barShowAppId: stateAdapter.barShowAppId
     property alias barShowWorkspaces: stateAdapter.barShowWorkspaces
-    property alias barShowColumnIndicator:
-        stateAdapter.barShowColumnIndicator
-    property alias barShowDate: stateAdapter.barShowDate
-    property alias barDateStyle: stateAdapter.barDateStyle
     property alias barShowKeyboardLayout:
         stateAdapter.barShowKeyboardLayout
     property alias barShowPrivacyIndicators:
         stateAdapter.barShowPrivacyIndicators
     property alias barShowTray: stateAdapter.barShowTray
-    property alias barTrayMode: stateAdapter.barTrayMode
     property alias barShowNotifications:
         stateAdapter.barShowNotifications
     property alias barShowDashboardButton:
         stateAdapter.barShowDashboardButton
-    property alias barShowAudioStatus:
-        stateAdapter.barShowAudioStatus
-    property alias barShowAudioLabel:
-        stateAdapter.barShowAudioLabel
-    property alias barShowNetworkStatus:
-        stateAdapter.barShowNetworkStatus
-    property alias barShowNetworkLabel:
-        stateAdapter.barShowNetworkLabel
-    property alias barShowBatteryStatus:
-        stateAdapter.barShowBatteryStatus
+    property alias barShowSystemStatus:
+        stateAdapter.barShowSystemStatus
     property alias barShowWallpaperButton:
         stateAdapter.barShowWallpaperButton
     property alias barShowSessionButton:
         stateAdapter.barShowSessionButton
     property alias barShowClock: stateAdapter.barShowClock
-    property alias barClock24Hour: stateAdapter.barClock24Hour
-    property alias barShowSeconds: stateAdapter.barShowSeconds
     property alias barLeftWidgetOrder:
         stateAdapter.barLeftWidgetOrder
     property alias barRightWidgetOrder:
         stateAdapter.barRightWidgetOrder
+    property alias barWidgetSettings:
+        stateAdapter.barWidgetSettings
+
+    readonly property string barContextMode:
+        widgetSetting("context", "mode", "contextual")
+    readonly property int barContextTimeout:
+        Number(widgetSetting("context", "timeout", 3500))
+    readonly property string barStatusLayout:
+        widgetSetting("system-status", "layout", "grouped")
+    readonly property string barTrayMode:
+        widgetSetting("tray", "mode", "grouped")
+    readonly property bool barShowWindowTitle:
+        Boolean(widgetSetting("context", "showWindowTitle", true))
+    readonly property bool barShowAppId:
+        Boolean(widgetSetting("context", "showApplicationId", true))
+    readonly property bool barShowColumnIndicator:
+        Boolean(widgetSetting("context", "showColumn", true))
+    readonly property bool barShowDate:
+        widgetSetting("datetime", "dateMode", "short") !== "hidden"
+    readonly property string barDateStyle:
+        widgetSetting("datetime", "dateMode", "short")
+    readonly property bool barClock24Hour:
+        widgetSetting("datetime", "hourFormat", "24") !== "12"
+    readonly property bool barShowSeconds:
+        Boolean(widgetSetting("datetime", "showSeconds", false))
+    readonly property bool barShowAudioStatus:
+        Boolean(widgetSetting("system-status", "showAudio", true))
+    readonly property bool barShowAudioLabel:
+        widgetSetting(
+            "system-status",
+            "audioTextMode",
+            "percentage"
+        ) !== "icon"
+    readonly property bool barShowNetworkStatus:
+        Boolean(widgetSetting("system-status", "showNetwork", true))
+    readonly property bool barShowNetworkLabel:
+        widgetSetting(
+            "system-status",
+            "networkTextMode",
+            "summary"
+        ) !== "icon"
+    readonly property bool barShowBatteryStatus:
+        Boolean(widgetSetting("system-status", "showBattery", true))
+    readonly property bool barWidgetPillsEnabled: true
     property alias dashboardDefaultPage:
         stateAdapter.dashboardDefaultPage
     property alias dashboardRememberPage:
@@ -234,8 +255,8 @@ Singleton {
         }
     }
 
-    function migrate() {
-        const normalized = ConfigSchema.migrate(snapshot())
+    function migrate(source) {
+        const normalized = ConfigSchema.migrate(source || snapshot())
         const before = JSON.stringify(snapshot())
 
         applyValues(normalized)
@@ -244,10 +265,10 @@ Singleton {
             scheduleSave()
     }
 
-    function finishLoad() {
+    function finishLoad(source) {
         initialized = true
         dirty = false
-        migrate()
+        migrate(source)
     }
 
     function validateLoadedState() {
@@ -255,14 +276,17 @@ Singleton {
 
         if (String(rawText || "").trim()) {
             try {
-                JSON.parse(rawText)
+                const parsed = JSON.parse(rawText)
+                finishLoad(parsed)
             } catch (error) {
                 recoverInvalidConfiguration("Invalid JSON: " + error)
                 return
             }
+
+            return
         }
 
-        finishLoad()
+        finishLoad(ConfigSchema.defaults())
     }
 
     function scheduleSave() {
@@ -354,21 +378,57 @@ Singleton {
             setValue(key, value)
     }
 
+    function widgetSettings(widgetId) {
+        const id = String(widgetId || "")
+        const current = stateAdapter.barWidgetSettings || {}
+        return cloneMap(current[id] || {})
+    }
+
+    function widgetSetting(widgetId, key, fallback) {
+        const settings = widgetSettings(widgetId)
+        const requested = String(key || "")
+        return settings[requested] === undefined
+            ? fallback
+            : settings[requested]
+    }
+
+    function setBarWidgetSetting(widgetId, key, value) {
+        const id = String(widgetId || "")
+
+        if (!BarWidgetCatalog.find(id))
+            return
+
+        const nextSettings = cloneMap(stateAdapter.barWidgetSettings)
+        const nextWidget = cloneMap(nextSettings[id])
+        nextWidget[String(key || "")] = value
+        nextSettings[id] = nextWidget
+        setValue("barWidgetSettings", nextSettings)
+    }
+
+    function resetBarWidgetSettings(widgetId) {
+        const id = String(widgetId || "")
+        const defaults = BarWidgetCatalog.defaultSettings()
+
+        if (!defaults[id])
+            return
+
+        const nextSettings = cloneMap(stateAdapter.barWidgetSettings)
+        nextSettings[id] = cloneMap(defaults[id])
+        setValue("barWidgetSettings", nextSettings)
+    }
+
     function barVisibilityKeys(widgetId) {
         const keys = {
             launcher: ["barShowLauncher"],
             overview: ["barShowOverview"],
             workspaces: ["barShowWorkspaces"],
             datetime: ["barShowClock"],
+            context: [],
             privacy: ["barShowPrivacyIndicators"],
             keyboard: ["barShowKeyboardLayout"],
             tray: ["barShowTray"],
             notifications: ["barShowNotifications"],
-            "system-status": [
-                "barShowAudioStatus",
-                "barShowNetworkStatus",
-                "barShowBatteryStatus"
-            ],
+            "system-status": ["barShowSystemStatus"],
             dashboard: ["barShowDashboardButton"],
             wallpaper: ["barShowWallpaperButton"],
             session: ["barShowSessionButton"]
@@ -379,21 +439,35 @@ Singleton {
 
     function setBarWidgetVisible(widgetId, visible) {
         const id = String(widgetId || "")
+
+        if (id === "context") {
+            const mode = String(
+                widgetSetting("context", "mode", "contextual")
+            )
+
+            if (!visible && mode !== "hidden")
+                setBarWidgetSetting("context", "mode", "hidden")
+            else if (visible && mode === "hidden")
+                setBarWidgetSetting("context", "mode", "contextual")
+
+            return
+        }
+
         const keys = barVisibilityKeys(id)
 
         for (var index = 0; index < keys.length; ++index)
             setValue(keys[index], Boolean(visible))
-
-        if (Boolean(visible)
-            && ["wallpaper", "session"].indexOf(id) >= 0
-            && barRightWidgetOrder.indexOf(id) < 0) {
-            const next = cloneList(barRightWidgetOrder)
-            next.push(id)
-            setValue("barRightWidgetOrder", next)
-        }
     }
 
     function barWidgetVisible(widgetId) {
+        if (String(widgetId || "") === "context") {
+            return widgetSetting(
+                "context",
+                "mode",
+                "contextual"
+            ) !== "hidden"
+        }
+
         const keys = barVisibilityKeys(widgetId)
 
         if (keys.length === 0)
@@ -433,6 +507,86 @@ Singleton {
         const moved = order.splice(currentIndex, 1)[0]
         order.splice(targetIndex, 0, moved)
         setValue(key, order)
+    }
+
+    function activeBarWidgets(side) {
+        const requested = String(side || "")
+
+        if (requested === "center")
+            return barWidgetVisible("context") ? ["context"] : []
+
+        const order = requested === "left"
+            ? cloneList(barLeftWidgetOrder)
+            : requested === "right"
+                ? cloneList(barRightWidgetOrder)
+                : []
+        const result = []
+
+        for (var index = 0; index < order.length; ++index) {
+            if (barWidgetVisible(order[index]))
+                result.push(order[index])
+        }
+
+        return result
+    }
+
+    function moveActiveBarWidget(side, widgetId, offset) {
+        const requested = String(side || "")
+        const key = requested === "left"
+            ? "barLeftWidgetOrder"
+            : requested === "right"
+                ? "barRightWidgetOrder"
+                : ""
+
+        if (!key)
+            return
+
+        setValue(
+            key,
+            BarWidgetState.moveActive(
+                stateAdapter[key],
+                activeBarWidgets(requested),
+                widgetId,
+                offset
+            )
+        )
+    }
+
+    function addBarWidget(side, widgetId) {
+        const requested = String(side || "")
+        const id = String(widgetId || "")
+        const entry = BarWidgetCatalog.find(id)
+
+        if (!entry || entry.side !== requested || !entry.available)
+            return
+
+        if (requested === "center") {
+            setBarWidgetVisible("context", true)
+            return
+        }
+
+        const key = requested === "left"
+            ? "barLeftWidgetOrder"
+            : requested === "right"
+                ? "barRightWidgetOrder"
+                : ""
+
+        if (!key)
+            return
+
+        setValue(
+            key,
+            BarWidgetState.addAtEnd(
+                stateAdapter[key],
+                id,
+                BarWidgetCatalog.idsForSide(requested)
+            )
+        )
+        setBarWidgetVisible(id, true)
+    }
+
+    function removeBarWidget(widgetId) {
+        setBarWidgetVisible(widgetId, false)
     }
 
     function setDashboardValue(key, value) {
@@ -547,43 +701,28 @@ Singleton {
             property real barSurfaceOpacity: 0.86
             property bool barAutoScaleContents: true
             property real barContentScale: 1
-            property string barContextMode: "contextual"
-            property int barContextTimeout: 3500
-            property string barStatusLayout: "grouped"
             property string barPosition: "top"
             property int barHeight: 56
             property int barMargin: 5
             property int barWidgetSpacing: 10
-            property bool barWidgetPillsEnabled: true
             property bool barShowLauncher: true
             property bool barShowOverview: true
-            property bool barShowWindowTitle: true
-            property bool barCenterWindowTitle: true
-            property bool barShowAppId: true
             property bool barShowWorkspaces: true
-            property bool barShowColumnIndicator: true
-            property bool barShowDate: true
-            property string barDateStyle: "short"
             property bool barShowKeyboardLayout: true
             property bool barShowPrivacyIndicators: true
             property bool barShowTray: true
-            property string barTrayMode: "grouped"
             property bool barShowNotifications: true
             property bool barShowDashboardButton: true
-            property bool barShowAudioStatus: true
-            property bool barShowAudioLabel: true
-            property bool barShowNetworkStatus: true
-            property bool barShowNetworkLabel: true
-            property bool barShowBatteryStatus: true
+            property bool barShowSystemStatus: true
             property bool barShowWallpaperButton: false
             property bool barShowSessionButton: false
             property bool barShowClock: true
-            property bool barClock24Hour: true
-            property bool barShowSeconds: false
             property var barLeftWidgetOrder:
                 ConfigSchema.defaults().barLeftWidgetOrder
             property var barRightWidgetOrder:
                 ConfigSchema.defaults().barRightWidgetOrder
+            property var barWidgetSettings:
+                ConfigSchema.defaults().barWidgetSettings
             property string dashboardDefaultPage: "dashboard"
             property bool dashboardRememberPage: true
             property bool dashboardRememberCategory: true

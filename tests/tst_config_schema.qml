@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema6Bar() {
+    function test_defaultsUseSchema7WidgetSettings() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 6)
+        compare(state.schemaVersion, 7)
         compare(state.themeMode, "auto")
         compare(state.paletteStyle, "auto")
         verify(state.barVisualStyle === undefined)
@@ -18,20 +18,25 @@ TestCase {
         compare(state.barSurfaceOpacity, 0.86)
         compare(state.barAutoScaleContents, true)
         compare(state.barContentScale, 1)
-        compare(state.barContextMode, "contextual")
-        compare(state.barStatusLayout, "grouped")
-        compare(state.barTrayMode, "grouped")
-        compare(state.barWidgetPillsEnabled, true)
-        compare(state.barShowAudioLabel, true)
-        compare(state.barShowNetworkLabel, true)
+        compare(state.barWidgetSettings.context.mode, "contextual")
+        compare(
+            state.barWidgetSettings["system-status"].layout,
+            "grouped"
+        )
+        compare(state.barWidgetSettings.tray.mode, "grouped")
+        compare(
+            state.barWidgetSettings.datetime.hourFormat,
+            "24"
+        )
+        compare(state.barWidgetSettings.launcher.showBackground, false)
         compare(state.dashboardUseUserAvatarImage, true)
         compare(state.dashboardUserAvatarPath, "")
-        compare(state.barContextTimeout, 3500)
+        compare(state.barWidgetSettings.context.timeout, 3500)
         compare(state.barHeight, 56)
         compare(state.barShowWallpaperButton, false)
         compare(state.barShowSessionButton, false)
         compare(state.barLeftWidgetOrder.length, 4)
-        compare(state.barRightWidgetOrder.length, 6)
+        compare(state.barRightWidgetOrder.length, 4)
         compare(state.notificationPopupMaximum, 3)
         compare(state.osdDuration, 1800)
         verify(state.dashboardCardOrder.length > 0)
@@ -47,7 +52,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 6)
+        compare(migrated.schemaVersion, 7)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -68,7 +73,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 6)
+        compare(migrated.schemaVersion, 7)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -77,8 +82,10 @@ TestCase {
         verify(migrated.barWidgetOrder === undefined)
         verify(migrated.barVisualStyle === undefined)
         compare(migrated.barSurfaceMode, "edge-to-edge")
-        compare(migrated.barShowAudioLabel, true)
-        compare(migrated.barShowNetworkLabel, true)
+        compare(
+            migrated.barWidgetSettings["system-status"].audioTextMode,
+            "percentage"
+        )
     }
 
     function test_schema5LegacyBarKeysAreIgnored() {
@@ -125,9 +132,7 @@ TestCase {
                 "dashboard",
                 "tray",
                 "notifications",
-                "system-status",
-                "privacy",
-                "keyboard"
+                "system-status"
             ])
         )
     }
@@ -145,7 +150,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 6)
+        compare(migrated.schemaVersion, 7)
         compare(migrated.transparencyEnabled, true)
         compare(migrated.surfaceOpacity, 0.78)
         compare(migrated.barBackgroundMode, "blur")
@@ -194,7 +199,9 @@ TestCase {
             cornerRadiusScale: 0,
             barHeight: 500,
             barMargin: -4,
-            barContextTimeout: 50,
+            barWidgetSettings: {
+                context: { timeout: 50 }
+            },
             notificationPopupDuration: 100,
             notificationPopupMaximum: 50,
             osdDuration: 9000,
@@ -208,7 +215,7 @@ TestCase {
         compare(state.cornerRadiusScale, 0.6)
         compare(state.barHeight, 80)
         compare(state.barMargin, 0)
-        compare(state.barContextTimeout, 1000)
+        compare(state.barWidgetSettings.context.timeout, 1000)
         compare(state.notificationPopupDuration, 3000)
         compare(state.notificationPopupMaximum, 5)
         compare(state.osdDuration, 5000)
@@ -239,18 +246,22 @@ TestCase {
         const valid = ConfigSchema.normalize({
             barSurfaceMode: "floating",
             barBackgroundMode: "frosted",
-            barContextMode: "always",
-            barStatusLayout: "individual",
-            barTrayMode: "inline",
-            barDateStyle: "full"
+            barWidgetSettings: {
+                context: { mode: "always" },
+                "system-status": { layout: "individual" },
+                tray: { mode: "inline" },
+                datetime: { dateMode: "full" }
+            }
         })
         const invalid = ConfigSchema.normalize({
             barSurfaceMode: "detached",
             barBackgroundMode: "blurred",
-            barContextMode: "polling",
-            barStatusLayout: "stacked",
-            barTrayMode: "floating",
-            barDateStyle: "numeric"
+            barWidgetSettings: {
+                context: { mode: "polling" },
+                "system-status": { layout: "stacked" },
+                tray: { mode: "floating" },
+                datetime: { dateMode: "numeric" }
+            }
         })
         const legacy = ConfigSchema.normalize({
             barBackgroundMode: "translucent"
@@ -258,17 +269,23 @@ TestCase {
 
         compare(valid.barSurfaceMode, "floating")
         compare(valid.barBackgroundMode, "frosted")
-        compare(valid.barContextMode, "always")
-        compare(valid.barStatusLayout, "individual")
-        compare(valid.barTrayMode, "inline")
-        compare(valid.barDateStyle, "full")
+        compare(valid.barWidgetSettings.context.mode, "always")
+        compare(
+            valid.barWidgetSettings["system-status"].layout,
+            "individual"
+        )
+        compare(valid.barWidgetSettings.tray.mode, "inline")
+        compare(valid.barWidgetSettings.datetime.dateMode, "full")
         compare(legacy.barBackgroundMode, "blur")
         compare(invalid.barSurfaceMode, "edge-to-edge")
         compare(invalid.barBackgroundMode, "solid")
-        compare(invalid.barContextMode, "contextual")
-        compare(invalid.barStatusLayout, "grouped")
-        compare(invalid.barTrayMode, "grouped")
-        compare(invalid.barDateStyle, "short")
+        compare(invalid.barWidgetSettings.context.mode, "contextual")
+        compare(
+            invalid.barWidgetSettings["system-status"].layout,
+            "grouped"
+        )
+        compare(invalid.barWidgetSettings.tray.mode, "grouped")
+        compare(invalid.barWidgetSettings.datetime.dateMode, "short")
     }
 
     function test_barWidgetOrdersAreUniqueAndComplete() {
@@ -301,8 +318,6 @@ TestCase {
             JSON.stringify([
                 "dashboard",
                 "session",
-                "privacy",
-                "keyboard",
                 "tray",
                 "notifications",
                 "system-status"
@@ -341,9 +356,7 @@ TestCase {
                 1: "system-status",
                 2: "notifications",
                 3: "tray",
-                4: "privacy",
-                5: "keyboard",
-                length: 6
+                length: 4
             }
         })
 
@@ -362,9 +375,7 @@ TestCase {
                 "dashboard",
                 "system-status",
                 "notifications",
-                "tray",
-                "privacy",
-                "keyboard"
+                "tray"
             ])
         )
     }
@@ -387,13 +398,10 @@ TestCase {
         compare(bar.barSurfaceOpacity, 0.86)
         compare(bar.barAutoScaleContents, true)
         compare(bar.barContentScale, 1)
-        compare(bar.barContextMode, "contextual")
-        compare(bar.barTrayMode, "grouped")
-        compare(bar.barWidgetPillsEnabled, true)
-        compare(bar.barShowAudioLabel, true)
-        compare(bar.barShowNetworkLabel, true)
+        compare(bar.barWidgetSettings.context.mode, "contextual")
+        compare(bar.barWidgetSettings.tray.mode, "grouped")
         compare(bar.barShowDashboardButton, true)
-        compare(bar.barRightWidgetOrder.length, 6)
+        compare(bar.barRightWidgetOrder.length, 4)
         verify(bar.themeMode === undefined)
         compare(dashboard.dashboardUseUserAvatarImage, true)
         compare(dashboard.dashboardUserAvatarPath, "")
@@ -427,10 +435,13 @@ TestCase {
             themeMode: "light",
             paletteStyle: "fruit-salad",
             barPosition: "bottom",
-            barTrayMode: "inline",
-            barWidgetPillsEnabled: false,
-            barShowAudioLabel: false,
-            barShowNetworkLabel: false,
+            barWidgetSettings: {
+                tray: { mode: "inline" },
+                "system-status": {
+                    audioTextMode: "icon",
+                    networkTextMode: "icon"
+                }
+            },
             dashboardUseUserAvatarImage: false,
             dashboardUserAvatarPath:
                 "  file:///tmp/avatar.png  ",
@@ -446,10 +457,15 @@ TestCase {
         compare(restored.themeMode, "light")
         compare(restored.paletteStyle, "fruit-salad")
         compare(restored.barPosition, "bottom")
-        compare(restored.barTrayMode, "inline")
-        compare(restored.barWidgetPillsEnabled, false)
-        compare(restored.barShowAudioLabel, false)
-        compare(restored.barShowNetworkLabel, false)
+        compare(restored.barWidgetSettings.tray.mode, "inline")
+        compare(
+            restored.barWidgetSettings["system-status"].audioTextMode,
+            "icon"
+        )
+        compare(
+            restored.barWidgetSettings["system-status"].networkTextMode,
+            "icon"
+        )
         compare(restored.dashboardUseUserAvatarImage, false)
         compare(
             restored.dashboardUserAvatarPath,
