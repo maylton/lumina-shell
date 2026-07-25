@@ -102,48 +102,20 @@ Column {
             Repeater {
                 model: root.connectedDevices
 
-                delegate: Column {
+                delegate: SettingsActionRow {
                     required property var modelData
-                    property bool settingsGroup: true
 
                     width: parent.width
-                    spacing: 1
-
-                    SettingsActionRow {
-                        width: parent.width
-                        title: modelData.name
-                        description: modelData.address
-                        iconName: "bluetooth-active-symbolic"
-                        symbol: "ᛒ"
-                        actionLabel: I18n.tr(
-                            "settings.connectivity.disconnect",
-                            "Disconnect"
-                        )
-                        available: !ConnectivityManagerService.busy
-                        onActivated: root.activateDevice(modelData)
-                    }
-
-                    SettingsActionRow {
-                        width: parent.width
-                        title: I18n.tr(
-                            "settings.connectivity.bluetooth.forgetNamed",
-                            "Forget %1",
-                            [modelData.name]
-                        )
-                        description: modelData.address
-                        iconName: "edit-delete-symbolic"
-                        symbol: "×"
-                        actionLabel: I18n.tr(
-                            "settings.connectivity.forget",
-                            "Forget"
-                        )
-                        destructive: true
-                        available: false
-                        availabilityText: I18n.tr(
-                            "settings.connectivity.disconnectFirst",
-                            "Disconnect this item first"
-                        )
-                    }
+                    title: modelData.name
+                    description: modelData.address
+                    iconName: "bluetooth-active-symbolic"
+                    symbol: "ᛒ"
+                    actionLabel: I18n.tr(
+                        "settings.connectivity.disconnect",
+                        "Disconnect"
+                    )
+                    available: !ConnectivityManagerService.busy
+                    onActivated: root.activateDevice(modelData)
                 }
             }
         }
