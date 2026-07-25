@@ -60,6 +60,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   point in the desktop bar and the Dashboard tab.
 - Theme-independent gear glyphs for Settings navigation and its dashboard
   shortcut, optically scaled to match adjacent icons.
+- Configurable system tray presentation with a compact grouped popover or
+  always-visible inline icons.
+- Compact notification bell with unread badge, Do Not Disturb state, tooltip,
+  and accessible status.
 
 ### Changed
 

@@ -17,6 +17,8 @@ Lumina's public-beta baseline provides semantic names, roles, descriptions, chec
   interaction area. Launcher, overview, workspaces, date/time, tray items,
   notifications, system status, and Dashboard expose focus outlines, names,
   descriptions, Enter, Space, and hover tooltips.
+- The grouped tray button announces its active-item count, while the
+  notification bell announces unread count and Do Not Disturb state.
 - The active workspace changes both shape and width, so selection does not
   depend on color. Urgency has a border and an assistive description.
 - Bar widget-order rows provide separate keyboard-focusable Show/Hide, Move

@@ -21,7 +21,8 @@ The Bar settings page controls:
 - Always, Contextual, or Hidden Niri context and the contextual timeout;
 - title, application ID, column, localized date style, 12/24-hour time, and
   seconds;
-- grouped or individual status and individual service visibility;
+- grouped or individual status, individual service visibility, and a grouped
+  tray menu or always-visible tray icons;
 - independent left/right widget order with Move up, Move down, and Show/Hide.
 
 Context is event-driven and independent per output. In Contextual mode, a
@@ -132,7 +133,9 @@ the adjacent `.invalid` backup before defaults are restored.
 
 ## Notifications
 
-The **Alerts** chip opens notification history. Do Not Disturb suppresses popup surfaces while preserving history.
+The bell button opens notification history and keeps the unread count in a
+compact badge. A crossed bell indicates Do Not Disturb, which suppresses popup
+surfaces while preserving history.
 
 Only one process can own `org.freedesktop.Notifications`. If Noctalia already owns it, Lumina waits without replacing or terminating Noctalia. Stop the other notification daemon before testing Lumina as the active daemon.
 

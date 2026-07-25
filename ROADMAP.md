@@ -149,6 +149,8 @@ This sprint completes the 0.5 public-beta foundation:
   edge-to-edge and floating surfaces.
 - Workspace, date/time, Niri context, system status, notification, tray, and
   Dashboard clusters remain single-line and output-aware.
+- System tray items can be grouped in a compact popover or kept visible
+  inline, and notifications use a compact stateful icon with an unread badge.
 - Schema v4 bar preferences migrate to schema v5 without losing valid
   left/right widget ordering or existing shell preferences; retired bar keys
   are ignored safely.

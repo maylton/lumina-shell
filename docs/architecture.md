@@ -103,9 +103,16 @@ The bar presents failures through the Niri status indicator for six seconds. A l
 
 ## System tray
 
-Lumina consumes Quickshell's shared `SystemTray.items` object model and creates one visual view per output. Registration and item state remain process-global, so adding more bars does not create duplicate activation or menu actions.
+Lumina consumes Quickshell's shared `SystemTray.items` object model and creates
+one visual view per output. Registration and item state remain process-global,
+so adding more bars does not create duplicate activation or menu actions. The
+persistent `barTrayMode` preference chooses between a compact per-output
+popover and direct inline presentation without copying item state.
 
-Each tray item owns its hover, pressed, attention, tooltip, activation, secondary activation, scrolling, and menu behavior. `QsMenuOpener` exposes DBus menu entries to a Lumina-styled popup with separators, selection controls, disabled states, and nested entries.
+Each tray item owns its hover, pressed, attention, tooltip, activation,
+secondary activation, scrolling, and menu behavior in either presentation.
+`QsMenuOpener` exposes DBus menu entries to a Lumina-styled popup with
+separators, selection controls, disabled states, and nested entries.
 
 ## Launcher and search providers
 
