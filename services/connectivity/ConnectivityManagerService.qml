@@ -18,6 +18,7 @@ Singleton {
     readonly property string secretPath:
         Quickshell.cacheDir + "/lumina-network-secret"
 
+    property bool active: false
     property var wifiNetworks: []
     property var networkProfiles: []
     property var networkDevices: []
@@ -29,6 +30,20 @@ Singleton {
     property string pendingWifiSsid: ""
     property bool pendingWifiSaved: false
     property bool clearSecretAfterAction: false
+
+    function setActive(value) {
+        const nextActive = Boolean(value)
+
+        if (active === nextActive) {
+            if (nextActive)
+                refreshAll()
+            return
+        }
+
+        active = nextActive
+        if (active)
+            refreshAll()
+    }
 
     function profileTypeMatches(profile, kind) {
         const type = String(profile && profile.type || "").toLowerCase()
@@ -80,6 +95,9 @@ Singleton {
     }
 
     function refreshNetwork() {
+        if (!active)
+            return
+
         if (!deviceListProcess.running) {
             deviceListProcess.exec([
                 "nmcli", "-t", "--escape", "yes",
@@ -108,6 +126,9 @@ Singleton {
     }
 
     function refreshBluetooth() {
+        if (!active)
+            return
+
         if (!bluetoothAllProcess.running)
             bluetoothAllProcess.exec(["bluetoothctl", "devices"])
         if (!bluetoothPairedProcess.running) {
@@ -131,6 +152,9 @@ Singleton {
     }
 
     function refreshAll() {
+        if (!active)
+            return
+
         refreshNetwork()
         refreshBluetooth()
     }
@@ -361,17 +385,17 @@ Singleton {
             removeSecretProcess.exec(["rm", "-f", secretPath])
     }
 
-    Component.onCompleted: refreshAll()
-
     Connections {
         target: ConnectivityService
 
         function onWifiEnabledChanged() {
-            root.refreshNetwork()
+            if (root.active)
+                root.refreshNetwork()
         }
 
         function onBluetoothEnabledChanged() {
-            root.refreshBluetooth()
+            if (root.active)
+                root.refreshBluetooth()
         }
     }
 
@@ -544,7 +568,7 @@ Singleton {
 
     Timer {
         interval: 15000
-        running: true
+        running: root.active
         repeat: true
         onTriggered: root.refreshAll()
     }
@@ -553,11 +577,12 @@ Singleton {
         target: "connectivity-manager"
 
         function refresh(): void {
-            root.refreshAll()
+            root.setActive(true)
         }
 
         function status(): string {
             return JSON.stringify({
+                active: root.active,
                 busy: root.busy,
                 action: root.busyAction,
                 wifiNetworks: root.wifiNetworks,
