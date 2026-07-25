@@ -138,10 +138,10 @@ QtObject {
             barClusterGap: ConfigStore.compactMode ? 12 : 18,
             barContentInset: ConfigStore.compactMode ? 12 : 18,
             barPanelGap: ConfigStore.compactMode ? 10 : 14,
-            controlItemGap: ConfigStore.compactMode ? 8 : 12,
-            controlCardGap: ConfigStore.compactMode ? 10 : 14,
+            controlItemGap: ConfigStore.compactMode ? 10 : 14,
+            controlCardGap: ConfigStore.compactMode ? 12 : 18,
             controlSectionGap: ConfigStore.compactMode ? 14 : 20,
-            controlContentInset: ConfigStore.compactMode ? 14 : 20
+            controlContentInset: ConfigStore.compactMode ? 16 : 22
         },
         size: {
             barHeight: ConfigStore.barHeight,
@@ -155,8 +155,10 @@ QtObject {
             barTouchTarget: ConfigStore.compactMode ? 36 : 40,
             calendarWidth: 336,
             chipHeight: ConfigStore.compactMode ? 28 : 30,
-            controlCenterHeight: 840,
-            controlCenterWidth: 1360,
+            controlCenterHeight: 920,
+            controlCenterWidth: 1440,
+            controlDashboardMinimumHeight: 752,
+            controlDashboardMinimumWidth: 1280,
             dayCell: 40,
             launcherHeight: 620,
             launcherIcon: 34,

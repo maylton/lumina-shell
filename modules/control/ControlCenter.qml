@@ -72,8 +72,10 @@ Scope {
                     ? 1
                     : Math.min(
                         1,
-                        dashboardArea.width / 1180,
-                        dashboardArea.height / 650
+                        dashboardArea.width
+                            / root.luminaDesign.size.controlDashboardMinimumWidth,
+                        dashboardArea.height
+                            / root.luminaDesign.size.controlDashboardMinimumHeight
                     )
 
                 screen: modelData

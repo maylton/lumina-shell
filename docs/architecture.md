@@ -193,6 +193,13 @@ between them with a short spatial transition and a shared moving indicator.
 position, and coordinates direction, opacity, focus, and input state when the
 active category changes.
 
+The preferred unified surface is 1440 by 920 logical pixels and remains
+bounded by the selected output's usable area. Dashboard content targets a
+1280-by-752 logical minimum, scaling as one unit below that threshold instead
+of clipping individual cards. Semantic 18-pixel card gaps, 22-pixel content
+insets, and a 42.5/57.5 overview-to-controls split preserve complete daily
+controls while giving media, status, and calendar cards more breathing room.
+
 Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do
 Not Disturb, dynamic color, battery status, and power profiles all call the
 same typed service methods used by IPC. `ControlCenterStore` owns `activePage`,

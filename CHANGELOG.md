@@ -69,6 +69,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- Increased the preferred unified control-center surface, card gaps, content
+  insets, and Dashboard action targets; rebalanced the left column so Daily
+  Controls no longer clips its power-profile actions.
 - Replaced the Dashboard media player's flat progress bar with a determinate
   Material Expressive wavy indicator, including active/track gap, shrinking
   stop indicator, playback motion, and reduced-motion handling.

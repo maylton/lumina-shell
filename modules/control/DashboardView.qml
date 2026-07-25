@@ -11,6 +11,7 @@ FocusScope {
     property bool active: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property real overviewControlsShare: 0.425
 
     focus: active
 
@@ -48,7 +49,7 @@ FocusScope {
             height: !visible
                 ? 0
                 : ConfigStore.dashboardShowControls
-                    ? parent.height * 0.45
+                    ? parent.height * root.overviewControlsShare
                     : parent.height
         }
 

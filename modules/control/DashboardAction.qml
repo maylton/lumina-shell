@@ -18,8 +18,8 @@ Rectangle {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
-    implicitWidth: wide ? Math.max(86, actionLabel.implicitWidth + 30) : 42
-    implicitHeight: 42
+    implicitWidth: wide ? Math.max(90, actionLabel.implicitWidth + 32) : 44
+    implicitHeight: 44
     radius: luminaDesign.shape.full
     color: checked
         ? luminaDesign.color.accentContainer

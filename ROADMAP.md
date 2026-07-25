@@ -161,6 +161,9 @@ This sprint completes the 0.5 public-beta foundation:
   expressive overshoot when reduced motion is enabled.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
+- The unified control center expands when screen space permits and preserves
+  comfortable card gaps, content insets, and complete Daily Controls content
+  through its responsive scale policy.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
 - Schema v4 bar preferences migrate to schema v5 without losing valid
