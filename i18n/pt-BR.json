@@ -196,6 +196,7 @@
   "settings.dashboard.avatar.systemImageDescription": "Remove o fallback personalizado e usa as fontes do sistema",
   "settings.dashboard.avatar.useImage": "Usar imagem de perfil",
   "settings.dashboard.avatar.useImageDescription": "Usa as iniciais da conta quando desativado",
+  "settings.dashboard.weather.enableOverviewFirst": "Ative primeiro o card de visão geral",
   "settings.page.about.description": "Projeto Lumina Shell e documentação local",
   "settings.page.appearance.description": "Cores, papel de parede e linguagem visual do Lumina",
   "settings.page.bar.description": "Superfície, contexto, status e widgets por saída",
