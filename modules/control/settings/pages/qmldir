@@ -3,8 +3,10 @@ AppearancePage 1.0 AppearancePage.qml
 AboutPage 1.0 AboutPage.qml
 BarPage 1.0 BarPage.qml
 BehaviorPage 1.0 BehaviorPage.qml
+ConnectivityPage 1.0 ConnectivityPage.qml
 DashboardPage 1.0 DashboardPage.qml
 NotificationsPage 1.0 NotificationsPage.qml
 OsdPage 1.0 OsdPage.qml
 SessionPage 1.0 SessionPage.qml
 SystemPage 1.0 SystemPage.qml
+WeatherPage 1.0 WeatherPage.qml
