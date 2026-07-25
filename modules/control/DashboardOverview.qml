@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.design
-import qs.services.niri
 import qs.services.weather
 import qs.stores.niri
 import qs.stores.time
@@ -16,7 +15,6 @@ Item {
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property var activeWorkspace:
         WorkspaceStore.activeForOutput(outputName)
-    readonly property var output: OutputStore.byName(outputName)
 
     DashboardCard {
         id: welcomeCard
@@ -91,12 +89,12 @@ Item {
             topMargin: root.luminaDesign.spacing.medium
         }
 
-        accessibleName: "Date, weather, and output"
+        accessibleName: "Date and weather"
 
         Column {
             anchors.centerIn: parent
             width: parent.width - root.luminaDesign.spacing.extraLarge * 2
-            spacing: root.luminaDesign.spacing.small
+            spacing: root.luminaDesign.spacing.medium
 
             Text {
                 width: parent.width
@@ -222,32 +220,6 @@ Item {
                             root.luminaDesign.typography.labelSmall
                         font.weight: Font.DemiBold
                     }
-                }
-            }
-
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.min(parent.width, outputSummary.implicitWidth + 28)
-                height: 30
-                radius: root.luminaDesign.shape.full
-                color: root.luminaDesign.color.surfaceMuted
-
-                Text {
-                    id: outputSummary
-
-                    anchors.centerIn: parent
-                    text: root.output
-                        ? root.outputName
-                            + " · "
-                            + OutputStore.resolutionLabel(root.output)
-                            + " · "
-                            + OutputStore.scaleLabel(root.output)
-                        : NiriService.demoMode
-                            ? "Demo output"
-                            : root.outputName
-                    color: root.luminaDesign.color.textMuted
-                    font.pixelSize: root.luminaDesign.typography.labelSmall
-                    font.weight: Font.DemiBold
                 }
             }
         }
