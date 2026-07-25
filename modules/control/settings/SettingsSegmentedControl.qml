@@ -15,6 +15,12 @@ Row {
 
     spacing: luminaDesign.spacing.small
 
+    function selectFromPointer(segment, value) {
+        segment.forceActiveFocus()
+        segment.focus = false
+        root.selected(String(value))
+    }
+
     Repeater {
         model: root.options
 
@@ -94,10 +100,10 @@ Row {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    segment.forceActiveFocus(Qt.MouseFocusReason)
-                    root.selected(String(segment.modelData.value))
-                }
+                onClicked: root.selectFromPointer(
+                    segment,
+                    segment.modelData.value
+                )
             }
         }
     }
