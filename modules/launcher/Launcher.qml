@@ -6,9 +6,10 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.stores.config
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.stores.launcher
+import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 
 Scope {
     id: root
@@ -72,27 +73,27 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-launcher"
                 WlrLayershell.keyboardFocus: launcherVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
+                    ? WlrKeyboardFocus.Exclusive
+                    : WlrKeyboardFocus.None
 
-      BackgroundEffect.blurRegion:
-          ShellSurfacePolicy.requestsBackdropBlur(
-              ConfigStore.shellBackgroundMode
-          )
-              ? shellBlurRegion
-              : null
+                BackgroundEffect.blurRegion:
+                    ShellSurfacePolicy.requestsBackdropBlur(
+                        ConfigStore.shellBackgroundMode
+                    )
+                        ? shellBlurRegion
+                        : null
 
-      Region {
-          id: shellBlurRegion
+                Region {
+                    id: shellBlurRegion
 
-          Region {
-              x: launcherSurface.x
-              y: launcherSurface.y
-              width: launcherSurface.width
-              height: launcherSurface.height
-              radius: launcherSurface.radius
-          }
-      }
+                    Region {
+                        x: launcherSurface.x
+                        y: launcherSurface.y
+                        width: launcherSurface.width
+                        height: launcherSurface.height
+                        radius: launcherSurface.radius
+                    }
+                }
 
                 onVisibleChanged: {
                     if (visible) {
@@ -113,7 +114,7 @@ Scope {
                 }
 
                 ShellSurface {
-          id: launcherSurface
+                    id: launcherSurface
 
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -126,11 +127,13 @@ Scope {
 
                     width: Math.min(
                         root.luminaDesign.size.launcherWidth,
-                        launcherWindow.width - root.luminaDesign.spacing.extraLarge * 2
+                        launcherWindow.width
+                            - root.luminaDesign.spacing.extraLarge * 2
                     )
                     height: Math.min(
                         root.luminaDesign.size.launcherHeight,
-                        launcherWindow.height - anchors.topMargin
+                        launcherWindow.height
+                            - anchors.topMargin
                             - root.luminaDesign.spacing.extraLarge * 2
                     )
                     radius: root.luminaDesign.shape.extraLarge
@@ -160,13 +163,15 @@ Scope {
                             Text {
                                 anchors {
                                     left: parent.left
-                                    leftMargin: root.luminaDesign.spacing.large
+                                    leftMargin:
+                                        root.luminaDesign.spacing.large
                                     verticalCenter: parent.verticalCenter
                                 }
 
                                 text: "⌕"
                                 color: root.luminaDesign.color.primary
-                                font.pixelSize: root.luminaDesign.typography.titleLarge
+                                font.pixelSize:
+                                    root.luminaDesign.typography.titleLarge
                             }
 
                             TextInput {
@@ -176,16 +181,20 @@ Scope {
                                     left: parent.left
                                     right: parent.right
                                     leftMargin: 44
-                                    rightMargin: root.luminaDesign.spacing.large
+                                    rightMargin:
+                                        root.luminaDesign.spacing.large
                                     verticalCenter: parent.verticalCenter
                                 }
 
                                 text: LauncherStore.query
                                 color: root.luminaDesign.color.onSurface
-                                selectionColor: root.luminaDesign.color.accentContainer
-                                selectedTextColor: root.luminaDesign.color.onAccentContainer
+                                selectionColor:
+                                    root.luminaDesign.color.accentContainer
+                                selectedTextColor:
+                                    root.luminaDesign.color.onAccentContainer
                                 clip: true
-                                font.pixelSize: root.luminaDesign.typography.titleMedium
+                                font.pixelSize:
+                                    root.luminaDesign.typography.titleMedium
 
                                 onTextEdited: LauncherStore.setQuery(text)
 
@@ -225,9 +234,13 @@ Scope {
                                 }
 
                                 visible: queryInput.text.length === 0
-                                text: "Search apps, windows, and shell actions"
+                                text: I18n.tr(
+                                    "launcher.search.placeholder",
+                                    "Search apps, windows, and shell actions"
+                                )
                                 color: root.luminaDesign.color.textMuted
-                                font.pixelSize: root.luminaDesign.typography.titleMedium
+                                font.pixelSize:
+                                    root.luminaDesign.typography.titleMedium
                             }
                         }
 
@@ -235,7 +248,10 @@ Scope {
                             id: resultList
 
                             width: parent.width
-                            height: parent.height - 48 - parent.spacing - footer.height
+                            height: parent.height
+                                - 48
+                                - parent.spacing
+                                - footer.height
                             spacing: root.luminaDesign.spacing.extraSmall
                             clip: true
                             model: ScriptModel {
@@ -248,16 +264,22 @@ Scope {
 
                                 width: resultList.width
                                 result: modelData
-                                selected: index === LauncherStore.selectedIndex
-                                onActivated: LauncherStore.execute(modelData)
+                                selected:
+                                    index === LauncherStore.selectedIndex
+                                onActivated:
+                                    LauncherStore.execute(modelData)
                             }
 
                             Text {
                                 anchors.centerIn: parent
                                 visible: LauncherStore.results.length === 0
-                                text: "No matching apps, windows, or actions"
+                                text: I18n.tr(
+                                    "launcher.empty",
+                                    "No matching apps, windows, or actions"
+                                )
                                 color: root.luminaDesign.color.textMuted
-                                font.pixelSize: root.luminaDesign.typography.bodyMedium
+                                font.pixelSize:
+                                    root.luminaDesign.typography.bodyMedium
                             }
                         }
 
@@ -269,21 +291,33 @@ Scope {
                             spacing: root.luminaDesign.spacing.medium
 
                             Text {
-                                text: "↑↓ Navigate"
+                                text: I18n.tr(
+                                    "launcher.hint.navigate",
+                                    "↑↓ Navigate"
+                                )
                                 color: root.luminaDesign.color.textMuted
-                                font.pixelSize: root.luminaDesign.typography.labelSmall
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelSmall
                             }
 
                             Text {
-                                text: "Enter Open"
+                                text: I18n.tr(
+                                    "launcher.hint.open",
+                                    "Enter Open"
+                                )
                                 color: root.luminaDesign.color.textMuted
-                                font.pixelSize: root.luminaDesign.typography.labelSmall
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelSmall
                             }
 
                             Text {
-                                text: "Esc Close"
+                                text: I18n.tr(
+                                    "launcher.hint.close",
+                                    "Esc Close"
+                                )
                                 color: root.luminaDesign.color.textMuted
-                                font.pixelSize: root.luminaDesign.typography.labelSmall
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelSmall
                             }
                         }
                     }
