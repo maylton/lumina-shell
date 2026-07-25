@@ -18,8 +18,6 @@ SettingsRow {
 
     readonly property real normalizedValue:
         Geometry.normalizedValue(value, from, to)
-    readonly property var sliderTokens:
-        luminaDesign.slider
 
     controlWidth: 220
     Accessible.role: Accessible.Slider
@@ -30,7 +28,22 @@ SettingsRow {
     }
 
     function step(direction) {
+        if (!available)
+            return
+
         valueEdited(clampValue(value + stepSize * direction))
+    }
+
+    function editNormalized(normalized) {
+        if (!available)
+            return
+
+        const raw = from + normalized * (to - from)
+        const stepped = Math.round(
+            (raw - from) / stepSize
+        ) * stepSize + from
+
+        valueEdited(clampValue(stepped))
     }
 
     onActivated: step(1)
@@ -49,92 +62,28 @@ SettingsRow {
         anchors.fill: parent
         spacing: root.luminaDesign.spacing.medium
 
-        Item {
-            id: track
+        ControlComponents.MaterialSlider {
+            id: slider
 
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - valueText.width - parent.spacing
-            height: root.sliderTokens.handleHeight
+            height: implicitHeight
+            value: root.normalizedValue
+            available: root.available
+            activeColor: root.available
+                ? root.luminaDesign.color.primary
+                : root.luminaDesign.color.outline
+            inactiveColor: root.grouped
+                ? root.luminaDesign.color.surfaceBase
+                : root.luminaDesign.color.surfaceMuted
+            handleColor: root.available
+                ? root.luminaDesign.color.primary
+                : root.luminaDesign.color.outline
 
-            ControlComponents.SliderTrackSegment {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Geometry.activeWidth(
-                    track.width,
-                    handle.width,
-                    root.sliderTokens.handleGap,
-                    root.normalizedValue
-                )
-                height: root.sliderTokens.trackHeight
-                outerAtStart: true
-                insideRadius: root.sliderTokens.trackInsideRadius
-                segmentColor: root.luminaDesign.color.primary
-            }
-
-            ControlComponents.SliderTrackSegment {
-                anchors.verticalCenter: parent.verticalCenter
-                x: Geometry.inactiveX(
-                    track.width,
-                    handle.width,
-                    root.sliderTokens.handleGap,
-                    root.normalizedValue
-                )
-                width: Geometry.inactiveWidth(
-                    track.width,
-                    handle.width,
-                    root.sliderTokens.handleGap,
-                    root.normalizedValue
-                )
-                height: root.sliderTokens.trackHeight
-                outerAtStart: false
-                insideRadius: root.sliderTokens.trackInsideRadius
-                segmentColor: root.grouped
-                    ? root.luminaDesign.color.surfaceBase
-                    : root.luminaDesign.color.surfaceMuted
-            }
-
-            Rectangle {
-                id: handle
-
-                width: root.sliderTokens.handleWidth
-                height: root.sliderTokens.handleHeight
-                radius: root.luminaDesign.shape.full
-                x: Geometry.handleX(
-                    track.width,
-                    width,
-                    root.normalizedValue
-                )
-                anchors.verticalCenter: parent.verticalCenter
-                color: root.luminaDesign.color.primary
-            }
-
-            MouseArea {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                height: 36
-                enabled: root.available
-                acceptedButtons: Qt.LeftButton
-                onPressed: mouse => updateValue(mouse.x)
-                onPositionChanged: mouse => {
-                    if (pressed)
-                        updateValue(mouse.x)
-                }
-
-                function updateValue(position) {
-                    const ratio = Math.max(
-                        0,
-                        Math.min(1, position / width)
-                    )
-                    const raw = root.from
-                        + ratio * (root.to - root.from)
-                    const stepped = Math.round(
-                        (raw - root.from) / root.stepSize
-                    ) * root.stepSize + root.from
-                    root.valueEdited(root.clampValue(stepped))
-                }
-            }
+            onInteractionStarted:
+                root.forceActiveFocus(Qt.MouseFocusReason)
+            onValueRequested: normalized =>
+                root.editNormalized(normalized)
         }
 
         Text {
@@ -144,7 +93,9 @@ SettingsRow {
             width: 52
             text: root.valueLabel
             horizontalAlignment: Text.AlignRight
-            color: root.luminaDesign.color.primary
+            color: root.available
+                ? root.luminaDesign.color.primary
+                : root.luminaDesign.color.textMuted
             font.pixelSize: root.luminaDesign.typography.labelMedium
             font.weight: Font.DemiBold
         }
