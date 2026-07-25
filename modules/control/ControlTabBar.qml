@@ -76,63 +76,43 @@ Item {
                     event.accepted = true
                 }
 
-                Rectangle {
-                    id: tabPill
+                Row {
+                    id: tabContent
 
                     anchors {
                         horizontalCenter: parent.horizontalCenter
-                        top: parent.top
-                        topMargin: 2
+                        verticalCenter: parent.verticalCenter
+                        verticalCenterOffset: -2
                     }
-                    width: tabContent.implicitWidth
-                        + root.luminaDesign.spacing.extraLarge * 2
-                    height: 34
-                    radius: tabButton.selected
-                        ? root.luminaDesign.shape.full
-                        : root.luminaDesign.shape.large
-                    color: tabButton.selected
-                        ? root.luminaDesign.color.accentContainer
-                        : tabMouse.containsMouse || tabButton.activeFocus
-                            ? root.luminaDesign.color.surfaceMuted
-                            : "transparent"
-                    border.width: tabButton.activeFocus ? 2 : 0
-                    border.color: root.luminaDesign.color.primary
+                    spacing: root.luminaDesign.spacing.small
 
-                    Behavior on radius {
-                        NumberAnimation {
-                            duration: root.luminaDesign.motion.medium
-                            easing.type: Easing.OutCubic
-                        }
+                    DashboardIcon {
+                        width: 16
+                        height: 16
+                        iconName: tabButton.modelData.iconName
+                        fallbackSymbol: tabButton.modelData.symbol
+                        iconColor: tabButton.selected
+                            ? root.luminaDesign.color.primary
+                            : tabMouse.containsMouse
+                                || tabButton.activeFocus
+                                ? root.luminaDesign.color.onSurface
+                                : root.luminaDesign.color.textMuted
+                        iconSize: 16
                     }
 
-                    Row {
-                        id: tabContent
-
-                        anchors.centerIn: parent
-                        spacing: root.luminaDesign.spacing.small
-
-                        DashboardIcon {
-                            width: 16
-                            height: 16
-                            iconName: tabButton.modelData.iconName
-                            fallbackSymbol: tabButton.modelData.symbol
-                            iconColor: tabButton.selected
-                                ? root.luminaDesign.color.onAccentContainer
+                    Text {
+                        text: tabButton.modelData.label
+                        color: tabButton.selected
+                            ? root.luminaDesign.color.primary
+                            : tabMouse.containsMouse
+                                || tabButton.activeFocus
+                                ? root.luminaDesign.color.onSurface
                                 : root.luminaDesign.color.textMuted
-                            iconSize: 16
-                        }
-
-                        Text {
-                            text: tabButton.modelData.label
-                            color: tabButton.selected
-                                ? root.luminaDesign.color.onAccentContainer
-                                : root.luminaDesign.color.textMuted
-                            font.pixelSize:
-                                root.luminaDesign.typography.bodyMedium
-                            font.weight: tabButton.selected
-                                ? Font.Bold
-                                : Font.Medium
-                        }
+                        font.pixelSize:
+                            root.luminaDesign.typography.bodyMedium
+                        font.weight: tabButton.selected
+                            ? Font.Bold
+                            : Font.Medium
                     }
                 }
 
@@ -142,7 +122,11 @@ Item {
                         right: parent.right
                         bottom: parent.bottom
                     }
-                    height: tabButton.selected ? 4 : 0
+                    height: tabButton.selected
+                        ? 4
+                        : tabButton.activeFocus
+                            ? 2
+                            : 0
                     radius: root.luminaDesign.shape.full
                     color: root.luminaDesign.color.primary
 
