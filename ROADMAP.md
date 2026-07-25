@@ -82,7 +82,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 ## 0.7 — Extended Beta
 
 - [ ] Secure session lock.
-- [ ] Optional dock.
+- [x] Optional dock with floating and task-panel presentation.
 - [ ] Optional desktop widgets.
 - [ ] Performance profiling and long-running tests.
 
@@ -113,7 +113,7 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ### Sprint 6 — Public beta
 
-This sprint completes the 0.5 public-beta foundation:
+This sprint completes the 0.5 public-beta foundation and begins the first 0.7 surface:
 
 1. Graphical configuration with schema v8 persistence and safe schema
    v3/v4/v5/v6/v7 migration.
@@ -136,6 +136,10 @@ This sprint completes the 0.5 public-beta foundation:
     discovery and connection, saved-profile and wired-profile management,
     bounded Bluetooth discovery, pairing, connection, and removal, and
     section-scoped refreshes.
+11. Optional per-output application dock with a compact floating mode, a
+    full-width task-panel mode with centered icons, Niri window grouping,
+    pinned desktop entries, auto-hide, click-through masking, shell-surface
+    styling, and feature-scoped persistence.
 
 ### Acceptance criteria
 
@@ -157,7 +161,7 @@ This sprint completes the 0.5 public-beta foundation:
 - Primary exclusive surfaces support keyboard dismissal and traversal.
 - Dashboard and graphical settings share one overlay, service layer, and
   persistent configuration store.
-- Graphical settings provide eleven keyboard-accessible categories, direct IPC
+- Graphical settings provide twelve keyboard-accessible categories, direct IPC
   navigation, scoped reset where supported, and debounced save feedback.
 - Lumina's Material Expressive bar is the only bar layout and supports both
   edge-to-edge and floating surfaces.
@@ -238,6 +242,15 @@ This sprint completes the 0.5 public-beta foundation:
   detailed periodic refreshes. Visual QML does not run commands. Password-
   protected Wi-Fi uses a temporary `0600` secret file passed to NetworkManager
   and removes it after the attempt.
+- The optional dock is disabled by default and appears per output when enabled.
+  Floating mode sizes the surface to its content; task-panel mode spans the
+  output while keeping icons centered. Both modes group Niri windows by app ID,
+  launch pinned desktop entries, cycle existing windows, follow Solid/Blur/
+  Frosted shell styling, keep transparent regions click-through, and bound long
+  application lists with horizontal scrolling.
+- Dock auto-hide uses a bottom-edge reveal region and a delayed collapse.
+  Workspace reservation is applied only while the dock is always visible and
+  includes any bottom-bar offset.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves
@@ -258,7 +271,7 @@ This sprint completes the 0.5 public-beta foundation:
 2. [ ] Validate backlight and battery behavior on a laptop.
 3. [ ] Validate overlay hotplug behavior with two physical outputs.
 4. [x] Select the project license.
-5. [ ] Begin the 0.7 extended-beta work.
+5. [ ] Continue the 0.7 extended-beta work.
 6. [ ] Continue extracting hard-coded English from notifications, session,
    wallpaper, calendar, OSD, and the remaining Settings pages.
 7. [ ] Validate GeoIP/manual weather switching and cache fallback on the native
@@ -267,3 +280,6 @@ This sprint completes the 0.5 public-beta foundation:
    pairing flows against physical hardware and the active system agents.
 9. [ ] Add advanced NetworkManager editing for static IP, DNS, IPv6, VPN,
    hotspot, and 802.1X only after the basic management flow is stable.
+10. [ ] Validate floating/task-panel switching, multi-output geometry, auto-hide,
+    click-through masking, bottom-bar coexistence, window cycling, and workspace
+    reservation on the native Niri runtime.
