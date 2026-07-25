@@ -6,6 +6,7 @@ import qs.services.connectivity
 import qs.services.config
 import qs.services.media
 import qs.services.power
+import qs.services.system
 import qs.services.weather
 
 Scope {
@@ -15,5 +16,7 @@ Scope {
     readonly property var configFileService: ConfigFileService
     readonly property var mediaService: MediaService
     readonly property var powerService: PowerService
+    readonly property var systemDiagnosticsService:
+        SystemDiagnosticsService
     readonly property var weatherService: WeatherService
 }

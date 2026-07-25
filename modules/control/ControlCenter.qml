@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.services.notifications
+import qs.stores.config
 import qs.stores.control
 import qs.stores.settings
 import qs.stores.time
@@ -66,11 +67,14 @@ Scope {
                     ControlCenterStore.activeOutputName === outputName
                 readonly property real safeMargin:
                     root.luminaDesign.spacing.extraLarge
-                readonly property real panelScale: Math.min(
-                    1,
-                    dashboardArea.width / 1180,
-                    dashboardArea.height / 650
-                )
+                readonly property real panelScale:
+                    ControlCenterStore.activePage === "settings"
+                    ? 1
+                    : Math.min(
+                        1,
+                        dashboardArea.width / 1180,
+                        dashboardArea.height / 650
+                    )
 
                 screen: modelData
                 visible: centerVisible
@@ -118,6 +122,7 @@ Scope {
 
                     MouseArea {
                         anchors.fill: parent
+                        enabled: ConfigStore.behaviorCloseOnOutside
                         onClicked: ControlCenterStore.close()
                     }
                 }

@@ -18,7 +18,7 @@ Rectangle {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
-    implicitHeight: compact ? 48 : 56
+    implicitHeight: compact ? 44 : 50
     radius: selected
         ? luminaDesign.shape.extraLarge
         : luminaDesign.shape.large

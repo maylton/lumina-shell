@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.stores.config
 import qs.stores.shell
 
 Singleton {
@@ -15,8 +16,13 @@ Singleton {
             : ""
     readonly property string uptimeLabel: formatUptime(uptimeSeconds)
 
-    property string activePage: "dashboard"
-    property string settingsCategory: "appearance"
+    property string activePage: ConfigStore.dashboardRememberPage
+        ? ConfigStore.lastControlPage
+        : ConfigStore.dashboardDefaultPage
+    property string settingsCategory:
+        ConfigStore.dashboardRememberCategory
+            ? ConfigStore.lastSettingsCategory
+            : "appearance"
     property double uptimeSeconds: 0
 
     function formatUptime(seconds) {
@@ -55,8 +61,12 @@ Singleton {
             ? "dashboard"
             : requested
 
-        if (["dashboard", "settings"].indexOf(normalized) >= 0)
+        if (["dashboard", "settings"].indexOf(normalized) >= 0) {
             activePage = normalized
+
+            if (ConfigStore.dashboardRememberPage)
+                ConfigStore.setLastControlPage(normalized)
+        }
     }
 
     function setTab(tabName) {
@@ -65,25 +75,41 @@ Singleton {
 
     function setSettingsCategory(categoryName) {
         const requested = String(categoryName || "")
+        const normalized = requested === "wallpaper"
+            ? "appearance"
+            : requested
         const categories = [
             "appearance",
             "bar",
-            "wallpaper",
+            "dashboard",
+            "behavior",
             "notifications",
             "osd",
-            "system"
+            "session",
+            "system",
+            "about"
         ]
 
-        if (categories.indexOf(requested) >= 0)
-            settingsCategory = requested
+        if (categories.indexOf(normalized) >= 0) {
+            settingsCategory = normalized
+
+            if (ConfigStore.dashboardRememberCategory)
+                ConfigStore.setLastSettingsCategory(normalized)
+        }
     }
 
     function openFor(outputName, pageName, categoryName) {
-        if (pageName)
+        if (pageName) {
             setPage(pageName)
+        } else if (!ConfigStore.dashboardRememberPage) {
+            setPage(ConfigStore.dashboardDefaultPage)
+        }
 
-        if (categoryName)
+        if (categoryName) {
             setSettingsCategory(categoryName)
+        } else if (!ConfigStore.dashboardRememberCategory) {
+            settingsCategory = "appearance"
+        }
 
         OverlayStore.openFor("control", outputName)
     }
@@ -114,5 +140,22 @@ Singleton {
         running: true
         repeat: true
         onTriggered: uptimeFile.reload()
+    }
+
+    Connections {
+        target: ConfigStore
+
+        function onInitializedChanged() {
+            if (!ConfigStore.initialized)
+                return
+
+            root.activePage = ConfigStore.dashboardRememberPage
+                ? ConfigStore.lastControlPage
+                : ConfigStore.dashboardDefaultPage
+            root.settingsCategory =
+                ConfigStore.dashboardRememberCategory
+                    ? ConfigStore.lastSettingsCategory
+                    : "appearance"
+        }
     }
 }

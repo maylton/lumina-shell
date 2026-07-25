@@ -13,41 +13,58 @@ FocusScope {
     property bool active: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool compactSidebar: width < 900
+    readonly property real sidebarWidth:
+        compactSidebar ? 68 : Math.min(250, Math.max(220, width * 0.22))
     readonly property var categories: [
         {
             id: "appearance",
             label: "Appearance",
-            description: "Color and visual language",
+            description: "Colors and wallpaper",
             iconName: "applications-graphics-symbolic",
             symbol: "✦"
         },
         {
             id: "bar",
             label: "Bar",
-            description: "Status density",
+            description: "Layout and widgets",
             iconName: "view-more-horizontal-symbolic",
             symbol: "≡"
         },
         {
-            id: "wallpaper",
-            label: "Wallpaper",
-            description: "Sources and palette",
-            iconName: "preferences-desktop-wallpaper-symbolic",
-            symbol: "▧"
+            id: "dashboard",
+            label: "Dashboard",
+            description: "Cards and opening",
+            iconName: "view-grid-symbolic",
+            symbol: "▦"
+        },
+        {
+            id: "behavior",
+            label: "Behavior",
+            description: "Focus and motion",
+            iconName: "preferences-system-symbolic",
+            symbol: "⚙"
         },
         {
             id: "notifications",
             label: "Notifications",
-            description: "Interruptions and DND",
+            description: "Popups and history",
             iconName: "preferences-system-notifications-symbolic",
             symbol: "◐"
         },
         {
             id: "osd",
             label: "OSD",
-            description: "Feedback and duration",
+            description: "Feedback and timing",
             iconName: "video-display-symbolic",
             symbol: "▰"
+        },
+        {
+            id: "session",
+            label: "Session",
+            description: "Actions and safety",
+            iconName: "system-shutdown-symbolic",
+            symbol: "⏻"
         },
         {
             id: "system",
@@ -55,6 +72,13 @@ FocusScope {
             description: "Health and recovery",
             iconName: "computer-symbolic",
             symbol: "●"
+        },
+        {
+            id: "about",
+            label: "About",
+            description: "Project information",
+            iconName: "help-about-symbolic",
+            symbol: "i"
         }
     ]
 
@@ -64,163 +88,17 @@ FocusScope {
         anchors.fill: parent
         spacing: root.luminaDesign.spacing.large
 
-        DashboardCard {
-            width: 252
+        SettingsSidebar {
+            width: root.sidebarWidth
             height: parent.height
-            accessibleName: "Settings categories"
-
-            Column {
-                anchors {
-                    fill: parent
-                    margins: root.luminaDesign.spacing.medium
-                }
-
-                spacing: root.luminaDesign.spacing.small
-
-                Repeater {
-                    model: root.categories
-
-                    delegate: Rectangle {
-                        id: categoryButton
-
-                        required property var modelData
-                        readonly property bool selected:
-                            ControlCenterStore.settingsCategory
-                                === modelData.id
-
-                        width: parent.width
-                        height: 70
-                        radius: selected
-                            ? root.luminaDesign.shape.extraLarge
-                            : root.luminaDesign.shape.large
-                        color: selected
-                            ? root.luminaDesign.color.accentContainer
-                            : categoryMouse.containsMouse || activeFocus
-                                ? Qt.lighter(
-                                    root.luminaDesign.color.surfaceMuted,
-                                    1.1
-                                )
-                                : "transparent"
-                        activeFocusOnTab: true
-                        border.width: activeFocus ? 2 : 0
-                        border.color: root.luminaDesign.color.primary
-
-                        function activate() {
-                            ControlCenterStore.setSettingsCategory(
-                                modelData.id
-                            )
-                        }
-
-                        Accessible.role: Accessible.PageTab
-                        Accessible.name: modelData.label
-                        Accessible.description: modelData.description
-                        Accessible.selected: selected
-                        Accessible.focusable: true
-                        Accessible.focused: activeFocus
-                        Accessible.onPressAction: activate()
-
-                        Keys.onSpacePressed: event => {
-                            activate()
-                            event.accepted = true
-                        }
-
-                        Keys.onReturnPressed: event => {
-                            activate()
-                            event.accepted = true
-                        }
-
-                        Behavior on radius {
-                            NumberAnimation {
-                                duration: root.luminaDesign.motion.medium
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: root.luminaDesign.motion.fast
-                            }
-                        }
-
-                        Row {
-                            anchors {
-                                fill: parent
-                                margins:
-                                    root.luminaDesign.spacing.medium
-                            }
-
-                            spacing: root.luminaDesign.spacing.medium
-
-                            DashboardIcon {
-                                anchors.verticalCenter:
-                                    parent.verticalCenter
-                                width: 30
-                                height: 30
-                                iconName:
-                                    categoryButton.modelData.iconName
-                                fallbackSymbol:
-                                    categoryButton.modelData.symbol
-                                iconColor: categoryButton.selected
-                                    ? root.luminaDesign.color.onAccentContainer
-                                    : root.luminaDesign.color.primary
-                                iconSize: 19
-                            }
-
-                            Column {
-                                anchors.verticalCenter:
-                                    parent.verticalCenter
-                                width: parent.width - 42
-                                spacing: 2
-
-                                Text {
-                                    width: parent.width
-                                    text:
-                                        categoryButton.modelData.label
-                                    color: categoryButton.selected
-                                        ? root.luminaDesign.color.onAccentContainer
-                                        : root.luminaDesign.color.onSurface
-                                    elide: Text.ElideRight
-                                    font.pixelSize:
-                                        root.luminaDesign.typography.bodyMedium
-                                    font.weight: Font.DemiBold
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text:
-                                        categoryButton.modelData.description
-                                    color: categoryButton.selected
-                                        ? root.luminaDesign.color.onAccentContainer
-                                        : root.luminaDesign.color.textMuted
-                                    opacity: 0.78
-                                    elide: Text.ElideRight
-                                    font.pixelSize:
-                                        root.luminaDesign.typography.labelSmall
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            id: categoryMouse
-
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                categoryButton.forceActiveFocus(
-                                    Qt.MouseFocusReason
-                                )
-                                categoryButton.activate()
-                            }
-                        }
-                    }
-                }
-            }
+            compact: root.compactSidebar
+            categories: root.categories
         }
 
         Item {
-            width: parent.width - 252 - parent.spacing
+            width: parent.width - root.sidebarWidth - parent.spacing
             height: parent.height
+            clip: true
 
             AppearancePage {
                 anchors.fill: parent
@@ -231,22 +109,29 @@ FocusScope {
                 enabled: visible
             }
 
-            BarSettings {
+            BarPage {
                 anchors.fill: parent
-                visible:
-                    ControlCenterStore.settingsCategory === "bar"
+                visible: ControlCenterStore.settingsCategory === "bar"
                 enabled: visible
             }
 
-            WallpaperSettings {
+            DashboardPage {
                 anchors.fill: parent
                 visible:
                     ControlCenterStore.settingsCategory
-                        === "wallpaper"
+                        === "dashboard"
                 enabled: visible
             }
 
-            NotificationSettings {
+            BehaviorPage {
+                anchors.fill: parent
+                visible:
+                    ControlCenterStore.settingsCategory
+                        === "behavior"
+                enabled: visible
+            }
+
+            NotificationsPage {
                 anchors.fill: parent
                 visible:
                     ControlCenterStore.settingsCategory
@@ -254,17 +139,30 @@ FocusScope {
                 enabled: visible
             }
 
-            OsdSettings {
+            OsdPage {
                 anchors.fill: parent
-                visible:
-                    ControlCenterStore.settingsCategory === "osd"
+                visible: ControlCenterStore.settingsCategory === "osd"
                 enabled: visible
             }
 
-            SystemSettings {
+            SessionPage {
+                anchors.fill: parent
+                visible:
+                    ControlCenterStore.settingsCategory === "session"
+                enabled: visible
+            }
+
+            SystemPage {
                 anchors.fill: parent
                 visible:
                     ControlCenterStore.settingsCategory === "system"
+                enabled: visible
+            }
+
+            AboutPage {
+                anchors.fill: parent
+                visible:
+                    ControlCenterStore.settingsCategory === "about"
                 enabled: visible
             }
         }

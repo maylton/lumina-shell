@@ -1,0 +1,2 @@
+module qs.services.system
+singleton SystemDiagnosticsService 1.0 SystemDiagnosticsService.qml
