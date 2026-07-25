@@ -18,6 +18,29 @@ def replace_once(source: str, old: str, new: str, label: str) -> str:
     return source.replace(old, new, 1)
 
 
+def normalize_literal_block(
+    payload: str,
+    first_line: str,
+    following_lines: list[tuple[str, str]],
+    label: str,
+) -> str:
+    """Repair YAML-stripped indentation inside one inline triple literal."""
+    old = first_line
+    new = first_line
+
+    for broken, intended in following_lines:
+        old += broken
+        new += intended
+
+    count = payload.count(old)
+    if count != 1:
+        raise RuntimeError(
+            f"Could not normalize {label}: expected one target, found {count}."
+        )
+
+    return payload.replace(old, new, 1)
+
+
 def normalize_payload(payload: str) -> str:
     ambiguous_boolean_removal = '''replace_once(
     'stores/config/ConfigSchema.js',
@@ -44,11 +67,52 @@ def normalize_payload(payload: str) -> str:
             f"expected one payload target, found {count}."
         )
 
-    return payload.replace(
+    payload = payload.replace(
         ambiguous_boolean_removal,
         contextual_boolean_removal,
         1,
     )
+
+    payload = normalize_literal_block(
+        payload,
+        "'''            \"paletteStyle\",\n",
+        [
+            ('  "transparencyEnabled",\n', '            "transparencyEnabled",\n'),
+            ('  "surfaceOpacity",\n', '            "surfaceOpacity",\n'),
+            ('  "animationsEnabled",\n', '            "animationsEnabled",\n'),
+        ],
+        "schema Appearance source keys",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''            \"paletteStyle\",\n",
+        [
+            ('  "shellBackgroundMode",\n', '            "shellBackgroundMode",\n'),
+            ('  "shellSurfaceOpacity",\n', '            "shellSurfaceOpacity",\n'),
+            ('  "animationsEnabled",\n', '            "animationsEnabled",\n'),
+        ],
+        "schema Appearance replacement keys",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''            \"transparencyEnabled\",\n",
+        [
+            ('  "surfaceOpacity",\n', '            "surfaceOpacity",\n'),
+            ('  "animationsEnabled",\n', '            "animationsEnabled",\n'),
+        ],
+        "ConfigStore Appearance source keys",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''            \"shellBackgroundMode\",\n",
+        [
+            ('  "shellSurfaceOpacity",\n', '            "shellSurfaceOpacity",\n'),
+            ('  "animationsEnabled",\n', '            "animationsEnabled",\n'),
+        ],
+        "ConfigStore Appearance replacement keys",
+    )
+
+    return payload
 
 
 def main() -> None:
