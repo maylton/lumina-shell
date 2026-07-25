@@ -70,6 +70,7 @@ Item {
 
         DashboardAction {
             symbol: "⚙"
+            symbolScale: 1.2
             label: "Open shell settings"
             checked: ControlCenterStore.activePage === "settings"
             onActivated: ControlCenterStore.setPage("settings")

@@ -98,6 +98,10 @@ Item {
                                 ? root.rocketIconSource
                                 : ""
                         fallbackSymbol: tabButton.modelData.symbol
+                        fallbackScale:
+                            tabButton.modelData.id === "settings"
+                                ? 1.2
+                                : 1
                         iconColor: tabButton.selected
                             ? root.luminaDesign.color.primary
                             : tabMouse.containsMouse

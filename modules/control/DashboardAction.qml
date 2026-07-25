@@ -9,6 +9,7 @@ Rectangle {
     required property string label
     property string iconName: ""
     property string symbol: ""
+    property real symbolScale: 1
     property bool checked: false
     property bool available: true
     property bool wide: false
@@ -65,6 +66,7 @@ Rectangle {
             height: width
             iconName: root.iconName
             fallbackSymbol: root.symbol
+            fallbackScale: root.symbolScale
             iconColor: root.checked
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface

@@ -12,6 +12,7 @@ Item {
     property string fallbackSymbol: ""
     property color iconColor: "white"
     property real iconSize: 18
+    property real fallbackScale: 1
 
     readonly property string iconSource: customSource.length > 0
         ? customSource
@@ -41,7 +42,7 @@ Item {
         visible: !root.iconReady
         text: root.fallbackSymbol
         color: root.iconColor
-        font.pixelSize: root.iconSize
+        font.pixelSize: root.iconSize * root.fallbackScale
         font.weight: Font.DemiBold
     }
 }
