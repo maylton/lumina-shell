@@ -220,6 +220,9 @@ Standard section rows render inside one tonal group surface. The section owns
 the outer expressive contour and clipping, while rows contribute interaction
 states and inset dividers instead of independent resting capsules. Visual
 preview sections can opt out when their cards already provide containment.
+Section-level segmented selectors occupy a separate header slot above that
+surface. Grouped-row hover and focus use inset state layers, so transient input
+feedback never redraws or squares the shared outer contour.
 
 `ConfigFileService` owns argument-array `xdg-open` processes.
 `SystemDiagnosticsService` owns local version and diagnostic processes.

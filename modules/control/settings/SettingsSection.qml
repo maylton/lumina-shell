@@ -9,6 +9,7 @@ Rectangle {
     required property string title
     property string description: ""
     property bool groupedRows: true
+    property alias headerData: headerContent.data
     default property alias sectionData: body.data
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -59,6 +60,14 @@ Rectangle {
             }
         }
 
+        Column {
+            id: headerContent
+
+            width: parent.width
+            visible: children.length > 0
+            spacing: root.luminaDesign.spacing.controlItemGap
+        }
+
         Rectangle {
             width: parent.width
             implicitHeight: body.implicitHeight
@@ -66,7 +75,6 @@ Rectangle {
             color: root.groupedRows
                 ? root.luminaDesign.color.surfaceMuted
                 : "transparent"
-            clip: root.groupedRows
 
             Column {
                 id: body

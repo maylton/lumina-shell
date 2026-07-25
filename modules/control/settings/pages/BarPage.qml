@@ -63,19 +63,21 @@ SettingsPage {
             ? "Edge-to-edge ignores the outer margin"
             : "Floating reserves margin around the visible surface"
 
-        SettingsSegmentedControl {
-            width: parent.width
-            height: 44
-            options: [
-                { value: "edge-to-edge", label: "Edge-to-edge" },
-                { value: "floating", label: "Floating" }
-            ]
-            currentValue: ConfigStore.barSurfaceMode
-            onSelected: value => ConfigStore.setBarValue(
-                "barSurfaceMode",
-                value
-            )
-        }
+        headerData: [
+            SettingsSegmentedControl {
+                width: parent.width
+                height: 44
+                options: [
+                    { value: "edge-to-edge", label: "Edge-to-edge" },
+                    { value: "floating", label: "Floating" }
+                ]
+                currentValue: ConfigStore.barSurfaceMode
+                onSelected: value => ConfigStore.setBarValue(
+                    "barSurfaceMode",
+                    value
+                )
+            }
+        ]
 
         SettingsComboRow {
             width: parent.width
@@ -165,20 +167,22 @@ SettingsPage {
         title: "Context"
         description: "Focused Niri context in the center of each output"
 
-        SettingsSegmentedControl {
-            width: parent.width
-            height: 44
-            options: [
-                { value: "always", label: "Always" },
-                { value: "contextual", label: "Contextual" },
-                { value: "hidden", label: "Hidden" }
-            ]
-            currentValue: ConfigStore.barContextMode
-            onSelected: value => ConfigStore.setBarValue(
-                "barContextMode",
-                value
-            )
-        }
+        headerData: [
+            SettingsSegmentedControl {
+                width: parent.width
+                height: 44
+                options: [
+                    { value: "always", label: "Always" },
+                    { value: "contextual", label: "Contextual" },
+                    { value: "hidden", label: "Hidden" }
+                ]
+                currentValue: ConfigStore.barContextMode
+                onSelected: value => ConfigStore.setBarValue(
+                    "barContextMode",
+                    value
+                )
+            }
+        ]
 
         SettingsSliderRow {
             width: parent.width
@@ -282,19 +286,21 @@ SettingsPage {
         title: "System status"
         description: "Only available native service data is shown"
 
-        SettingsSegmentedControl {
-            width: parent.width
-            height: 44
-            options: [
-                { value: "grouped", label: "Grouped" },
-                { value: "individual", label: "Individual" }
-            ]
-            currentValue: ConfigStore.barStatusLayout
-            onSelected: value => ConfigStore.setBarValue(
-                "barStatusLayout",
-                value
-            )
-        }
+        headerData: [
+            SettingsSegmentedControl {
+                width: parent.width
+                height: 44
+                options: [
+                    { value: "grouped", label: "Grouped" },
+                    { value: "individual", label: "Individual" }
+                ]
+                currentValue: ConfigStore.barStatusLayout
+                onSelected: value => ConfigStore.setBarValue(
+                    "barStatusLayout",
+                    value
+                )
+            }
+        ]
 
         SettingsSwitchRow {
             width: parent.width

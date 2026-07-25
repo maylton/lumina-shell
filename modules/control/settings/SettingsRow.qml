@@ -36,17 +36,17 @@ Rectangle {
         : rowMouse.pressed
             ? luminaDesign.shape.medium
             : luminaDesign.shape.large
-    color: rowMouse.pressed
-        ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.12)
-        : rowMouse.containsMouse || activeFocus
-            ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.06)
-            : grouped
-                ? "transparent"
+    color: grouped
+        ? "transparent"
+        : rowMouse.pressed
+            ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.12)
+            : rowMouse.containsMouse || activeFocus
+                ? Qt.lighter(luminaDesign.color.surfaceMuted, 1.06)
                 : luminaDesign.color.surfaceMuted
     opacity: enabled && available ? 1 : 0.56
-    scale: rowMouse.pressed ? 0.99 : 1
+    scale: rowMouse.pressed && !grouped ? 0.99 : 1
     activeFocusOnTab: available
-    border.width: activeFocus ? 2 : 0
+    border.width: activeFocus && !grouped ? 2 : 0
     border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Button
@@ -97,6 +97,45 @@ Rectangle {
         NumberAnimation {
             duration: root.luminaDesign.motion.press
             easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Rectangle {
+        id: groupedStateLayer
+
+        anchors {
+            fill: parent
+            leftMargin: 4
+            rightMargin: 4
+            topMargin: 3
+            bottomMargin: 3
+        }
+
+        visible: root.grouped
+        radius: root.luminaDesign.shape.medium
+        color: root.activeFocus
+            ? root.luminaDesign.color.primary
+            : root.luminaDesign.color.onSurface
+        opacity: rowMouse.pressed
+            ? 0.10
+            : rowMouse.containsMouse || root.activeFocus
+                ? 0.06
+                : 0
+        border.width: root.activeFocus ? 2 : 0
+        border.color: root.luminaDesign.color.primary
+
+        Behavior on color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
         }
     }
 
