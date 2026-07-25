@@ -36,9 +36,9 @@ Rectangle {
         CalendarStore.currentDate,
         Locale.LongFormat
     )
-    implicitWidth: dateTimeLabel.implicitWidth + 24
+    implicitWidth: dateTimeContent.implicitWidth + 24
     implicitHeight: luminaDesign.size.barTouchTarget
-    radius: expanded
+    radius: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.shape.full
         : luminaDesign.shape.large
     scale: dateTimeMouse.pressed
@@ -48,7 +48,7 @@ Rectangle {
             : 1
     color: expanded || dateTimeMouse.containsMouse
         ? luminaDesign.color.accentContainer
-        : "transparent"
+        : luminaDesign.color.surfaceMuted
     activeFocusOnTab: true
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -96,18 +96,47 @@ Rectangle {
         }
     }
 
-    Text {
-        id: dateTimeLabel
+    Row {
+        id: dateTimeContent
 
         anchors.centerIn: parent
-        text: root.formattedDate.length > 0
-            ? root.formattedDate + "  " + CalendarStore.formattedTime
-            : CalendarStore.formattedTime
-        color: root.expanded
-            ? root.luminaDesign.color.onAccentContainer
-            : root.luminaDesign.color.onSurface
-        font.pixelSize: root.luminaDesign.typography.bodyMedium
-        font.weight: Font.DemiBold
+        spacing: root.luminaDesign.spacing.small
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: CalendarStore.formattedTime
+            color: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.onSurface
+            font.pixelSize: root.luminaDesign.typography.barClock
+            font.weight: Font.Bold
+        }
+
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: dateLabel.visible
+            width: 3
+            height: 3
+            radius: 2
+            color: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.outline
+        }
+
+        Text {
+            id: dateLabel
+
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.showDate && !root.compact
+                && root.formattedDate.length > 0
+            text: root.formattedDate
+            color: root.expanded
+                ? root.luminaDesign.color.onAccentContainer
+                : root.luminaDesign.color.textMuted
+            font.pixelSize:
+                root.luminaDesign.typography.barSecondary
+            font.weight: Font.Medium
+        }
     }
 
     MouseArea {

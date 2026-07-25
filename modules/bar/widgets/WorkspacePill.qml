@@ -12,30 +12,21 @@ Rectangle {
     readonly property bool selected: Boolean(workspace.is_focused)
     readonly property bool active: Boolean(workspace.is_active)
 
-    implicitWidth: selected || active
-        ? workspaceLabel.implicitWidth + 28
-        : Math.max(
-            luminaDesign.size.barTouchTarget,
-            workspaceLabel.implicitWidth + 16
-        )
-    implicitHeight: luminaDesign.size.barTouchTarget
-    radius: selected
-        ? luminaDesign.shape.workspaceActive
+    implicitWidth: selected
+        ? workspaceLabel.implicitWidth + 32
         : active
-            ? luminaDesign.shape.large
-            : luminaDesign.shape.workspaceResting
+            ? workspaceLabel.implicitWidth + 24
+            : luminaDesign.size.barTouchTarget
+    implicitHeight: luminaDesign.size.barTouchTarget
+    radius: luminaDesign.shape.full
     scale: workspaceMouse.pressed
         ? 0.92
         : workspaceMouse.containsMouse
             ? 1.04
             : 1.0
-    color: selected || workspaceMouse.containsMouse
-        ? luminaDesign.color.accentContainer
-        : active
-            ? luminaDesign.color.surfaceMuted
-            : "transparent"
-    border.width: workspace.is_urgent ? 1 : 0
-    border.color: luminaDesign.color.urgent
+    color: "transparent"
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
@@ -74,19 +65,6 @@ Rectangle {
         }
     }
 
-    Behavior on color {
-        ColorAnimation {
-            duration: root.luminaDesign.motion.fast
-        }
-    }
-
-    Behavior on radius {
-        NumberAnimation {
-            duration: root.luminaDesign.motion.workspaceTransform
-            easing.type: Easing.OutCubic
-        }
-    }
-
     Behavior on scale {
         NumberAnimation {
             duration: root.luminaDesign.motion.fast
@@ -94,20 +72,85 @@ Rectangle {
         }
     }
 
-    Text {
-        id: workspaceLabel
+    Rectangle {
+        id: workspaceVisual
 
         anchors.centerIn: parent
-        text: WorkspaceStore.labelFor(root.workspace)
-        color: root.selected
-            ? root.luminaDesign.color.onAccentContainer
-            : root.workspace.is_urgent
-                ? root.luminaDesign.color.urgent
-                : root.luminaDesign.color.textMuted
-        font.pixelSize: root.luminaDesign.typography.labelMedium
-        font.weight: root.active
-            ? Font.DemiBold
-            : Font.Medium
+        width: root.selected
+            ? root.width
+            : root.active
+                ? workspaceLabel.implicitWidth + 24
+                : workspaceMouse.containsMouse
+                    ? 18
+                    : 10
+        height: root.selected
+            ? root.height
+            : root.active
+                ? root.height - 6
+                : workspaceMouse.containsMouse
+                    ? 18
+                    : 10
+        radius: root.selected
+            ? root.luminaDesign.shape.workspaceActive
+            : root.active
+                ? root.luminaDesign.shape.large
+                : root.luminaDesign.shape.full
+        color: root.selected || workspaceMouse.containsMouse
+            ? root.luminaDesign.color.accentContainer
+            : root.active
+                ? root.luminaDesign.color.surfaceMuted
+                : root.luminaDesign.color.outline
+        border.width: root.workspace.is_urgent ? 2 : 0
+        border.color: root.luminaDesign.color.urgent
+
+        Behavior on width {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.workspaceTransform
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on height {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.workspaceTransform
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on color {
+            ColorAnimation {
+                duration: root.luminaDesign.motion.fast
+            }
+        }
+
+        Behavior on radius {
+            NumberAnimation {
+                duration: root.luminaDesign.motion.workspaceTransform
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Text {
+            id: workspaceLabel
+
+            anchors.centerIn: parent
+            visible: root.selected || root.active
+            opacity: visible ? 1 : 0
+            text: WorkspaceStore.labelFor(root.workspace)
+            color: root.selected
+                ? root.luminaDesign.color.onAccentContainer
+                : root.workspace.is_urgent
+                    ? root.luminaDesign.color.urgent
+                    : root.luminaDesign.color.onSurface
+            font.pixelSize: root.luminaDesign.typography.labelMedium
+            font.weight: Font.DemiBold
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: root.luminaDesign.motion.fast
+                }
+            }
+        }
     }
 
     MouseArea {

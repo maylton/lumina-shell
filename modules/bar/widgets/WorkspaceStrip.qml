@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import qs.design
 
 Row {
     id: root
@@ -8,7 +9,9 @@ Row {
     property var workspaces: []
     property real itemSpacing: 0
 
-    spacing: itemSpacing
+    readonly property var luminaDesign: Theme.luminaTokens
+
+    spacing: Math.min(itemSpacing, luminaDesign.spacing.small)
 
     Repeater {
         model: root.workspaces

@@ -169,6 +169,8 @@ QtObject {
             labelSmall: 10,
             labelMedium: 12,
             bodyMedium: 13,
+            barClock: ConfigStore.compactMode ? 14 : 15,
+            barSecondary: 12,
             titleMedium: 14,
             titleLarge: 20
         },
