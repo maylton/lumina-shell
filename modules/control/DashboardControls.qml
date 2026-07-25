@@ -36,7 +36,7 @@ DashboardCard {
 
         Row {
             width: parent.width
-            height: 38
+            height: 48
 
             Text {
                 width: parent.width - muteActions.width
@@ -50,6 +50,7 @@ DashboardCard {
             Row {
                 id: muteActions
 
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: root.luminaDesign.spacing.extraSmall
 
                 DashboardAction {
