@@ -7,53 +7,68 @@ import qs.services.media
 DashboardCard {
     id: root
 
+    function formatDuration(seconds) {
+        const value = Math.max(0, Math.floor(Number(seconds || 0)))
+        const minutes = Math.floor(value / 60)
+        const remainingSeconds = value % 60
+
+        return minutes + ":" + String(remainingSeconds).padStart(2, "0")
+    }
+
     accessibleName: MediaService.hasSession
         ? MediaService.playbackLabel + ": " + MediaService.title
         : MediaService.playbackLabel
 
-    Column {
+    Row {
+        id: mediaLayout
+
         anchors {
             fill: parent
             margins: root.luminaDesign.spacing.large
         }
 
-        spacing: root.luminaDesign.spacing.medium
+        spacing: root.luminaDesign.spacing.large
 
-        Row {
-            width: parent.width
-            height: 84
-            spacing: root.luminaDesign.spacing.large
+        Rectangle {
+            id: albumArt
 
-            Rectangle {
-                width: 84
-                height: 84
-                radius: root.luminaDesign.shape.large
-                color: root.luminaDesign.color.surfaceMuted
-                clip: true
+            width: height
+            height: mediaLayout.height
+            radius: root.luminaDesign.shape.large
+            color: root.luminaDesign.color.surfaceMuted
+            clip: true
 
-                Image {
-                    anchors.fill: parent
-                    source: MediaService.artUrl
-                    fillMode: Image.PreserveAspectCrop
-                    visible: MediaService.hasSession
-                        && MediaService.artUrl.length > 0
-                    asynchronous: true
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    visible: !MediaService.hasSession
-                        || MediaService.artUrl.length === 0
-                    text: "♪"
-                    color: root.luminaDesign.color.primary
-                    font.pixelSize: 34
-                    font.weight: Font.Bold
-                }
+            Image {
+                anchors.fill: parent
+                source: MediaService.artUrl
+                fillMode: Image.PreserveAspectCrop
+                visible: MediaService.hasSession
+                    && MediaService.artUrl.length > 0
+                asynchronous: true
             }
 
+            Text {
+                anchors.centerIn: parent
+                visible: !MediaService.hasSession
+                    || MediaService.artUrl.length === 0
+                text: "♪"
+                color: root.luminaDesign.color.primary
+                font.pixelSize: 42
+                font.weight: Font.Bold
+            }
+        }
+
+        Item {
+            width: mediaLayout.width - albumArt.width - mediaLayout.spacing
+            height: mediaLayout.height
+
             Column {
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 84 - parent.spacing
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                }
+
                 spacing: root.luminaDesign.spacing.extraSmall
 
                 Text {
@@ -90,68 +105,103 @@ DashboardCard {
                     font.pixelSize: root.luminaDesign.typography.labelSmall
                 }
             }
-        }
 
-        Rectangle {
-            width: parent.width
-            height: 6
-            radius: 3
-            color: root.luminaDesign.color.surfaceMuted
-            clip: true
+            Text {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: progressTrack.top
+                    bottomMargin: root.luminaDesign.spacing.extraSmall
+                }
+
+                text: MediaService.hasSession && MediaService.length > 0
+                    ? root.formatDuration(MediaService.position)
+                        + " / " + root.formatDuration(MediaService.length)
+                    : "--:-- / --:--"
+                color: root.luminaDesign.color.textMuted
+                font.pixelSize: root.luminaDesign.typography.labelSmall
+            }
 
             Rectangle {
-                width: parent.width * (
-                    MediaService.hasSession && MediaService.length > 0
-                        ? Math.max(
-                            0,
-                            Math.min(
-                                1,
-                                MediaService.position / MediaService.length
+                id: progressTrack
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: mediaActions.top
+                    bottomMargin: root.luminaDesign.spacing.small
+                }
+
+                height: 5
+                radius: height / 2
+                color: root.luminaDesign.color.surfaceMuted
+                clip: true
+
+                Rectangle {
+                    width: parent.width * (
+                        MediaService.hasSession && MediaService.length > 0
+                            ? Math.max(
+                                0,
+                                Math.min(
+                                    1,
+                                    MediaService.position
+                                        / MediaService.length
+                                )
                             )
-                        )
-                        : 0
-                )
-                height: parent.height
-                radius: parent.radius
-                color: root.luminaDesign.color.primary
-            }
-        }
-
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: root.luminaDesign.spacing.medium
-
-            DashboardAction {
-                iconName: "media-skip-backward-symbolic"
-                symbol: "‹"
-                label: "Previous track"
-                available: MediaService.hasSession
-                    && MediaService.activePlayer
-                    && MediaService.activePlayer.canGoPrevious
-                onActivated: MediaService.previous()
+                            : 0
+                    )
+                    height: parent.height
+                    radius: parent.radius
+                    color: root.luminaDesign.color.primary
+                }
             }
 
-            DashboardAction {
-                iconName: MediaService.playing
-                    ? "media-playback-pause-symbolic"
-                    : "media-playback-start-symbolic"
-                symbol: MediaService.playing ? "Ⅱ" : "▶"
-                label: MediaService.playing ? "Pause" : "Play"
-                checked: MediaService.playing
-                available: MediaService.hasSession
-                    && MediaService.activePlayer
-                    && MediaService.activePlayer.canTogglePlaying
-                onActivated: MediaService.toggle()
-            }
+            Row {
+                id: mediaActions
 
-            DashboardAction {
-                iconName: "media-skip-forward-symbolic"
-                symbol: "›"
-                label: "Next track"
-                available: MediaService.hasSession
-                    && MediaService.activePlayer
-                    && MediaService.activePlayer.canGoNext
-                onActivated: MediaService.next()
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    bottom: parent.bottom
+                }
+
+                spacing: root.luminaDesign.spacing.medium
+
+                DashboardAction {
+                    width: 36
+                    height: 36
+                    iconName: "media-skip-backward-symbolic"
+                    symbol: "‹"
+                    label: "Previous track"
+                    available: MediaService.hasSession
+                        && MediaService.activePlayer
+                        && MediaService.activePlayer.canGoPrevious
+                    onActivated: MediaService.previous()
+                }
+
+                DashboardAction {
+                    iconName: MediaService.playing
+                        ? "media-playback-pause-symbolic"
+                        : "media-playback-start-symbolic"
+                    symbol: MediaService.playing ? "Ⅱ" : "▶"
+                    label: MediaService.playing ? "Pause" : "Play"
+                    checked: MediaService.playing
+                    available: MediaService.hasSession
+                        && MediaService.activePlayer
+                        && MediaService.activePlayer.canTogglePlaying
+                    onActivated: MediaService.toggle()
+                }
+
+                DashboardAction {
+                    width: 36
+                    height: 36
+                    iconName: "media-skip-forward-symbolic"
+                    symbol: "›"
+                    label: "Next track"
+                    available: MediaService.hasSession
+                        && MediaService.activePlayer
+                        && MediaService.activePlayer.canGoNext
+                    onActivated: MediaService.next()
+                }
             }
         }
     }
