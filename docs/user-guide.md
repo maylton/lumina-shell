@@ -34,10 +34,11 @@ omitted or shown as unavailable instead of preventing the shell from starting.
 ## Shell surface styles
 
 Appearance offers **Solid**, **Blur**, and **Frosted Glass** for primary shell
-panels independently of the bar. Dashboard/Settings, Launcher, Notification
-Center, Wallpaper Picker, Session Menu, and OSD use the shared policy. Cards,
-text, icons, and controls remain opaque. Heads-up notification cards remain
-opaque, while calendar and tray popups follow the bar's visual policy.
+panels independently of the bar. Dashboard/Settings, Launcher, Dock,
+Notification Center, Wallpaper Picker, Session Menu, and OSD use the shared
+policy. Cards, text, icons, and controls remain opaque. Heads-up notification
+cards remain opaque, while calendar and tray popups follow the bar's visual
+policy.
 
 ## Launcher
 
@@ -51,6 +52,32 @@ qs ipc -p /path/to/lumina-shell call launcher toggle DP-1
 
 Replace `DP-1` with an output reported by `niri msg outputs`. An unavailable
 name falls back to a connected output.
+
+## Dock and task panel
+
+The optional application dock is configured under **Settings → Dock** and is
+disabled by default. It has two presentation modes:
+
+- **Floating dock:** a compact centered surface sized to its visible icons;
+- **Task panel:** a full-width bottom panel with application icons centered.
+
+The Launcher button is always first. Pinned applications follow it, and running
+Niri applications can be appended as grouped items. Clicking a running item
+focuses its window; repeated clicks cycle through multiple windows from the same
+application. Clicking a pinned item that is not running launches its desktop
+entry.
+
+Right-click an application icon to pin or unpin it. The Settings page can also
+remove individual favorites or clear the complete list.
+
+Automatic hiding leaves a small bottom-edge reveal region. The floating mode
+uses the center of the edge, while task-panel mode uses the complete bottom
+edge. Workspace reservation is available only while automatic hiding is off.
+When the main bar is at the bottom, the dock is positioned above it.
+
+Both modes follow the current Solid, Blur, or Frosted Glass shell style. Long
+application lists scroll horizontally. Detailed behavior and current limits are
+in [dock.md](dock.md).
 
 ## Dashboard
 
@@ -97,12 +124,14 @@ Detailed behavior and privacy notes are in [weather.md](weather.md).
 ## Graphical settings
 
 Choose the settings action in the control-center header. The sidebar contains
-eleven categories:
+twelve categories:
 
 - **Appearance:** theme, dynamic palette, wallpaper, shell surfaces, motion,
   shape, and density;
 - **Bar:** surface, scale, geometry, active widgets, and widget settings;
 - **Dashboard:** opening behavior, density, identity, and visible cards;
+- **Dock:** enablement, floating/task-panel presentation, auto-hide, size,
+  workspace reservation, and pinned applications;
 - **Weather:** visibility, automatic or manual location, and refresh interval;
 - **Connectivity:** Wi-Fi, wired profiles, and Bluetooth devices;
 - **Behavior:** outside-click dismissal, output fallback, confirmation, and
@@ -114,22 +143,24 @@ eleven categories:
 - **About:** version, license, documentation, and credits.
 
 The page header reports `Saved`, `Saving…`, or `Could not save`. Central shell
-settings use debounced schema-v8 persistence. Weather mode, manual city, and
-refresh interval use their own feature-scoped state file so location settings
+settings use debounced schema-v8 persistence. Weather and Dock use separate
+feature-scoped state files so their location and application-surface settings
 can evolve independently of the shell schema.
 
 Settings can open directly on an output and category:
 
 ```bash
 qs ipc -p /path/to/lumina-shell call settings open DP-1
+qs ipc -p /path/to/lumina-shell call settings openCategory dock DP-1
 qs ipc -p /path/to/lumina-shell call settings openCategory weather DP-1
 qs ipc -p /path/to/lumina-shell call settings openCategory connectivity DP-1
 qs ipc -p /path/to/lumina-shell call settings category osd
 ```
 
-Available category identifiers are `appearance`, `bar`, `dashboard`, `weather`,
-`connectivity`, `behavior`, `notifications`, `osd`, `session`, `system`, and
-`about`. `wallpaper` remains a compatibility alias for `appearance`.
+Available category identifiers are `appearance`, `bar`, `dashboard`, `dock`,
+`weather`, `connectivity`, `behavior`, `notifications`, `osd`, `session`,
+`system`, and `about`. `wallpaper` remains a compatibility alias for
+`appearance`.
 
 ## Connectivity
 
