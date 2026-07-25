@@ -1,0 +1,2 @@
+module qs.services.config
+singleton ConfigFileService 1.0 ConfigFileService.qml

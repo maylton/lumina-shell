@@ -3,18 +3,26 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "ConfigSchema.js" as ConfigSchema
 
 Singleton {
     id: root
 
-    readonly property int currentSchemaVersion: 3
+    readonly property int currentSchemaVersion:
+        ConfigSchema.CURRENT_VERSION
     readonly property string statePath: {
         const overridePath = Quickshell.env("LUMINA_STATE_PATH")
-
         return overridePath
             ? String(overridePath)
             : Quickshell.stateDir + "/lumina-state.json"
     }
+    readonly property string recoveryBackupPath: statePath + ".invalid"
+    readonly property string saveStatusLabel:
+        lastError && !lastSaveSucceeded
+        ? "Could not save"
+        : saving || dirty
+            ? "Saving…"
+            : "Saved"
 
     property alias schemaVersion: stateAdapter.schemaVersion
     property alias doNotDisturb: stateAdapter.doNotDisturb
@@ -25,10 +33,114 @@ Singleton {
     property alias osdEnabled: stateAdapter.osdEnabled
     property alias osdDuration: stateAdapter.osdDuration
     property alias showStatusDetails: stateAdapter.showStatusDetails
+    property alias themeMode: stateAdapter.themeMode
+    property alias transparencyEnabled:
+        stateAdapter.transparencyEnabled
+    property alias surfaceOpacity: stateAdapter.surfaceOpacity
+    property alias animationsEnabled: stateAdapter.animationsEnabled
+    property alias animationScale: stateAdapter.animationScale
+    property alias cornerRadiusScale: stateAdapter.cornerRadiusScale
+    property alias compactMode: stateAdapter.compactMode
+    property alias barPosition: stateAdapter.barPosition
+    property alias barHeight: stateAdapter.barHeight
+    property alias barMargin: stateAdapter.barMargin
+    property alias barWidgetSpacing: stateAdapter.barWidgetSpacing
+    property alias barShowWindowTitle:
+        stateAdapter.barShowWindowTitle
+    property alias barCenterWindowTitle:
+        stateAdapter.barCenterWindowTitle
+    property alias barShowAppId: stateAdapter.barShowAppId
+    property alias barShowWorkspaces: stateAdapter.barShowWorkspaces
+    property alias barShowColumnIndicator:
+        stateAdapter.barShowColumnIndicator
+    property alias barShowTray: stateAdapter.barShowTray
+    property alias barShowClock: stateAdapter.barShowClock
+    property alias barClock24Hour: stateAdapter.barClock24Hour
+    property alias barShowSeconds: stateAdapter.barShowSeconds
+    property alias barWidgetOrder: stateAdapter.barWidgetOrder
+    property alias dashboardDefaultPage:
+        stateAdapter.dashboardDefaultPage
+    property alias dashboardRememberPage:
+        stateAdapter.dashboardRememberPage
+    property alias dashboardRememberCategory:
+        stateAdapter.dashboardRememberCategory
+    property alias dashboardDensity: stateAdapter.dashboardDensity
+    property alias dashboardShowWeather:
+        stateAdapter.dashboardShowWeather
+    property alias dashboardShowCalendar:
+        stateAdapter.dashboardShowCalendar
+    property alias dashboardShowMedia:
+        stateAdapter.dashboardShowMedia
+    property alias dashboardShowNotifications:
+        stateAdapter.dashboardShowNotifications
+    property alias dashboardShowSystem:
+        stateAdapter.dashboardShowSystem
+    property alias dashboardShowOverview:
+        stateAdapter.dashboardShowOverview
+    property alias dashboardShowControls:
+        stateAdapter.dashboardShowControls
+    property alias dashboardShowSessionActions:
+        stateAdapter.dashboardShowSessionActions
+    property alias dashboardCardOrder:
+        stateAdapter.dashboardCardOrder
+    property alias behaviorCloseOnOutside:
+        stateAdapter.behaviorCloseOnOutside
+    property alias behaviorCloseAfterAction:
+        stateAdapter.behaviorCloseAfterAction
+    property alias behaviorOpenOnActiveOutput:
+        stateAdapter.behaviorOpenOnActiveOutput
+    property alias behaviorTransitionScale:
+        stateAdapter.behaviorTransitionScale
+    property alias reduceMotion: stateAdapter.reduceMotion
+    property alias destructiveConfirmations:
+        stateAdapter.destructiveConfirmations
+    property alias notificationPopupPosition:
+        stateAdapter.notificationPopupPosition
+    property alias notificationPopupDuration:
+        stateAdapter.notificationPopupDuration
+    property alias notificationPopupMaximum:
+        stateAdapter.notificationPopupMaximum
+    property alias notificationShowImages:
+        stateAdapter.notificationShowImages
+    property alias notificationKeepHistory:
+        stateAdapter.notificationKeepHistory
+    property alias notificationClearHistoryOnExit:
+        stateAdapter.notificationClearHistoryOnExit
+    property alias notificationPreferredOutput:
+        stateAdapter.notificationPreferredOutput
+    property alias osdPosition: stateAdapter.osdPosition
+    property alias osdSize: stateAdapter.osdSize
+    property alias osdShowPercentage:
+        stateAdapter.osdShowPercentage
+    property alias osdVolumeEnabled:
+        stateAdapter.osdVolumeEnabled
+    property alias osdMicrophoneEnabled:
+        stateAdapter.osdMicrophoneEnabled
+    property alias osdBrightnessEnabled:
+        stateAdapter.osdBrightnessEnabled
+    property alias osdPowerEnabled: stateAdapter.osdPowerEnabled
+    property alias osdPreferredOutput:
+        stateAdapter.osdPreferredOutput
+    property alias sessionConfirmLogout:
+        stateAdapter.sessionConfirmLogout
+    property alias sessionConfirmReboot:
+        stateAdapter.sessionConfirmReboot
+    property alias sessionConfirmPoweroff:
+        stateAdapter.sessionConfirmPoweroff
+    property alias sessionShowSuspend:
+        stateAdapter.sessionShowSuspend
+    property alias sessionShowLock: stateAdapter.sessionShowLock
+    property alias lastSettingsCategory:
+        stateAdapter.lastSettingsCategory
+    property alias lastControlPage: stateAdapter.lastControlPage
+
     property bool initialized: false
+    property bool dirty: false
+    property bool saving: false
+    property double lastSavedAt: 0
+    property bool lastSaveSucceeded: true
     property string lastError: ""
     property bool recoveredInvalidConfiguration: false
-    readonly property string recoveryBackupPath: statePath + ".invalid"
 
     function cloneMap(source) {
         const result = {}
@@ -42,43 +154,40 @@ Singleton {
         return result
     }
 
+    function cloneList(source) {
+        return Array.isArray(source) ? source.slice() : []
+    }
+
+    function snapshot() {
+        const result = {}
+        const defaults = ConfigSchema.defaults()
+
+        for (const key in defaults)
+            result[key] = stateAdapter[key]
+
+        return result
+    }
+
+    function applyValues(values) {
+        for (const key in values) {
+            if (stateAdapter[key] !== undefined)
+                stateAdapter[key] = values[key]
+        }
+    }
+
     function migrate() {
-        var changed = false
+        const normalized = ConfigSchema.migrate(snapshot())
+        const before = JSON.stringify(snapshot())
 
-        if (typeof stateAdapter.wallpapers === "string") {
-            stateAdapter.defaultWallpaper = stateAdapter.wallpapers
-            stateAdapter.wallpapers = {}
-            changed = true
-        } else if (!stateAdapter.wallpapers
-            || Array.isArray(stateAdapter.wallpapers)
-            || typeof stateAdapter.wallpapers !== "object") {
-            stateAdapter.wallpapers = {}
-            changed = true
-        }
+        applyValues(normalized)
 
-        if (!stateAdapter.wallpaperDirectory) {
-            stateAdapter.wallpaperDirectory =
-                "/usr/share/wallpapers/cachyos-wallpapers"
-            changed = true
-        }
-
-        if (stateAdapter.osdDuration < 800
-            || stateAdapter.osdDuration > 5000) {
-            stateAdapter.osdDuration = 1800
-            changed = true
-        }
-
-        if (stateAdapter.schemaVersion !== currentSchemaVersion) {
-            stateAdapter.schemaVersion = currentSchemaVersion
-            changed = true
-        }
-
-        if (changed)
-            saveTimer.restart()
+        if (before !== JSON.stringify(snapshot()))
+            scheduleSave()
     }
 
     function finishLoad() {
         initialized = true
+        dirty = false
         migrate()
     }
 
@@ -98,70 +207,139 @@ Singleton {
     }
 
     function scheduleSave() {
-        if (initialized)
-            saveTimer.restart()
+        if (!initialized)
+            return
+
+        dirty = true
+        lastError = ""
+        saveTimer.restart()
     }
 
-    function setDoNotDisturb(enabled) {
-        stateAdapter.doNotDisturb = Boolean(enabled)
+    function saveNow() {
+        if (!initialized)
+            return
+
+        saveTimer.stop()
+        saving = true
+        stateFile.writeAdapter()
+    }
+
+    function setValue(key, value) {
+        const candidate = snapshot()
+        candidate[key] = value
+        const normalized = ConfigSchema.normalize(candidate)
+
+        if (stateAdapter[key] === normalized[key])
+            return
+
+        stateAdapter[key] = normalized[key]
         scheduleSave()
     }
 
-    function setDynamicTheme(enabled) {
-        stateAdapter.dynamicTheme = Boolean(enabled)
-        scheduleSave()
+    function setDoNotDisturb(value) {
+        setValue("doNotDisturb", Boolean(value))
+    }
+
+    function setDynamicTheme(value) {
+        setValue("dynamicTheme", Boolean(value))
     }
 
     function setWallpapers(value) {
-        stateAdapter.wallpapers = cloneMap(value)
-        scheduleSave()
+        setValue("wallpapers", cloneMap(value))
     }
 
     function setDefaultWallpaper(value) {
-        stateAdapter.defaultWallpaper = String(value || "")
-        scheduleSave()
+        setValue("defaultWallpaper", String(value || ""))
     }
 
     function setWallpaperDirectory(value) {
-        stateAdapter.wallpaperDirectory = String(value || "")
-        scheduleSave()
+        setValue("wallpaperDirectory", String(value || ""))
     }
 
-    function setOsdEnabled(enabled) {
-        stateAdapter.osdEnabled = Boolean(enabled)
-        scheduleSave()
+    function setOsdEnabled(value) {
+        setValue("osdEnabled", Boolean(value))
     }
 
     function setOsdDuration(value) {
-        stateAdapter.osdDuration = Math.max(
-            800,
-            Math.min(5000, Math.round(Number(value) || 1800))
-        )
+        setValue("osdDuration", Number(value))
+    }
+
+    function setShowStatusDetails(value) {
+        setValue("showStatusDetails", Boolean(value))
+    }
+
+    function setThemeMode(value) {
+        setValue("themeMode", value)
+    }
+
+    function setAppearanceValue(key, value) {
+        if ([
+            "transparencyEnabled",
+            "surfaceOpacity",
+            "animationsEnabled",
+            "animationScale",
+            "cornerRadiusScale",
+            "compactMode"
+        ].indexOf(String(key)) >= 0)
+            setValue(key, value)
+    }
+
+    function setBarValue(key, value) {
+        if (String(key).indexOf("bar") === 0
+            || key === "showStatusDetails")
+            setValue(key, value)
+    }
+
+    function setDashboardValue(key, value) {
+        if (String(key).indexOf("dashboard") === 0)
+            setValue(key, value)
+    }
+
+    function setBehaviorValue(key, value) {
+        if (String(key).indexOf("behavior") === 0
+            || key === "reduceMotion"
+            || key === "destructiveConfirmations")
+            setValue(key, value)
+    }
+
+    function setNotificationValue(key, value) {
+        if (String(key).indexOf("notification") === 0
+            || key === "doNotDisturb")
+            setValue(key, value)
+    }
+
+    function setOsdValue(key, value) {
+        if (String(key).indexOf("osd") === 0)
+            setValue(key, value)
+    }
+
+    function setSessionValue(key, value) {
+        if (String(key).indexOf("session") === 0)
+            setValue(key, value)
+    }
+
+    function setLastSettingsCategory(value) {
+        setValue("lastSettingsCategory", value)
+    }
+
+    function setLastControlPage(value) {
+        setValue("lastControlPage", value)
+    }
+
+    function resetCategory(categoryName) {
+        const values = ConfigSchema.defaultsForCategory(categoryName)
+
+        applyValues(values)
         scheduleSave()
     }
 
-    function setShowStatusDetails(enabled) {
-        stateAdapter.showStatusDetails = Boolean(enabled)
+    function resetAll() {
+        applyValues(ConfigSchema.defaults())
         scheduleSave()
-    }
-
-    function applyDefaults() {
-        stateAdapter.schemaVersion = currentSchemaVersion
-        stateAdapter.doNotDisturb = false
-        stateAdapter.dynamicTheme = true
-        stateAdapter.wallpapers = {}
-        stateAdapter.defaultWallpaper =
-            "/usr/share/wallpapers/cachyos-wallpapers/Abstract.png"
-        stateAdapter.wallpaperDirectory =
-            "/usr/share/wallpapers/cachyos-wallpapers"
-        stateAdapter.osdEnabled = true
-        stateAdapter.osdDuration = 1800
-        stateAdapter.showStatusDetails = true
     }
 
     function reset() {
-        applyDefaults()
-        scheduleSave()
+        resetAll()
     }
 
     function recoverInvalidConfiguration(error) {
@@ -173,11 +351,11 @@ Singleton {
         if (rawText)
             recoveryFile.setText(rawText)
 
-        applyDefaults()
+        applyValues(ConfigSchema.defaults())
         initialized = true
         recoveredInvalidConfiguration = true
-        lastError = "Invalid configuration recovered: "
-            + errorText
+        lastError = "Invalid configuration recovered: " + errorText
+        dirty = true
         saveTimer.restart()
         console.warn(
             "Lumina configuration:",
@@ -199,7 +377,8 @@ Singleton {
         adapter: JsonAdapter {
             id: stateAdapter
 
-            property int schemaVersion: root.currentSchemaVersion
+            property int schemaVersion:
+                ConfigSchema.CURRENT_VERSION
             property bool doNotDisturb: false
             property bool dynamicTheme: true
             property var wallpapers: ({})
@@ -210,6 +389,70 @@ Singleton {
             property bool osdEnabled: true
             property int osdDuration: 1800
             property bool showStatusDetails: true
+            property string themeMode: "auto"
+            property bool transparencyEnabled: false
+            property real surfaceOpacity: 0.96
+            property bool animationsEnabled: true
+            property real animationScale: 1
+            property real cornerRadiusScale: 1
+            property bool compactMode: false
+            property string barPosition: "top"
+            property int barHeight: 48
+            property int barMargin: 5
+            property int barWidgetSpacing: 10
+            property bool barShowWindowTitle: true
+            property bool barCenterWindowTitle: true
+            property bool barShowAppId: true
+            property bool barShowWorkspaces: true
+            property bool barShowColumnIndicator: true
+            property bool barShowTray: true
+            property bool barShowClock: true
+            property bool barClock24Hour: true
+            property bool barShowSeconds: false
+            property var barWidgetOrder:
+                ConfigSchema.defaults().barWidgetOrder
+            property string dashboardDefaultPage: "dashboard"
+            property bool dashboardRememberPage: true
+            property bool dashboardRememberCategory: true
+            property string dashboardDensity: "comfortable"
+            property bool dashboardShowWeather: true
+            property bool dashboardShowCalendar: true
+            property bool dashboardShowMedia: true
+            property bool dashboardShowNotifications: true
+            property bool dashboardShowSystem: true
+            property bool dashboardShowOverview: true
+            property bool dashboardShowControls: true
+            property bool dashboardShowSessionActions: true
+            property var dashboardCardOrder:
+                ConfigSchema.defaults().dashboardCardOrder
+            property bool behaviorCloseOnOutside: true
+            property bool behaviorCloseAfterAction: false
+            property bool behaviorOpenOnActiveOutput: true
+            property real behaviorTransitionScale: 1
+            property bool reduceMotion: false
+            property bool destructiveConfirmations: true
+            property string notificationPopupPosition: "top-right"
+            property int notificationPopupDuration: 6000
+            property int notificationPopupMaximum: 3
+            property bool notificationShowImages: true
+            property bool notificationKeepHistory: true
+            property bool notificationClearHistoryOnExit: false
+            property string notificationPreferredOutput: "active"
+            property string osdPosition: "bottom"
+            property real osdSize: 1
+            property bool osdShowPercentage: true
+            property bool osdVolumeEnabled: true
+            property bool osdMicrophoneEnabled: true
+            property bool osdBrightnessEnabled: true
+            property bool osdPowerEnabled: true
+            property string osdPreferredOutput: "active"
+            property bool sessionConfirmLogout: true
+            property bool sessionConfirmReboot: true
+            property bool sessionConfirmPoweroff: true
+            property bool sessionShowSuspend: true
+            property bool sessionShowLock: true
+            property string lastSettingsCategory: "appearance"
+            property string lastControlPage: "dashboard"
         }
 
         onLoaded: root.validateLoadedState()
@@ -221,15 +464,24 @@ Singleton {
             }
 
             root.finishLoad()
+            root.scheduleSave()
         }
 
         onSaveFailed: error => {
+            root.saving = false
+            root.dirty = true
+            root.lastSaveSucceeded = false
             root.lastError = "Failed to save state: "
                 + FileViewError.toString(error)
             console.warn("Lumina configuration:", root.lastError)
         }
 
         onSaved: {
+            root.saving = false
+            root.dirty = false
+            root.lastSavedAt = Date.now()
+            root.lastSaveSucceeded = true
+
             if (!root.recoveredInvalidConfiguration)
                 root.lastError = ""
         }
@@ -246,16 +498,24 @@ Singleton {
     Timer {
         id: saveTimer
 
-        interval: 120
+        interval: 220
         repeat: false
-        onTriggered: stateFile.writeAdapter()
+        onTriggered: root.saveNow()
     }
 
     IpcHandler {
         target: "config"
 
         function reset(): void {
-            root.reset()
+            root.resetAll()
+        }
+
+        function resetCategory(categoryName: string): void {
+            root.resetCategory(categoryName)
+        }
+
+        function save(): void {
+            root.saveNow()
         }
 
         function osd(enabled: bool): void {
@@ -275,16 +535,24 @@ Singleton {
                 schemaVersion: root.schemaVersion,
                 path: root.statePath,
                 initialized: root.initialized,
+                dirty: root.dirty,
+                saving: root.saving,
+                lastSavedAt: root.lastSavedAt,
+                lastSaveSucceeded: root.lastSaveSucceeded,
+                saveStatus: root.saveStatusLabel,
                 recovered: root.recoveredInvalidConfiguration,
-                recoveryBackupPath: root.recoveredInvalidConfiguration
-                    ? root.recoveryBackupPath
-                    : "",
+                recoveryBackupPath:
+                    root.recoveredInvalidConfiguration
+                        ? root.recoveryBackupPath
+                        : "",
                 lastError: root.lastError,
-                doNotDisturb: root.doNotDisturb,
+                themeMode: root.themeMode,
                 dynamicTheme: root.dynamicTheme,
+                barPosition: root.barPosition,
+                dashboardDefaultPage: root.dashboardDefaultPage,
+                doNotDisturb: root.doNotDisturb,
                 osdEnabled: root.osdEnabled,
                 osdDuration: root.osdDuration,
-                showStatusDetails: root.showStatusDetails,
                 wallpaperDirectory: root.wallpaperDirectory
             })
         }
