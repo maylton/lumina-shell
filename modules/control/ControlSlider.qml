@@ -118,7 +118,7 @@ Rectangle {
 
         height: root.sliderTokens.handleHeight
 
-        Rectangle {
+        SliderTrackSegment {
             anchors.verticalCenter: parent.verticalCenter
             width: Geometry.activeWidth(
                 sliderTrack.width,
@@ -127,8 +127,9 @@ Rectangle {
                 root.clampedValue
             )
             height: root.sliderTokens.trackHeight
-            radius: root.luminaDesign.shape.full
-            color: root.available
+            outerAtStart: true
+            insideRadius: root.sliderTokens.trackInsideRadius
+            segmentColor: root.available
                 ? root.luminaDesign.color.primary
                 : root.luminaDesign.color.outline
             visible: width > 0
@@ -141,7 +142,7 @@ Rectangle {
             }
         }
 
-        Rectangle {
+        SliderTrackSegment {
             id: inactiveTrack
 
             anchors.verticalCenter: parent.verticalCenter
@@ -158,8 +159,9 @@ Rectangle {
                 root.clampedValue
             )
             height: root.sliderTokens.trackHeight
-            radius: root.luminaDesign.shape.full
-            color: root.luminaDesign.color.surfaceContainer
+            outerAtStart: false
+            insideRadius: root.sliderTokens.trackInsideRadius
+            segmentColor: root.luminaDesign.color.surfaceContainer
             visible: width > 0
 
             Behavior on x {

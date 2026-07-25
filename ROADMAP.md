@@ -198,8 +198,9 @@ This sprint completes the 0.5 public-beta foundation:
 - Settings sliders separate active and inactive tracks with a stable gap around
   the Material handle at intermediate and endpoint values.
 - Dashboard volume, microphone, and brightness sliders use the same Material 3
-  track gap, vertical handle, endpoint-safe geometry, and stop indicator while
-  preserving pointer, keyboard, and service interactions.
+  track gap, small inner track corners, fully rounded outer ends, vertical
+  handle, endpoint-safe geometry, and stop indicator while preserving pointer,
+  keyboard, and service interactions.
 - Settings combo rows open real Material dropdown menus with selected state,
   bounded placement, outside dismissal, and keyboard navigation.
 - Runtime locale detection, regional fallback, live catalog reload, and

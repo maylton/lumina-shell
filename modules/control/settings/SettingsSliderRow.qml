@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import ".." as ControlComponents
 import "../SliderGeometry.js" as Geometry
 
 SettingsRow {
@@ -55,7 +56,7 @@ SettingsRow {
             width: parent.width - valueText.width - parent.spacing
             height: root.sliderTokens.handleHeight
 
-            Rectangle {
+            ControlComponents.SliderTrackSegment {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Geometry.activeWidth(
                     track.width,
@@ -64,11 +65,12 @@ SettingsRow {
                     root.normalizedValue
                 )
                 height: root.sliderTokens.trackHeight
-                radius: root.luminaDesign.shape.full
-                color: root.luminaDesign.color.primary
+                outerAtStart: true
+                insideRadius: root.sliderTokens.trackInsideRadius
+                segmentColor: root.luminaDesign.color.primary
             }
 
-            Rectangle {
+            ControlComponents.SliderTrackSegment {
                 anchors.verticalCenter: parent.verticalCenter
                 x: Geometry.inactiveX(
                     track.width,
@@ -83,8 +85,9 @@ SettingsRow {
                     root.normalizedValue
                 )
                 height: root.sliderTokens.trackHeight
-                radius: root.luminaDesign.shape.full
-                color: root.grouped
+                outerAtStart: false
+                insideRadius: root.sliderTokens.trackInsideRadius
+                segmentColor: root.grouped
                     ? root.luminaDesign.color.surfaceBase
                     : root.luminaDesign.color.surfaceMuted
             }
