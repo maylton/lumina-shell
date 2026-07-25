@@ -8,6 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Added an optional per-output application dock with a compact floating mode and
+  a full-width task-panel mode with centered icons. Both presentations support
+  pinned desktop entries, grouped Niri windows, focus cycling, auto-hide,
+  click-through masking, optional workspace reservation, horizontal overflow,
+  and the shared Solid, Blur, and Frosted Glass shell styles.
 - Added dedicated Weather settings with enable/disable behavior, approximate
   GeoIP location, manual-city lookup, feature-scoped persistence, a 24-hour
   coordinate cache, selectable refresh intervals, and immediate refresh.
@@ -48,7 +53,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - GPL-3.0-or-later project licensing with explicit third-party credits and contribution terms.
 - Unified Dashboard and Shell Settings views with direct category navigation
   and no duplicate overlay state.
-- Material Expressive settings sidebar with eleven categories, reusable
+- Material Expressive settings sidebar with twelve categories, reusable
   accessible controls, light/dark previews, and local Edit config actions.
 - Schema v4 persistence with debounced save status, category reset, schema v3
   migration, validation clamps, and serialization tests.
