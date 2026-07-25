@@ -46,11 +46,15 @@ Item {
                 ? root.visibleWorkspaces
                 : []
             itemSpacing: ConfigStore.barWidgetSpacing
+            visualStyle: "expressive"
         }
 
-        ClockWidget {
+        DateTimeCluster {
             anchors.verticalCenter: parent.verticalCenter
             visible: ConfigStore.barShowClock
+            compact: root.width < 1400
+            visualStyle: "expressive"
+            barPosition: ConfigStore.barPosition
             outputName: root.outputName.length > 0
                 ? root.outputName
                 : "screen"

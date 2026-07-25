@@ -124,6 +124,8 @@ QtObject {
             extraLarge: Math.round(32 * root.radiusScale),
             extraLargeIncreased: Math.round(40 * root.radiusScale),
             extraExtraLarge: Math.round(48 * root.radiusScale),
+            workspaceResting: Math.round(12 * root.radiusScale),
+            workspaceActive: 999,
             full: 999
         },
         spacing: {
@@ -135,6 +137,8 @@ QtObject {
         },
         size: {
             barHeight: ConfigStore.barHeight,
+            expressiveBarHeight: 48,
+            barTouchTarget: ConfigStore.compactMode ? 34 : 36,
             calendarWidth: 336,
             chipHeight: ConfigStore.compactMode ? 28 : 30,
             controlCenterHeight: 840,
@@ -164,7 +168,9 @@ QtObject {
         motion: {
             fast: Math.max(1, Math.round(120 * root.motionScale)),
             medium: Math.max(1, Math.round(220 * root.motionScale)),
-            slow: Math.max(1, Math.round(380 * root.motionScale))
+            slow: Math.max(1, Math.round(380 * root.motionScale)),
+            workspaceTransform:
+                Math.max(1, Math.round(210 * root.motionScale))
         }
     })
 }

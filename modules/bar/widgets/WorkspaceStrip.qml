@@ -7,6 +7,7 @@ Row {
 
     property var workspaces: []
     property real itemSpacing: 0
+    property string visualStyle: "classic"
 
     spacing: itemSpacing
 
@@ -17,6 +18,7 @@ Row {
             required property var modelData
 
             workspace: modelData
+            visualStyle: root.visualStyle
         }
     }
 }

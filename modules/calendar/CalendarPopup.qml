@@ -10,6 +10,7 @@ PopupWindow {
 
     required property Item anchorItem
     required property string outputName
+    property string barPosition: "top"
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property real dayCellSize: Math.max(
@@ -25,9 +26,18 @@ PopupWindow {
     grabFocus: true
 
     anchor.item: root.anchorItem
-    anchor.edges: Edges.Bottom | Edges.Right
-    anchor.gravity: Edges.Bottom | Edges.Left
-    anchor.margins.top: luminaDesign.spacing.small
+    anchor.edges: barPosition === "top"
+        ? Edges.Bottom | Edges.Right
+        : Edges.Top | Edges.Right
+    anchor.gravity: barPosition === "top"
+        ? Edges.Bottom | Edges.Left
+        : Edges.Top | Edges.Left
+    anchor.margins.top: barPosition === "top"
+        ? luminaDesign.spacing.small
+        : 0
+    anchor.margins.bottom: barPosition === "bottom"
+        ? luminaDesign.spacing.small
+        : 0
     anchor.adjustment: PopupAdjustment.All
 
     onClosed: CalendarStore.dismiss(outputName)
