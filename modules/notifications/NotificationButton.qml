@@ -8,6 +8,7 @@ Rectangle {
     id: root
 
     required property string outputName
+    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: NotificationService.centerOutputName
@@ -15,7 +16,9 @@ Rectangle {
 
     implicitWidth: notificationLabel.implicitWidth + 20
         + (NotificationService.unreadCount > 0 ? badge.width + 4 : 0)
-    implicitHeight: luminaDesign.size.chipHeight
+    implicitHeight: expressive
+        ? luminaDesign.size.barTouchTarget
+        : luminaDesign.size.chipHeight
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     scale: notificationMouse.pressed
         ? 0.94
@@ -27,6 +30,7 @@ Rectangle {
         : "transparent"
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
+    activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
     Accessible.name: "Open notifications"
@@ -36,6 +40,16 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction:
         NotificationService.toggleCenter(root.outputName)
+
+    Keys.onSpacePressed: event => {
+        NotificationService.toggleCenter(root.outputName)
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        NotificationService.toggleCenter(root.outputName)
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -87,6 +101,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: NotificationService.toggleCenter(root.outputName)
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            NotificationService.toggleCenter(root.outputName)
+        }
     }
 }

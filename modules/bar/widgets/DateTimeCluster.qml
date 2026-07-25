@@ -131,6 +131,13 @@ Rectangle {
         }
     }
 
+    TrayTooltip {
+        anchorItem: root
+        title: root.accessibleDate
+        description: "Open calendar"
+        shown: dateTimeMouse.containsMouse
+    }
+
     CalendarPopup {
         anchorItem: root
         outputName: root.outputName

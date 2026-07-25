@@ -8,13 +8,16 @@ Rectangle {
     id: root
 
     required property string outputName
+    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: WallpaperService.pickerOutputName
         === outputName
 
     implicitWidth: wallpaperLabel.implicitWidth + 20
-    implicitHeight: luminaDesign.size.chipHeight
+    implicitHeight: expressive
+        ? luminaDesign.size.barTouchTarget
+        : luminaDesign.size.chipHeight
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || wallpaperMouse.containsMouse
         ? luminaDesign.color.accentContainer
@@ -26,6 +29,7 @@ Rectangle {
             : 1.0
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
+    activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
     Accessible.name: "Open wallpaper picker"
@@ -33,6 +37,16 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction:
         WallpaperService.togglePicker(root.outputName)
+
+    Keys.onSpacePressed: event => {
+        WallpaperService.togglePicker(root.outputName)
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        WallpaperService.togglePicker(root.outputName)
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -65,6 +79,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: WallpaperService.togglePicker(root.outputName)
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            WallpaperService.togglePicker(root.outputName)
+        }
     }
 }

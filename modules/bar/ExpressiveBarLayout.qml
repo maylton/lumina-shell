@@ -129,13 +129,16 @@ Item {
 
         LauncherButton {
             outputName: root.outputName
+            expressive: true
         }
     }
 
     Component {
         id: overviewComponent
 
-        OverviewButton {}
+        OverviewButton {
+            expressive: true
+        }
     }
 
     Component {
@@ -176,7 +179,9 @@ Item {
     Component {
         id: trayComponent
 
-        TrayWidget {}
+        TrayWidget {
+            expressive: true
+        }
     }
 
     Component {
@@ -184,6 +189,7 @@ Item {
 
         NotificationButton {
             outputName: root.outputName
+            expressive: true
         }
     }
 
@@ -209,6 +215,7 @@ Item {
 
         WallpaperButton {
             outputName: root.outputName
+            expressive: true
         }
     }
 
@@ -217,6 +224,7 @@ Item {
 
         SessionButton {
             outputName: root.outputName
+            expressive: true
         }
     }
 }

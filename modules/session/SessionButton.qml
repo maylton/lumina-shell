@@ -9,13 +9,16 @@ Rectangle {
     id: root
 
     required property string outputName
+    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property bool expanded: SessionMenuStore.activeOutputName
         === outputName
 
     implicitWidth: sessionLabel.implicitWidth + 20
-    implicitHeight: luminaDesign.size.chipHeight
+    implicitHeight: expressive
+        ? luminaDesign.size.barTouchTarget
+        : luminaDesign.size.chipHeight
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     color: expanded || sessionMouse.containsMouse
         ? luminaDesign.color.accentContainer
@@ -27,12 +30,23 @@ Rectangle {
             : 1.0
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
+    activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
     Accessible.name: "Open session and layout controls"
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate()
+
+    Keys.onSpacePressed: event => {
+        activate()
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        activate()
+        event.accepted = true
+    }
 
     function activate() {
         if (expanded) {
@@ -74,6 +88,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.activate()
+        onClicked: {
+            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.activate()
+        }
     }
 }

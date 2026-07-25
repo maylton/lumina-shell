@@ -10,6 +10,7 @@ Rectangle {
     id: root
 
     required property var trayItem
+    property bool expressive: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property string itemTitle: {
@@ -36,8 +37,12 @@ Rectangle {
         trayMenu.show()
     }
 
-    implicitWidth: luminaDesign.size.chipHeight
-    implicitHeight: luminaDesign.size.chipHeight
+    implicitWidth: expressive
+        ? luminaDesign.size.barTouchTarget
+        : luminaDesign.size.chipHeight
+    implicitHeight: expressive
+        ? luminaDesign.size.barTouchTarget
+        : luminaDesign.size.chipHeight
     radius: needsAttention
         ? luminaDesign.shape.full
         : luminaDesign.shape.medium
@@ -53,6 +58,36 @@ Rectangle {
             : itemMouse.containsMouse
                 ? luminaDesign.color.surfaceMuted
                 : "transparent"
+    activeFocusOnTab: true
+    border.width: activeFocus ? 2 : 0
+    border.color: luminaDesign.color.primary
+
+    Accessible.role: Accessible.Button
+    Accessible.name: itemTitle
+    Accessible.description: itemDescription
+    Accessible.focusable: true
+    Accessible.focused: activeFocus
+    Accessible.onPressAction: root.activate()
+
+    function activate() {
+        if (!trayItem)
+            return
+
+        if (trayItem.onlyMenu && trayItem.hasMenu)
+            showMenu()
+        else
+            trayItem.activate()
+    }
+
+    Keys.onSpacePressed: event => {
+        activate()
+        event.accepted = true
+    }
+
+    Keys.onReturnPressed: event => {
+        activate()
+        event.accepted = true
+    }
 
     Behavior on color {
         ColorAnimation {

@@ -180,4 +180,11 @@ Rectangle {
             root.activate()
         }
     }
+
+    TrayTooltip {
+        anchorItem: root
+        title: "System status"
+        description: root.accessibleSummary
+        shown: statusMouse.containsMouse
+    }
 }

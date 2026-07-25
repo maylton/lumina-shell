@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.design
+import qs.stores.config
 
 PopupWindow {
     id: root
@@ -29,9 +30,18 @@ PopupWindow {
     grabFocus: false
 
     anchor.item: root.anchorItem
-    anchor.edges: Edges.Bottom
-    anchor.gravity: Edges.Bottom
-    anchor.margins.top: luminaDesign.spacing.small
+    anchor.edges: ConfigStore.barPosition === "top"
+        ? Edges.Bottom
+        : Edges.Top
+    anchor.gravity: ConfigStore.barPosition === "top"
+        ? Edges.Bottom
+        : Edges.Top
+    anchor.margins.top: ConfigStore.barPosition === "top"
+        ? luminaDesign.spacing.small
+        : 0
+    anchor.margins.bottom: ConfigStore.barPosition === "bottom"
+        ? luminaDesign.spacing.small
+        : 0
     anchor.adjustment: PopupAdjustment.All
 
     Rectangle {

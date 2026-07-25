@@ -7,6 +7,8 @@ import qs.design
 Item {
     id: root
 
+    property bool expressive: false
+
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property var activeItems: {
         const items = []
@@ -40,6 +42,7 @@ Item {
                 required property var modelData
 
                 trayItem: modelData
+                expressive: root.expressive
             }
         }
     }

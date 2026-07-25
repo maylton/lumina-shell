@@ -96,4 +96,11 @@ Rectangle {
             root.activate()
         }
     }
+
+    TrayTooltip {
+        anchorItem: root
+        title: "Lumina dashboard"
+        description: "Quick controls and shell settings"
+        shown: dashboardMouse.containsMouse
+    }
 }
