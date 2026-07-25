@@ -69,7 +69,6 @@ Item {
         spacing: root.luminaDesign.spacing.small
 
         DashboardAction {
-            iconName: "preferences-system-symbolic"
             symbol: "⚙"
             label: "Open shell settings"
             checked: ControlCenterStore.activePage === "settings"

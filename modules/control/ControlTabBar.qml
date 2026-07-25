@@ -40,7 +40,7 @@ Item {
                 },
                 {
                     id: "settings",
-                    iconName: "preferences-system-symbolic",
+                    iconName: "",
                     symbol: "⚙",
                     label: "Settings"
                 }

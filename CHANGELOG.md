@@ -57,3 +57,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   notifications, and the unified control-center surface on either edge.
 - Palette-aware rocket glyph for the unified Dashboard and Settings entry
   point in the desktop bar and the Dashboard tab.
+- Theme-independent gear glyphs for Settings navigation and its dashboard
+  shortcut.
