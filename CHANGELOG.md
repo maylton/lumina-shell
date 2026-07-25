@@ -55,3 +55,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   optional actions, accessible ordering, and immediate persistence.
 - Consistent semantic spacing between the bar and calendars, tray popups,
   notifications, and the unified control-center surface on either edge.
+- Palette-aware rocket glyph for the unified Dashboard and Settings entry
+  point in the desktop bar.

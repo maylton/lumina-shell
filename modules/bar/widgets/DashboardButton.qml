@@ -77,8 +77,10 @@ Rectangle {
 
     DashboardIcon {
         anchors.centerIn: parent
-        iconName: "preferences-system-symbolic"
-        fallbackSymbol: "L"
+        customSource: Qt.resolvedUrl(
+            "../../../assets/icons/rocket-symbolic.svg"
+        )
+        fallbackSymbol: "🚀"
         iconColor: root.expanded
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.primary

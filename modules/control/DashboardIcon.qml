@@ -8,13 +8,16 @@ Item {
     id: root
 
     property string iconName: ""
+    property string customSource: ""
     property string fallbackSymbol: ""
     property color iconColor: "white"
     property real iconSize: 18
 
-    readonly property string iconSource: iconName.length > 0
-        ? Quickshell.iconPath(iconName, "")
-        : ""
+    readonly property string iconSource: customSource.length > 0
+        ? customSource
+        : iconName.length > 0
+            ? Quickshell.iconPath(iconName, "")
+            : ""
     readonly property bool iconReady: iconSource.length > 0
         && sourceIcon.status === Image.Ready
 
