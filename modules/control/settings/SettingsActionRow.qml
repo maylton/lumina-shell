@@ -15,7 +15,7 @@ SettingsRow {
         anchors.fill: parent
         radius: root.luminaDesign.shape.full
         color: root.destructive
-            ? Qt.rgba(1, 0.35, 0.32, 0.16)
+            ? root.luminaDesign.color.errorContainer
             : root.luminaDesign.color.accentContainer
         border.width: root.destructive ? 1 : 0
         border.color: root.luminaDesign.color.urgent
@@ -26,7 +26,7 @@ SettingsRow {
             anchors.centerIn: parent
             text: root.actionLabel
             color: root.destructive
-                ? root.luminaDesign.color.urgent
+                ? root.luminaDesign.color.onErrorContainer
                 : root.luminaDesign.color.onAccentContainer
             font.pixelSize: root.luminaDesign.typography.labelMedium
             font.weight: Font.DemiBold

@@ -164,6 +164,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   outer endpoints across Dashboard and Settings.
 - Rendered Material slider segments as single contours to remove dark overlap
   artifacts from disabled Settings sliders.
+- Added a complete contrast-tested Light tonal scheme while preserving the
+  validated Dark palette, and made wallpaper-derived palettes retain separate
+  reactive Light and Dark variants.
+- Added semantic light-theme surface, outline, primary, error, and state-layer
+  roles; previews and selected/destructive states now consume those roles
+  without dark-theme-specific hardcoded overlays.
+- Added a typed `config theme` IPC action for Light, Dark, and Auto mode
+  switching and runtime validation.
 - Replaced cyclic Settings combo controls with real Material dropdown menus,
   including selected state, viewport-aware placement, outside dismissal, and
   complete keyboard navigation.

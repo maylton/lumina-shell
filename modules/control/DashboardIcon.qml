@@ -11,7 +11,7 @@ Item {
     property string iconName: ""
     property string customSource: ""
     property string fallbackSymbol: ""
-    property color iconColor: "white"
+    property color iconColor: luminaDesign.color.onSurface
     property real iconSize: 18
     property real fallbackScale: 1
 

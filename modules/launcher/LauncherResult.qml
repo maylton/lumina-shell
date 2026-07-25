@@ -111,7 +111,7 @@ Rectangle {
         height: 22
         radius: root.luminaDesign.shape.full
         color: root.selected
-            ? Qt.rgba(1, 1, 1, 0.12)
+            ? root.luminaDesign.color.pressedState
             : root.luminaDesign.color.surfaceMuted
 
         Text {

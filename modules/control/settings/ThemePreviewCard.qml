@@ -13,13 +13,15 @@ Rectangle {
     signal activated
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property bool light: mode === "light"
+    readonly property var previewPalette: Theme.previewPalette(mode)
     readonly property color previewSurface:
-        light ? "#F8F9FF" : "#111318"
+        previewPalette.surfaceBase
     readonly property color previewContainer:
-        light ? "#E9EAF2" : "#292C33"
+        previewPalette.surfaceMuted
     readonly property color previewText:
-        light ? "#1A1B20" : "#E2E2E9"
+        previewPalette.onSurface
+    readonly property color previewPrimary:
+        previewPalette.primary
 
     implicitHeight: 154
     radius: selected
@@ -107,7 +109,7 @@ Rectangle {
                         height: 10
                         radius: 5
                         color: index === 0
-                            ? root.luminaDesign.color.primary
+                            ? root.previewPrimary
                             : root.previewText
                         opacity: index === 0 ? 1 : 0.4
                     }

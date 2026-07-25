@@ -20,7 +20,7 @@ Rectangle {
     radius: root.luminaDesign.shape.large
     color: actionMouse.containsMouse
         ? destructive
-            ? Qt.rgba(1, 0.35, 0.32, 0.18)
+            ? root.luminaDesign.color.errorContainer
             : root.luminaDesign.color.accentContainer
         : root.luminaDesign.color.surfaceMuted
     border.width: activeFocus ? 2 : destructive ? 1 : 0
@@ -68,7 +68,9 @@ Rectangle {
 
         text: root.symbol
         color: root.destructive
-            ? root.luminaDesign.color.urgent
+            ? actionMouse.containsMouse
+                ? root.luminaDesign.color.onErrorContainer
+                : root.luminaDesign.color.urgent
             : actionMouse.containsMouse
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.primary
@@ -90,8 +92,10 @@ Rectangle {
         Text {
             width: parent.width
             text: root.title
-            color: actionMouse.containsMouse && !root.destructive
-                ? root.luminaDesign.color.onAccentContainer
+            color: actionMouse.containsMouse
+                ? root.destructive
+                    ? root.luminaDesign.color.onErrorContainer
+                    : root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
             elide: Text.ElideRight
             font.pixelSize: root.luminaDesign.typography.bodyMedium
@@ -101,7 +105,9 @@ Rectangle {
         Text {
             width: parent.width
             text: root.description
-            color: root.luminaDesign.color.textMuted
+            color: actionMouse.containsMouse && root.destructive
+                ? root.luminaDesign.color.onErrorContainer
+                : root.luminaDesign.color.textMuted
             elide: Text.ElideRight
             font.pixelSize: root.luminaDesign.typography.labelSmall
         }

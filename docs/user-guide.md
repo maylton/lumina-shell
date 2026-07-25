@@ -206,6 +206,20 @@ next save.
 Invalid JSON is still copied to the adjacent `.invalid` backup before defaults
 are restored.
 
+Appearance provides complete Light and Dark tonal schemes. Light uses bright
+layered surfaces with dark foregrounds rather than inverting the Dark theme.
+Wallpaper palettes generate coordinated variants for both modes, so switching
+Light/Dark is immediate and keeps the selected palette profile. Auto currently
+uses the documented Dark fallback on the validated Quickshell runtime.
+
+The mode can also be changed through IPC:
+
+```bash
+qs ipc -p /path/to/lumina-shell call config theme light
+qs ipc -p /path/to/lumina-shell call config theme dark
+qs ipc -p /path/to/lumina-shell call config theme auto
+```
+
 ## Notifications
 
 The bell button opens notification history and keeps the unread count in a

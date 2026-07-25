@@ -57,7 +57,7 @@ SettingsPage {
         groupedRows: false
         description: ConfigStore.themeMode === "auto"
             ? "Auto uses Lumina's predictable dark fallback on this runtime"
-            : "Choose the light or dark semantic token set"
+            : "Choose Lumina's complete light or dark tonal scheme"
 
         Row {
             width: parent.width
