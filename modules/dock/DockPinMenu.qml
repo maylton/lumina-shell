@@ -30,7 +30,7 @@ Rectangle {
     border.color: luminaDesign.color.outline
     activeFocusOnTab: false
 
-    Accessible.role: Accessible.Menu
+    Accessible.role: Accessible.PopupMenu
     Accessible.name: applicationTitle.length > 0
         ? DockStrings.text(I18n.locale, "applicationMenu")
             + ": " + applicationTitle
