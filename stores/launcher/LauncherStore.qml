@@ -2,10 +2,13 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services.i18n
 import qs.services.niri
+import qs.stores.dock
 import qs.stores.niri
 import qs.stores.session
 import qs.stores.shell
+import "../../services/i18n/LauncherStrings.js" as LauncherStrings
 import "LauncherSearch.js" as LauncherSearch
 
 Singleton {
@@ -18,7 +21,16 @@ Singleton {
             : ""
     readonly property var applications: DesktopEntries.applications.values
     readonly property var windows: WindowStore.windows
-    readonly property var results: buildResults(query, applications, windows)
+    readonly property var results: buildResults(
+        query,
+        applications,
+        windows,
+        I18n.locale
+    )
+    readonly property var favoriteResults: buildFavoriteResults(
+        DockPreferences.favoriteAppIds,
+        I18n.locale
+    )
 
     property string query: ""
     property int selectedIndex: 0
@@ -46,7 +58,101 @@ Singleton {
             : "application-x-executable"
     }
 
-    function buildResults(searchText, appEntries, windowEntries) {
+    function resultForEntry(entry, locale) {
+        if (!entry)
+            return null
+
+        return {
+            kind: "application",
+            title: String(
+                entry.name
+                    || entry.id
+                    || LauncherStrings.text(locale, "applicationFallback")
+            ),
+            subtitle: String(
+                entry.comment
+                    || entry.genericName
+                    || entry.id
+                    || ""
+            ),
+            icon: String(entry.icon || "application-x-executable"),
+            entry: entry,
+            score: 1
+        }
+    }
+
+    function buildFavoriteResults(favoriteIds, locale) {
+        const identifiers = favoriteIds || []
+        const favorites = []
+
+        for (var index = 0; index < identifiers.length; ++index) {
+            const identifier = String(identifiers[index] || "").trim()
+            const entry = identifier
+                ? DesktopEntries.heuristicLookup(identifier)
+                : null
+
+            if (!entry || entry.noDisplay)
+                continue
+
+            const result = resultForEntry(entry, locale)
+            if (result)
+                favorites.push(result)
+
+            if (favorites.length >= 8)
+                break
+        }
+
+        return favorites
+    }
+
+    function localizedShellActions(locale) {
+        return [
+            {
+                id: "toggle-overview",
+                title: LauncherStrings.text(locale, "toggleOverviewTitle"),
+                subtitle: LauncherStrings.text(locale, "niriShellAction"),
+                icon: "view-grid-symbolic"
+            },
+            {
+                id: "focus-column-left",
+                title: LauncherStrings.text(locale, "focusColumnLeftTitle"),
+                subtitle: LauncherStrings.text(locale, "niriLayoutAction"),
+                icon: "go-previous-symbolic"
+            },
+            {
+                id: "focus-column-right",
+                title: LauncherStrings.text(locale, "focusColumnRightTitle"),
+                subtitle: LauncherStrings.text(locale, "niriLayoutAction"),
+                icon: "go-next-symbolic"
+            },
+            {
+                id: "center-column",
+                title: LauncherStrings.text(locale, "centerColumnTitle"),
+                subtitle: LauncherStrings.text(locale, "niriLayoutAction"),
+                icon: "object-align-horizontal-center-symbolic"
+            },
+            {
+                id: "toggle-floating",
+                title: LauncherStrings.text(locale, "toggleFloatingTitle"),
+                subtitle: LauncherStrings.text(locale, "niriLayoutAction"),
+                icon: "window-duplicate-symbolic"
+            },
+            {
+                id: "toggle-fullscreen",
+                title: LauncherStrings.text(locale, "toggleFullscreenTitle"),
+                subtitle: LauncherStrings.text(locale, "niriLayoutAction"),
+                icon: "view-fullscreen-symbolic"
+            },
+            {
+                id: "session-menu",
+                title: LauncherStrings.text(locale, "sessionMenuTitle"),
+                subtitle: LauncherStrings.text(locale, "sessionMenuSubtitle"),
+                icon: "system-shutdown-symbolic"
+            }
+        ]
+    }
+
+    function buildResults(searchText, appEntries, windowEntries, locale) {
         const needle = normalizedText(searchText)
         const matches = []
         const apps = appEntries || []
@@ -58,34 +164,34 @@ Singleton {
             if (!entry || entry.noDisplay)
                 continue
 
-            const title = String(entry.name || entry.id || "Application")
+            const result = resultForEntry(entry, locale)
             const details = searchableText([
                 entry.genericName,
                 entry.comment,
                 entry.id,
                 entry.keywords ? entry.keywords.join(" ") : ""
             ])
-            const score = matchScore(needle, title, details)
+            const score = matchScore(needle, result.title, details)
 
             if (score < 0)
                 continue
 
-            matches.push({
-                kind: "application",
-                title: title,
-                subtitle: String(entry.comment || entry.genericName || entry.id || ""),
-                icon: String(entry.icon || "application-x-executable"),
-                entry: entry,
-                score: score
-            })
+            result.score = score
+            matches.push(result)
         }
 
         if (needle) {
-            for (var windowIndex = 0; windowIndex < currentWindows.length; ++windowIndex) {
+            for (var windowIndex = 0;
+                 windowIndex < currentWindows.length;
+                 ++windowIndex) {
                 const windowItem = currentWindows[windowIndex]
                 const windowTitle = WindowStore.titleFor(windowItem)
                 const appId = WindowStore.appIdFor(windowItem)
-                const windowScore = matchScore(needle, windowTitle, appId)
+                const windowScore = matchScore(
+                    needle,
+                    windowTitle,
+                    appId
+                )
 
                 if (windowScore < 0)
                     continue
@@ -93,7 +199,8 @@ Singleton {
                 matches.push({
                     kind: "window",
                     title: windowTitle,
-                    subtitle: appId || "Open window",
+                    subtitle: appId
+                        || LauncherStrings.text(locale, "openWindow"),
                     icon: iconForWindow(windowItem),
                     windowId: windowItem.id,
                     score: windowScore + 50
@@ -101,52 +208,10 @@ Singleton {
             }
         }
 
-        const shellActions = [
-            {
-                id: "toggle-overview",
-                title: "Toggle overview",
-                subtitle: "Niri shell action",
-                icon: "view-grid-symbolic"
-            },
-            {
-                id: "focus-column-left",
-                title: "Focus column left",
-                subtitle: "Niri layout action",
-                icon: "go-previous-symbolic"
-            },
-            {
-                id: "focus-column-right",
-                title: "Focus column right",
-                subtitle: "Niri layout action",
-                icon: "go-next-symbolic"
-            },
-            {
-                id: "center-column",
-                title: "Center current column",
-                subtitle: "Niri layout action",
-                icon: "object-align-horizontal-center-symbolic"
-            },
-            {
-                id: "toggle-floating",
-                title: "Toggle floating window",
-                subtitle: "Niri layout action",
-                icon: "window-duplicate-symbolic"
-            },
-            {
-                id: "toggle-fullscreen",
-                title: "Toggle fullscreen",
-                subtitle: "Niri layout action",
-                icon: "view-fullscreen-symbolic"
-            },
-            {
-                id: "session-menu",
-                title: "Open session menu",
-                subtitle: "Lock, suspend, log out, or power controls",
-                icon: "system-shutdown-symbolic"
-            }
-        ]
-
-        for (var actionIndex = 0; actionIndex < shellActions.length; ++actionIndex) {
+        const shellActions = localizedShellActions(locale)
+        for (var actionIndex = 0;
+             actionIndex < shellActions.length;
+             ++actionIndex) {
             const action = shellActions[actionIndex]
             const actionScore = matchScore(
                 needle,
@@ -235,6 +300,15 @@ Singleton {
             return
 
         selectedIndex = (selectedIndex - 1 + results.length) % results.length
+    }
+
+    function selectOffset(offset) {
+        if (results.length === 0)
+            return
+
+        selectedIndex = (
+            selectedIndex + Number(offset || 0) + results.length
+        ) % results.length
     }
 
     function execute(result) {
