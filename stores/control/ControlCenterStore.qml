@@ -18,7 +18,8 @@ Singleton {
     readonly property string uptimeLabel: formatUptime(uptimeSeconds)
     readonly property var auxiliarySettingsCategories: [
         "weather",
-        "connectivity"
+        "connectivity",
+        "dock"
     ]
 
     property string activePage: ConfigStore.dashboardRememberPage
@@ -148,7 +149,6 @@ Singleton {
         function onInitializedChanged() {
             if (!ConfigStore.initialized)
                 return
-
             root.activePage = ConfigStore.dashboardRememberPage
                 ? ConfigStore.lastControlPage
                 : ConfigStore.dashboardDefaultPage
