@@ -98,10 +98,12 @@ Edge-to-edge and floating are geometry modes of this same implementation. The
 default edge-to-edge surface is 56 pixels high with 40-pixel interaction
 targets.
 
-`barWidgetPillsEnabled` is a shared presentation preference consumed by every
-bar widget. It controls only resting container colors; active/open, pointer,
-focus, urgent, and error states remain component-owned. Popup windows do not
-inherit it, so disabling bar pills cannot make menus or tooltips transparent.
+`barWidgetPillsEnabled` is a shared presentation preference consumed by
+eligible non-workspace bar widgets. It controls only resting container colors;
+active/open, pointer, focus, urgent, and error states remain component-owned.
+`WorkspacePill` intentionally ignores the preference because its focused and
+active backgrounds encode navigation state. Popup windows do not inherit the
+preference, so disabling bar pills cannot make menus or tooltips transparent.
 
 `BarScalePolicy` derives automatic content scale directly as
 `clamp(barHeight, 40, 80) / 56`, so the supported automatic range is about

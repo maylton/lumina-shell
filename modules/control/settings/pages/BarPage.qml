@@ -271,12 +271,12 @@ SettingsPage {
 
     SettingsSection {
         title: "Widgets"
-        description: "Shared presentation for every bar item"
+        description: "Shared presentation for non-workspace bar items"
 
         SettingsSwitchRow {
             width: parent.width
             title: "Widget backgrounds"
-            description: "Show resting pill surfaces behind bar widgets"
+            description: "Show resting pills behind non-workspace widgets"
             checked: ConfigStore.barWidgetPillsEnabled
             onToggled: value => ConfigStore.setBarValue(
                 "barWidgetPillsEnabled",

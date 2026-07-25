@@ -75,9 +75,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   subtle grain, and glass-edge highlight. Legacy `translucent` preferences
   migrate to Blur.
 - Persistent global control for resting bar-widget pill backgrounds, covering
-  launcher, overview, workspaces, date/time, context, tray, notifications,
-  system status, Dashboard, wallpaper, and session actions while preserving
-  interactive and semantic feedback.
+  launcher, overview, date/time, context, tray, notifications, system status,
+  Dashboard, wallpaper, and session actions while preserving interactive and
+  semantic feedback. Workspace pills remain visible because they communicate
+  focused and active navigation state.
 - The wallpaper surface now ignores shell exclusion zones, allowing Transparent
   bars to reserve work area without exposing a compositor-colored strip or
   placing tiled windows behind bar controls.

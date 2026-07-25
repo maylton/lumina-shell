@@ -1,7 +1,6 @@
 import QtQuick
 import qs.design
 import qs.services.niri
-import qs.stores.config
 import qs.stores.niri
 
 Rectangle {
@@ -112,16 +111,10 @@ Rectangle {
             : root.active
                 ? root.luminaDesign.shape.barLarge
                 : root.luminaDesign.shape.full
-        color: workspaceMouse.containsMouse
+        color: root.selected || workspaceMouse.containsMouse
             ? root.luminaDesign.color.accentContainer
-            : root.selected
-                ? ConfigStore.barWidgetPillsEnabled
-                    ? root.luminaDesign.color.accentContainer
-                    : "transparent"
             : root.active
-                ? ConfigStore.barWidgetPillsEnabled
-                    ? root.luminaDesign.color.surfaceMuted
-                    : "transparent"
+                ? root.luminaDesign.color.surfaceMuted
                 : root.luminaDesign.color.outline
         border.width: root.workspace.is_urgent ? 2 : 0
         border.color: root.luminaDesign.color.urgent
@@ -168,16 +161,10 @@ Rectangle {
             opacity: visible ? 1 : 0
             text: WorkspaceStore.labelFor(root.workspace)
             color: root.selected
-                && (
-                    ConfigStore.barWidgetPillsEnabled
-                    || workspaceMouse.containsMouse
-                )
                 ? root.luminaDesign.color.onAccentContainer
                 : root.workspace.is_urgent
                     ? root.luminaDesign.color.urgent
-                    : root.selected
-                        ? root.luminaDesign.color.primary
-                        : root.luminaDesign.color.onSurface
+                    : root.luminaDesign.color.onSurface
             font.pixelSize:
                 root.luminaDesign.typography.barWorkspace
             font.weight: Font.DemiBold
