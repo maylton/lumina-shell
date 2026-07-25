@@ -82,14 +82,24 @@ Rectangle {
 
     UserAvatar {
         anchors.centerIn: parent
-        avatarSize: Math.max(
-            root.luminaDesign.size.barIcon + 8,
-            root.luminaDesign.size.barTouchTarget - 7
-        )
-        borderWidth: root.expanded || root.activeFocus ? 2 : 1
-        borderColor: root.expanded
+        avatarSize: root.luminaDesign.size.barTouchTarget
+        borderWidth: root.expanded
+            || root.activeFocus
+            || avatarMouse.containsMouse
+            ? 2
+            : 1
+        borderColor: root.expanded || avatarMouse.containsMouse
             ? root.luminaDesign.color.onAccentContainer
             : root.luminaDesign.color.primary
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        z: 2
+        radius: root.luminaDesign.shape.full
+        color: "transparent"
+        border.width: root.activeFocus ? 2 : 0
+        border.color: root.luminaDesign.color.primary
     }
 
     MouseArea {
