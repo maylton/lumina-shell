@@ -45,6 +45,13 @@ surfaces, while **Bar → Surface → Background opacity** changes only a
 translucent bar. Transparent mode keeps widgets on their own subtle tonal
 surfaces for contrast. Lumina intentionally offers no blur until a backend is
 validated for the supported Niri and Quickshell environment.
+Solid mode reserves desktop work area; translucent and transparent modes
+overlay windows so the composited background is the actual desktop content,
+not an empty reserved strip.
+
+When automatic content scaling is enabled, Settings shows the calculated
+effective percentage as a read-only value. Disabling it exposes the manual
+slider in five-percent steps from 80% through 140%, with 100% as the reference.
 
 Context is event-driven and independent per output. In Contextual mode, a
 window, app ID, column, workspace, or action-error change reveals the capsule

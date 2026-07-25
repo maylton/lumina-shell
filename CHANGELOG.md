@@ -125,3 +125,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Scale Material Expressive bar icons, typography, workspace states, status
   badges, padding, gaps, and interaction targets semantically across 40–80
   pixel heights while retaining a moderate compact-density adjustment.
+- Let translucent and transparent bars overlay the desktop instead of exposing
+  an empty exclusive work-area strip, and show the effective automatic content
+  scale while keeping manual adjustments on clear five-percent steps.

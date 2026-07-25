@@ -38,3 +38,15 @@ function borderAlpha(mode, opacity) {
 
     return 1
 }
+
+function exclusiveZone(mode, windowHeight) {
+    if (mode === "translucent" || mode === "transparent")
+        return 0
+
+    var height = Number(windowHeight)
+
+    if (!isFinite(height))
+        return 0
+
+    return Math.max(0, Math.round(height))
+}

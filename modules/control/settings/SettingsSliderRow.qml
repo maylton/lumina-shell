@@ -111,6 +111,7 @@ SettingsRow {
                     verticalCenter: parent.verticalCenter
                 }
                 height: 36
+                enabled: root.available
                 acceptedButtons: Qt.LeftButton
                 onPressed: mouse => updateValue(mouse.x)
                 onPositionChanged: mouse => {

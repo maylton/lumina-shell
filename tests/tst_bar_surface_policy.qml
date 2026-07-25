@@ -28,4 +28,11 @@ TestCase {
         compare(BarSurfacePolicy.dividerAlpha("translucent", 0.5), 0.12)
         compare(BarSurfacePolicy.borderAlpha("translucent", 0.5), 0.21)
     }
+
+    function test_onlySolidSurfaceReservesWorkArea() {
+        compare(BarSurfacePolicy.exclusiveZone("solid", 56), 56)
+        compare(BarSurfacePolicy.exclusiveZone("translucent", 56), 0)
+        compare(BarSurfacePolicy.exclusiveZone("transparent", 56), 0)
+        compare(BarSurfacePolicy.exclusiveZone("solid", -10), 0)
+    }
 }

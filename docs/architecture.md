@@ -76,6 +76,9 @@ widgets and popup surfaces remain fully opaque. Divider and floating-border
 alpha are derived separately by `BarSurfacePolicy`. Color changes use the
 existing effects motion tokens. Blur is intentionally absent because the
 supported Quickshell/Niri combination has no validated blur backend.
+Solid mode reserves its full layer-shell height. Translucent and transparent
+modes use a zero exclusive zone so windows remain behind the composited bar
+instead of revealing a separate wallpaper-colored work-area strip.
 
 `BarLayout` implements Lumina's Material Expressive bar. Its left and right
 orders are registries of `Component` objects instantiated through `Loader`;

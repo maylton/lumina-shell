@@ -4,9 +4,18 @@ import QtQuick
 import qs.modules.control.settings
 import qs.services.i18n
 import qs.stores.config
+import "../../../bar/BarScalePolicy.js" as BarScalePolicy
 
 SettingsPage {
     id: root
+
+    readonly property real effectiveBarContentScale:
+        BarScalePolicy.effectiveScale(
+            ConfigStore.barHeight,
+            ConfigStore.barAutoScaleContents,
+            ConfigStore.barContentScale,
+            ConfigStore.compactMode
+        )
 
     title: I18n.tr("settings.category.bar.label", "Bar")
     description: I18n.tr(
@@ -173,14 +182,23 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Content scale"
-            description: "Manual scale for bar contents"
+            title: ConfigStore.barAutoScaleContents
+                ? "Effective content scale"
+                : "Content scale"
+            description: ConfigStore.barAutoScaleContents
+                ? "Calculated from the selected bar height"
+                : "Manual scale for bar contents"
             available: !ConfigStore.barAutoScaleContents
-            availabilityText: "Disable automatic content scaling first"
+            availabilityText:
+                "Calculated automatically from "
+                + ConfigStore.barHeight
+                + " px bar height"
             from: 0.8
             to: 1.4
-            stepSize: 0.02
-            value: ConfigStore.barContentScale
+            stepSize: 0.05
+            value: ConfigStore.barAutoScaleContents
+                ? root.effectiveBarContentScale
+                : ConfigStore.barContentScale
             valueLabel: Math.round(value * 100) + "%"
             onValueEdited: value => ConfigStore.setBarValue(
                 "barContentScale",
