@@ -151,6 +151,37 @@ def normalize_payload(payload: str) -> str:
         "ConfigStore adapter replacement properties",
     )
 
+    payload = normalize_literal_block(
+        payload,
+        "'''                themeMode: root.themeMode,\n",
+        [
+            (
+                "      dynamicTheme: root.dynamicTheme,\n",
+                "                dynamicTheme: root.dynamicTheme,\n",
+            ),
+        ],
+        "ConfigStore snapshot source",
+    )
+    payload = normalize_literal_block(
+        payload,
+        "'''                themeMode: root.themeMode,\n",
+        [
+            (
+                "      shellBackgroundMode: root.shellBackgroundMode,\n",
+                "                shellBackgroundMode: root.shellBackgroundMode,\n",
+            ),
+            (
+                "      shellSurfaceOpacity: root.shellSurfaceOpacity,\n",
+                "                shellSurfaceOpacity: root.shellSurfaceOpacity,\n",
+            ),
+            (
+                "      dynamicTheme: root.dynamicTheme,\n",
+                "                dynamicTheme: root.dynamicTheme,\n",
+            ),
+        ],
+        "ConfigStore snapshot replacement",
+    )
+
     return payload
 
 
