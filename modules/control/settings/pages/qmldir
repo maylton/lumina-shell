@@ -5,6 +5,7 @@ BarPage 1.0 BarPage.qml
 BehaviorPage 1.0 BehaviorPage.qml
 ConnectivityPage 1.0 ConnectivityPage.qml
 DashboardPage 1.0 DashboardPage.qml
+DockPage 1.0 DockPage.qml
 NotificationsPage 1.0 NotificationsPage.qml
 OsdPage 1.0 OsdPage.qml
 SessionPage 1.0 SessionPage.qml
