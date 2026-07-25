@@ -11,6 +11,7 @@ import qs.services.i18n
 import qs.stores.config
 import qs.stores.dock
 import qs.stores.launcher
+import "../../services/i18n/LauncherStrings.js" as LauncherStrings
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 
 Scope {
@@ -39,6 +40,7 @@ Scope {
                 outputName: LauncherStore.activeOutputName,
                 query: LauncherStore.query,
                 applicationCount: LauncherStore.applications.length,
+                favoriteCount: LauncherStore.favoriteResults.length,
                 resultCount: LauncherStore.results.length
             })
         }
@@ -59,11 +61,32 @@ Scope {
                         : ""
                 readonly property bool launcherVisible: LauncherStore.open
                     && LauncherStore.activeOutputName === outputName
+                readonly property bool browsingApplications:
+                    LauncherStore.query.trim().length === 0
+                readonly property int bottomBarOffset:
+                    ConfigStore.barPosition === "bottom"
+                        ? ConfigStore.barHeight
+                            + (ConfigStore.barSurfaceMode === "floating"
+                                ? ConfigStore.barMargin * 2
+                                : 0)
+                        : 0
+                readonly property int dockOffset:
+                    DockPreferences.enabled
+                        ? DockPreferences.iconSize
+                            + 24
+                            + (DockPreferences.mode === "floating"
+                                ? DockPreferences.margin
+                                : 0)
+                            + 12
+                        : 24
+                readonly property int surfaceBottomOffset:
+                    bottomBarOffset + dockOffset
 
                 property var contextResult: null
                 property string contextIdentifier: ""
                 property real contextMenuX: 0
                 property real contextMenuY: 0
+                property bool keyboardNavigationActive: false
 
                 function closePinMenu(restoreSearchFocus) {
                     pinMenu.close()
@@ -108,6 +131,7 @@ Scope {
 
                     contextResult = result
                     contextIdentifier = identifier
+                    keyboardNavigationActive = false
                     contextMenuX = Math.max(
                         edge,
                         Math.min(
@@ -121,6 +145,27 @@ Scope {
                             ? belowY
                             : Math.max(edge, aboveY)
                     pinMenu.open()
+                }
+
+                function positionSelectedResult() {
+                    if (browsingApplications) {
+                        appGrid.positionViewAtIndex(
+                            LauncherStore.selectedIndex,
+                            GridView.Contain
+                        )
+                    } else {
+                        resultList.positionViewAtIndex(
+                            LauncherStore.selectedIndex,
+                            ListView.Contain
+                        )
+                    }
+                }
+
+                function navigateBy(offset) {
+                    closePinMenu(false)
+                    keyboardNavigationActive = true
+                    LauncherStore.selectOffset(offset)
+                    positionSelectedResult()
                 }
 
                 screen: modelData
@@ -164,6 +209,7 @@ Scope {
 
                 onVisibleChanged: {
                     if (visible) {
+                        keyboardNavigationActive = false
                         Qt.callLater(function() {
                             queryInput.forceActiveFocus()
                         })
@@ -187,60 +233,83 @@ Scope {
 
                     anchors {
                         horizontalCenter: parent.horizontalCenter
-                        top: parent.top
-                        topMargin: Math.max(
-                            root.luminaDesign.spacing.extraLarge * 4,
-                            parent.height * 0.12
-                        )
+                        bottom: parent.bottom
+                        bottomMargin: launcherWindow.surfaceBottomOffset
                     }
 
                     width: Math.min(
-                        root.luminaDesign.size.launcherWidth,
-                        launcherWindow.width
-                            - root.luminaDesign.spacing.extraLarge * 2
+                        720,
+                        Math.max(360, launcherWindow.width - 32)
                     )
                     height: Math.min(
-                        root.luminaDesign.size.launcherHeight,
-                        launcherWindow.height
-                            - anchors.topMargin
-                            - root.luminaDesign.spacing.extraLarge * 2
+                        720,
+                        Math.max(
+                            360,
+                            launcherWindow.height
+                                - launcherWindow.surfaceBottomOffset
+                                - 48
+                        )
                     )
-                    radius: root.luminaDesign.shape.extraLarge
+                    radius: root.luminaDesign.shape.extraLargeIncreased
 
                     MouseArea {
                         anchors.fill: parent
                     }
 
                     Column {
+                        id: launcherColumn
+
                         anchors {
                             fill: parent
-                            margins: root.luminaDesign.spacing.extraLarge
+                            leftMargin: root.luminaDesign.spacing.extraLarge
+                            rightMargin: root.luminaDesign.spacing.extraLarge
+                            topMargin: root.luminaDesign.spacing.medium
+                            bottomMargin: root.luminaDesign.spacing.extraLarge
                         }
 
                         spacing: root.luminaDesign.spacing.medium
 
-                        Rectangle {
+                        Item {
                             width: parent.width
-                            height: 48
+                            height: 10
+
+                            Rectangle {
+                                anchors {
+                                    horizontalCenter: parent.horizontalCenter
+                                    top: parent.top
+                                }
+                                width: 36
+                                height: 4
+                                radius: 2
+                                color: root.luminaDesign.color.outline
+                                opacity: 0.9
+                            }
+                        }
+
+                        Rectangle {
+                            id: searchBox
+
+                            width: parent.width
+                            height: 52
                             radius: root.luminaDesign.shape.full
-                            color: root.luminaDesign.color.surfaceMuted
+                            color: root.luminaDesign.color.surfaceBase
                             border.width: queryInput.activeFocus ? 2 : 1
                             border.color: queryInput.activeFocus
                                 ? root.luminaDesign.color.primary
                                 : root.luminaDesign.color.outline
 
-                            Text {
+                            DashboardIcon {
                                 anchors {
                                     left: parent.left
-                                    leftMargin:
-                                        root.luminaDesign.spacing.large
+                                    leftMargin: root.luminaDesign.spacing.large
                                     verticalCenter: parent.verticalCenter
                                 }
-
-                                text: "⌕"
-                                color: root.luminaDesign.color.primary
-                                font.pixelSize:
-                                    root.luminaDesign.typography.titleLarge
+                                width: 22
+                                height: 22
+                                iconName: "system-search-symbolic"
+                                fallbackSymbol: "⌕"
+                                iconColor: root.luminaDesign.color.onSurface
+                                iconSize: 19
                             }
 
                             TextInput {
@@ -249,7 +318,7 @@ Scope {
                                 anchors {
                                     left: parent.left
                                     right: parent.right
-                                    leftMargin: 44
+                                    leftMargin: 50
                                     rightMargin:
                                         root.luminaDesign.spacing.large
                                     verticalCenter: parent.verticalCenter
@@ -267,6 +336,7 @@ Scope {
 
                                 onTextEdited: {
                                     launcherWindow.closePinMenu(false)
+                                    launcherWindow.keyboardNavigationActive = false
                                     LauncherStore.setQuery(text)
                                 }
 
@@ -280,23 +350,35 @@ Scope {
                                 }
 
                                 Keys.onDownPressed: event => {
-                                    launcherWindow.closePinMenu(false)
-                                    LauncherStore.selectNext()
-                                    resultList.positionViewAtIndex(
-                                        LauncherStore.selectedIndex,
-                                        ListView.Contain
+                                    launcherWindow.navigateBy(
+                                        launcherWindow.browsingApplications
+                                            ? appGrid.columnCount
+                                            : 1
                                     )
                                     event.accepted = true
                                 }
 
                                 Keys.onUpPressed: event => {
-                                    launcherWindow.closePinMenu(false)
-                                    LauncherStore.selectPrevious()
-                                    resultList.positionViewAtIndex(
-                                        LauncherStore.selectedIndex,
-                                        ListView.Contain
+                                    launcherWindow.navigateBy(
+                                        launcherWindow.browsingApplications
+                                            ? -appGrid.columnCount
+                                            : -1
                                     )
                                     event.accepted = true
+                                }
+
+                                Keys.onLeftPressed: event => {
+                                    if (launcherWindow.browsingApplications) {
+                                        launcherWindow.navigateBy(-1)
+                                        event.accepted = true
+                                    }
+                                }
+
+                                Keys.onRightPressed: event => {
+                                    if (launcherWindow.browsingApplications) {
+                                        launcherWindow.navigateBy(1)
+                                        event.accepted = true
+                                    }
                                 }
 
                                 Keys.onReturnPressed: event => {
@@ -323,89 +405,308 @@ Scope {
                             }
                         }
 
-                        ListView {
-                            id: resultList
+                        Item {
+                            id: contentArea
 
                             width: parent.width
                             height: parent.height
-                                - 48
-                                - parent.spacing
-                                - footer.height
-                            spacing: root.luminaDesign.spacing.extraSmall
-                            clip: true
-                            model: ScriptModel {
-                                values: LauncherStore.results
-                            }
+                                - 10
+                                - searchBox.height
+                                - launcherColumn.spacing * 2
 
-                            delegate: LauncherResult {
-                                required property var modelData
-                                required property int index
+                            Item {
+                                id: browseView
 
-                                width: resultList.width
-                                result: modelData
-                                selected:
-                                    index === LauncherStore.selectedIndex
-                                onActivated: {
-                                    launcherWindow.closePinMenu(false)
-                                    LauncherStore.execute(modelData)
-                                }
-                                onContextMenuRequested: sourceItem => {
-                                    LauncherStore.selectedIndex = index
-                                    launcherWindow.openPinMenu(
-                                        modelData,
-                                        sourceItem
+                                anchors.fill: parent
+                                visible:
+                                    launcherWindow.browsingApplications
+
+                                Flickable {
+                                    id: pinnedFlick
+
+                                    visible:
+                                        LauncherStore.favoriteResults.length > 0
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                    }
+                                    height: visible ? 102 : 0
+                                    contentWidth: Math.max(
+                                        width,
+                                        pinnedRow.implicitWidth
                                     )
+                                    contentHeight: height
+                                    clip: true
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    flickableDirection:
+                                        Flickable.HorizontalFlick
+                                    Accessible.name:
+                                        LauncherStrings.text(
+                                            I18n.locale,
+                                            "pinnedGridAccessibleName"
+                                        )
+
+                                    Row {
+                                        id: pinnedRow
+
+                                        x: Math.max(
+                                            0,
+                                            (pinnedFlick.width
+                                                - implicitWidth) / 2
+                                        )
+                                        anchors.verticalCenter:
+                                            parent.verticalCenter
+                                        spacing:
+                                            root.luminaDesign.spacing.small
+
+                                        Repeater {
+                                            model: ScriptModel {
+                                                values:
+                                                    LauncherStore.favoriteResults
+                                            }
+
+                                            delegate: LauncherAppTile {
+                                                required property var modelData
+
+                                                width: 92
+                                                height: 96
+                                                result: modelData
+                                                selected: false
+                                                iconSize: 48
+                                                onActivated: {
+                                                    launcherWindow.closePinMenu(false)
+                                                    LauncherStore.execute(modelData)
+                                                }
+                                                onContextMenuRequested: sourceItem =>
+                                                    launcherWindow.openPinMenu(
+                                                        modelData,
+                                                        sourceItem
+                                                    )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: allAppsLabel
+
+                                    anchors {
+                                        horizontalCenter:
+                                            parent.horizontalCenter
+                                        top: pinnedFlick.visible
+                                            ? pinnedFlick.bottom
+                                            : parent.top
+                                        topMargin:
+                                            root.luminaDesign.spacing.small
+                                    }
+                                    height: 28
+                                    text: LauncherStrings.text(
+                                        I18n.locale,
+                                        "allApps"
+                                    )
+                                    color: root.luminaDesign.color.onSurface
+                                    font.pixelSize:
+                                        root.luminaDesign.typography.titleSmall
+                                    font.weight: Font.DemiBold
+                                }
+
+                                GridView {
+                                    id: appGrid
+
+                                    readonly property int columnCount:
+                                        Math.max(
+                                            4,
+                                            Math.min(
+                                                7,
+                                                Math.floor(width / 92)
+                                            )
+                                        )
+
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: allAppsLabel.bottom
+                                        bottom: parent.bottom
+                                        topMargin:
+                                            root.luminaDesign.spacing.small
+                                    }
+                                    cellWidth: width / columnCount
+                                    cellHeight: 100
+                                    clip: true
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    currentIndex:
+                                        LauncherStore.selectedIndex
+                                    highlightFollowsCurrentItem: false
+                                    model: ScriptModel {
+                                        values: LauncherStore.results
+                                    }
+                                    Accessible.name:
+                                        LauncherStrings.text(
+                                            I18n.locale,
+                                            "appGridAccessibleName"
+                                        )
+
+                                    delegate: LauncherAppTile {
+                                        required property var modelData
+                                        required property int index
+
+                                        width: GridView.view.cellWidth
+                                        height: GridView.view.cellHeight
+                                        result: modelData
+                                        selected:
+                                            launcherWindow.keyboardNavigationActive
+                                                && index
+                                                    === LauncherStore.selectedIndex
+                                        iconSize: 48
+                                        onActivated: {
+                                            launcherWindow.closePinMenu(false)
+                                            LauncherStore.selectedIndex = index
+                                            LauncherStore.execute(modelData)
+                                        }
+                                        onContextMenuRequested: sourceItem => {
+                                            LauncherStore.selectedIndex = index
+                                            launcherWindow.openPinMenu(
+                                                modelData,
+                                                sourceItem
+                                            )
+                                        }
+                                    }
                                 }
                             }
 
-                            Text {
-                                anchors.centerIn: parent
-                                visible: LauncherStore.results.length === 0
-                                text: I18n.tr(
-                                    "launcher.empty",
-                                    "No matching apps, windows, or actions"
-                                )
-                                color: root.luminaDesign.color.textMuted
-                                font.pixelSize:
-                                    root.luminaDesign.typography.bodyMedium
-                            }
-                        }
+                            Item {
+                                id: searchView
 
-                        Row {
-                            id: footer
+                                anchors.fill: parent
+                                visible:
+                                    !launcherWindow.browsingApplications
 
-                            width: parent.width
-                            height: 22
-                            spacing: root.luminaDesign.spacing.medium
+                                Text {
+                                    id: searchResultsLabel
 
-                            Text {
-                                text: I18n.tr(
-                                    "launcher.hint.navigate",
-                                    "↑↓ Navigate"
-                                )
-                                color: root.luminaDesign.color.textMuted
-                                font.pixelSize:
-                                    root.luminaDesign.typography.labelSmall
-                            }
+                                    anchors {
+                                        left: parent.left
+                                        top: parent.top
+                                    }
+                                    height: 28
+                                    text: LauncherStrings.text(
+                                        I18n.locale,
+                                        "searchResults"
+                                    )
+                                    color: root.luminaDesign.color.onSurface
+                                    font.pixelSize:
+                                        root.luminaDesign.typography.titleSmall
+                                    font.weight: Font.DemiBold
+                                }
 
-                            Text {
-                                text: I18n.tr(
-                                    "launcher.hint.open",
-                                    "Enter Open"
-                                )
-                                color: root.luminaDesign.color.textMuted
-                                font.pixelSize:
-                                    root.luminaDesign.typography.labelSmall
-                            }
+                                Row {
+                                    id: footer
 
-                            Text {
-                                text: I18n.tr(
-                                    "launcher.hint.close",
-                                    "Esc Close"
-                                )
-                                color: root.luminaDesign.color.textMuted
-                                font.pixelSize:
-                                    root.luminaDesign.typography.labelSmall
+                                    anchors {
+                                        left: parent.left
+                                        bottom: parent.bottom
+                                    }
+                                    height: 22
+                                    spacing:
+                                        root.luminaDesign.spacing.medium
+
+                                    Text {
+                                        text: I18n.tr(
+                                            "launcher.hint.navigate",
+                                            "↑↓ Navigate"
+                                        )
+                                        color:
+                                            root.luminaDesign.color.textMuted
+                                        font.pixelSize:
+                                            root.luminaDesign.typography.labelSmall
+                                    }
+
+                                    Text {
+                                        text: I18n.tr(
+                                            "launcher.hint.open",
+                                            "Enter Open"
+                                        )
+                                        color:
+                                            root.luminaDesign.color.textMuted
+                                        font.pixelSize:
+                                            root.luminaDesign.typography.labelSmall
+                                    }
+
+                                    Text {
+                                        text: I18n.tr(
+                                            "launcher.hint.close",
+                                            "Esc Close"
+                                        )
+                                        color:
+                                            root.luminaDesign.color.textMuted
+                                        font.pixelSize:
+                                            root.luminaDesign.typography.labelSmall
+                                    }
+                                }
+
+                                ListView {
+                                    id: resultList
+
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: searchResultsLabel.bottom
+                                        bottom: footer.top
+                                        topMargin:
+                                            root.luminaDesign.spacing.small
+                                        bottomMargin:
+                                            root.luminaDesign.spacing.small
+                                    }
+                                    spacing:
+                                        root.luminaDesign.spacing.extraSmall
+                                    clip: true
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    currentIndex:
+                                        LauncherStore.selectedIndex
+                                    highlightFollowsCurrentItem: false
+                                    model: ScriptModel {
+                                        values: LauncherStore.results
+                                    }
+
+                                    delegate: LauncherResult {
+                                        required property var modelData
+                                        required property int index
+
+                                        width: resultList.width
+                                        result: modelData
+                                        selected:
+                                            launcherWindow.keyboardNavigationActive
+                                                && index
+                                                    === LauncherStore.selectedIndex
+                                        onActivated: {
+                                            launcherWindow.closePinMenu(false)
+                                            LauncherStore.selectedIndex = index
+                                            LauncherStore.execute(modelData)
+                                        }
+                                        onContextMenuRequested: sourceItem => {
+                                            LauncherStore.selectedIndex = index
+                                            launcherWindow.openPinMenu(
+                                                modelData,
+                                                sourceItem
+                                            )
+                                        }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible:
+                                            LauncherStore.results.length === 0
+                                        text: I18n.tr(
+                                            "launcher.empty",
+                                            "No matching apps, windows, or actions"
+                                        )
+                                        color:
+                                            root.luminaDesign.color.textMuted
+                                        font.pixelSize:
+                                            root.luminaDesign.typography.bodyMedium
+                                    }
+                                }
                             }
                         }
                     }
