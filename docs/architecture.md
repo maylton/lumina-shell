@@ -319,7 +319,8 @@ microphone, and brightness sliders. Their compact desktop treatment retains
 the Material 3 vertical handle, explicit track gap, smaller corners facing the
 handle, fully rounded outer endpoints, end stop indicator, and pointer-to-handle
 travel mapping while continuing to call the existing audio and brightness
-services.
+services. Each track segment is rendered as one vector contour so disabled
+opacity cannot darken overlapping cap layers.
 
 Settings combo rows keep their typed `options`, `currentValue`, and `selected`
 contract, but present choices in a shared overlay dropdown rather than cycling
