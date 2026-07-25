@@ -292,23 +292,33 @@ Singleton {
         if (results.length === 0)
             return
 
-        selectedIndex = (selectedIndex + 1) % results.length
+        selectedIndex = LauncherSearch.wrappedIndex(
+            selectedIndex,
+            1,
+            results.length
+        )
     }
 
     function selectPrevious() {
         if (results.length === 0)
             return
 
-        selectedIndex = (selectedIndex - 1 + results.length) % results.length
+        selectedIndex = LauncherSearch.wrappedIndex(
+            selectedIndex,
+            -1,
+            results.length
+        )
     }
 
     function selectOffset(offset) {
         if (results.length === 0)
             return
 
-        selectedIndex = (
-            selectedIndex + Number(offset || 0) + results.length
-        ) % results.length
+        selectedIndex = LauncherSearch.wrappedIndex(
+            selectedIndex,
+            offset,
+            results.length
+        )
     }
 
     function execute(result) {
