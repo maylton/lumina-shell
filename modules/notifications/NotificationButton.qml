@@ -2,6 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.modules.bar.widgets
+import qs.modules.control
 import qs.services.notifications
 
 Rectangle {
@@ -13,8 +15,9 @@ Rectangle {
     readonly property bool expanded: NotificationService.centerOutputName
         === outputName
 
-    implicitWidth: notificationLabel.implicitWidth + 20
-        + (NotificationService.unreadCount > 0 ? badge.width + 4 : 0)
+    property bool tooltipVisible: false
+
+    implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
     radius: expanded ? luminaDesign.shape.full : luminaDesign.shape.medium
     scale: notificationMouse.pressed
@@ -30,9 +33,16 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open notifications"
+    Accessible.name: expanded
+        ? qsTr("Close notifications")
+        : qsTr("Open notifications")
     Accessible.description: NotificationService.unreadCount
-        + " unread notifications"
+        + qsTr(" unread notifications")
+        + (
+            NotificationService.doNotDisturb
+                ? qsTr(". Do Not Disturb is enabled")
+                : ""
+        )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction:
@@ -54,41 +64,58 @@ Rectangle {
         }
     }
 
-    Row {
+    DashboardIcon {
+        id: notificationIcon
+
         anchors.centerIn: parent
-        spacing: 4
-
-        Text {
-            id: notificationLabel
-
-            text: NotificationService.doNotDisturb ? "DND" : "Alerts"
-            color: root.expanded
-                ? root.luminaDesign.color.onAccentContainer
+        customSource: Qt.resolvedUrl(
+            "../../assets/icons/notification-symbolic.svg"
+        )
+        fallbackSymbol: "●"
+        iconColor: root.expanded
+            ? root.luminaDesign.color.onAccentContainer
+            : NotificationService.doNotDisturb
+                ? root.luminaDesign.color.textMuted
                 : root.luminaDesign.color.onSurface
-            font.pixelSize: root.luminaDesign.typography.labelMedium
-            font.weight: Font.DemiBold
+        iconSize: root.luminaDesign.size.trayIcon
+    }
+
+    Rectangle {
+        anchors.centerIn: notificationIcon
+        visible: NotificationService.doNotDisturb
+        width: notificationIcon.width + 4
+        height: 2
+        radius: 1
+        rotation: -45
+        color: root.expanded
+            ? root.luminaDesign.color.onAccentContainer
+            : root.luminaDesign.color.textMuted
+    }
+
+    Rectangle {
+        id: badge
+
+        anchors {
+            right: parent.right
+            top: parent.top
         }
 
-        Rectangle {
-            id: badge
+        visible: NotificationService.unreadCount > 0
+        width: Math.max(17, badgeLabel.implicitWidth + 7)
+        height: 17
+        radius: root.luminaDesign.shape.full
+        color: root.luminaDesign.color.urgent
 
-            visible: NotificationService.unreadCount > 0
-            width: Math.max(18, badgeLabel.implicitWidth + 8)
-            height: 18
-            radius: root.luminaDesign.shape.full
-            color: root.luminaDesign.color.urgent
+        Text {
+            id: badgeLabel
 
-            Text {
-                id: badgeLabel
-
-                anchors.centerIn: parent
-                text: NotificationService.unreadCount > 99
-                    ? "99+"
-                    : String(NotificationService.unreadCount)
-                color: root.luminaDesign.color.surfaceBase
-                font.pixelSize: root.luminaDesign.typography.labelSmall
-                font.weight: Font.Bold
-            }
+            anchors.centerIn: parent
+            text: NotificationService.unreadCount > 99
+                ? "99+"
+                : String(NotificationService.unreadCount)
+            color: root.luminaDesign.color.surfaceBase
+            font.pixelSize: root.luminaDesign.typography.labelSmall
+            font.weight: Font.Bold
         }
     }
 
@@ -98,9 +125,38 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
+        onEntered: tooltipTimer.restart()
+        onExited: {
+            tooltipTimer.stop()
+            root.tooltipVisible = false
+        }
+        onPressed: {
+            tooltipTimer.stop()
+            root.tooltipVisible = false
+        }
         onClicked: {
             root.forceActiveFocus(Qt.MouseFocusReason)
             NotificationService.toggleCenter(root.outputName)
         }
+    }
+
+    Timer {
+        id: tooltipTimer
+
+        interval: 450
+        repeat: false
+        onTriggered: root.tooltipVisible =
+            notificationMouse.containsMouse
+    }
+
+    TrayTooltip {
+        anchorItem: root
+        title: NotificationService.doNotDisturb
+            ? qsTr("Notifications · DND")
+            : qsTr("Notifications")
+        description: NotificationService.unreadCount > 0
+            ? qsTr("%1 unread").arg(NotificationService.unreadCount)
+            : qsTr("No unread notifications")
+        shown: root.tooltipVisible && !root.expanded
     }
 }
