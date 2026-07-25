@@ -357,11 +357,15 @@ Singleton {
         if (!BarWidgetCatalog.find(id))
             return
 
-        const nextSettings = cloneMap(stateAdapter.barWidgetSettings)
-        const nextWidget = cloneMap(nextSettings[id])
-        nextWidget[String(key || "")] = value
-        nextSettings[id] = nextWidget
-        setValue("barWidgetSettings", nextSettings)
+        setValue(
+            "barWidgetSettings",
+            BarWidgetCatalog.withSetting(
+                stateAdapter.barWidgetSettings,
+                id,
+                key,
+                value
+            )
+        )
     }
 
     function resetBarWidgetSettings(widgetId) {
@@ -371,9 +375,13 @@ Singleton {
         if (!defaults[id])
             return
 
-        const nextSettings = cloneMap(stateAdapter.barWidgetSettings)
-        nextSettings[id] = cloneMap(defaults[id])
-        setValue("barWidgetSettings", nextSettings)
+        setValue(
+            "barWidgetSettings",
+            BarWidgetCatalog.withReset(
+                stateAdapter.barWidgetSettings,
+                id
+            )
+        )
     }
 
     function barVisibilityKeys(widgetId) {

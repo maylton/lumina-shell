@@ -38,5 +38,38 @@ TestCase {
             JSON.stringify(["context"])
         )
     }
-}
 
+    function test_individualResetPreservesOtherWidgets() {
+        const configured = BarWidgetCatalog.defaultSettings()
+        configured.context.timeout = 12000
+        configured.tray.mode = "inline"
+        const reset = BarWidgetCatalog.withReset(
+            configured,
+            "context"
+        )
+
+        compare(reset.context.timeout, 3500)
+        compare(reset.context.mode, "contextual")
+        compare(reset.tray.mode, "inline")
+        compare(configured.context.timeout, 12000)
+    }
+
+    function test_individualUpdateIsImmutable() {
+        const configured = BarWidgetCatalog.defaultSettings()
+        const updated = BarWidgetCatalog.withSetting(
+            configured,
+            "launcher",
+            "showLabel",
+            true
+        )
+
+        compare(configured.launcher.showLabel, false)
+        compare(updated.launcher.showLabel, true)
+        verify(updated !== configured)
+        verify(updated.launcher !== configured.launcher)
+        compare(
+            JSON.stringify(updated.tray),
+            JSON.stringify(configured.tray)
+        )
+    }
+}

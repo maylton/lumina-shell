@@ -31,9 +31,14 @@ function uniqueKnown(value, allowed) {
 
 function activeOrder(order, activeIds) {
     var active = list(activeIds)
-    return list(order).filter(function(id) {
-        return active.indexOf(id) >= 0
+    var result = []
+
+    list(order).forEach(function(id) {
+        if (active.indexOf(id) >= 0 && result.indexOf(id) < 0)
+            result.push(id)
     })
+
+    return result
 }
 
 function removedIds(allowed, activeIds) {
@@ -81,4 +86,3 @@ function addAtEnd(order, widgetId, allowed) {
 
     return result
 }
-

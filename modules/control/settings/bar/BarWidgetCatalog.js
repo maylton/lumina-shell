@@ -243,3 +243,28 @@ function defaultSettings() {
 
     return result
 }
+
+function withSetting(settings, widgetId, key, value) {
+    var id = String(widgetId || "")
+    var entry = find(id)
+    var result = clone(settings || {})
+
+    if (!entry)
+        return result
+
+    var widget = clone(result[id] || entry.defaults)
+    widget[String(key || "")] = value
+    result[id] = widget
+    return result
+}
+
+function withReset(settings, widgetId) {
+    var id = String(widgetId || "")
+    var entry = find(id)
+    var result = clone(settings || {})
+
+    if (entry)
+        result[id] = clone(entry.defaults)
+
+    return result
+}

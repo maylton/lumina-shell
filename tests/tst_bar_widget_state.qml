@@ -83,5 +83,51 @@ TestCase {
             JSON.stringify(["overview"])
         )
     }
-}
 
+    function test_moveActiveRespectsBoundaries() {
+        const order = ["launcher", "overview", "workspaces"]
+        const active = ["launcher", "workspaces"]
+
+        compare(
+            JSON.stringify(
+                BarWidgetState.moveActive(
+                    order, active, "launcher", -1
+                )
+            ),
+            JSON.stringify(order)
+        )
+        compare(
+            JSON.stringify(
+                BarWidgetState.moveActive(
+                    order, active, "workspaces", 1
+                )
+            ),
+            JSON.stringify(order)
+        )
+    }
+
+    function test_activeAndRemovedListsHaveNoDuplicates() {
+        const order = ["launcher", "launcher", "overview"]
+        const active = BarWidgetState.uniqueKnown(
+            ["launcher", "launcher"],
+            ["launcher", "overview"]
+        )
+
+        compare(JSON.stringify(active), JSON.stringify(["launcher"]))
+        compare(
+            JSON.stringify(
+                BarWidgetState.removedIds(
+                    ["launcher", "overview"],
+                    active
+                )
+            ),
+            JSON.stringify(["overview"])
+        )
+        compare(
+            JSON.stringify(
+                BarWidgetState.activeOrder(order, active)
+            ),
+            JSON.stringify(["launcher"])
+        )
+    }
+}
