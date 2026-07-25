@@ -11,7 +11,22 @@ Singleton {
     readonly property var players: Mpris.players.values
     readonly property var activePlayer: choosePlayer(players)
     readonly property bool available: activePlayer !== null
-    readonly property bool playing: available && activePlayer.isPlaying
+    readonly property int playbackState: available
+        ? activePlayer.playbackState
+        : MprisPlaybackState.Stopped
+    readonly property bool playing: playbackState === MprisPlaybackState.Playing
+    readonly property bool paused: playbackState === MprisPlaybackState.Paused
+    readonly property bool hasSession: playing || paused
+    readonly property string playbackStatus: playing
+        ? "playing"
+        : paused
+            ? "paused"
+            : "stopped"
+    readonly property string playbackLabel: playing
+        ? "Playing"
+        : paused
+            ? "Paused"
+            : "Nothing playing"
     readonly property string identity: available
         ? String(activePlayer.identity || "Media")
         : "No media player"
@@ -38,8 +53,15 @@ Singleton {
         const values = playerList || []
 
         for (var i = 0; i < values.length; ++i) {
-            if (values[i] && values[i].isPlaying)
+            if (values[i]
+                    && values[i].playbackState === MprisPlaybackState.Playing)
                 return values[i]
+        }
+
+        for (var j = 0; j < values.length; ++j) {
+            if (values[j]
+                    && values[j].playbackState === MprisPlaybackState.Paused)
+                return values[j]
         }
 
         return values.length > 0 ? values[0] : null
@@ -69,6 +91,9 @@ Singleton {
         return {
             available: available,
             playing: playing,
+            paused: paused,
+            hasSession: hasSession,
+            playbackStatus: playbackStatus,
             player: identity,
             title: title,
             artist: artist,

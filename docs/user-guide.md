@@ -31,7 +31,7 @@ The status/volume chip opens a centered desktop dashboard. The **Dashboard** tab
 - output and microphone levels;
 - display brightness when a backlight exists;
 - notification history and Do Not Disturb;
-- MPRIS media controls;
+- MPRIS media controls with automatic playing, paused, and idle detection;
 - Wi-Fi and Bluetooth state;
 - battery state and power profiles;
 - an inline calendar.

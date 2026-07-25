@@ -118,7 +118,7 @@ Daily hardware state is split into typed singleton services:
 - `AudioService` binds the current PipeWire sink and source through `PwObjectTracker`, then exposes volume and mute operations.
 - `BrightnessService` contains the optional `brightnessctl --class=backlight` process boundary. Systems without a backlight remain usable and report the capability as unavailable.
 - `PowerService` consumes native UPower battery state and the power-profiles daemon.
-- `MediaService` selects the currently playing MPRIS client, falling back to the first available player.
+- `MediaService` selects the currently playing MPRIS client, then a paused session, and distinguishes native playing, paused, and stopped states so stale player metadata is not presented as active playback.
 - `ConnectivityService` consumes the native NetworkManager and BlueZ models for network, Wi-Fi, adapter, and connected-device status.
 - `WeatherService` resolves an explicit location or the system timezone through Open-Meteo geocoding, then refreshes current conditions and a three-day forecast every 30 minutes.
 

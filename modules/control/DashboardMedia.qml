@@ -7,7 +7,9 @@ import qs.services.media
 DashboardCard {
     id: root
 
-    accessibleName: "Media"
+    accessibleName: MediaService.hasSession
+        ? MediaService.playbackLabel + ": " + MediaService.title
+        : MediaService.playbackLabel
 
     Column {
         anchors {
@@ -33,13 +35,15 @@ DashboardCard {
                     anchors.fill: parent
                     source: MediaService.artUrl
                     fillMode: Image.PreserveAspectCrop
-                    visible: MediaService.artUrl.length > 0
+                    visible: MediaService.hasSession
+                        && MediaService.artUrl.length > 0
                     asynchronous: true
                 }
 
                 Text {
                     anchors.centerIn: parent
-                    visible: !MediaService.artUrl
+                    visible: !MediaService.hasSession
+                        || MediaService.artUrl.length === 0
                     text: "♪"
                     color: root.luminaDesign.color.primary
                     font.pixelSize: 34
@@ -54,7 +58,7 @@ DashboardCard {
 
                 Text {
                     width: parent.width
-                    text: MediaService.available
+                    text: MediaService.hasSession
                         ? MediaService.title
                         : "Nothing playing"
                     color: root.luminaDesign.color.onSurface
@@ -65,9 +69,12 @@ DashboardCard {
 
                 Text {
                     width: parent.width
-                    text: MediaService.available
-                        ? MediaService.artist || MediaService.identity
-                        : "MPRIS players appear here"
+                    text: MediaService.hasSession
+                        ? MediaService.playbackLabel + " · "
+                            + (MediaService.artist || MediaService.identity)
+                        : MediaService.available
+                            ? MediaService.identity + " is idle"
+                            : "No MPRIS player detected"
                     color: root.luminaDesign.color.textMuted
                     elide: Text.ElideRight
                     font.pixelSize: root.luminaDesign.typography.labelMedium
@@ -75,7 +82,7 @@ DashboardCard {
 
                 Text {
                     width: parent.width
-                    visible: MediaService.available
+                    visible: MediaService.hasSession
                         && MediaService.album.length > 0
                     text: MediaService.album
                     color: root.luminaDesign.color.textMuted
@@ -94,7 +101,7 @@ DashboardCard {
 
             Rectangle {
                 width: parent.width * (
-                    MediaService.length > 0
+                    MediaService.hasSession && MediaService.length > 0
                         ? Math.max(
                             0,
                             Math.min(
@@ -118,7 +125,7 @@ DashboardCard {
                 iconName: "media-skip-backward-symbolic"
                 symbol: "‹"
                 label: "Previous track"
-                available: MediaService.available
+                available: MediaService.hasSession
                     && MediaService.activePlayer
                     && MediaService.activePlayer.canGoPrevious
                 onActivated: MediaService.previous()
@@ -131,7 +138,7 @@ DashboardCard {
                 symbol: MediaService.playing ? "Ⅱ" : "▶"
                 label: MediaService.playing ? "Pause" : "Play"
                 checked: MediaService.playing
-                available: MediaService.available
+                available: MediaService.hasSession
                     && MediaService.activePlayer
                     && MediaService.activePlayer.canTogglePlaying
                 onActivated: MediaService.toggle()
@@ -141,7 +148,7 @@ DashboardCard {
                 iconName: "media-skip-forward-symbolic"
                 symbol: "›"
                 label: "Next track"
-                available: MediaService.available
+                available: MediaService.hasSession
                     && MediaService.activePlayer
                     && MediaService.activePlayer.canGoNext
                 onActivated: MediaService.next()

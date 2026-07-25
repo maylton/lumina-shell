@@ -29,3 +29,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Centered control-center dashboard with overview, notification, media, status, control, and calendar cards.
 - Optional Open-Meteo conditions and daily temperature range in the dashboard.
 - Automatic dashboard identity from the session user and `/etc/os-release`.
+- Automatic MPRIS playing, paused, and idle-state presentation.
