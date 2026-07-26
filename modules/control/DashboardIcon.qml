@@ -40,7 +40,7 @@ Item {
         anchors.fill: parent
         source: root.iconSource
         color: root.iconColor
-        asynchronous: true
+        asynchronous: false
         visible: root.iconReady
         sourceSize.width: root.iconSize
         sourceSize.height: root.iconSize
