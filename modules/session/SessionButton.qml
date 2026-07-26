@@ -96,7 +96,7 @@ Rectangle {
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
-        OverlayStore.prepareFor(
+        BarPanelCoordinator.requestToggle(
             "session",
             root.outputName,
             root.surfacePlacement,
@@ -104,12 +104,42 @@ Rectangle {
             anchor.top,
             anchor.bottom
         )
+    }
 
-        if (expanded) {
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "session" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "session",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            SessionMenuStore.openFor(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "session" || outputName !== root.outputName)
+                return
+
             SessionService.cancel()
-            SessionMenuStore.close()
-        } else {
-            SessionMenuStore.openFor(outputName)
+            if (root.expanded)
+                SessionMenuStore.close()
+            else
+                BarPanelCoordinator.reportClosed("session", root.outputName)
         }
     }
 
