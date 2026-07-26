@@ -10,6 +10,7 @@ Singleton {
     id: root
 
     readonly property bool busy: actionProcess.running
+        || pairAgentProcess.running
         || scanProcess.running
         || infoProcess.running
         || verifyTimer.running
@@ -30,6 +31,14 @@ Singleton {
     property bool expectedConnected: false
     property int verifyAttempts: 0
     property int stableChecks: 0
+    property bool pairingAgentCompleted: false
+    property string cancellationReason: ""
+
+    property bool authenticationPending: false
+    property string authenticationType: ""
+    property string authenticationCode: ""
+    property string authenticationService: ""
+    property int authenticationEntered: 0
 
     property bool refreshQueued: false
     property bool allReady: false
@@ -118,13 +127,173 @@ Singleton {
         ])
     }
 
+    function clearAuthentication() {
+        authenticationTimeout.stop()
+        authenticationPending = false
+        authenticationType = ""
+        authenticationCode = ""
+        authenticationService = ""
+        authenticationEntered = 0
+    }
+
+    function requestAuthentication(kind, code, service, entered) {
+        authenticationType = String(kind || "")
+        authenticationCode = String(code || "")
+        authenticationService = String(service || "")
+        authenticationEntered = Number(entered || 0)
+        authenticationPending = true
+        authenticationTimeout.restart()
+    }
+
+    function sendAgentCommand(payload) {
+        if (!pairAgentProcess.running)
+            return false
+
+        pairAgentProcess.write(JSON.stringify(payload || {}) + "\n")
+        return true
+    }
+
+    function acceptAuthentication() {
+        if (!authenticationPending
+            || ["confirmation", "authorize"]
+                .indexOf(authenticationType) < 0) {
+            return
+        }
+
+        if (sendAgentCommand({ action: "accept" }))
+            clearAuthentication()
+    }
+
+    function rejectAuthentication() {
+        if (!authenticationPending
+            || ["confirmation", "authorize"]
+                .indexOf(authenticationType) < 0) {
+            return
+        }
+
+        if (sendAgentCommand({ action: "reject" }))
+            clearAuthentication()
+    }
+
+    function submitAuthentication(value) {
+        if (!authenticationPending
+            || ["pin", "passkey"].indexOf(authenticationType) < 0) {
+            return
+        }
+
+        const requested = String(value || "").trim()
+        const valid = authenticationType === "pin"
+            ? requested.length >= 1 && requested.length <= 16
+            : /^[0-9]{1,6}$/.test(requested)
+                && Number(requested) <= 999999
+
+        if (!valid) {
+            statusCode = authenticationType === "pin"
+                ? "invalid-pin"
+                : "invalid-passkey"
+            return
+        }
+
+        if (sendAgentCommand({ action: "value", value: requested }))
+            clearAuthentication()
+    }
+
+    function cancelAuthentication(reason) {
+        if (!pairAgentProcess.running)
+            return
+
+        cancellationReason = String(reason || "user")
+        sendAgentCommand({
+            action: "cancel",
+            reason: cancellationReason
+        })
+        clearAuthentication()
+    }
+
+    function handlePairingAgentEvent(data) {
+        let event = null
+        try {
+            event = JSON.parse(String(data || ""))
+        } catch (error) {
+            diagnostic = "Invalid pairing-agent response: " + error
+            return
+        }
+
+        const type = String(event.type || "")
+        if (type === "prompt") {
+            requestAuthentication(
+                event.kind,
+                event.code,
+                event.service,
+                event.entered
+            )
+            return
+        }
+
+        if (type === "display") {
+            requestAuthentication(
+                event.kind,
+                event.code,
+                event.service,
+                event.entered
+            )
+            return
+        }
+
+        if (type === "invalid-response") {
+            statusCode = String(event.kind || "") === "pin"
+                ? "invalid-pin"
+                : "invalid-passkey"
+            return
+        }
+
+        if (type === "completed") {
+            pairingAgentCompleted = true
+            clearAuthentication()
+            runStep("trust", [
+                "bluetoothctl", "--timeout", "15",
+                "trust", targetAddress
+            ])
+            return
+        }
+
+        if (type === "cancelled") {
+            pairingAgentCompleted = true
+            if (cancellationReason === "timeout") {
+                fail(
+                    "pair-failed",
+                    "Pairing confirmation timed out"
+                )
+            } else {
+                statusCode = ""
+                diagnostic = ""
+                clearFlow()
+                refresh()
+            }
+            return
+        }
+
+        if (type === "failed") {
+            pairingAgentCompleted = true
+            const helperCode = String(event.code || "")
+            const code = helperCode === "invalid-address"
+                ? "invalid-address"
+                : "pair-failed"
+            fail(code, String(event.message || helperCode))
+        }
+    }
+
     function clearFlow() {
+        verifyTimer.stop()
+        clearAuthentication()
         flow = ""
         step = ""
         expectedConnected = false
         verifyAttempts = 0
         stableChecks = 0
         busyAction = ""
+        pairingAgentCompleted = false
+        cancellationReason = ""
     }
 
     function finish(code) {
@@ -144,15 +313,6 @@ Singleton {
     }
 
     function failureCode(text) {
-        const normalized = String(text || "").toLowerCase()
-        if (flow === "pair"
-            && (normalized.indexOf("authentication") >= 0
-                || normalized.indexOf("agent") >= 0
-                || normalized.indexOf("passkey") >= 0
-                || normalized.indexOf("pin") >= 0)) {
-            return "authentication-required"
-        }
-
         if (flow === "remove")
             return "forget-failed"
 
@@ -198,6 +358,8 @@ Singleton {
         diagnostic = ""
         verifyAttempts = 0
         stableChecks = 0
+        pairingAgentCompleted = false
+        cancellationReason = ""
         busyAction = flow
         statusCode = flow === "pair"
             ? "pairing"
@@ -208,9 +370,13 @@ Singleton {
                     : "forgetting"
 
         if (flow === "pair") {
-            runStep("pair", [
-                "bluetoothctl", "--timeout", "30",
-                "--agent=NoInputNoOutput", "pair", requested
+            step = "agent"
+            pairAgentProcess.exec([
+                "python3",
+                String(Quickshell.shellPath(
+                    "services/connectivity/BluetoothPairingAgent.py"
+                )),
+                requested
             ])
         } else if (flow === "connect") {
             runStep("connect", [
@@ -328,6 +494,28 @@ Singleton {
     }
 
     Process {
+        id: pairAgentProcess
+        stdinEnabled: true
+        stdout: SplitParser {
+            onRead: data => root.handlePairingAgentEvent(data)
+        }
+        stderr: StdioCollector { id: pairAgentError }
+        onExited: (exitCode, exitStatus) => {
+            if (root.flow !== "pair"
+                || root.step !== "agent"
+                || root.pairingAgentCompleted) {
+                return
+            }
+
+            root.fail(
+                "pair-failed",
+                Parsing.bluetoothCommandSummary(pairAgentError.text)
+                    || "Pairing agent exited unexpectedly"
+            )
+        }
+    }
+
+    Process {
         id: actionProcess
         stdout: StdioCollector { id: actionOutput }
         stderr: StdioCollector { id: actionError }
@@ -341,12 +529,7 @@ Singleton {
                 return
             }
 
-            if (root.step === "pair") {
-                root.runStep("trust", [
-                    "bluetoothctl", "--timeout", "15",
-                    "trust", root.targetAddress
-                ])
-            } else if (root.step === "trust") {
+            if (root.step === "trust") {
                 root.runStep("connect", [
                     "bluetoothctl", "--timeout", "20",
                     "connect", root.targetAddress
@@ -416,6 +599,13 @@ Singleton {
     }
 
     Timer {
+        id: authenticationTimeout
+        interval: 60000
+        repeat: false
+        onTriggered: root.cancelAuthentication("timeout")
+    }
+
+    Timer {
         id: delayedRefresh
         interval: 650
         repeat: false
@@ -445,6 +635,13 @@ Singleton {
                 targetAddress: root.targetAddress,
                 targetName: root.targetName,
                 diagnostic: root.diagnostic,
+                authentication: {
+                    pending: root.authenticationPending,
+                    type: root.authenticationType,
+                    code: root.authenticationCode,
+                    service: root.authenticationService,
+                    entered: root.authenticationEntered
+                },
                 devices: root.devices
             })
         }
