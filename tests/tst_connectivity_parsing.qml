@@ -32,6 +32,36 @@ TestCase {
         compare(profiles[1].autoconnect, false)
     }
 
+    function test_parsesVerifiedBluetoothInfo() {
+        const info = Parsing.parseBluetoothInfo(
+            "\x1b[0;94mDevice AA:BB:CC:DD:EE:FF Headphones\x1b[0m\n"
+            + "    Name: Headphones\n"
+            + "    Paired: yes\n"
+            + "    Bonded: yes\n"
+            + "    Trusted: yes\n"
+            + "    Connected: yes\n"
+            + "    Blocked: no\n"
+        )
+
+        compare(info.valid, true)
+        compare(info.address, "AA:BB:CC:DD:EE:FF")
+        compare(info.name, "Headphones")
+        compare(info.paired, true)
+        compare(info.bonded, true)
+        compare(info.trusted, true)
+        compare(info.connected, true)
+        compare(info.blocked, false)
+    }
+
+    function test_summarizesBluetoothOutputWithoutEventConsole() {
+        const summary = Parsing.bluetoothCommandSummary(
+            "[CHG] Device AA:BB:CC:DD:EE:FF Connected: yes\n"
+            + "Connection successful\n"
+        )
+
+        compare(summary, "Connection successful")
+    }
+
     function test_mergesBluetoothState() {
         const devices = Parsing.mergeBluetoothDevices(
             "Device AA:BB:CC:DD:EE:FF Headphones\n"
