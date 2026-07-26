@@ -195,6 +195,30 @@ headerbar separator {
   max-width: 152px;
 }
 
+/*
+ * Keep the boundary below Nautilus' split headerbar continuous. The divider is
+ * owned by the top bar; content surfaces must not add a second rounded edge.
+ */
+.nautilus-window headerbar {
+  border-bottom: 1px solid alpha(@lumina_outline_variant, 0.42);
+  box-shadow: none;
+}
+
+.nautilus-window placessidebar,
+.nautilus-window .navigation-sidebar,
+.nautilus-window .sidebar,
+.nautilus-window .content-view,
+.nautilus-window scrolledwindow,
+.nautilus-window viewport,
+.nautilus-window gridview,
+.nautilus-window columnview,
+.nautilus-window listview {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  box-shadow: none;
+}
+
 statuspage,
 statuspage > scrolledwindow > viewport {
   color: @lumina_on_surface;
