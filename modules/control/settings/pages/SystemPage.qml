@@ -26,12 +26,18 @@ SettingsPage {
     )
 
     SettingsSection {
-        title: "Runtime"
+        title: I18n.tr(
+            "settings.system.runtime.section",
+            "Runtime"
+        )
 
         SettingsRow {
             width: parent.width
             title: "Lumina Shell"
-            description: "Public beta foundation"
+            description: I18n.tr(
+                "settings.system.runtime.beta",
+                "Public beta foundation"
+            )
             controlWidth: 180
 
             Text {
@@ -48,9 +54,15 @@ SettingsPage {
         SettingsRow {
             width: parent.width
             title: "Niri"
-            description: NiriService.socketPath || "NIRI_SOCKET unavailable"
+            description: NiriService.socketPath || I18n.tr(
+                "settings.system.runtime.niriUnavailable",
+                "NIRI_SOCKET unavailable"
+            )
             available: NiriService.available
-            availabilityText: "NIRI_SOCKET unavailable"
+            availabilityText: I18n.tr(
+                "settings.system.runtime.niriUnavailable",
+                "NIRI_SOCKET unavailable"
+            )
             controlWidth: 220
 
             Text {
@@ -66,7 +78,10 @@ SettingsPage {
         SettingsRow {
             width: parent.width
             title: "Quickshell"
-            description: "Validated runtime"
+            description: I18n.tr(
+                "settings.system.runtime.validated",
+                "Validated runtime"
+            )
             controlWidth: 260
 
             Text {
@@ -81,20 +96,37 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Services"
-        description: "Live availability from Lumina's typed services"
+        title: I18n.tr(
+            "settings.system.services.section",
+            "Services"
+        )
+        description: I18n.tr(
+            "settings.system.services.description",
+            "Live availability from Lumina's typed services"
+        )
 
         SettingsRow {
             width: parent.width
             title: "PipeWire"
             description: AudioService.outputName
             available: AudioService.ready
-            availabilityText: "PipeWire is not ready"
+            availabilityText: I18n.tr(
+                "settings.system.services.pipewireNotReady",
+                "PipeWire is not ready"
+            )
             controlWidth: 100
 
             Text {
                 anchors.centerIn: parent
-                text: AudioService.ready ? "Ready" : "Unavailable"
+                text: AudioService.ready
+                    ? I18n.tr(
+                        "settings.system.status.ready",
+                        "Ready"
+                    )
+                    : I18n.tr(
+                        "settings.system.status.unavailable",
+                        "Unavailable"
+                    )
                 color: AudioService.ready
                     ? root.luminaDesign.color.primary
                     : root.luminaDesign.color.urgent
@@ -112,8 +144,14 @@ SettingsPage {
             Text {
                 anchors.centerIn: parent
                 text: ConnectivityService.generallyConnected
-                    ? "Connected"
-                    : "Offline"
+                    ? I18n.tr(
+                        "settings.system.status.connected",
+                        "Connected"
+                    )
+                    : I18n.tr(
+                        "settings.system.status.offline",
+                        "Offline"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize:
                     root.luminaDesign.typography.labelMedium
@@ -125,14 +163,23 @@ SettingsPage {
             title: "BlueZ"
             description: ConnectivityService.bluetoothSummary
             available: ConnectivityService.bluetoothAvailable
-            availabilityText: "No Bluetooth adapter"
+            availabilityText: I18n.tr(
+                "settings.system.services.noBluetooth",
+                "No Bluetooth adapter"
+            )
             controlWidth: 100
 
             Text {
                 anchors.centerIn: parent
                 text: ConnectivityService.bluetoothAvailable
-                    ? "Available"
-                    : "Unavailable"
+                    ? I18n.tr(
+                        "settings.system.status.available",
+                        "Available"
+                    )
+                    : I18n.tr(
+                        "settings.system.status.unavailable",
+                        "Unavailable"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize:
                     root.luminaDesign.typography.labelMedium
@@ -149,7 +196,10 @@ SettingsPage {
                 anchors.centerIn: parent
                 text: PowerService.batteryAvailable
                     ? PowerService.batteryPercentage + "%"
-                    : "AC system"
+                    : I18n.tr(
+                        "settings.system.services.acSystem",
+                        "AC system"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize:
                     root.luminaDesign.typography.labelMedium
@@ -163,14 +213,20 @@ SettingsPage {
                 ? BrightnessService.deviceName
                 : BrightnessService.lastError
             available: BrightnessService.available
-            availabilityText: "No backlight device"
+            availabilityText: I18n.tr(
+                "settings.system.services.noBacklight",
+                "No backlight device"
+            )
             controlWidth: 100
 
             Text {
                 anchors.centerIn: parent
                 text: BrightnessService.available
                     ? BrightnessService.percentage + "%"
-                    : "Unavailable"
+                    : I18n.tr(
+                        "settings.system.status.unavailable",
+                        "Unavailable"
+                    )
                 color: root.luminaDesign.color.textMuted
                 font.pixelSize:
                     root.luminaDesign.typography.labelMedium
@@ -179,42 +235,72 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Configuration"
+        title: I18n.tr(
+            "settings.system.configuration.section",
+            "Configuration"
+        )
         description: ConfigStore.statePath
 
         SettingsActionRow {
             width: parent.width
-            title: "Edit config"
+            title: I18n.tr(
+                "settings.system.configuration.edit",
+                "Edit config"
+            )
             description: ConfigStore.statePath
-            actionLabel: "Edit"
+            actionLabel: I18n.tr(
+                "settings.system.action.edit",
+                "Edit"
+            )
             onActivated: ConfigFileService.openConfigFile()
         }
 
         SettingsActionRow {
             width: parent.width
-            title: "Open config directory"
+            title: I18n.tr(
+                "settings.system.configuration.openDirectory",
+                "Open config directory"
+            )
             description: ConfigFileService.configDirectory
-            actionLabel: "Open"
+            actionLabel: I18n.tr(
+                "settings.common.action.open",
+                "Open"
+            )
             onActivated: ConfigFileService.openConfigDirectory()
         }
 
         SettingsActionRow {
             width: parent.width
-            title: "Run environment diagnostics"
+            title: I18n.tr(
+                "settings.system.configuration.diagnostics",
+                "Run environment diagnostics"
+            )
             description: SystemDiagnosticsService.diagnosticsStatus
             actionLabel: SystemDiagnosticsService.running
-                ? "Running…"
-                : "Run"
+                ? I18n.tr(
+                    "settings.system.action.running",
+                    "Running…"
+                )
+                : I18n.tr(
+                    "settings.system.action.run",
+                    "Run"
+                )
             available: !SystemDiagnosticsService.running
             onActivated: SystemDiagnosticsService.runDiagnostics()
         }
 
         SettingsActionRow {
             width: parent.width
-            title: "Open local documentation"
+            title: I18n.tr(
+                "settings.system.configuration.documentation",
+                "Open local documentation"
+            )
             description: SystemDiagnosticsService.projectRoot
                 + "/docs/user-guide.md"
-            actionLabel: "Open"
+            actionLabel: I18n.tr(
+                "settings.common.action.open",
+                "Open"
+            )
             onActivated: ConfigFileService.openPath(
                 SystemDiagnosticsService.projectRoot
                     + "/docs/user-guide.md"
@@ -223,11 +309,23 @@ SettingsPage {
 
         SettingsActionRow {
             width: parent.width
-            title: "Restore all settings"
-            description: "Two-step confirmation protects current preferences"
+            title: I18n.tr(
+                "settings.system.configuration.restore",
+                "Restore all settings"
+            )
+            description: I18n.tr(
+                "settings.system.configuration.restoreDescription",
+                "Two-step confirmation protects current preferences"
+            )
             actionLabel: SettingsStore.resetConfirmation
-                ? "Confirm restore"
-                : "Restore"
+                ? I18n.tr(
+                    "settings.system.action.confirmRestore",
+                    "Confirm restore"
+                )
+                : I18n.tr(
+                    "settings.system.action.restore",
+                    "Restore"
+                )
             destructive: true
             onActivated: {
                 if (SettingsStore.resetConfirmation)
