@@ -5,7 +5,7 @@ import QtQuick
 QtObject {
     id: root
 
-    property int capacity: 96
+    property int capacity: 512
     property int slowThresholdMs: 120
     property int sequence: 0
     property int slowEventCount: 0

@@ -279,8 +279,15 @@ Rectangle {
                     anchorTop,
                     anchorBottom
                 )
-                networkPanel.prepareContent()
                 OverlayStore.openFor("network", root.outputName)
+                Qt.callLater(function() {
+                    if (OverlayStore.isOpenFor(
+                        "network",
+                        root.outputName
+                    )) {
+                        networkPanel.prepareContent()
+                    }
+                })
             } else if (panelId === "audio") {
                 OverlayStore.prepareFor(
                     "audio",

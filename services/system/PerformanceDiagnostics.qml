@@ -38,6 +38,47 @@ Scope {
     IpcHandler {
         target: "performance"
 
+        function togglePanel(
+            panelId: string,
+            outputName: string
+        ): void {
+            BarPanelCoordinator.requestToggle(
+                panelId,
+                outputName,
+                "centered",
+                -1,
+                -1,
+                -1
+            )
+        }
+
+        function closePanel(
+            panelId: string,
+            outputName: string
+        ): void {
+            if (BarPanelCoordinator.activePanelId === panelId
+                && BarPanelCoordinator.activeOutputName === outputName) {
+                BarPanelCoordinator.requestToggle(
+                    panelId,
+                    outputName,
+                    "centered",
+                    -1,
+                    -1,
+                    -1
+                )
+            }
+        }
+
+        function coordinatorStatus(): string {
+            return JSON.stringify({
+                activePanel: BarPanelCoordinator.activePanelId,
+                activeOutput: BarPanelCoordinator.activeOutputName,
+                pendingPanel: BarPanelCoordinator.pendingPanelId,
+                pendingOutput: BarPanelCoordinator.pendingOutputName,
+                phase: BarPanelCoordinator.transitionPhase
+            })
+        }
+
         function reset(): void {
             PerformanceTrace.reset()
             root.expectedTickAt = 0

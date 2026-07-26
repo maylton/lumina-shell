@@ -246,11 +246,21 @@ Singleton {
 
     function markAllRead() {
         const next = []
+        let changed = false
 
-        for (var i = 0; i < history.length; ++i)
-            next.push(updatedEntry(history[i], { read: true }))
+        for (var i = 0; i < history.length; ++i) {
+            const entry = history[i]
 
-        history = next
+            if (!entry.read) {
+                next.push(updatedEntry(entry, { read: true }))
+                changed = true
+            } else {
+                next.push(entry)
+            }
+        }
+
+        if (changed)
+            history = next
     }
 
     function openCenter(outputName) {

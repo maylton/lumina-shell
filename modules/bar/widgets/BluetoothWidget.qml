@@ -278,8 +278,15 @@ Item {
                 anchorTop,
                 anchorBottom
             )
-            bluetoothPanel.prepareContent()
             OverlayStore.openFor("bluetooth", root.outputName)
+            Qt.callLater(function() {
+                if (OverlayStore.isOpenFor(
+                    "bluetooth",
+                    root.outputName
+                )) {
+                    bluetoothPanel.prepareContent()
+                }
+            })
         }
 
         function onCloseRequested(panelId, outputName) {

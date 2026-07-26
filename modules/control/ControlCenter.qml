@@ -86,6 +86,9 @@ Scope {
                         dashboardArea.height
                             / root.luminaDesign.size.controlDashboardMinimumHeight
                     )
+                property double visibilityRequestedAt: 0
+                property double hidingRequestedAt: 0
+                property double settleRequestedAt: 0
 
                 screen: modelData
                 visible: centerVisible
@@ -108,12 +111,62 @@ Scope {
 	          : WlrKeyboardFocus.None
 
                 onBackingWindowVisibleChanged: {
+                    if (backingWindowVisible
+                        && visibilityRequestedAt > 0) {
+                        settleRequestedAt = visibilityRequestedAt
+                        PerformanceTrace.record(
+                            "panel",
+                            "dashboard",
+                            "visible",
+                            Date.now() - visibilityRequestedAt,
+                            { output: outputName }
+                        )
+                        visibilityRequestedAt = 0
+                        Qt.callLater(function() {
+                            if (!controlWindow.centerVisible
+                                || controlWindow.settleRequestedAt <= 0) {
+                                return
+                            }
+
+                            PerformanceTrace.record(
+                                "panel",
+                                "dashboard",
+                                "settled",
+                                Date.now()
+                                    - controlWindow.settleRequestedAt,
+                                { output: controlWindow.outputName }
+                            )
+                            controlWindow.settleRequestedAt = 0
+                        })
+                    } else if (!backingWindowVisible
+                        && hidingRequestedAt > 0) {
+                        PerformanceTrace.record(
+                            "panel",
+                            "dashboard",
+                            "hidden",
+                            Date.now() - hidingRequestedAt,
+                            { output: outputName }
+                        )
+                        hidingRequestedAt = 0
+                        settleRequestedAt = 0
+                    }
+
                     BarPanelCoordinator
                         .reportPanelWindowVisibility(
                             "dashboard",
                             outputName,
                             backingWindowVisible
                         )
+
+                    if (backingWindowVisible) {
+                        Qt.callLater(function() {
+                            if (!controlWindow.centerVisible)
+                                return
+
+                            NotificationService.markAllRead()
+                            CalendarStore.goToToday()
+                        })
+                    }
                 }
 
 	      BackgroundEffect.blurRegion:
@@ -137,8 +190,15 @@ Scope {
 
                 onCenterVisibleChanged: {
                     if (centerVisible) {
-                        NotificationService.markAllRead()
-                        CalendarStore.goToToday()
+                        visibilityRequestedAt = Date.now()
+                        PerformanceTrace.recordInstant(
+                            "panel",
+                            "dashboard",
+                            "requested",
+                            { output: outputName }
+                        )
+                    } else {
+                        hidingRequestedAt = Date.now()
                     }
                 }
 
@@ -283,6 +343,9 @@ Scope {
                                         controlWindow.outputName
 
                                     Behavior on x {
+                                        enabled:
+                                            controlWindow.backingWindowVisible
+
                                         NumberAnimation {
                                             duration:
                                                 root.luminaDesign.motion.pageTransition
@@ -294,6 +357,9 @@ Scope {
                                     }
 
                                     Behavior on opacity {
+                                        enabled:
+                                            controlWindow.backingWindowVisible
+
                                         NumberAnimation {
                                             duration:
                                                 root.luminaDesign.motion.effectsDefault
@@ -324,6 +390,9 @@ Scope {
                                         controlWindow.outputName
 
                                     Behavior on x {
+                                        enabled:
+                                            controlWindow.backingWindowVisible
+
                                         NumberAnimation {
                                             duration:
                                                 root.luminaDesign.motion.pageTransition
@@ -335,6 +404,9 @@ Scope {
                                     }
 
                                     Behavior on opacity {
+                                        enabled:
+                                            controlWindow.backingWindowVisible
+
                                         NumberAnimation {
                                             duration:
                                                 root.luminaDesign.motion.effectsDefault

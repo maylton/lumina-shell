@@ -1,7 +1,7 @@
 # Performance diagnostics
 
 Lumina records a small in-memory trace for panel, dropdown, event-loop, and
-external-process latency. The trace keeps the most recent 96 events and does
+external-process latency. The trace keeps the most recent 512 events and does
 not write them to disk.
 
 ## Capture an intermittent delay
@@ -18,6 +18,19 @@ the trace:
 ```bash
 qs -p . ipc call performance status | jq
 ```
+
+Panel handoffs can also be reproduced without pointer automation. Replace
+`DP-1` with the output being tested:
+
+```bash
+qs -p . ipc call performance togglePanel bluetooth DP-1
+qs -p . ipc call performance closePanel bluetooth DP-1
+qs -p . ipc call performance coordinatorStatus | jq
+```
+
+The supported panel identifiers include `bluetooth`, `network`, `dashboard`,
+and `launcher`. These calls use the same coordinator path as their bar
+widgets.
 
 The snapshot contains:
 
@@ -48,6 +61,15 @@ in 0–2 ms and settled in 0–4 ms. The network and Bluetooth refresh paths wer
 found to launch three commands concurrently. They now serialize each snapshot,
 limiting concurrency within each snapshot to one, and the background
 Bluetooth polling interval was increased from 15 to 60 seconds.
+
+A second stress pass covered 20 isolated open/close cycles for Bluetooth,
+network, dashboard, and launcher, 40 rapid cross-panel handoffs, and 80
+double-toggle races. It found and fixed two stale-intent cases in the panel
+coordinator, deferred network and Bluetooth refreshes until after the opening
+frame, and prevented the dashboard's internal page transition from running
+while its window is still opening. The optimized isolated run had p95 settle
+times of 1 ms for Bluetooth, 2 ms for network, 31 ms for dashboard, and 2 ms
+for launcher, with no event-loop delays or transition timeouts.
 
 ## Focused summary
 

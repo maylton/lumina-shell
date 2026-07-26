@@ -92,18 +92,14 @@ QtObject {
         )
 
         if (transitionPhase === "closing") {
-            if (activePanelId === panel && activeOutputName === output) {
-                clearPending()
-            } else {
-                setPending(
-                    panel,
-                    output,
-                    placement,
-                    anchorX,
-                    anchorTop,
-                    anchorBottom
-                )
-            }
+            setPending(
+                panel,
+                output,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
             return
         }
 
@@ -196,6 +192,12 @@ QtObject {
         transitionTimer.stop()
 
         if (pendingPanelId) {
+            const closesJustOpenedPanel = pendingPanelId === panel
+                && pendingOutputName === output
+
+            if (closesJustOpenedPanel)
+                clearPending()
+
             transitionPhase = "idle"
             beginClose()
         } else {
