@@ -3,7 +3,7 @@
 
 /* GTK 4 and libadwaita-friendly additions */
 window.csd {
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 12px 34px @lumina_shadow;
 }
 
@@ -20,6 +20,7 @@ listview row {
 .navigation-sidebar,
 .sidebar,
 placessidebar {
+  padding: 8px 0;
   background-color: @lumina_surface_container_low;
 }
 
@@ -27,10 +28,10 @@ placessidebar {
 .sidebar row,
 placessidebar row,
 listview row {
-  min-height: 38px;
-  margin: 2px 6px;
-  padding: 2px 8px;
-  border-radius: 10px;
+  min-height: 40px;
+  margin: 2px 8px;
+  padding: 0 12px;
+  border-radius: 12px;
 }
 
 .navigation-sidebar row:hover,
@@ -48,6 +49,12 @@ listview row:selected {
   background-color: @lumina_primary_container;
 }
 
+.navigation-sidebar separator,
+.sidebar separator,
+placessidebar separator {
+  margin: 8px 16px;
+}
+
 toolbarview,
 .navigation-view,
 .navigation-page,
@@ -60,9 +67,14 @@ listview {
   background-color: @lumina_surface;
 }
 
+gridview {
+  padding: 16px;
+}
+
 gridview child,
 flowboxchild {
-  border-radius: 12px;
+  padding: 8px;
+  border-radius: 16px;
 }
 
 gridview child:hover,
@@ -78,8 +90,41 @@ flowboxchild:selected {
 
 searchbar,
 actionbar {
+  padding: 8px;
   background-color: @lumina_surface_container;
-  border-color: alpha(@lumina_outline_variant, 0.45);
+  border-color: alpha(@lumina_outline_variant, 0.36);
+}
+
+headerbar entry,
+headerbar spinbutton {
+  min-height: 40px;
+  background-color: @lumina_surface_container_high;
+  border-color: transparent;
+}
+
+headerbar entry:hover,
+headerbar spinbutton:hover {
+  background-color: mix(@lumina_surface_container_high, @lumina_on_surface, 0.05);
+}
+
+headerbar entry:focus,
+headerbar spinbutton:focus {
+  border-color: @lumina_primary;
+}
+
+headerbar button:not(.suggested-action):not(.destructive-action) {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+headerbar button:not(.suggested-action):not(.destructive-action):hover {
+  background-color: alpha(@lumina_on_surface, 0.08);
+}
+
+headerbar button:not(.suggested-action):not(.destructive-action):active,
+headerbar button:not(.suggested-action):not(.destructive-action):checked {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
 }
 
 statuspage,
@@ -89,8 +134,8 @@ statuspage > scrolledwindow > viewport {
 }
 
 windowcontrols button {
-  min-width: 26px;
-  min-height: 26px;
+  min-width: 28px;
+  min-height: 28px;
   padding: 0;
   border-color: transparent;
   border-radius: 999px;
