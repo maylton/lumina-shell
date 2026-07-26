@@ -89,7 +89,7 @@ Rectangle {
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
-        OverlayStore.prepareFor(
+        BarPanelCoordinator.requestToggle(
             "launcher",
             root.outputName,
             root.surfacePlacement,
@@ -97,7 +97,6 @@ Rectangle {
             anchor.top,
             anchor.bottom
         )
-        LauncherStore.toggle(root.outputName)
     }
 
     Keys.onSpacePressed: event => {
@@ -108,6 +107,42 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "launcher" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "launcher",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            LauncherStore.openFor(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "launcher" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                LauncherStore.close()
+            else
+                BarPanelCoordinator.reportClosed("launcher", root.outputName)
+        }
     }
 
     Behavior on color {
