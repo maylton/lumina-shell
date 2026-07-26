@@ -32,6 +32,23 @@ The supported panel identifiers include `bluetooth`, `network`, `dashboard`,
 and `launcher`. These calls use the same coordinator path as their bar
 widgets.
 
+Dashboard and Settings controls can be inspected and exercised through the
+same runtime components:
+
+```bash
+qs -p . ipc call settings openCategory appearance DP-1
+qs -p . ipc call control performanceStatus DP-1 | jq
+qs -p . ipc call control performanceDropdown DP-1 0
+qs -p . ipc call control performanceSettingsSlider DP-1 0 0.5
+qs -p . ipc call control performanceDashboardSlider DP-1 0 0.5
+qs -p . ipc call control performancePopup DP-1 0
+qs -p . ipc call control performanceDialog DP-1
+```
+
+Slider calls use a normalized value from `0` to `1` and change the real
+setting or service. Capture the original value from `performanceStatus` and
+restore it after a diagnostic pulse.
+
 The snapshot contains:
 
 - `slowEventCount`: operations taking at least 120 ms;
@@ -70,6 +87,22 @@ frame, and prevented the dashboard's internal page transition from running
 while its window is still opening. The optimized isolated run had p95 settle
 times of 1 ms for Bluetooth, 2 ms for network, 31 ms for dashboard, and 2 ms
 for launcher, with no event-loop delays or transition timeouts.
+
+The dashboard and Settings pass covered both pages, all 12 Settings
+categories, nine dropdown controls, 12 available Settings sliders, the
+dashboard output and microphone sliders, three add-widget popups, and the
+bar-widget settings dialog. Normal animations record their expected and total
+durations separately; `durationMs` for transitions, sliders, and animated
+popups is the overrun beyond the configured motion budget.
+
+The optimized run measured p95 opening times of 30 ms for the dashboard and
+16 ms for Settings. Dashboard/Settings page transitions had no overrun; the
+largest category-transition overrun was 7 ms. Dropdowns completed in
+170–175 ms with no overrun, including 45 rapid double-toggle races. Dock icon
+size was the only slider to stall the QML thread: keeping the transparent
+layer-shell window at a stable maximum height reduced its p95 from 257 ms to
+111 ms and removed all event-loop delays. Dashboard audio sliders, Settings
+popups, and the widget-settings dialog completed without overruns.
 
 ## Focused summary
 

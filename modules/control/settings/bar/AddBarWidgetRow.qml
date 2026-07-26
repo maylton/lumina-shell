@@ -5,11 +5,13 @@ import QtQuick.Controls as Controls
 import qs.design
 import qs.modules.control
 import qs.services.i18n
+import qs.stores.shell
 
 Rectangle {
     id: root
 
     property var widgets: []
+    property double openRequestedAt: 0
 
     signal addWidget(string widgetId)
 
@@ -44,10 +46,12 @@ Rectangle {
     Accessible.onPressAction: togglePopup()
 
     function togglePopup() {
-        if (addPopup.opened)
+        if (addPopup.opened) {
             addPopup.close()
-        else
+        } else {
+            openRequestedAt = Date.now()
             addPopup.open()
+        }
     }
 
     function toggleFromPointer() {
@@ -148,6 +152,17 @@ Rectangle {
             Controls.Popup.CloseOnEscape
                 | Controls.Popup.CloseOnPressOutside
         onOpened: {
+            if (root.openRequestedAt > 0) {
+                PerformanceTrace.record(
+                    "popup",
+                    "add-bar-widget",
+                    "opened",
+                    Date.now() - root.openRequestedAt,
+                    { optionCount: root.widgets.length }
+                )
+                root.openRequestedAt = 0
+            }
+
             const firstItem = addRepeater.itemAt(0)
 
             if (firstItem)

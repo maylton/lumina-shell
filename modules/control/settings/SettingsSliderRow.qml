@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.stores.shell
 import ".." as ControlComponents
 import "../SliderGeometry.js" as Geometry
 
@@ -13,6 +14,7 @@ SettingsRow {
     property real to: 1
     property real stepSize: 0.1
     property string valueLabel: Math.round(value * 100) + "%"
+    property double benchmarkRequestedAt: 0
 
     signal valueEdited(real value)
 
@@ -46,6 +48,21 @@ SettingsRow {
         valueEdited(clampValue(stepped))
     }
 
+    function benchmarkValue(normalized) {
+        if (!available)
+            return
+
+        benchmarkRequestedAt = Date.now()
+        PerformanceTrace.recordInstant(
+            "slider",
+            title,
+            "requested",
+            { normalized: Number(normalized) }
+        )
+        editNormalized(normalized)
+        benchmarkSettleTimer.restart()
+    }
+
     onActivated: step(1)
 
     Keys.onLeftPressed: event => {
@@ -56,6 +73,32 @@ SettingsRow {
     Keys.onRightPressed: event => {
         step(1)
         event.accepted = true
+    }
+
+    Timer {
+        id: benchmarkSettleTimer
+
+        interval: root.luminaDesign.motion.effectsFast
+        repeat: false
+        onTriggered: {
+            PerformanceTrace.record(
+                "slider",
+                root.title,
+                "settled",
+                Math.max(
+                    0,
+                    Date.now()
+                        - root.benchmarkRequestedAt
+                        - interval
+                ),
+                {
+                    value: root.value,
+                    expectedDurationMs: interval,
+                    totalDurationMs:
+                        Date.now() - root.benchmarkRequestedAt
+                }
+            )
+        }
     }
 
     Row {

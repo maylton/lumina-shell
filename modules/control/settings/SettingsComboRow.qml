@@ -12,6 +12,9 @@ SettingsRow {
     property var options: []
     property string currentValue: ""
     property double openRequestedAt: 0
+    property bool desiredOpen: false
+    readonly property bool menuOpen:
+        desiredOpen || dropdownPopup.visible
 
     signal selected(string value)
 
@@ -78,6 +81,11 @@ SettingsRow {
         if (!available || options.length === 0)
             return
 
+        desiredOpen = true
+
+        if (dropdownPopup.visible)
+            return
+
         dropdownPopup.highlightedIndex =
             DropdownLogic.initialIndex(
                 currentIndex(),
@@ -91,10 +99,16 @@ SettingsRow {
     }
 
     function toggleMenu() {
-        if (dropdownPopup.opened)
+        desiredOpen = DropdownLogic.desiredOpenAfterToggle(
+            desiredOpen,
+            dropdownPopup.opened
+        )
+
+        if (!desiredOpen) {
             dropdownPopup.close()
-        else
+        } else {
             openMenu()
+        }
     }
 
     function selectIndex(index) {
@@ -102,6 +116,7 @@ SettingsRow {
             return
 
         selected(String(options[index].value))
+        desiredOpen = false
         dropdownPopup.close()
     }
 
@@ -211,12 +226,23 @@ SettingsRow {
         onOpened: {
             if (root.openRequestedAt > 0) {
                 const requestedAt = root.openRequestedAt
+                const expectedDuration =
+                    root.luminaDesign.motion.effectsDefault
+                const totalDuration = Date.now()
+                    - root.openRequestedAt
                 PerformanceTrace.record(
                     "dropdown",
                     root.title,
                     "opened",
-                    Date.now() - root.openRequestedAt,
-                    { optionCount: root.options.length }
+                    Math.max(
+                        0,
+                        totalDuration - expectedDuration
+                    ),
+                    {
+                        optionCount: root.options.length,
+                        expectedDurationMs: expectedDuration,
+                        totalDurationMs: totalDuration
+                    }
                 )
                 root.openRequestedAt = 0
                 Qt.callLater(function() {
@@ -227,8 +253,18 @@ SettingsRow {
                         "dropdown",
                         root.title,
                         "settled",
-                        Date.now() - requestedAt,
-                        { optionCount: root.options.length }
+                        Math.max(
+                            0,
+                            Date.now()
+                                - requestedAt
+                                - expectedDuration
+                        ),
+                        {
+                            optionCount: root.options.length,
+                            expectedDurationMs: expectedDuration,
+                            totalDurationMs:
+                                Date.now() - requestedAt
+                        }
                     )
                 })
             }
@@ -238,6 +274,19 @@ SettingsRow {
                 root.options.length
             )
             menuFocus.forceActiveFocus(Qt.PopupFocusReason)
+        }
+
+        onAboutToHide: {
+            if (root.desiredOpen)
+                root.desiredOpen = false
+        }
+
+        onClosed: {
+            if (DropdownLogic.shouldReopenAfterClose(
+                root.desiredOpen
+            )) {
+                root.openMenu()
+            }
         }
 
         background: Rectangle {

@@ -6,6 +6,7 @@ import qs.modules.control.settings
 import qs.modules.control.settings.pages
 import qs.services.i18n
 import qs.stores.control
+import qs.stores.shell
 import "../dock/DockStrings.js" as DockStrings
 
 FocusScope {
@@ -27,6 +28,8 @@ FocusScope {
     }
     readonly property real sidebarWidth:
         compactSidebar ? 68 : Math.min(250, Math.max(220, width * 0.22))
+    property double categoryTransitionRequestedAt: 0
+    property string categoryTransitionTarget: ""
     readonly property var categories: [
         {
             id: "appearance",
@@ -183,7 +186,164 @@ FocusScope {
         }
     ]
 
+    function activePageFrame() {
+        for (var index = 0; index < pagesHost.children.length; ++index) {
+            const frame = pagesHost.children[index]
+
+            if (frame
+                && String(frame.categoryId || "")
+                    === ControlCenterStore.settingsCategory) {
+                return frame
+            }
+        }
+
+        return null
+    }
+
+    function controlsWithMethod(item, methodName, result) {
+        const controls = result || []
+
+        if (!item)
+            return controls
+
+        if (typeof item[methodName] === "function")
+            controls.push(item)
+
+        const descendants = item.children || []
+        for (var index = 0; index < descendants.length; ++index)
+            controlsWithMethod(descendants[index], methodName, controls)
+
+        return controls
+    }
+
+    function activeControls(methodName) {
+        return controlsWithMethod(activePageFrame(), methodName, [])
+    }
+
+    function performanceStatus() {
+        const combos = activeControls("toggleMenu")
+        const sliders = activeControls("benchmarkValue")
+        const popups = activeControls("togglePopup")
+
+        return {
+            category: ControlCenterStore.settingsCategory,
+            dropdowns: combos.map(function(control) {
+                return {
+                    title: String(control.title || ""),
+                    open: Boolean(control.menuOpen),
+                    optionCount: Number(
+                        control.options ? control.options.length : 0
+                    )
+                }
+            }),
+            sliders: sliders.map(function(control) {
+                const range = Number(control.to) - Number(control.from)
+                return {
+                    title: String(control.title || ""),
+                    available: Boolean(control.available),
+                    value: Number(control.value),
+                    from: Number(control.from),
+                    to: Number(control.to),
+                    normalized: range > 0
+                        ? (Number(control.value) - Number(control.from))
+                            / range
+                        : 0
+                }
+            }),
+            popups: popups.length
+        }
+    }
+
+    function togglePerformanceDropdown(index) {
+        const controls = activeControls("toggleMenu")
+        const requested = Number(index)
+
+        if (requested >= 0 && requested < controls.length)
+            controls[requested].toggleMenu()
+    }
+
+    function setPerformanceSlider(index, normalized) {
+        const controls = activeControls("benchmarkValue")
+        const requested = Number(index)
+
+        if (requested >= 0 && requested < controls.length)
+            controls[requested].benchmarkValue(Number(normalized))
+    }
+
+    function togglePerformancePopup(index) {
+        const controls = activeControls("togglePopup")
+        const requested = Number(index)
+
+        if (requested >= 0 && requested < controls.length)
+            controls[requested].togglePopup()
+    }
+
+    function togglePerformanceDialog() {
+        const controls = activeControls(
+            "togglePerformanceWidgetDialog"
+        )
+
+        if (controls.length > 0)
+            controls[0].togglePerformanceWidgetDialog()
+    }
+
     focus: active
+
+    Connections {
+        target: ControlCenterStore
+
+        function onSettingsCategoryChanged() {
+            if (!root.active)
+                return
+
+            root.categoryTransitionRequestedAt = Date.now()
+            root.categoryTransitionTarget =
+                ControlCenterStore.settingsCategory
+            PerformanceTrace.recordInstant(
+                "transition",
+                "settings-category",
+                "requested",
+                { target: root.categoryTransitionTarget }
+            )
+            categoryTransitionTimer.restart()
+        }
+    }
+
+    Timer {
+        id: categoryTransitionTimer
+
+        interval: Math.max(
+            root.luminaDesign.motion.pageTransition,
+            root.luminaDesign.motion.effectsDefault
+        )
+        repeat: false
+        onTriggered: {
+            if (!root.active
+                || root.categoryTransitionTarget
+                    !== ControlCenterStore.settingsCategory) {
+                return
+            }
+
+            PerformanceTrace.record(
+                "transition",
+                "settings-category",
+                "settled",
+                Math.max(
+                    0,
+                    Date.now()
+                        - root.categoryTransitionRequestedAt
+                        - interval
+                ),
+                {
+                    target: root.categoryTransitionTarget,
+                    expectedDurationMs: interval,
+                    totalDurationMs:
+                        Date.now()
+                            - root.categoryTransitionRequestedAt
+                }
+            )
+        }
+    }
 
     Row {
         anchors.fill: parent
@@ -197,6 +357,8 @@ FocusScope {
         }
 
         Item {
+            id: pagesHost
+
             width: parent.width - root.sidebarWidth - parent.spacing
             height: parent.height
             clip: true

@@ -15,6 +15,42 @@ FocusScope {
 
     focus: active
 
+    function sliderControls(item, result) {
+        const controls = result || []
+
+        if (!item)
+            return controls
+
+        if (typeof item.benchmarkValue === "function")
+            controls.push(item)
+
+        const descendants = item.children || []
+        for (var index = 0; index < descendants.length; ++index)
+            sliderControls(descendants[index], controls)
+
+        return controls
+    }
+
+    function performanceStatus() {
+        return {
+            sliders: sliderControls(root, []).map(function(control) {
+                return {
+                    title: String(control.title || ""),
+                    available: Boolean(control.available),
+                    value: Number(control.value)
+                }
+            })
+        }
+    }
+
+    function setPerformanceSlider(index, normalized) {
+        const controls = sliderControls(root, [])
+        const requested = Number(index)
+
+        if (requested >= 0 && requested < controls.length)
+            controls[requested].benchmarkValue(Number(normalized))
+    }
+
     Item {
         id: leftColumn
 

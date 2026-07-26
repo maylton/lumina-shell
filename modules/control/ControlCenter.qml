@@ -18,6 +18,31 @@ Scope {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
+    property var controlWindows: ({})
+
+    function registerControlWindow(outputName, windowObject) {
+        const output = String(outputName || "")
+        if (!output || !windowObject)
+            return
+
+        const windows = Object.assign({}, controlWindows)
+        windows[output] = windowObject
+        controlWindows = windows
+    }
+
+    function unregisterControlWindow(outputName, windowObject) {
+        const output = String(outputName || "")
+        if (!output || controlWindows[output] !== windowObject)
+            return
+
+        const windows = Object.assign({}, controlWindows)
+        delete windows[output]
+        controlWindows = windows
+    }
+
+    function controlWindowFor(outputName) {
+        return controlWindows[String(outputName || "")] || null
+    }
 
     IpcHandler {
         target: "control"
@@ -51,6 +76,67 @@ Scope {
                 settingsCategory:
                     ControlCenterStore.settingsCategory
             })
+        }
+
+        function performanceStatus(outputName: string): string {
+            const windowObject = root.controlWindowFor(outputName)
+            return JSON.stringify(
+                windowObject
+                    ? windowObject.performanceStatus()
+                    : { error: "output-not-found" }
+            )
+        }
+
+        function performanceDropdown(
+            outputName: string,
+            index: int
+        ): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject)
+                windowObject.togglePerformanceDropdown(index)
+        }
+
+        function performanceSettingsSlider(
+            outputName: string,
+            index: int,
+            normalized: real
+        ): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject) {
+                windowObject.setPerformanceSettingsSlider(
+                    index,
+                    normalized
+                )
+            }
+        }
+
+        function performanceDashboardSlider(
+            outputName: string,
+            index: int,
+            normalized: real
+        ): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject) {
+                windowObject.setPerformanceDashboardSlider(
+                    index,
+                    normalized
+                )
+            }
+        }
+
+        function performancePopup(
+            outputName: string,
+            index: int
+        ): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject)
+                windowObject.togglePerformancePopup(index)
+        }
+
+        function performanceDialog(outputName: string): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject)
+                windowObject.togglePerformanceDialog()
         }
     }
 
@@ -89,6 +175,43 @@ Scope {
                 property double visibilityRequestedAt: 0
                 property double hidingRequestedAt: 0
                 property double settleRequestedAt: 0
+                property double pageTransitionRequestedAt: 0
+                property string pageTransitionTarget: ""
+
+                function performanceStatus() {
+                    return {
+                        output: outputName,
+                        page: ControlCenterStore.activePage,
+                        settings: settingsView.performanceStatus(),
+                        dashboard: dashboardView.performanceStatus()
+                    }
+                }
+
+                function togglePerformanceDropdown(index) {
+                    settingsView.togglePerformanceDropdown(index)
+                }
+
+                function setPerformanceSettingsSlider(index, normalized) {
+                    settingsView.setPerformanceSlider(index, normalized)
+                }
+
+                function setPerformanceDashboardSlider(index, normalized) {
+                    dashboardView.setPerformanceSlider(index, normalized)
+                }
+
+                function togglePerformancePopup(index) {
+                    settingsView.togglePerformancePopup(index)
+                }
+
+                function togglePerformanceDialog() {
+                    settingsView.togglePerformanceDialog()
+                }
+
+                Component.onCompleted:
+                    root.registerControlWindow(outputName, controlWindow)
+
+                Component.onDestruction:
+                    root.unregisterControlWindow(outputName, controlWindow)
 
                 screen: modelData
                 visible: centerVisible
@@ -119,7 +242,10 @@ Scope {
                             "dashboard",
                             "visible",
                             Date.now() - visibilityRequestedAt,
-                            { output: outputName }
+                            {
+                                output: outputName,
+                                page: ControlCenterStore.activePage
+                            }
                         )
                         visibilityRequestedAt = 0
                         Qt.callLater(function() {
@@ -134,7 +260,10 @@ Scope {
                                 "settled",
                                 Date.now()
                                     - controlWindow.settleRequestedAt,
-                                { output: controlWindow.outputName }
+                                {
+                                    output: controlWindow.outputName,
+                                    page: ControlCenterStore.activePage
+                                }
                             )
                             controlWindow.settleRequestedAt = 0
                         })
@@ -145,7 +274,10 @@ Scope {
                             "dashboard",
                             "hidden",
                             Date.now() - hidingRequestedAt,
-                            { output: outputName }
+                            {
+                                output: outputName,
+                                page: ControlCenterStore.activePage
+                            }
                         )
                         hidingRequestedAt = 0
                         settleRequestedAt = 0
@@ -195,10 +327,76 @@ Scope {
                             "panel",
                             "dashboard",
                             "requested",
-                            { output: outputName }
+                            {
+                                output: outputName,
+                                page: ControlCenterStore.activePage
+                            }
                         )
                     } else {
                         hidingRequestedAt = Date.now()
+                    }
+                }
+
+                Connections {
+                    target: ControlCenterStore
+
+                    function onActivePageChanged() {
+                        if (!controlWindow.centerVisible)
+                            return
+
+                        controlWindow.pageTransitionRequestedAt =
+                            Date.now()
+                        controlWindow.pageTransitionTarget =
+                            ControlCenterStore.activePage
+                        PerformanceTrace.recordInstant(
+                            "transition",
+                            "control-page",
+                            "requested",
+                            {
+                                target:
+                                    controlWindow.pageTransitionTarget
+                            }
+                        )
+                        pageTransitionTimer.restart()
+                    }
+                }
+
+                Timer {
+                    id: pageTransitionTimer
+
+                    interval: Math.max(
+                        root.luminaDesign.motion.pageTransition,
+                        root.luminaDesign.motion.effectsDefault
+                    )
+                    repeat: false
+                    onTriggered: {
+                        if (!controlWindow.centerVisible
+                            || controlWindow.pageTransitionTarget
+                                !== ControlCenterStore.activePage) {
+                            return
+                        }
+
+                        PerformanceTrace.record(
+                            "transition",
+                            "control-page",
+                            "settled",
+                            Math.max(
+                                0,
+                                Date.now()
+                                    - controlWindow
+                                        .pageTransitionRequestedAt
+                                    - interval
+                            ),
+                            {
+                                target:
+                                    controlWindow.pageTransitionTarget,
+                                expectedDurationMs: interval,
+                                totalDurationMs:
+                                    Date.now()
+                                        - controlWindow
+                                            .pageTransitionRequestedAt
+                            }
+                        )
                     }
                 }
 
@@ -323,6 +521,8 @@ Scope {
                                 scale: controlWindow.panelScale
 
                                 DashboardView {
+                                    id: dashboardView
+
                                     readonly property bool pageActive:
                                         ControlCenterStore.activePage
                                             === "dashboard"
@@ -370,6 +570,8 @@ Scope {
                                 }
 
                                 ShellSettingsView {
+                                    id: settingsView
+
                                     readonly property bool pageActive:
                                         ControlCenterStore.activePage
                                             === "settings"

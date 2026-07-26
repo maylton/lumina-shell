@@ -54,8 +54,14 @@ Scope {
                         + surfaceHeight
                         + effectiveMargin
                         + reservedWindowGap
-                readonly property int collapsedHeight:
-                    bottomBarOffset + 7
+                // Keep the layer-shell window stable while live settings resize
+                // the visible dock: 72 px icon + chrome + margin + reserve gap.
+                readonly property int stableWindowHeight:
+                    bottomBarOffset
+                        + 72
+                        + 24
+                        + 24
+                        + 8
                 readonly property int desiredFloatingWidth:
                     Math.max(112, dockRow.implicitWidth + 24)
                 readonly property int maximumFloatingWidth:
@@ -107,9 +113,8 @@ Scope {
                 screen: modelData
                 visible: DockPreferences.initialized
                     && DockPreferences.enabled
-                implicitHeight: expanded
-                    ? expandedHeight + contextMenuExtraHeight
-                    : collapsedHeight
+                implicitHeight:
+                    stableWindowHeight + contextMenuExtraHeight
                 exclusiveZone: DockPreferences.reserveSpace
                     && !DockPreferences.autoHide
                         ? expandedHeight
@@ -172,15 +177,6 @@ Scope {
                         width: dockSurface.width
                         height: dockSurface.height
                         radius: dockSurface.radius
-                    }
-                }
-
-                Behavior on implicitHeight {
-                    NumberAnimation {
-                        duration: root.luminaDesign.motion.spatialDefault
-                        easing.type: root.luminaDesign.motion.spatialEasing
-                        easing.overshoot:
-                            root.luminaDesign.motion.spatialOvershoot
                     }
                 }
 

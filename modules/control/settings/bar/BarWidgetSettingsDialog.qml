@@ -6,6 +6,7 @@ import qs.design
 import qs.modules.control.settings.bar.widgets
 import qs.services.i18n
 import qs.stores.config
+import qs.stores.shell
 import "BarWidgetCatalog.js" as BarWidgetCatalog
 
 Controls.Popup {
@@ -14,6 +15,7 @@ Controls.Popup {
     property string widgetId: ""
     property var widget: BarWidgetCatalog.find(widgetId)
     property Item restoreFocusItem: null
+    property double openRequestedAt: 0
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property string displayTitle: widget
@@ -75,10 +77,36 @@ Controls.Popup {
         restoreFocusItem = sourceItem && sourceItem.activeFocus
             ? sourceItem
             : null
+        openRequestedAt = Date.now()
         open()
     }
 
-    onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
+    onOpened: {
+        if (openRequestedAt > 0) {
+            const expectedDuration = Math.max(
+                root.luminaDesign.motion.effectsDefault,
+                root.luminaDesign.motion.spatialDefault
+            )
+            const totalDuration = Date.now() - openRequestedAt
+            PerformanceTrace.record(
+                "popup",
+                "bar-widget-settings",
+                "opened",
+                Math.max(
+                    0,
+                    totalDuration - expectedDuration
+                ),
+                {
+                    widgetId: widgetId,
+                    expectedDurationMs: expectedDuration,
+                    totalDurationMs: totalDuration
+                }
+            )
+            openRequestedAt = 0
+        }
+
+        closeButton.forceActiveFocus(Qt.PopupFocusReason)
+    }
 
     onClosed: {
         if (restoreFocusItem)
