@@ -46,6 +46,34 @@ if [[ -n "${async_pixmap_matches}" ]]; then
     exit 1
 fi
 
+(
+    install_test_root="$(mktemp -d)"
+    install_test_target="${install_test_root}/lumina-shell"
+
+    cleanup_install_test() {
+        if [[ -e "${install_test_target}" ]]; then
+            "${repository_dir}/scripts/uninstall.sh" \
+                --target "${install_test_target}" >/dev/null
+        fi
+
+        rmdir "${install_test_root}"
+    }
+    trap cleanup_install_test EXIT
+
+    "${repository_dir}/scripts/install.sh" \
+        --target "${install_test_target}" >/dev/null
+
+    test -f "${install_test_target}/.lumina-shell-install"
+    test -f "${install_test_target}/shell.qml"
+    test -f \
+        "${install_test_target}/assets/icons/notification-symbolic.svg"
+    test -f \
+        "${install_test_target}/assets/icons/rocket-symbolic.svg"
+
+    "${repository_dir}/scripts/uninstall.sh" \
+        --target "${install_test_target}" >/dev/null
+)
+
 if command -v qmltestrunner >/dev/null 2>&1; then
     qml_test_runner="$(command -v qmltestrunner)"
 elif [[ -x /usr/lib/qt6/bin/qmltestrunner ]]; then

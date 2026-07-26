@@ -81,6 +81,7 @@ install_paths=(
     CONTRIBUTING.md
     README.md
     ROADMAP.md
+    assets
     design
     docs
     i18n
