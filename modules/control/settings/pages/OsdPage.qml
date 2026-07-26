@@ -15,26 +15,56 @@ SettingsPage {
     )
 
     SettingsSection {
-        title: "Presentation"
+        title: I18n.tr(
+            "settings.osd.presentation.section",
+            "Presentation"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show OSD"
-            description: "Master switch for on-screen feedback"
+            title: I18n.tr("settings.osd.enabled", "Show OSD")
+            description: I18n.tr(
+                "settings.osd.enabledDescription",
+                "Master switch for on-screen feedback"
+            )
             checked: ConfigStore.osdEnabled
             onToggled: value => ConfigStore.setOsdEnabled(value)
         }
 
         SettingsComboRow {
             width: parent.width
-            title: "Position"
-            description: "Vertical placement on the active output"
+            title: I18n.tr("settings.osd.position", "Position")
+            description: I18n.tr(
+                "settings.osd.positionDescription",
+                "Vertical placement on the active output"
+            )
             available: ConfigStore.osdEnabled
-            availabilityText: "Enable OSD first"
+            availabilityText: I18n.tr(
+                "settings.osd.enableFirst",
+                "Enable OSD first"
+            )
             options: [
-                { value: "top", label: "Top" },
-                { value: "center", label: "Center" },
-                { value: "bottom", label: "Bottom" }
+                {
+                    value: "top",
+                    label: I18n.tr(
+                        "settings.common.position.top",
+                        "Top"
+                    )
+                },
+                {
+                    value: "center",
+                    label: I18n.tr(
+                        "settings.common.position.center",
+                        "Center"
+                    )
+                },
+                {
+                    value: "bottom",
+                    label: I18n.tr(
+                        "settings.common.position.bottom",
+                        "Bottom"
+                    )
+                }
             ]
             currentValue: ConfigStore.osdPosition
             onSelected: value =>
@@ -43,10 +73,16 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Duration"
-            description: "Safe range: 0.8–5 seconds"
+            title: I18n.tr("settings.osd.duration", "Duration")
+            description: I18n.tr(
+                "settings.osd.durationDescription",
+                "Safe range: 0.8–5 seconds"
+            )
             available: ConfigStore.osdEnabled
-            availabilityText: "Enable OSD first"
+            availabilityText: I18n.tr(
+                "settings.osd.enableFirst",
+                "Enable OSD first"
+            )
             from: 800
             to: 5000
             stepSize: 200
@@ -58,10 +94,16 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Size"
-            description: "Scale the complete OSD surface"
+            title: I18n.tr("settings.osd.size", "Size")
+            description: I18n.tr(
+                "settings.osd.sizeDescription",
+                "Scale the complete OSD surface"
+            )
             available: ConfigStore.osdEnabled
-            availabilityText: "Enable OSD first"
+            availabilityText: I18n.tr(
+                "settings.osd.enableFirst",
+                "Enable OSD first"
+            )
             from: 0.8
             to: 1.4
             stepSize: 0.1
@@ -73,10 +115,19 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show percentage"
-            description: "Show numeric values beside progress feedback"
+            title: I18n.tr(
+                "settings.osd.percentage",
+                "Show percentage"
+            )
+            description: I18n.tr(
+                "settings.osd.percentageDescription",
+                "Show numeric values beside progress feedback"
+            )
             available: ConfigStore.osdEnabled
-            availabilityText: "Enable OSD first"
+            availabilityText: I18n.tr(
+                "settings.osd.enableFirst",
+                "Enable OSD first"
+            )
             checked: ConfigStore.osdShowPercentage
             onToggled: value =>
                 ConfigStore.setOsdValue(
@@ -87,11 +138,14 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Events"
+        title: I18n.tr("settings.osd.events.section", "Events")
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Output volume"
+            title: I18n.tr(
+                "settings.osd.events.volume",
+                "Output volume"
+            )
             checked: ConfigStore.osdVolumeEnabled
             onToggled: value =>
                 ConfigStore.setOsdValue(
@@ -102,7 +156,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Microphone"
+            title: I18n.tr(
+                "settings.osd.events.microphone",
+                "Microphone"
+            )
             checked: ConfigStore.osdMicrophoneEnabled
             onToggled: value =>
                 ConfigStore.setOsdValue(
@@ -113,7 +170,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Brightness"
+            title: I18n.tr(
+                "settings.osd.events.brightness",
+                "Brightness"
+            )
             checked: ConfigStore.osdBrightnessEnabled
             onToggled: value =>
                 ConfigStore.setOsdValue(
