@@ -1,17 +1,24 @@
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 Column {
     width: parent ? parent.width : 0
     SettingsSection {
-        title: "Window context"
-        description: "Focused Niri context in the center"
+        title: I18n.tr("settings.widget.context.section", "Window context")
+        description: I18n.tr(
+            "settings.widget.context.description",
+            "Focused Niri context in the center"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Background"
-            description: "Show a resting tonal surface"
+            title: I18n.tr("settings.widget.common.background", "Background")
+            description: I18n.tr(
+                "settings.widget.common.backgroundResting",
+                "Show a resting tonal surface"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "context", "showBackground", true
             ))
@@ -22,12 +29,15 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Visibility"
-            description: "Choose when context remains visible"
+            title: I18n.tr("settings.widget.context.visibility", "Visibility")
+            description: I18n.tr(
+                "settings.widget.context.visibilityDescription",
+                "Choose when context remains visible"
+            )
             options: [
-                { value: "always", label: "Always" },
-                { value: "contextual", label: "Contextual" },
-                { value: "hidden", label: "Hidden" }
+                { value: "always", label: I18n.tr("settings.widget.context.always", "Always") },
+                { value: "contextual", label: I18n.tr("settings.widget.context.contextual", "Contextual") },
+                { value: "hidden", label: I18n.tr("settings.widget.context.hidden", "Hidden") }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "context", "mode", "contextual"
@@ -39,8 +49,11 @@ Column {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Context duration"
-            description: "Time before contextual information recedes"
+            title: I18n.tr("settings.widget.context.duration", "Context duration")
+            description: I18n.tr(
+                "settings.widget.context.durationDescription",
+                "Time before contextual information recedes"
+            )
             available: String(ConfigStore.widgetSetting(
                 "context", "mode", "contextual"
             )) === "contextual"
@@ -58,8 +71,11 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Window title"
-            description: "Include the focused window title"
+            title: I18n.tr("settings.widget.context.windowTitle", "Window title")
+            description: I18n.tr(
+                "settings.widget.context.windowTitleDescription",
+                "Include the focused window title"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "context", "showWindowTitle", true
             ))
@@ -70,8 +86,11 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Workspace"
-            description: "Include the current workspace"
+            title: I18n.tr("settings.widget.context.workspace", "Workspace")
+            description: I18n.tr(
+                "settings.widget.context.workspaceDescription",
+                "Include the current workspace"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "context", "showWorkspace", true
             ))
@@ -82,8 +101,11 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Application ID"
-            description: "Include the focused application ID"
+            title: I18n.tr("settings.widget.context.applicationId", "Application ID")
+            description: I18n.tr(
+                "settings.widget.context.applicationIdDescription",
+                "Include the focused application ID"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "context", "showApplicationId", true
             ))
@@ -94,8 +116,11 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Column and tile"
-            description: "Include the focused Niri column or tile"
+            title: I18n.tr("settings.widget.context.column", "Column and tile")
+            description: I18n.tr(
+                "settings.widget.context.columnDescription",
+                "Include the focused Niri column or tile"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "context", "showColumn", true
             ))
