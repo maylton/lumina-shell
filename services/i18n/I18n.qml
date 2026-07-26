@@ -8,6 +8,7 @@ import "AppearanceMessages.js" as AppearanceMessages
 import "BarMessages.js" as BarMessages
 import "BehaviorMessages.js" as BehaviorMessages
 import "SettingsMessages.js" as SettingsMessages
+import "WidgetMessages.js" as WidgetMessages
 
 Singleton {
     id: root
@@ -57,6 +58,7 @@ Singleton {
             || BarMessages.message(locale, key)
             || BehaviorMessages.message(locale, key)
             || SettingsMessages.message(locale, key)
+            || WidgetMessages.message(locale, key)
         const sourceValue = catalogValue
             || supplementalValue
             || String(fallback || key)
