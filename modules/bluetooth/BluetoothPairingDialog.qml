@@ -38,7 +38,6 @@ FloatingWindow {
         "bluetooth.auth.windowTitle",
         "Bluetooth pairing"
     )
-    modality: Qt.ApplicationModal
 
     function heading() {
         switch (promptType) {
