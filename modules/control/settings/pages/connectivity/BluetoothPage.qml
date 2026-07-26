@@ -11,28 +11,163 @@ Column {
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property var connectedDevices:
-        ConnectivityManagerService.bluetoothDevices.filter(function(device) {
+        BluetoothManagerService.devices.filter(function(device) {
             return Boolean(device.connected)
         })
     readonly property var pairedDevices:
-        ConnectivityManagerService.bluetoothDevices.filter(function(device) {
+        BluetoothManagerService.devices.filter(function(device) {
             return Boolean(device.paired) && !device.connected
         })
     readonly property var foundDevices:
-        ConnectivityManagerService.bluetoothDevices.filter(function(device) {
+        BluetoothManagerService.devices.filter(function(device) {
             return !device.paired && !device.connected
         })
 
     width: parent ? parent.width : 0
     spacing: luminaDesign.spacing.controlSectionGap
 
+    Component.onCompleted: BluetoothManagerService.setActive(true)
+    Component.onDestruction: BluetoothManagerService.setActive(false)
+
     function activateDevice(device) {
         if (device.connected) {
-            ConnectivityManagerService.disconnectBluetooth(device.address)
+            BluetoothManagerService.disconnectDevice(device.address)
         } else if (device.paired) {
-            ConnectivityManagerService.connectBluetooth(device.address)
+            BluetoothManagerService.connectDevice(device.address)
         } else {
-            ConnectivityManagerService.pairBluetooth(device.address)
+            BluetoothManagerService.pair(device.address)
+        }
+    }
+
+    function idleStatusDescription() {
+        if (!ConnectivityService.bluetoothAvailable) {
+            return I18n.tr(
+                "dashboard.status.unavailable",
+                "Unavailable"
+            )
+        }
+        if (!ConnectivityService.bluetoothEnabled) {
+            return I18n.tr(
+                "dashboard.status.disabled",
+                "Disabled"
+            )
+        }
+        if (root.connectedDevices.length > 0)
+            return root.connectedDevices[0].name
+
+        return I18n.tr(
+            "settings.connectivity.bluetooth.status.on",
+            "On"
+        )
+    }
+
+    function bluetoothStatusDescription() {
+        const code = BluetoothManagerService.statusCode
+        const name = BluetoothManagerService.targetName
+            || BluetoothManagerService.targetAddress
+        const replacements = [name]
+
+        switch (code) {
+        case "scanning":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.scanning",
+                "Searching for Bluetooth devices"
+            )
+        case "scan-complete":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.scanComplete",
+                "Bluetooth device search completed"
+            )
+        case "scan-failed":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.scanFailed",
+                "Bluetooth device search failed"
+            )
+        case "pairing":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.pairing",
+                "Pairing with %1",
+                replacements
+            )
+        case "connecting":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.connecting",
+                "Connecting to %1",
+                replacements
+            )
+        case "disconnecting":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.disconnecting",
+                "Disconnecting %1",
+                replacements
+            )
+        case "forgetting":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.forgetting",
+                "Forgetting %1",
+                replacements
+            )
+        case "connected":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.connected",
+                "%1 is connected",
+                replacements
+            )
+        case "disconnected":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.disconnected",
+                "%1 is disconnected",
+                replacements
+            )
+        case "forgotten":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.forgotten",
+                "%1 was forgotten",
+                replacements
+            )
+        case "paired-not-connected":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.pairedNotConnected",
+                "%1 was paired, but the connection could not be confirmed",
+                replacements
+            )
+        case "authentication-required":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.authenticationRequired",
+                "%1 requires a PIN or confirmation that Lumina does not support yet",
+                replacements
+            )
+        case "pair-failed":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.pairFailed",
+                "Could not pair with %1",
+                replacements
+            )
+        case "connect-failed":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.connectFailed",
+                "Could not confirm a connection to %1",
+                replacements
+            )
+        case "disconnect-failed":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.disconnectFailed",
+                "Could not confirm that %1 disconnected",
+                replacements
+            )
+        case "forget-failed":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.forgetFailed",
+                "Could not forget %1",
+                replacements
+            )
+        case "invalid-address":
+            return I18n.tr(
+                "settings.connectivity.bluetooth.status.invalidAddress",
+                "The Bluetooth device address is invalid"
+            )
+        default:
+            return root.idleStatusDescription()
         }
     }
 
@@ -41,8 +176,7 @@ Column {
             "settings.connectivity.bluetooth.section",
             "Bluetooth"
         )
-        description: ConnectivityManagerService.lastError
-            || ConnectivityManagerService.statusMessage
+        description: root.bluetoothStatusDescription()
 
         SettingsSwitchRow {
             width: parent.width
@@ -50,15 +184,14 @@ Column {
                 "settings.connectivity.bluetooth.enabled",
                 "Bluetooth"
             )
-            description: ConnectivityService.bluetoothSummary
+            description: root.idleStatusDescription()
             iconName: ConnectivityService.bluetoothEnabled
                 ? "bluetooth-active-symbolic"
                 : "bluetooth-disabled-symbolic"
             symbol: "ᛒ"
             available: ConnectivityService.bluetoothAvailable
             checked: ConnectivityService.bluetoothEnabled
-            onToggled: value =>
-                ConnectivityManagerService.setBluetoothEnabled(value)
+            onToggled: value => BluetoothManagerService.setEnabled(value)
         }
 
         SettingsActionRow {
@@ -73,8 +206,7 @@ Column {
             )
             iconName: "view-refresh-symbolic"
             symbol: "↻"
-            actionLabel: ConnectivityManagerService.busyAction
-                === "bluetooth-scan"
+            actionLabel: BluetoothManagerService.busyAction === "scan"
                 ? I18n.tr(
                     "settings.connectivity.scanning",
                     "Scanning"
@@ -84,8 +216,8 @@ Column {
                     "Scan"
                 )
             available: ConnectivityService.bluetoothEnabled
-                && !ConnectivityManagerService.busy
-            onActivated: ConnectivityManagerService.scanBluetooth()
+                && !BluetoothManagerService.busy
+            onActivated: BluetoothManagerService.scan()
         }
     }
 
@@ -110,11 +242,19 @@ Column {
                     description: modelData.address
                     iconName: "bluetooth-active-symbolic"
                     symbol: "ᛒ"
-                    actionLabel: I18n.tr(
-                        "settings.connectivity.disconnect",
-                        "Disconnect"
-                    )
-                    available: !ConnectivityManagerService.busy
+                    actionLabel: BluetoothManagerService.busyAction
+                        === "disconnect"
+                        && BluetoothManagerService.targetAddress
+                            === modelData.address
+                        ? I18n.tr(
+                            "settings.connectivity.bluetooth.action.disconnecting",
+                            "Disconnecting"
+                        )
+                        : I18n.tr(
+                            "settings.connectivity.disconnect",
+                            "Disconnect"
+                        )
+                    available: !BluetoothManagerService.busy
                     onActivated: root.activateDevice(modelData)
                 }
             }
@@ -147,11 +287,19 @@ Column {
                         description: modelData.address
                         iconName: "bluetooth-symbolic"
                         symbol: "ᛒ"
-                        actionLabel: I18n.tr(
-                            "settings.connectivity.connect",
-                            "Connect"
-                        )
-                        available: !ConnectivityManagerService.busy
+                        actionLabel: BluetoothManagerService.busyAction
+                            === "connect"
+                            && BluetoothManagerService.targetAddress
+                                === modelData.address
+                            ? I18n.tr(
+                                "settings.connectivity.bluetooth.action.connecting",
+                                "Connecting"
+                            )
+                            : I18n.tr(
+                                "settings.connectivity.connect",
+                                "Connect"
+                            )
+                        available: !BluetoothManagerService.busy
                         onActivated: root.activateDevice(modelData)
                     }
 
@@ -170,11 +318,10 @@ Column {
                             "Forget"
                         )
                         destructive: true
-                        available: !ConnectivityManagerService.busy
-                        onActivated:
-                            ConnectivityManagerService.removeBluetooth(
-                                modelData.address
-                            )
+                        available: !BluetoothManagerService.busy
+                        onActivated: BluetoothManagerService.forgetDevice(
+                            modelData.address
+                        )
                     }
                 }
             }
@@ -206,11 +353,18 @@ Column {
                     description: modelData.address
                     iconName: "bluetooth-symbolic"
                     symbol: "ᛒ"
-                    actionLabel: I18n.tr(
-                        "settings.connectivity.bluetooth.pair",
-                        "Pair"
-                    )
-                    available: !ConnectivityManagerService.busy
+                    actionLabel: BluetoothManagerService.busyAction === "pair"
+                        && BluetoothManagerService.targetAddress
+                            === modelData.address
+                        ? I18n.tr(
+                            "settings.connectivity.bluetooth.action.pairing",
+                            "Pairing"
+                        )
+                        : I18n.tr(
+                            "settings.connectivity.bluetooth.pair",
+                            "Pair"
+                        )
+                    available: !BluetoothManagerService.busy
                     onActivated: root.activateDevice(modelData)
                 }
             }
