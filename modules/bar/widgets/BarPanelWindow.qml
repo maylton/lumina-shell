@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs.stores.config
 import qs.stores.shell
 import "../../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
+import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 PanelWindow {
     id: root
@@ -17,6 +18,11 @@ PanelWindow {
     property color scrimColor: "transparent"
     property Item surfaceItem: null
     property real surfaceRadius: 0
+    property string surfaceAnchorEdge: ""
+    property real surfaceAnchorTop: -1
+    property double visibilityRequestedAt: 0
+    property double hidingRequestedAt: 0
+    property double settleRequestedAt: 0
 
     default property alias panelData: panelLayer.data
 
@@ -30,6 +36,27 @@ PanelWindow {
         return ConfigStore.barPosition === "bottom"
             ? Math.max(0, maximum - gap)
             : Math.min(gap, maximum)
+    }
+
+    function resolvedSurfaceY(surfaceHeight) {
+        if (surfaceAnchorEdge !== "above" || surfaceAnchorTop < 0)
+            return adjacentSurfaceY(surfaceHeight)
+
+        const viewportAnchorTop =
+            SurfacePlacementPolicy.outputYToViewportY(
+                surfaceAnchorTop,
+                ConfigStore.barPosition,
+                ConfigStore.barHeight,
+                ConfigStore.barSurfaceMode,
+                ConfigStore.barMargin
+            )
+
+        return SurfacePlacementPolicy.aboveAnchorY(
+            viewportAnchorTop,
+            surfaceHeight,
+            root.height,
+            ConfigStore.barPanelGap
+        )
     }
 
     visible: panelVisible
@@ -51,6 +78,26 @@ PanelWindow {
         ? WlrKeyboardFocus.Exclusive
         : WlrKeyboardFocus.None
 
+    onPanelVisibleChanged: {
+        if (panelVisible) {
+            visibilityRequestedAt = Date.now()
+            PerformanceTrace.recordInstant(
+                "panel",
+                panelId,
+                "requested",
+                { output: panelOutputName }
+            )
+        } else {
+            hidingRequestedAt = Date.now()
+        }
+
+        BarPanelCoordinator.reportPanelLogicalVisibility(
+            panelId,
+            panelOutputName,
+            panelVisible
+        )
+    }
+
     BackgroundEffect.blurRegion:
         surfaceItem
         && ShellSurfacePolicy.requestsBackdropBlur(
@@ -60,10 +107,45 @@ PanelWindow {
             : null
 
     onBackingWindowVisibleChanged: {
+        if (backingWindowVisible && visibilityRequestedAt > 0) {
+            settleRequestedAt = visibilityRequestedAt
+            PerformanceTrace.record(
+                "panel",
+                panelId,
+                "visible",
+                Date.now() - visibilityRequestedAt,
+                { output: panelOutputName }
+            )
+            visibilityRequestedAt = 0
+            Qt.callLater(function() {
+                if (!root.panelVisible || root.settleRequestedAt <= 0)
+                    return
+
+                PerformanceTrace.record(
+                    "panel",
+                    root.panelId,
+                    "settled",
+                    Date.now() - root.settleRequestedAt,
+                    { output: root.panelOutputName }
+                )
+                root.settleRequestedAt = 0
+            })
+        } else if (!backingWindowVisible && hidingRequestedAt > 0) {
+            PerformanceTrace.record(
+                "panel",
+                panelId,
+                "hidden",
+                Date.now() - hidingRequestedAt,
+                { output: panelOutputName }
+            )
+            hidingRequestedAt = 0
+            settleRequestedAt = 0
+        }
+
         BarPanelCoordinator.reportPanelWindowVisibility(
             panelId,
             panelOutputName,
-            backingWindowVisible
+            backingWindowVisible && panelVisible
         )
     }
 
@@ -103,7 +185,7 @@ PanelWindow {
     Binding {
         target: root.surfaceItem
         property: "y"
-        value: root.adjacentSurfaceY(
+        value: root.resolvedSurfaceY(
             root.surfaceItem ? root.surfaceItem.height : 0
         )
         when: root.surfaceItem !== null

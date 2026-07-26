@@ -1,3 +1,4 @@
 module qs.stores.shell
 singleton BarPanelCoordinator 1.0 BarPanelCoordinator.qml
 singleton OverlayStore 1.0 OverlayStore.qml
+singleton PerformanceTrace 1.0 PerformanceTrace.qml

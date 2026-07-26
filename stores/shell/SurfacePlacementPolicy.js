@@ -35,6 +35,33 @@ function barWindowHeight(barHeight, surfaceMode, margin) {
     )
 }
 
+function barReservedHeight(barHeight, surfaceMode, margin) {
+    return Math.max(
+        0,
+        finiteNumber(barHeight, 0)
+            + (String(surfaceMode) === "floating"
+                ? finiteNumber(margin, 0) * 2
+                : 0)
+    )
+}
+
+function outputYToViewportY(
+    outputY,
+    barPosition,
+    barHeight,
+    surfaceMode,
+    margin
+) {
+    var y = Number(outputY)
+
+    if (!isFinite(y) || y < 0)
+        return -1
+
+    return y - (String(barPosition) === "top"
+        ? barReservedHeight(barHeight, surfaceMode, margin)
+        : 0)
+}
+
 function horizontalX(
     placement,
     anchorX,
@@ -81,4 +108,17 @@ function verticalY(
         : adjacentGap
 
     return clamp(adjacent, 0, maximum)
+}
+
+function aboveAnchorY(anchorTop, surfaceHeight, viewportHeight, gap) {
+    var height = Math.max(0, finiteNumber(surfaceHeight, 0))
+    var viewport = Math.max(height, finiteNumber(viewportHeight, height))
+    var maximum = Math.max(0, viewport - height)
+    var adjacentGap = Math.max(0, finiteNumber(gap, 0))
+    var top = Number(anchorTop)
+
+    if (!isFinite(top) || top < 0)
+        return maximum
+
+    return clamp(top - height - adjacentGap, 0, maximum)
 }

@@ -19,6 +19,13 @@ SettingsPage {
             ConfigStore.barContentScale,
             ConfigStore.compactMode
         )
+
+    function togglePerformanceWidgetDialog(widgetId) {
+        if (widgetDialog.opened)
+            widgetDialog.close()
+        else
+            widgetDialog.openFor(String(widgetId || "launcher"), null)
+    }
     readonly property string backgroundModeDescription: {
         switch (ConfigStore.barBackgroundMode) {
         case "translucent":

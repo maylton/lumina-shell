@@ -5,8 +5,9 @@
 Lumina creates one instance of **Lumina's Material Expressive bar** for each
 connected output. Its default 56-pixel, edge-to-edge surface places launcher,
 overview, workspaces, and localized date/time on the left; temporary Niri
-context in the center; and tray, notifications, system status, and the account
-avatar on the right. The avatar opens the Dashboard and its session actions.
+context in the center; and tray, notifications, network, audio, battery, and
+the account avatar on the right. The avatar opens the Dashboard and its session
+actions.
 
 The focused workspace expands into an accent pill. Other active workspaces
 remain compact, while inactive workspaces recede without reducing their pointer
@@ -22,6 +23,10 @@ The Bar settings page controls:
 - automatic height-derived content scale or manual 80–140% scale;
 - active widgets under Left, Center, and Right;
 - per-widget backgrounds, labels, text modes, and presentation settings.
+
+Network, audio, and battery are separate widgets. They can be reordered,
+removed, restored, and configured independently. Network and audio open their
+dedicated panels, while battery opens the Dashboard.
 
 Only Blur and Frosted Glass request Niri's native shaped blur. Translucent uses
 client alpha without compositor blur. All modes reserve desktop work area, and

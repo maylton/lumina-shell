@@ -127,24 +127,51 @@ var entries = [
         }
     },
     {
-        id: "system-status",
-        title: "System status",
-        description: "Network, audio, and battery",
+        id: "network",
+        title: "Network",
+        description: "Current wired or wireless connection",
         icon: "network-wireless-symbolic",
         side: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
-        component: "SystemStatusWidgetSettings",
+        component: "NetworkWidgetSettings",
         defaults: {
             showBackground: true,
-            layout: "grouped",
-            showNetwork: true,
-            networkTextMode: "summary",
-            showAudio: true,
-            audioTextMode: "percentage",
-            showBattery: true,
-            batteryTextMode: "percentage"
+            surfacePlacement: "near-widget",
+            textMode: "summary"
+        }
+    },
+    {
+        id: "audio",
+        title: "Audio",
+        description: "Output volume and audio controls",
+        icon: "audio-volume-high-symbolic",
+        side: RIGHT,
+        configurable: true,
+        available: true,
+        unavailableReason: "",
+        component: "AudioWidgetSettings",
+        defaults: {
+            showBackground: true,
+            surfacePlacement: "near-widget",
+            textMode: "percentage"
+        }
+    },
+    {
+        id: "battery",
+        title: "Battery",
+        description: "Battery level and charging state",
+        icon: "battery-good-symbolic",
+        side: RIGHT,
+        configurable: true,
+        available: true,
+        unavailableReason: "",
+        component: "BatteryWidgetSettings",
+        defaults: {
+            showBackground: true,
+            surfacePlacement: "near-widget",
+            textMode: "percentage"
         }
     },
     {

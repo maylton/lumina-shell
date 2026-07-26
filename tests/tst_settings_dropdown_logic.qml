@@ -18,6 +18,24 @@ TestCase {
         compare(DropdownLogic.offsetIndex(1, 1, 3), 2)
     }
 
+    function test_secondToggleDuringEnterRequestsClose() {
+        compare(
+            DropdownLogic.desiredOpenAfterToggle(true, false),
+            false
+        )
+    }
+
+    function test_toggleDuringExitRequestsReopen() {
+        compare(
+            DropdownLogic.desiredOpenAfterToggle(false, false),
+            true
+        )
+        compare(
+            DropdownLogic.shouldReopenAfterClose(true),
+            true
+        )
+    }
+
     function test_popupFlipsAboveWhenNeeded() {
         compare(
             DropdownLogic.popupY(100, 20, 140, 600, 14),

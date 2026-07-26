@@ -109,42 +109,6 @@ Rectangle {
         event.accepted = true
     }
 
-    Connections {
-        target: BarPanelCoordinator
-
-        function onOpenRequested(
-            panelId,
-            outputName,
-            placement,
-            anchorX,
-            anchorTop,
-            anchorBottom
-        ) {
-            if (panelId !== "launcher" || outputName !== root.outputName)
-                return
-
-            OverlayStore.prepareFor(
-                "launcher",
-                root.outputName,
-                placement,
-                anchorX,
-                anchorTop,
-                anchorBottom
-            )
-            LauncherStore.openFor(root.outputName)
-        }
-
-        function onCloseRequested(panelId, outputName) {
-            if (panelId !== "launcher" || outputName !== root.outputName)
-                return
-
-            if (root.expanded)
-                LauncherStore.close()
-            else
-                BarPanelCoordinator.reportClosed("launcher", root.outputName)
-        }
-    }
-
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast

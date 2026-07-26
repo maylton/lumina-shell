@@ -59,7 +59,6 @@ BarPanelWindow {
 
     function prepareContent() {
         ConnectivityManagerService.setActiveSection("wifi")
-        ConnectivityManagerService.refreshAll()
     }
 
     function dismiss() {

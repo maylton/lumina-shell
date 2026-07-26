@@ -2,6 +2,8 @@ module qs.modules.bar.widgets
 BarPanelWindow 1.0 BarPanelWindow.qml
 AudioPanel 1.0 AudioPanel.qml
 AudioVolumeRow 1.0 AudioVolumeRow.qml
+AudioWidget 1.0 AudioWidget.qml
+BatteryWidget 1.0 BatteryWidget.qml
 BluetoothDeviceRow 1.0 BluetoothDeviceRow.qml
 BluetoothPanel 1.0 BluetoothPanel.qml
 BluetoothWidget 1.0 BluetoothWidget.qml
@@ -11,16 +13,15 @@ ExpressiveBatteryIcon 1.0 ExpressiveBatteryIcon.qml
 KeyboardLayoutIndicator 1.0 KeyboardLayoutIndicator.qml
 NetworkConnectionRow 1.0 NetworkConnectionRow.qml
 NetworkPanel 1.0 NetworkPanel.qml
+NetworkWidget 1.0 NetworkWidget.qml
 OverviewButton 1.0 OverviewButton.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml
-SystemStatusCluster 1.0 SystemStatusCluster.qml
 SystemStatusItem 1.0 SystemStatusItem.qml
 UserAvatarButton 1.0 UserAvatarButton.qml
 TrayItem 1.0 TrayItem.qml
 TrayMenu 1.0 TrayMenu.qml
 TrayMenuEntry 1.0 TrayMenuEntry.qml
 TrayPanel 1.0 TrayPanel.qml
-TrayTooltip 1.0 TrayTooltip.qml
 TrayWidget 1.0 TrayWidget.qml
 WorkspacePill 1.0 WorkspacePill.qml
 WorkspaceStrip 1.0 WorkspaceStrip.qml

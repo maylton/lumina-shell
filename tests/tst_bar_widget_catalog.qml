@@ -10,8 +10,12 @@ TestCase {
         const entries = BarWidgetCatalog.all()
         const ids = entries.map(entry => entry.id)
 
-        compare(entries.length, 11)
+        compare(entries.length, 13)
         compare(new Set(ids).size, entries.length)
+        verify(ids.indexOf("network") >= 0)
+        verify(ids.indexOf("audio") >= 0)
+        verify(ids.indexOf("battery") >= 0)
+        verify(ids.indexOf("system-status") < 0)
         verify(ids.indexOf("privacy") < 0)
         verify(ids.indexOf("keyboard") < 0)
     }
@@ -46,6 +50,9 @@ TestCase {
         compare(settings.datetime.surfacePlacement, "near-widget")
         compare(settings.tray.surfacePlacement, "near-widget")
         compare(settings.notifications.surfacePlacement, "near-widget")
+        compare(settings.network.surfacePlacement, "near-widget")
+        compare(settings.audio.surfacePlacement, "near-widget")
+        compare(settings.battery.surfacePlacement, "near-widget")
         compare(settings.dashboard.surfacePlacement, "centered")
         compare(settings.wallpaper.surfacePlacement, "centered")
         compare(settings.session.surfacePlacement, "centered")

@@ -8,7 +8,7 @@ import qs.modules.control
 import qs.services.i18n
 import qs.stores.config
 import qs.stores.dock
-import qs.stores.launcher
+import qs.stores.shell
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import "DockStrings.js" as DockStrings
 
@@ -54,8 +54,14 @@ Scope {
                         + surfaceHeight
                         + effectiveMargin
                         + reservedWindowGap
-                readonly property int collapsedHeight:
-                    bottomBarOffset + 7
+                // Keep the layer-shell window stable while live settings resize
+                // the visible dock: 72 px icon + chrome + margin + reserve gap.
+                readonly property int stableWindowHeight:
+                    bottomBarOffset
+                        + 72
+                        + 24
+                        + 24
+                        + 8
                 readonly property int desiredFloatingWidth:
                     Math.max(112, dockRow.implicitWidth + 24)
                 readonly property int maximumFloatingWidth:
@@ -78,6 +84,13 @@ Scope {
                 property bool revealRequested: !DockPreferences.autoHide
                 property var contextItem: null
                 property real contextAnchorX: width / 2
+                readonly property string launcherSurfacePlacement: String(
+                    ConfigStore.widgetSetting(
+                        "launcher",
+                        "surfacePlacement",
+                        "centered"
+                    )
+                )
 
                 function closeContextMenu() {
                     const wasOpen = dockPinMenu.opened
@@ -96,7 +109,7 @@ Scope {
                     if (!item || !sourceItem)
                         return
 
-                    const point = sourceItem.mapToItem(panel, 0, 0)
+                    const point = sourceItem.mapToItem(null, 0, 0)
                     contextItem = item
                     contextAnchorX = point.x + sourceItem.width / 2
                     revealRequested = true
@@ -107,9 +120,8 @@ Scope {
                 screen: modelData
                 visible: DockPreferences.initialized
                     && DockPreferences.enabled
-                implicitHeight: expanded
-                    ? expandedHeight + contextMenuExtraHeight
-                    : collapsedHeight
+                implicitHeight:
+                    stableWindowHeight + contextMenuExtraHeight
                 exclusiveZone: DockPreferences.reserveSpace
                     && !DockPreferences.autoHide
                         ? expandedHeight
@@ -172,15 +184,6 @@ Scope {
                         width: dockSurface.width
                         height: dockSurface.height
                         radius: dockSurface.radius
-                    }
-                }
-
-                Behavior on implicitHeight {
-                    NumberAnimation {
-                        duration: root.luminaDesign.motion.spatialDefault
-                        easing.type: root.luminaDesign.motion.spatialEasing
-                        easing.overshoot:
-                            root.luminaDesign.motion.spatialOvershoot
                     }
                 }
 
@@ -342,24 +345,70 @@ Scope {
                                 Accessible.focusable: true
                                 Accessible.focused: activeFocus
                                 Accessible.onPressAction:
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
+
+                                function anchorGeometry() {
+                                    const horizontal = launcherButton.mapToItem(
+                                        null,
+                                        launcherButton.width / 2,
+                                        0
+                                    )
+                                    const surfaceTop =
+                                        launcherButton.mapToItem(
+                                            dockSurface,
+                                            launcherButton.width / 2,
+                                            0
+                                        )
+                                    const surfaceBottom =
+                                        launcherButton.mapToItem(
+                                            dockSurface,
+                                            launcherButton.width / 2,
+                                            launcherButton.height
+                                        )
+                                    const outputSurfaceTop =
+                                        panel.modelData.height
+                                        - panel.bottomBarOffset
+                                        - panel.effectiveMargin
+                                        - dockSurface.height
+
+                                    return {
+                                        x: Number(horizontal.x),
+                                        top: Number(
+                                            outputSurfaceTop + surfaceTop.y
+                                        ),
+                                        bottom: Number(
+                                            outputSurfaceTop + surfaceBottom.y
+                                        )
+                                    }
+                                }
+
+                                function activate() {
+                                    panel.closeContextMenu()
+                                    const anchor = anchorGeometry()
+                                    BarPanelCoordinator.requestToggle(
+                                        "launcher",
+                                        panel.outputName,
+                                        panel.launcherSurfacePlacement,
+                                        anchor.x,
+                                        anchor.top,
+                                        anchor.bottom,
+                                        "above"
+                                    )
+                                }
 
                                 function activateFromPointer() {
-                                    panel.closeContextMenu()
                                     launcherButton.forceActiveFocus()
                                     launcherButton.focus = false
-                                    LauncherStore.toggle(panel.outputName)
+                                    activate()
                                 }
 
                                 Keys.onSpacePressed: event => {
-                                    panel.closeContextMenu()
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
                                     event.accepted = true
                                 }
 
                                 Keys.onReturnPressed: event => {
-                                    panel.closeContextMenu()
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
                                     event.accepted = true
                                 }
 

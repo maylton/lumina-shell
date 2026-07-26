@@ -481,29 +481,29 @@ QtObject {
             stateLayerSize: 32
         },
         motion: {
-            fast: Math.max(1, Math.round(120 * root.motionScale)),
-            medium: Math.max(1, Math.round(220 * root.motionScale)),
-            slow: Math.max(1, Math.round(380 * root.motionScale)),
+            fast: Math.max(1, Math.round(100 * root.motionScale)),
+            medium: Math.max(1, Math.round(180 * root.motionScale)),
+            slow: Math.max(1, Math.round(300 * root.motionScale)),
             effectsFast:
-                Math.max(1, Math.round(100 * root.motionScale)),
+                Math.max(1, Math.round(80 * root.motionScale)),
             effectsDefault:
-                Math.max(1, Math.round(180 * root.motionScale)),
+                Math.max(1, Math.round(140 * root.motionScale)),
             effectsSlow:
-                Math.max(1, Math.round(300 * root.motionScale)),
+                Math.max(1, Math.round(240 * root.motionScale)),
             spatialFast:
-                Math.max(1, Math.round(180 * root.motionScale)),
+                Math.max(1, Math.round(140 * root.motionScale)),
             spatialDefault:
-                Math.max(1, Math.round(300 * root.motionScale)),
+                Math.max(1, Math.round(240 * root.motionScale)),
             spatialSlow:
-                Math.max(1, Math.round(450 * root.motionScale)),
-            press:
-                Math.max(1, Math.round(90 * root.motionScale)),
-            pageTransition:
                 Math.max(1, Math.round(360 * root.motionScale)),
+            press:
+                Math.max(1, Math.round(70 * root.motionScale)),
+            pageTransition:
+                Math.max(1, Math.round(280 * root.motionScale)),
             workspaceTransform:
-                Math.max(1, Math.round(300 * root.motionScale)),
+                Math.max(1, Math.round(240 * root.motionScale)),
             mediaProgressMorph:
-                Math.max(1, Math.round(420 * root.motionScale)),
+                Math.max(1, Math.round(340 * root.motionScale)),
             mediaWaveCycle:
                 Math.max(1, Math.round(1600 * root.motionScale)),
             effectsEasing: Easing.OutCubic,

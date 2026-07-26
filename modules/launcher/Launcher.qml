@@ -20,6 +20,46 @@ Scope {
 
     readonly property var luminaDesign: Theme.luminaTokens
 
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom,
+            anchorEdge
+        ) {
+            if (panelId !== "launcher")
+                return
+
+            OverlayStore.prepareFor(
+                "launcher",
+                outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom,
+                anchorEdge
+            )
+            LauncherStore.openFor(outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "launcher")
+                return
+
+            if (LauncherStore.open
+                && LauncherStore.activeOutputName === outputName) {
+                LauncherStore.close()
+            } else {
+                BarPanelCoordinator.reportClosed("launcher", outputName)
+            }
+        }
+    }
+
     IpcHandler {
         target: "launcher"
 
@@ -164,6 +204,8 @@ Scope {
                 scrimColor: root.luminaDesign.color.scrim
                 surfaceItem: launcherSurface
                 surfaceRadius: launcherSurface.radius
+                surfaceAnchorEdge: OverlayStore.activeAnchorEdge
+                surfaceAnchorTop: OverlayStore.activeAnchorTop
                 onDismissRequested: LauncherStore.close()
 
                 onVisibleChanged: {

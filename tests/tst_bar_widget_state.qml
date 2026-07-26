@@ -7,8 +7,15 @@ TestCase {
     name: "BarWidgetState"
 
     function test_moveActivePreservesHiddenSlots() {
-        const order = ["tray", "notifications", "system-status", "dashboard"]
-        const active = ["tray", "system-status", "dashboard"]
+        const order = [
+            "tray",
+            "notifications",
+            "network",
+            "audio",
+            "battery",
+            "dashboard"
+        ]
+        const active = ["tray", "network", "audio", "dashboard"]
         const moved = BarWidgetState.moveActive(
             order,
             active,
@@ -21,8 +28,10 @@ TestCase {
             JSON.stringify([
                 "tray",
                 "notifications",
+                "network",
                 "dashboard",
-                "system-status"
+                "battery",
+                "audio"
             ])
         )
     }

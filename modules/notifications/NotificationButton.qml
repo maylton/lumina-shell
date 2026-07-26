@@ -48,8 +48,6 @@ Rectangle {
         )
     )
 
-    property bool tooltipVisible: false
-
     width: circleDiameter
     height: circleDiameter
     implicitWidth: circleDiameter
@@ -293,51 +291,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: tooltipTimer.restart()
-        onExited: {
-            tooltipTimer.stop()
-            root.tooltipVisible = false
-        }
-        onPressed: {
-            tooltipTimer.stop()
-            root.tooltipVisible = false
-        }
         onClicked: mouse => {
             root.focus = false
             root.activate(mouse.x)
         }
-    }
-
-    Timer {
-        id: tooltipTimer
-
-        interval: 450
-        repeat: false
-        onTriggered: root.tooltipVisible =
-            notificationMouse.containsMouse
-    }
-
-    TrayTooltip {
-        anchorItem: root
-        title: NotificationService.doNotDisturb
-            ? I18n.tr(
-                "bar.notifications.tooltipDnd",
-                "Notifications · DND"
-            )
-            : I18n.tr(
-                "bar.notifications.tooltip",
-                "Notifications"
-            )
-        description: NotificationService.unreadCount > 0
-            ? I18n.tr(
-                "bar.notifications.unreadCount",
-                "%1 unread",
-                [NotificationService.unreadCount]
-            )
-            : I18n.tr(
-                "bar.notifications.noneUnread",
-                "No unread notifications"
-            )
-        shown: root.tooltipVisible && !root.expanded
     }
 }

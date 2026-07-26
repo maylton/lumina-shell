@@ -10,6 +10,8 @@ import qs.services.system
 import qs.services.weather
 
 Scope {
+    PerformanceDiagnostics {}
+
     readonly property var audioService: AudioService
     readonly property var brightnessService: BrightnessService
     readonly property var connectivityService: ConnectivityService

@@ -274,13 +274,6 @@ Rectangle {
         }
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: root.accessibleDate
-        description: "Open calendar"
-        shown: dateTimeMouse.containsMouse
-    }
-
     CalendarPanel {
         id: calendarPanel
 

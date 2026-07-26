@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema9WidgetSettings() {
+    function test_defaultsUseSchema10IndividualSystemWidgets() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 9)
+        compare(state.schemaVersion, 10)
         compare(state.themeMode, "auto")
         compare(state.shellBackgroundMode, "solid")
         compare(state.shellSurfaceOpacity, 0.82)
@@ -23,10 +23,10 @@ TestCase {
         compare(state.barAutoScaleContents, true)
         compare(state.barContentScale, 1)
         compare(state.barWidgetSettings.context.mode, "contextual")
-        compare(
-            state.barWidgetSettings["system-status"].layout,
-            "grouped"
-        )
+        compare(state.barWidgetSettings.network.textMode, "summary")
+        compare(state.barWidgetSettings.audio.textMode, "percentage")
+        compare(state.barWidgetSettings.battery.textMode, "percentage")
+        verify(state.barWidgetSettings["system-status"] === undefined)
         compare(state.barWidgetSettings.tray.mode, "grouped")
         compare(
             state.barWidgetSettings.datetime.hourFormat,
@@ -49,7 +49,7 @@ TestCase {
         compare(state.barShowWallpaperButton, false)
         compare(state.barShowSessionButton, false)
         compare(state.barLeftWidgetOrder.length, 4)
-        compare(state.barRightWidgetOrder.length, 4)
+        compare(state.barRightWidgetOrder.length, 6)
         compare(state.notificationPopupMaximum, 3)
         compare(state.osdDuration, 1800)
         verify(state.dashboardCardOrder.length > 0)
@@ -65,7 +65,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -86,7 +86,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -96,7 +96,7 @@ TestCase {
         verify(migrated.barVisualStyle === undefined)
         compare(migrated.barSurfaceMode, "edge-to-edge")
         compare(
-            migrated.barWidgetSettings["system-status"].audioTextMode,
+            migrated.barWidgetSettings.audio.textMode,
             "percentage"
         )
     }
@@ -145,7 +145,9 @@ TestCase {
                 "dashboard",
                 "tray",
                 "notifications",
-                "system-status"
+                "network",
+                "audio",
+                "battery"
             ])
         )
     }
@@ -163,7 +165,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
         compare(migrated.shellBackgroundMode, "blur")
@@ -204,7 +206,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -221,23 +223,12 @@ TestCase {
         compare(migrated.barWidgetSettings.datetime.hourFormat, "12")
         compare(migrated.barWidgetSettings.datetime.showSeconds, true)
         compare(migrated.barWidgetSettings.tray.mode, "inline")
-        compare(
-            migrated.barWidgetSettings["system-status"].layout,
-            "individual"
-        )
-        compare(
-            migrated.barWidgetSettings["system-status"].showNetwork,
-            false
-        )
-        compare(
-            migrated.barWidgetSettings["system-status"].audioTextMode,
-            "icon"
-        )
-        compare(
-            migrated.barWidgetSettings["system-status"].showBattery,
-            false
-        )
-        compare(migrated.barShowSystemStatus, true)
+        compare(migrated.barWidgetSettings.network.textMode, "summary")
+        compare(migrated.barWidgetSettings.audio.textMode, "icon")
+        compare(migrated.barWidgetSettings.battery.textMode, "percentage")
+        compare(migrated.barShowNetworkStatus, false)
+        compare(migrated.barShowAudioStatus, true)
+        compare(migrated.barShowBatteryStatus, false)
         compare(migrated.barShowDashboardButton, false)
         verify(migrated.barWidgetPillsEnabled === undefined)
         verify(migrated.barContextMode === undefined)
@@ -253,8 +244,8 @@ TestCase {
                     showSeconds: "yes",
                     extra: "ignored"
                 },
-                "system-status": {
-                    networkTextMode: "fictional"
+                network: {
+                    textMode: "fictional"
                 }
             }
         })
@@ -264,7 +255,7 @@ TestCase {
         compare(state.barWidgetSettings.datetime.showSeconds, false)
         verify(state.barWidgetSettings.datetime.extra === undefined)
         compare(
-            state.barWidgetSettings["system-status"].networkTextMode,
+            state.barWidgetSettings.network.textMode,
             "summary"
         )
     }
@@ -277,7 +268,7 @@ TestCase {
             barBackgroundMode: "frosted"
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.shellBackgroundMode, "blur")
         compare(migrated.shellSurfaceOpacity, 0.74)
         compare(migrated.barBackgroundMode, "frosted")
@@ -291,9 +282,62 @@ TestCase {
             barHeight: 64
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.barHeight, 64)
         compare(migrated.barPanelGap, 8)
+    }
+
+    function test_schema9SplitsSystemStatusWithoutLosingPreferences() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 9,
+            barShowSystemStatus: true,
+            barRightWidgetOrder: [
+                "tray",
+                "system-status",
+                "notifications",
+                "dashboard"
+            ],
+            barWidgetSettings: {
+                "system-status": {
+                    showBackground: false,
+                    showNetwork: false,
+                    networkTextMode: "name",
+                    showAudio: true,
+                    audioTextMode: "state",
+                    showBattery: true,
+                    batteryTextMode: "icon"
+                }
+            }
+        })
+        const hiddenWithoutSettings = ConfigSchema.migrate({
+            schemaVersion: 9,
+            barShowSystemStatus: false
+        })
+
+        compare(migrated.schemaVersion, 10)
+        compare(
+            JSON.stringify(migrated.barRightWidgetOrder),
+            JSON.stringify([
+                "tray",
+                "network",
+                "audio",
+                "battery",
+                "notifications",
+                "dashboard"
+            ])
+        )
+        compare(migrated.barShowNetworkStatus, false)
+        compare(migrated.barShowAudioStatus, true)
+        compare(migrated.barShowBatteryStatus, true)
+        compare(migrated.barWidgetSettings.network.showBackground, false)
+        compare(migrated.barWidgetSettings.network.textMode, "name")
+        compare(migrated.barWidgetSettings.audio.textMode, "state")
+        compare(migrated.barWidgetSettings.battery.textMode, "icon")
+        verify(migrated.barWidgetSettings["system-status"] === undefined)
+        verify(migrated.barShowSystemStatus === undefined)
+        compare(hiddenWithoutSettings.barShowNetworkStatus, false)
+        compare(hiddenWithoutSettings.barShowAudioStatus, false)
+        compare(hiddenWithoutSettings.barShowBatteryStatus, false)
     }
 
     function test_widgetSurfacePlacementNormalization() {
@@ -403,7 +447,7 @@ TestCase {
             barBackgroundMode: "frosted",
             barWidgetSettings: {
                 context: { mode: "always" },
-                "system-status": { layout: "individual" },
+                network: { textMode: "name" },
                 tray: { mode: "inline" },
                 datetime: { dateMode: "full" }
             }
@@ -413,7 +457,7 @@ TestCase {
             barBackgroundMode: "blurred",
             barWidgetSettings: {
                 context: { mode: "polling" },
-                "system-status": { layout: "stacked" },
+                network: { textMode: "fictional" },
                 tray: { mode: "floating" },
                 datetime: { dateMode: "numeric" }
             }
@@ -426,8 +470,8 @@ TestCase {
         compare(valid.barBackgroundMode, "frosted")
         compare(valid.barWidgetSettings.context.mode, "always")
         compare(
-            valid.barWidgetSettings["system-status"].layout,
-            "individual"
+            valid.barWidgetSettings.network.textMode,
+            "name"
         )
         compare(valid.barWidgetSettings.tray.mode, "inline")
         compare(valid.barWidgetSettings.datetime.dateMode, "full")
@@ -436,8 +480,8 @@ TestCase {
         compare(invalid.barBackgroundMode, "solid")
         compare(invalid.barWidgetSettings.context.mode, "contextual")
         compare(
-            invalid.barWidgetSettings["system-status"].layout,
-            "grouped"
+            invalid.barWidgetSettings.network.textMode,
+            "summary"
         )
         compare(invalid.barWidgetSettings.tray.mode, "grouped")
         compare(invalid.barWidgetSettings.datetime.dateMode, "short")
@@ -449,7 +493,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 9)
+        compare(migrated.schemaVersion, 10)
         compare(migrated.barBackgroundMode, "blur")
     }
 
@@ -485,7 +529,9 @@ TestCase {
                 "session",
                 "tray",
                 "notifications",
-                "system-status"
+                "network",
+                "audio",
+                "battery"
             ])
         )
     }
@@ -518,10 +564,12 @@ TestCase {
             },
             barRightWidgetOrder: {
                 0: "dashboard",
-                1: "system-status",
-                2: "notifications",
-                3: "tray",
-                length: 4
+                1: "battery",
+                2: "audio",
+                3: "network",
+                4: "notifications",
+                5: "tray",
+                length: 6
             }
         })
 
@@ -538,7 +586,9 @@ TestCase {
             JSON.stringify(state.barRightWidgetOrder),
             JSON.stringify([
                 "dashboard",
-                "system-status",
+                "battery",
+                "audio",
+                "network",
                 "notifications",
                 "tray"
             ])
@@ -567,7 +617,7 @@ TestCase {
         compare(bar.barWidgetSettings.context.mode, "contextual")
         compare(bar.barWidgetSettings.tray.mode, "grouped")
         compare(bar.barShowDashboardButton, true)
-        compare(bar.barRightWidgetOrder.length, 4)
+        compare(bar.barRightWidgetOrder.length, 6)
         verify(bar.themeMode === undefined)
         compare(dashboard.dashboardUseUserAvatarImage, true)
         compare(dashboard.dashboardUserAvatarPath, "")
@@ -603,10 +653,8 @@ TestCase {
             barPosition: "bottom",
             barWidgetSettings: {
                 tray: { mode: "inline" },
-                "system-status": {
-                    audioTextMode: "icon",
-                    networkTextMode: "icon"
-                }
+                audio: { textMode: "icon" },
+                network: { textMode: "icon" }
             },
             dashboardUseUserAvatarImage: false,
             dashboardUserAvatarPath:
@@ -625,11 +673,11 @@ TestCase {
         compare(restored.barPosition, "bottom")
         compare(restored.barWidgetSettings.tray.mode, "inline")
         compare(
-            restored.barWidgetSettings["system-status"].audioTextMode,
+            restored.barWidgetSettings.audio.textMode,
             "icon"
         )
         compare(
-            restored.barWidgetSettings["system-status"].networkTextMode,
+            restored.barWidgetSettings.network.textMode,
             "icon"
         )
         compare(restored.dashboardUseUserAvatarImage, false)

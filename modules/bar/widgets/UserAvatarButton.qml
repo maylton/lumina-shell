@@ -186,13 +186,4 @@ Rectangle {
         }
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: SystemInfoStore.displayName
-        description: I18n.tr(
-            "bar.dashboard.tooltipDescription",
-            "Open Dashboard and session actions"
-        )
-        shown: avatarMouse.containsMouse
-    }
 }

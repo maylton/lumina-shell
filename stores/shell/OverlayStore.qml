@@ -14,6 +14,7 @@ QtObject {
     property real activeAnchorX: -1
     property real activeAnchorTop: -1
     property real activeAnchorBottom: -1
+    property string activeAnchorEdge: ""
 
     property string pendingSurface: ""
     property string pendingOutputName: ""
@@ -21,6 +22,7 @@ QtObject {
     property real pendingAnchorX: -1
     property real pendingAnchorTop: -1
     property real pendingAnchorBottom: -1
+    property string pendingAnchorEdge: ""
 
     signal surfaceOpened(string surfaceName, string outputName)
     signal surfaceClosed(string surfaceName)
@@ -32,6 +34,7 @@ QtObject {
         pendingAnchorX = -1
         pendingAnchorTop = -1
         pendingAnchorBottom = -1
+        pendingAnchorEdge = ""
     }
 
     function prepareFor(
@@ -40,7 +43,8 @@ QtObject {
         placement,
         anchorX,
         anchorTop,
-        anchorBottom
+        anchorBottom,
+        anchorEdge
     ) {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
@@ -70,6 +74,11 @@ QtObject {
         pendingAnchorBottom = validVerticalAnchor
             ? numericAnchorBottom
             : -1
+        pendingAnchorEdge = nearWidget
+            && validVerticalAnchor
+            && String(anchorEdge || "") === "above"
+                ? "above"
+                : ""
     }
 
     function resolvedOutputName(outputName) {
@@ -99,6 +108,7 @@ QtObject {
         activeAnchorX = prepared ? pendingAnchorX : -1
         activeAnchorTop = prepared ? pendingAnchorTop : -1
         activeAnchorBottom = prepared ? pendingAnchorBottom : -1
+        activeAnchorEdge = prepared ? pendingAnchorEdge : ""
 
         clearPending()
         activeSurface = surface
@@ -120,6 +130,7 @@ QtObject {
         activeAnchorX = -1
         activeAnchorTop = -1
         activeAnchorBottom = -1
+        activeAnchorEdge = ""
         clearPending()
 
         if (closedSurface)

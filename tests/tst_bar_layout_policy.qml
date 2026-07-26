@@ -64,4 +64,21 @@ TestCase {
             0
         )
     }
+
+    function test_unavailableLoadedWidgetsDoNotReserveLayoutSpace() {
+        verify(BarLayoutPolicy.loadedWidgetVisible(true, null))
+        verify(BarLayoutPolicy.loadedWidgetVisible(true, {}))
+        verify(BarLayoutPolicy.loadedWidgetVisible(
+            true,
+            { layoutAvailable: true }
+        ))
+        verify(!BarLayoutPolicy.loadedWidgetVisible(
+            true,
+            { layoutAvailable: false }
+        ))
+        verify(!BarLayoutPolicy.loadedWidgetVisible(
+            false,
+            { layoutAvailable: true }
+        ))
+    }
 }

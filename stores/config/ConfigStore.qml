@@ -71,8 +71,12 @@ Singleton {
         stateAdapter.barShowNotifications
     property alias barShowDashboardButton:
         stateAdapter.barShowDashboardButton
-    property alias barShowSystemStatus:
-        stateAdapter.barShowSystemStatus
+    property alias barShowNetworkStatus:
+        stateAdapter.barShowNetworkStatus
+    property alias barShowAudioStatus:
+        stateAdapter.barShowAudioStatus
+    property alias barShowBatteryStatus:
+        stateAdapter.barShowBatteryStatus
     property alias barShowWallpaperButton:
         stateAdapter.barShowWallpaperButton
     property alias barShowSessionButton:
@@ -397,7 +401,9 @@ Singleton {
             keyboard: ["barShowKeyboardLayout"],
             tray: ["barShowTray"],
             notifications: ["barShowNotifications"],
-            "system-status": ["barShowSystemStatus"],
+            network: ["barShowNetworkStatus"],
+            audio: ["barShowAudioStatus"],
+            battery: ["barShowBatteryStatus"],
             dashboard: ["barShowDashboardButton"],
             wallpaper: ["barShowWallpaperButton"],
             session: ["barShowSessionButton"]
@@ -683,7 +689,9 @@ Singleton {
             property bool barShowTray: true
             property bool barShowNotifications: true
             property bool barShowDashboardButton: true
-            property bool barShowSystemStatus: true
+            property bool barShowNetworkStatus: true
+            property bool barShowAudioStatus: true
+            property bool barShowBatteryStatus: true
             property bool barShowWallpaperButton: false
             property bool barShowSessionButton: false
             property bool barShowClock: true

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls as Controls
 import qs.design
+import qs.stores.shell
 import "SettingsDropdownLogic.js" as DropdownLogic
 
 SettingsRow {
@@ -10,6 +11,10 @@ SettingsRow {
 
     property var options: []
     property string currentValue: ""
+    property double openRequestedAt: 0
+    property bool desiredOpen: false
+    readonly property bool menuOpen:
+        desiredOpen || dropdownPopup.visible
 
     signal selected(string value)
 
@@ -76,19 +81,34 @@ SettingsRow {
         if (!available || options.length === 0)
             return
 
+        desiredOpen = true
+
+        if (dropdownPopup.visible)
+            return
+
         dropdownPopup.highlightedIndex =
             DropdownLogic.initialIndex(
                 currentIndex(),
                 options.length
             )
+        const position = popupPosition()
+        dropdownPopup.x = position.x
+        dropdownPopup.y = position.y
+        openRequestedAt = Date.now()
         dropdownPopup.open()
     }
 
     function toggleMenu() {
-        if (dropdownPopup.opened)
+        desiredOpen = DropdownLogic.desiredOpenAfterToggle(
+            desiredOpen,
+            dropdownPopup.opened
+        )
+
+        if (!desiredOpen) {
             dropdownPopup.close()
-        else
+        } else {
             openMenu()
+        }
     }
 
     function selectIndex(index) {
@@ -96,6 +116,7 @@ SettingsRow {
             return
 
         selected(String(options[index].value))
+        desiredOpen = false
         dropdownPopup.close()
     }
 
@@ -171,8 +192,8 @@ SettingsRow {
         property int highlightedIndex: -1
 
         parent: root
-        x: root.popupPosition().x
-        y: root.popupPosition().y
+        x: 0
+        y: 0
         width: root.controlWidth
         height: root.popupHeight
         padding: root.luminaDesign.spacing.small
@@ -203,11 +224,69 @@ SettingsRow {
         }
 
         onOpened: {
+            if (root.openRequestedAt > 0) {
+                const requestedAt = root.openRequestedAt
+                const expectedDuration =
+                    root.luminaDesign.motion.effectsDefault
+                const totalDuration = Date.now()
+                    - root.openRequestedAt
+                PerformanceTrace.record(
+                    "dropdown",
+                    root.title,
+                    "opened",
+                    Math.max(
+                        0,
+                        totalDuration - expectedDuration
+                    ),
+                    {
+                        optionCount: root.options.length,
+                        expectedDurationMs: expectedDuration,
+                        totalDurationMs: totalDuration
+                    }
+                )
+                root.openRequestedAt = 0
+                Qt.callLater(function() {
+                    if (!dropdownPopup.opened)
+                        return
+
+                    PerformanceTrace.record(
+                        "dropdown",
+                        root.title,
+                        "settled",
+                        Math.max(
+                            0,
+                            Date.now()
+                                - requestedAt
+                                - expectedDuration
+                        ),
+                        {
+                            optionCount: root.options.length,
+                            expectedDurationMs: expectedDuration,
+                            totalDurationMs:
+                                Date.now() - requestedAt
+                        }
+                    )
+                })
+            }
+
             highlightedIndex = DropdownLogic.initialIndex(
                 root.currentIndex(),
                 root.options.length
             )
             menuFocus.forceActiveFocus(Qt.PopupFocusReason)
+        }
+
+        onAboutToHide: {
+            if (root.desiredOpen)
+                root.desiredOpen = false
+        }
+
+        onClosed: {
+            if (DropdownLogic.shouldReopenAfterClose(
+                root.desiredOpen
+            )) {
+                root.openMenu()
+            }
         }
 
         background: Rectangle {

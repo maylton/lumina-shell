@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -12,6 +13,7 @@ Rectangle {
     property string detail: ""
     property real value: 0
     property bool available: true
+    property double benchmarkRequestedAt: 0
 
     signal valueRequested(real value)
 
@@ -29,6 +31,25 @@ Rectangle {
             0,
             Math.min(1, clampedValue + delta)
         ))
+    }
+
+    function benchmarkValue(candidate) {
+        if (!available)
+            return
+
+        const normalized = Math.max(
+            0,
+            Math.min(1, Number(candidate))
+        )
+        benchmarkRequestedAt = Date.now()
+        PerformanceTrace.recordInstant(
+            "slider",
+            title,
+            "requested",
+            { normalized: normalized }
+        )
+        valueRequested(normalized)
+        benchmarkSettleTimer.restart()
     }
 
     implicitHeight: 72
@@ -55,6 +76,32 @@ Rectangle {
     Keys.onRightPressed: event => {
         root.adjustBy(0.05)
         event.accepted = true
+    }
+
+    Timer {
+        id: benchmarkSettleTimer
+
+        interval: root.luminaDesign.motion.effectsFast
+        repeat: false
+        onTriggered: {
+            PerformanceTrace.record(
+                "slider",
+                root.title,
+                "settled",
+                Math.max(
+                    0,
+                    Date.now()
+                        - root.benchmarkRequestedAt
+                        - interval
+                ),
+                {
+                    value: root.value,
+                    expectedDurationMs: interval,
+                    totalDurationMs:
+                        Date.now() - root.benchmarkRequestedAt
+                }
+            )
+        }
     }
 
     Row {

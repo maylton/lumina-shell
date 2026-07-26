@@ -51,8 +51,6 @@ Item {
         )
     )
 
-    property bool tooltipVisible: false
-
     function mappedAnchorGeometry(localX) {
         const top = groupButton.mapToItem(
             null,
@@ -200,15 +198,6 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onEntered: tooltipTimer.restart()
-                onExited: {
-                    tooltipTimer.stop()
-                    root.tooltipVisible = false
-                }
-                onPressed: {
-                    tooltipTimer.stop()
-                    root.tooltipVisible = false
-                }
                 onClicked: mouse => {
                     groupButton.focus = false
                     root.togglePopup(mouse.x)
@@ -225,21 +214,6 @@ Item {
                 trayItem: modelData
             }
         }
-    }
-
-    Timer {
-        id: tooltipTimer
-
-        interval: 450
-        repeat: false
-        onTriggered: root.tooltipVisible = groupMouse.containsMouse
-    }
-
-    TrayTooltip {
-        anchorItem: groupButton
-        title: qsTr("System tray")
-        description: qsTr("%1 active items").arg(root.itemCount)
-        shown: root.tooltipVisible && !trayPanel.visible
     }
 
     TrayPanel {

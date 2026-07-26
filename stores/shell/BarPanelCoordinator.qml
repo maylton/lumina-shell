@@ -15,6 +15,7 @@ QtObject {
     property real pendingAnchorX: -1
     property real pendingAnchorTop: -1
     property real pendingAnchorBottom: -1
+    property string pendingAnchorEdge: ""
     property string transitionPhase: "idle"
 
     signal openRequested(
@@ -23,7 +24,8 @@ QtObject {
         string placement,
         real anchorX,
         real anchorTop,
-        real anchorBottom
+        real anchorBottom,
+        string anchorEdge
     )
     signal closeRequested(string panelId, string outputName)
 
@@ -38,6 +40,7 @@ QtObject {
         pendingAnchorX = -1
         pendingAnchorTop = -1
         pendingAnchorBottom = -1
+        pendingAnchorEdge = ""
     }
 
     function reset() {
@@ -55,7 +58,8 @@ QtObject {
         placement,
         anchorX,
         anchorTop,
-        anchorBottom
+        anchorBottom,
+        anchorEdge
     ) {
         pendingPanelId = normalized(panelId)
         pendingOutputName = normalized(outputName)
@@ -63,6 +67,9 @@ QtObject {
         pendingAnchorX = Number(anchorX)
         pendingAnchorTop = Number(anchorTop)
         pendingAnchorBottom = Number(anchorBottom)
+        pendingAnchorEdge = String(anchorEdge || "") === "above"
+            ? "above"
+            : ""
     }
 
     function requestToggle(
@@ -71,7 +78,8 @@ QtObject {
         placement,
         anchorX,
         anchorTop,
-        anchorBottom
+        anchorBottom,
+        anchorEdge
     ) {
         const panel = normalized(panelId)
         const output = normalized(outputName)
@@ -79,8 +87,36 @@ QtObject {
         if (!panel || !output)
             return
 
+        PerformanceTrace.recordInstant(
+            "coordinator",
+            panel,
+            "toggle",
+            {
+                output: output,
+                phase: transitionPhase,
+                activePanel: activePanelId,
+                pendingPanel: pendingPanelId
+            }
+        )
+
         if (transitionPhase === "closing") {
-            if (activePanelId === panel && activeOutputName === output) {
+            setPending(
+                panel,
+                output,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom,
+                anchorEdge
+            )
+            return
+        }
+
+        if (transitionPhase === "opening") {
+            const togglesOpeningPanel = activePanelId === panel
+                && activeOutputName === output
+
+            if (togglesOpeningPanel) {
                 clearPending()
             } else {
                 setPending(
@@ -89,21 +125,13 @@ QtObject {
                     placement,
                     anchorX,
                     anchorTop,
-                    anchorBottom
+                    anchorBottom,
+                    anchorEdge
                 )
             }
-            return
-        }
 
-        if (transitionPhase === "opening") {
-            setPending(
-                panel,
-                output,
-                placement,
-                anchorX,
-                anchorTop,
-                anchorBottom
-            )
+            if (activePanelId)
+                beginClose()
             return
         }
 
@@ -119,7 +147,8 @@ QtObject {
             placement,
             anchorX,
             anchorTop,
-            anchorBottom
+            anchorBottom,
+            anchorEdge
         )
 
         if (activePanelId)
@@ -155,8 +184,11 @@ QtObject {
         const anchorX = pendingAnchorX
         const anchorTop = pendingAnchorTop
         const anchorBottom = pendingAnchorBottom
+        const anchorEdge = pendingAnchorEdge
 
         clearPending()
+        activePanelId = panel
+        activeOutputName = output
         transitionPhase = "opening"
         transitionTimer.restart()
 
@@ -167,7 +199,8 @@ QtObject {
                 placement,
                 anchorX,
                 anchorTop,
-                anchorBottom
+                anchorBottom,
+                anchorEdge
             )
         })
     }
@@ -179,16 +212,49 @@ QtObject {
         if (!panel || !output)
             return
 
+        if (activePanelId
+            && (activePanelId !== panel || activeOutputName !== output)) {
+            return
+        }
+
         activePanelId = panel
         activeOutputName = output
         transitionTimer.stop()
 
         if (pendingPanelId) {
+            const closesJustOpenedPanel = pendingPanelId === panel
+                && pendingOutputName === output
+
+            if (closesJustOpenedPanel)
+                clearPending()
+
             transitionPhase = "idle"
             beginClose()
         } else {
             transitionPhase = "idle"
         }
+    }
+
+    function reportPanelLogicalVisibility(
+        panelId,
+        outputName,
+        visible
+    ) {
+        const panel = normalized(panelId)
+        const output = normalized(outputName)
+
+        if (!panel || !output)
+            return
+
+        if (Boolean(visible)) {
+            if (!activePanelId) {
+                activePanelId = panel
+                activeOutputName = output
+            }
+            return
+        }
+
+        reportClosed(panel, output)
     }
 
     function reportClosed(panelId, outputName) {
@@ -236,14 +302,32 @@ QtObject {
         interval: 350
         repeat: false
         onTriggered: {
+            PerformanceTrace.record(
+                "coordinator",
+                root.transitionPhase === "closing"
+                    ? root.activePanelId
+                    : root.pendingPanelId,
+                "timeout",
+                interval,
+                {
+                    phase: root.transitionPhase,
+                    activePanel: root.activePanelId,
+                    pendingPanel: root.pendingPanelId
+                }
+            )
+
             if (root.transitionPhase === "closing") {
                 root.activePanelId = ""
                 root.activeOutputName = ""
                 root.openPending()
             } else if (root.transitionPhase === "opening") {
                 root.transitionPhase = "idle"
-                if (root.pendingPanelId)
-                    root.openPending()
+                if (root.pendingPanelId) {
+                    if (root.activePanelId)
+                        root.beginClose()
+                    else
+                        root.openPending()
+                }
             }
         }
     }

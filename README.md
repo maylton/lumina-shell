@@ -79,6 +79,7 @@ Documentation:
 - [Architecture](docs/architecture.md)
 - [Compatibility](docs/compatibility.md)
 - [Accessibility](docs/accessibility.md)
+- [Performance diagnostics](docs/performance.md)
 - [Translations](docs/translations.md)
 
 ## Repository structure

@@ -1,7 +1,6 @@
 import QtQuick
 import qs.design
 import qs.modules.control
-import qs.stores.config
 
 Rectangle {
     id: root
@@ -12,6 +11,7 @@ Rectangle {
     property string description: ""
     property bool showLabel: true
     property bool individual: false
+    property bool showBackground: true
     property bool alert: false
     property bool expressiveBattery: false
     property real batteryPercentage: 0
@@ -36,13 +36,7 @@ Rectangle {
     radius: individual || interactive ? luminaDesign.shape.barLarge : 0
     color: selected || hovered
         ? luminaDesign.color.accentContainer
-        : individual && Boolean(
-            ConfigStore.widgetSetting(
-                "system-status",
-                "showBackground",
-                true
-            )
-        )
+        : individual && showBackground
             ? luminaDesign.color.surfaceMuted
             : "transparent"
     scale: interactionMouse.pressed ? 0.96 : 1

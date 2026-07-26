@@ -35,6 +35,49 @@ TestCase {
         )
     }
 
+    function test_barReservedHeightIncludesBothFloatingMargins() {
+        compare(
+            SurfacePlacementPolicy.barReservedHeight(
+                56, "edge-to-edge", 12
+            ),
+            56
+        )
+        compare(
+            SurfacePlacementPolicy.barReservedHeight(56, "floating", 12),
+            80
+        )
+    }
+
+    function test_outputYConvertsToTopBarViewportCoordinates() {
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "top", 56, "edge-to-edge", 12
+            ),
+            1324
+        )
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "top", 56, "floating", 12
+            ),
+            1300
+        )
+    }
+
+    function test_outputYPreservesBottomBarViewportCoordinates() {
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "bottom", 56, "edge-to-edge", 12
+            ),
+            1380
+        )
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                -1, "top", 56, "edge-to-edge", 12
+            ),
+            -1
+        )
+    }
+
     function test_horizontalPositionFollowsAndClampsAnchor() {
         compare(
             SurfacePlacementPolicy.horizontalX(
@@ -134,6 +177,32 @@ TestCase {
                 "near-widget", "bottom", 300, 900, 68, 0, 16, 848, 888
             ),
             600
+        )
+    }
+
+    function test_aboveAnchorPositionUsesAnchorAndGap() {
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(760, 420, 900, 8),
+            332
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(760, 420, 900, 0),
+            340
+        )
+    }
+
+    function test_aboveAnchorPositionClampsToViewport() {
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(300, 420, 900, 8),
+            0
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(1200, 420, 900, 8),
+            480
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(-1, 420, 900, 8),
+            480
         )
     }
 

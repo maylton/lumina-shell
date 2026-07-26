@@ -20,6 +20,14 @@ function offsetIndex(currentIndex, offset, optionCount) {
     ) % optionCount
 }
 
+function desiredOpenAfterToggle(desiredOpen, opened) {
+    return !(Boolean(desiredOpen) || Boolean(opened))
+}
+
+function shouldReopenAfterClose(desiredOpen) {
+    return Boolean(desiredOpen)
+}
+
 function popupY(
     belowY,
     aboveY,
