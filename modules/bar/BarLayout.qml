@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import qs.design
 import qs.modules.bar.widgets
@@ -130,6 +132,7 @@ Item {
         )
 
         BluetoothWidget {
+            outputName: root.outputName
             panelWindow: root.panelWindow
         }
 
@@ -200,6 +203,7 @@ Item {
         id: trayComponent
 
         TrayWidget {
+            outputName: root.outputName
             panelWindow: root.panelWindow
         }
     }
