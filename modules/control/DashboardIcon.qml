@@ -16,9 +16,12 @@ Item {
     property real fallbackScale: 1
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool forceFallback:
+        iconName === "view-visible-symbolic"
+        || iconName === "view-hidden-symbolic"
     readonly property string iconSource: customSource.length > 0
         ? customSource
-        : iconName.length > 0
+        : iconName.length > 0 && !forceFallback
             ? Quickshell.iconPath(iconName, "")
             : ""
     readonly property bool iconReady: iconSource.length > 0
