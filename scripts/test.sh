@@ -55,4 +55,6 @@ else
 fi
 
 QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}" \
-    "${qml_test_runner}" -input "${repository_dir}/tests"
+    "${qml_test_runner}" \
+        -import "${repository_dir}" \
+        -input "${repository_dir}/tests"
