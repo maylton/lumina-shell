@@ -74,17 +74,19 @@ Rectangle {
         if (networkTextMode === "icon")
             return ""
 
-        if (networkTextMode === "name")
+        if (networkTextMode === "name") {
             return ConnectivityService.wifiConnected
                 ? ConnectivityService.wifiName
                 : ConnectivityService.networkSummary
+        }
 
-        if (networkTextMode === "type")
+        if (networkTextMode === "type") {
             return ConnectivityService.wifiConnected
                 ? "Wi-Fi"
                 : ConnectivityService.wiredConnected
                     ? "Wired"
                     : "Offline"
+        }
 
         return ConnectivityService.networkSummary
     }
@@ -174,46 +176,132 @@ Rectangle {
     Accessible.description: accessibleSummary
     Accessible.focusable: visible
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activate()
+    Accessible.onPressAction: root.activate(root.width / 2)
 
-    function activate() {
-        networkPopup.dismiss()
-        ControlCenterStore.openFor(outputName, "dashboard")
-    }
-
-    function mappedNetworkAnchorX(localX) {
-        const point = networkItem.mapToItem(
+    function mappedAnchorGeometry(item, localX) {
+        const target = item || root
+        const top = target.mapToItem(
             null,
             Number(localX),
-            networkItem.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = target.mapToItem(
+            null,
+            Number(localX),
+            target.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
+    }
+
+    function activate(localX) {
+        const anchor = mappedAnchorGeometry(
+            root,
+            isFinite(Number(localX)) ? Number(localX) : root.width / 2
+        )
+
+        BarPanelCoordinator.requestToggle(
+            "dashboard",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     function toggleNetworkPopup(localX) {
-        const opening = !networkPopup.requestedVisible
-        if (opening)
-            OverlayStore.close()
-        networkPopup.anchorX = mappedNetworkAnchorX(localX)
-        networkPopup.toggle()
+        const anchor = mappedAnchorGeometry(networkItem, localX)
+
+        BarPanelCoordinator.requestToggle(
+            "network",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     Keys.onSpacePressed: event => {
-        activate()
+        activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        activate()
+        activate(root.width / 2)
         event.accepted = true
     }
 
     Connections {
-        target: OverlayStore
+        target: BarPanelCoordinator
 
-        function onActiveSurfaceChanged() {
-            if (OverlayStore.activeSurface.length > 0)
-                networkPopup.dismiss()
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (outputName !== root.outputName)
+                return
+
+            if (panelId === "dashboard") {
+                OverlayStore.prepareFor(
+                    "control",
+                    root.outputName,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom
+                )
+                ControlCenterStore.openFor(root.outputName, "dashboard")
+            } else if (panelId === "network") {
+                networkPopup.placement = placement
+                networkPopup.anchorX = anchorX
+                if (!networkPopup.requestedVisible)
+                    networkPopup.toggle()
+            }
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (outputName !== root.outputName)
+                return
+
+            if (panelId === "dashboard") {
+                if (root.expanded)
+                    ControlCenterStore.close()
+                else
+                    BarPanelCoordinator.reportClosed(
+                        "dashboard",
+                        root.outputName
+                    )
+            } else if (panelId === "network") {
+                if (networkPopup.requestedVisible)
+                    networkPopup.dismiss()
+                else
+                    BarPanelCoordinator.reportClosed(
+                        "network",
+                        root.outputName
+                    )
+            }
+        }
+    }
+
+    Connections {
+        target: networkPopup
+
+        function onRequestedVisibleChanged() {
+            BarPanelCoordinator.synchronizeIndependentPanel(
+                "network",
+                root.outputName,
+                networkPopup.requestedVisible
+            )
         }
     }
 
@@ -256,9 +344,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            root.activate()
+            root.activate(mouse.x)
         }
     }
 
