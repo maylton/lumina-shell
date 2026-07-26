@@ -32,3 +32,28 @@
 @define-color lumina_inverse_primary #4d5d92;
 @define-color lumina_scrim rgba(0, 0, 0, 0.72);
 @define-color lumina_shadow rgba(0, 0, 0, 0.38);
+
+/* GTK/libadwaita compatibility roles used by Nautilus and GNOME apps. */
+@define-color accent_color @lumina_primary;
+@define-color accent_bg_color @lumina_primary;
+@define-color accent_fg_color @lumina_on_primary;
+@define-color destructive_color @lumina_error;
+@define-color destructive_bg_color @lumina_error;
+@define-color destructive_fg_color @lumina_on_error;
+@define-color window_bg_color @lumina_surface;
+@define-color window_fg_color @lumina_on_surface;
+@define-color view_bg_color @lumina_surface_container_lowest;
+@define-color view_fg_color @lumina_on_surface;
+@define-color headerbar_bg_color @lumina_surface_container;
+@define-color headerbar_fg_color @lumina_on_surface;
+@define-color headerbar_border_color @lumina_outline_variant;
+@define-color sidebar_bg_color @lumina_surface_container_low;
+@define-color sidebar_fg_color @lumina_on_surface;
+@define-color sidebar_backdrop_color @lumina_surface;
+@define-color card_bg_color @lumina_surface_container_low;
+@define-color card_fg_color @lumina_on_surface;
+@define-color popover_bg_color @lumina_surface_container_high;
+@define-color popover_fg_color @lumina_on_surface;
+@define-color dialog_bg_color @lumina_surface_container;
+@define-color dialog_fg_color @lumina_on_surface;
+@define-color borders @lumina_outline_variant;
