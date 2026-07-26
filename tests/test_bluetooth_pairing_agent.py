@@ -35,6 +35,13 @@ class BluetoothPairingAgentPatterns(unittest.TestCase):
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), "420042")
 
+    def test_verify_pairing_code_wording_is_detected(self):
+        match = AGENT.CONFIRM_RE.search(
+            "Verify pairing code: 004200 (yes/no):"
+        )
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), "004200")
+
     def test_pin_and_passkey_prompts_are_distinct(self):
         self.assertIsNotNone(
             AGENT.PIN_RE.search("[agent] Enter PIN code:")
@@ -70,6 +77,26 @@ class BluetoothPairingAgentPatterns(unittest.TestCase):
         self.assertIsNotNone(
             AGENT.AGENT_READY_RE.search("Agent registered")
         )
+        self.assertIsNotNone(
+            AGENT.AGENT_READY_RE.search("Agent is already registered")
+        )
+
+    def test_default_agent_and_pairable_readiness_are_detected(self):
+        self.assertIsNotNone(
+            AGENT.DEFAULT_AGENT_READY_RE.search(
+                "Default agent request successful"
+            )
+        )
+        self.assertIsNotNone(
+            AGENT.PAIRABLE_READY_RE.search(
+                "Changing pairable on succeeded"
+            )
+        )
+        self.assertIsNotNone(
+            AGENT.PAIRABLE_READY_RE.search(
+                "[CHG] Controller AA:BB:CC:DD:EE:FF Pairable: yes"
+            )
+        )
 
     def test_terminal_sequences_are_cleaned(self):
         raw = (
@@ -80,6 +107,17 @@ class BluetoothPairingAgentPatterns(unittest.TestCase):
         self.assertEqual(
             AGENT.cleaned(raw),
             "[agent] Confirm passkey 123456 (yes/no):\n",
+        )
+
+    def test_multiple_osc_sequences_do_not_swallow_prompt(self):
+        raw = (
+            "\x1b]0;bluetoothctl\x07"
+            "[agent] Confirm passkey 123456 (yes/no):"
+            "\x1b]2;device\x1b\\"
+        )
+        self.assertEqual(
+            AGENT.cleaned(raw),
+            "[agent] Confirm passkey 123456 (yes/no):",
         )
 
     def test_backspaces_are_collapsed(self):
