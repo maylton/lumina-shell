@@ -18,7 +18,7 @@ Item {
             return Boolean(device.connected)
         })
     readonly property int connectedCount: connectedDevices.length
-    readonly property bool enabled:
+    readonly property bool bluetoothEnabled:
         ConnectivityService.bluetoothEnabled
     readonly property bool available:
         ConnectivityService.bluetoothAvailable
@@ -81,7 +81,7 @@ Item {
                 "%1 connected",
                 [root.connectedCount]
             )
-            : root.enabled
+            : root.bluetoothEnabled
                 ? I18n.tr(
                     "settings.connectivity.bluetooth.status.on",
                     "On"
@@ -130,7 +130,7 @@ Item {
 
         DashboardIcon {
             anchors.centerIn: parent
-            iconName: root.enabled
+            iconName: root.bluetoothEnabled
                 ? root.connectedCount > 0
                     ? "bluetooth-active-symbolic"
                     : "bluetooth-symbolic"
@@ -138,7 +138,7 @@ Item {
             fallbackSymbol: "ᛒ"
             iconColor: bluetoothPopup.visible
                 ? root.luminaDesign.color.onAccentContainer
-                : root.enabled
+                : root.bluetoothEnabled
                     ? root.luminaDesign.color.onSurface
                     : root.luminaDesign.color.textMuted
             iconSize: root.luminaDesign.size.barIcon
@@ -217,7 +217,7 @@ Item {
                 "%1 connected",
                 [root.connectedCount]
             )
-            : root.enabled
+            : root.bluetoothEnabled
                 ? I18n.tr(
                     "settings.connectivity.bluetooth.status.on",
                     "On"
