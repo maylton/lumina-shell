@@ -21,13 +21,29 @@ import time
 from typing import Any
 
 CSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
-OSC_RE = re.compile(r"\x1b\][^\x07]*(?:\x07|\x1b\\)")
+OSC_RE = re.compile(
+    r"\x1b\](?:[^\x07\x1b]|\x1b(?!\\))*(?:\x07|\x1b\\)"
+)
 AGENT_READY_RE = re.compile(
     r"Agent registered|Agent is already registered",
     re.IGNORECASE,
 )
+DEFAULT_AGENT_READY_RE = re.compile(
+    r"Default agent request successful",
+    re.IGNORECASE,
+)
+PAIRABLE_READY_RE = re.compile(
+    r"Changing pairable on succeeded|Pairable\s*:\s*yes",
+    re.IGNORECASE,
+)
+AGENT_FAILURE_RE = re.compile(
+    r"Failed to register agent|No agent is registered|"
+    r"Failed to request default agent",
+    re.IGNORECASE,
+)
 CONFIRM_RE = re.compile(
-    r"Confirm\s+(?:passkey|pairing code)\s+([0-9]{1,6})"
+    r"(?:Confirm|Verify)\s+"
+    r"(?:passkey|pairing(?:\s+code)?)\s*:?\s*([0-9]{1,6})"
     r"(?:\s+\((?:yes/no|yes\\/no)\))?\s*:?",
     re.IGNORECASE,
 )
@@ -54,7 +70,8 @@ SUCCESS_RE = re.compile(r"Pairing successful", re.IGNORECASE)
 FAILURE_RE = re.compile(
     r"(?:Failed to pair|Pairing failed|AuthenticationFailed|"
     r"AuthenticationCanceled|AuthenticationRejected|"
-    r"org\.bluez\.Error\.[A-Za-z]+)\s*:?\s*([^\r\n]*)",
+    r"AuthenticationTimeout|org\.bluez\.Error\.[A-Za-z]+)"
+    r"\s*:?\s*([^\r\n]*)",
     re.IGNORECASE,
 )
 ADDRESS_RE = re.compile(r"^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$")
@@ -81,7 +98,8 @@ def cleaned(text: str) -> str:
     value = OSC_RE.sub("", text)
     value = CSI_RE.sub("", value)
     value = collapse_backspaces(value)
-    return value.replace("\r", "")
+    value = value.replace("\r", "")
+    return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f]", "", value)
 
 
 def useful_tail(text: str) -> str:
@@ -143,10 +161,7 @@ def main() -> int:
             os.environ["LANG"] = "C"
             os.environ["TERM"] = "dumb"
             os.environ["NO_COLOR"] = "1"
-            os.execvp(
-                "bluetoothctl",
-                ["bluetoothctl", "--agent=KeyboardDisplay"],
-            )
+            os.execvp("bluetoothctl", ["bluetoothctl"])
         except OSError as error:
             sys.stderr.write(str(error))
             os._exit(127)
@@ -163,31 +178,69 @@ def main() -> int:
     selector.register(master_fd, selectors.EVENT_READ, "bluetoothctl")
     selector.register(sys.stdin, selectors.EVENT_READ, "ui")
 
+    agent_requested = False
+    agent_ready = False
+    default_agent_requested = False
+    pairable_requested = False
+    pairable_ready = False
     pair_requested = False
     current_prompt = ""
     buffer = ""
     emitted_displays: set[str] = set()
     started_at = time.monotonic()
-    fallback_at = started_at + 2.5
-    deadline = started_at + 90.0
+    agent_retry_at = started_at + 2.0
+    setup_deadline = started_at + 10.0
+    deadline = started_at + 100.0
     finished = False
 
     emit("started", address=address)
 
+    def request_agent() -> None:
+        nonlocal agent_requested
+        write_fd(master_fd, "agent KeyboardDisplay\n")
+        agent_requested = True
+
+    def request_default_agent() -> None:
+        nonlocal default_agent_requested
+        if default_agent_requested:
+            return
+        write_fd(master_fd, "default-agent\n")
+        default_agent_requested = True
+
+    def request_pairable() -> None:
+        nonlocal pairable_requested
+        if pairable_requested:
+            return
+        write_fd(master_fd, "pairable on\n")
+        pairable_requested = True
+
     def start_pairing() -> None:
         nonlocal pair_requested, buffer
-        if pair_requested:
+        if pair_requested or not agent_ready:
             return
         pair_requested = True
         buffer = ""
-        write_fd(master_fd, "default-agent\n")
+        emit("ready", address=address)
         write_fd(master_fd, f"pair {address}\n")
+
+    request_agent()
 
     try:
         while time.monotonic() < deadline:
-            if not pair_requested and time.monotonic() >= fallback_at:
-                write_fd(master_fd, "agent KeyboardDisplay\n")
-                start_pairing()
+            now = time.monotonic()
+
+            if not pair_requested and now >= setup_deadline:
+                emit(
+                    "failed",
+                    code="agent-not-ready",
+                    message=useful_tail(buffer)
+                    or "Bluetooth authentication agent did not become ready",
+                )
+                return 7
+
+            if not agent_ready and now >= agent_retry_at:
+                request_agent()
+                agent_retry_at = now + 2.0
 
             for key, _ in selector.select(timeout=0.10):
                 if key.data == "ui":
@@ -272,9 +325,30 @@ def main() -> int:
                     buffer + cleaned(chunk.decode("utf-8", "replace"))
                 )[-16384:]
 
-                if not pair_requested and AGENT_READY_RE.search(buffer):
+                if not agent_ready and AGENT_READY_RE.search(buffer):
+                    agent_ready = True
+                    emit("agent-ready", address=address)
+                    request_default_agent()
+                    request_pairable()
+
+                if agent_ready and DEFAULT_AGENT_READY_RE.search(buffer):
+                    emit("default-agent-ready", address=address)
+
+                if agent_ready and PAIRABLE_READY_RE.search(buffer):
+                    pairable_ready = True
+
+                if not pair_requested and agent_ready and pairable_ready:
                     start_pairing()
                     continue
+
+                if not pair_requested and AGENT_FAILURE_RE.search(buffer):
+                    emit(
+                        "failed",
+                        code="agent-registration-failed",
+                        message=useful_tail(buffer)
+                        or "Bluetooth authentication agent registration failed",
+                    )
+                    return 7
 
                 if not current_prompt:
                     confirmation = CONFIRM_RE.search(buffer)
@@ -340,10 +414,11 @@ def main() -> int:
                 failure = FAILURE_RE.search(buffer)
                 if failure:
                     finished = True
+                    message = (failure.group(1) or "").strip()
                     emit(
                         "failed",
                         code="pair-failed",
-                        message=(failure.group(1) or failure.group(0)).strip(),
+                        message=message or useful_tail(buffer) or failure.group(0),
                     )
                     return 5
 
