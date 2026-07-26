@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.bar.widgets
+import qs.modules.control
 import qs.stores.time
 import qs.stores.config
 import qs.stores.shell
@@ -34,7 +35,7 @@ BarPanelWindow {
 
     onClosed: CalendarStore.dismiss(outputName)
 
-    Rectangle {
+    ShellSurface {
         id: calendarSurface
 
         x: SurfacePlacementPolicy.horizontalX(
@@ -48,9 +49,6 @@ BarPanelWindow {
         height: calendarContent.implicitHeight
             + root.luminaDesign.spacing.large * 2
         radius: root.luminaDesign.shape.large
-        color: root.luminaDesign.color.surfaceContainer
-        border.width: 1
-        border.color: root.luminaDesign.color.outline
         opacity: root.visible ? 1.0 : 0.0
         scale: root.visible ? 1.0 : 0.96
 

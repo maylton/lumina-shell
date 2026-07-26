@@ -148,7 +148,7 @@ BarPanelWindow {
 
     onClosed: dismiss()
 
-    Rectangle {
+    ShellSurface {
         id: networkSurface
 
         x: SurfacePlacementPolicy.horizontalX(
@@ -161,9 +161,6 @@ BarPanelWindow {
         width: root.panelWidth
         height: root.panelHeight
         radius: root.luminaDesign.shape.extraLarge
-        color: root.luminaDesign.color.surfaceContainer
-        border.width: 1
-        border.color: root.luminaDesign.color.outline
         clip: true
 
         Column {

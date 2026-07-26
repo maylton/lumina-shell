@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.modules.control
 import qs.stores.config
 import qs.stores.shell
 import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
@@ -34,7 +35,7 @@ BarPanelWindow {
 
     onClosed: dismiss()
 
-    Rectangle {
+    ShellSurface {
         id: traySurface
 
         x: SurfacePlacementPolicy.horizontalX(
@@ -47,9 +48,6 @@ BarPanelWindow {
         width: trayGrid.implicitWidth + root.luminaDesign.spacing.medium * 2
         height: trayGrid.implicitHeight + root.luminaDesign.spacing.medium * 2
         radius: root.luminaDesign.shape.large
-        color: root.luminaDesign.color.surfaceContainer
-        border.width: 1
-        border.color: root.luminaDesign.color.outline
         opacity: root.visible ? 1 : 0
         scale: root.visible ? 1 : 0.96
 
