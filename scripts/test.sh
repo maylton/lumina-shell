@@ -32,6 +32,7 @@ fi
 async_pixmap_matches="$({
     rg -n \
         'asynchronous:[[:space:]]*true' \
+        "${repository_dir}/modules/control/DashboardIcon.qml" \
         "${repository_dir}/modules/control/UserAvatar.qml" \
         "${repository_dir}/modules/wallpaper/Wallpaper.qml" \
         "${repository_dir}/modules/notifications/NotificationCard.qml" \
@@ -40,7 +41,7 @@ async_pixmap_matches="$({
 
 if [[ -n "${async_pixmap_matches}" ]]; then
     printf '%s\n' \
-        'Critical local images must avoid QQuickPixmapReader:' \
+        'Critical local images and shared icons must avoid QQuickPixmapReader:' \
         "${async_pixmap_matches}" >&2
     exit 1
 fi
