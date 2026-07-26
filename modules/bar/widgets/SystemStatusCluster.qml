@@ -164,9 +164,7 @@ Rectangle {
             : showBackground
                 ? luminaDesign.color.surfaceMuted
                 : "transparent"
-    scale: statusMouse.pressed
-        ? 0.96
-        : 1
+    scale: statusMouse.pressed ? 0.96 : 1
     activeFocusOnTab: visible
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -251,9 +249,23 @@ Rectangle {
         }
     }
 
+    MouseArea {
+        id: statusMouse
+
+        z: 0
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            root.focus = false
+            root.activate()
+        }
+    }
+
     Row {
         id: statusRow
 
+        z: 1
         anchors.centerIn: parent
         spacing: root.individual
             ? root.luminaDesign.spacing.barItemGap
@@ -316,18 +328,6 @@ Rectangle {
                 PowerService.batteryPercentage,
                 root.batteryCharging
             )
-        }
-    }
-
-    MouseArea {
-        id: statusMouse
-
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.focus = false
-            root.activate()
         }
     }
 
