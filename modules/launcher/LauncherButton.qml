@@ -63,21 +63,35 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
+        const anchor = mappedAnchorGeometry(localX)
+
         OverlayStore.prepareFor(
             "launcher",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
         LauncherStore.toggle(root.outputName)
     }
