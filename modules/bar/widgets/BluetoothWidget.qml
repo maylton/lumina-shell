@@ -5,6 +5,7 @@ import qs.design
 import qs.modules.control
 import qs.services.connectivity
 import qs.services.i18n
+import qs.stores.shell
 
 Item {
     id: root
@@ -43,8 +44,22 @@ Item {
     }
 
     function togglePopup(localX) {
+        const opening = !bluetoothPopup.requestedVisible
+
+        if (opening)
+            OverlayStore.close()
+
         bluetoothPopup.anchorX = mappedAnchorX(localX)
         bluetoothPopup.toggle()
+    }
+
+    Connections {
+        target: OverlayStore
+
+        function onActiveSurfaceChanged() {
+            if (OverlayStore.activeSurface.length > 0)
+                bluetoothPopup.dismiss()
+        }
     }
 
     Rectangle {
