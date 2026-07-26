@@ -5,10 +5,12 @@ import Quickshell.Services.SystemTray
 import qs.design
 import qs.modules.control
 import qs.stores.config
+import qs.stores.shell
 
 Item {
     id: root
 
+    required property string outputName
     property var panelWindow: null
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -51,18 +53,36 @@ Item {
 
     property bool tooltipVisible: false
 
-    function mappedAnchorX(localX) {
-        const point = groupButton.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = groupButton.mapToItem(
             null,
             Number(localX),
-            groupButton.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = groupButton.mapToItem(
+            null,
+            Number(localX),
+            groupButton.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function togglePopup(localX) {
-        trayPopup.anchorX = mappedAnchorX(localX)
-        root.togglePopup(groupButton.width / 2)
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
+            "tray",
+            root.outputName,
+            root.surfacePlacement,
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     visible: itemCount > 0
@@ -110,7 +130,7 @@ Item {
             }
 
             Keys.onReturnPressed: event => {
-                trayPopup.toggle()
+                root.togglePopup(groupButton.width / 2)
                 event.accepted = true
             }
 
@@ -229,6 +249,49 @@ Item {
         panelWindow: root.panelWindow
         placement: root.surfacePlacement
         items: root.activeItems
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "tray" || outputName !== root.outputName)
+                return
+
+            trayPopup.placement = placement
+            trayPopup.anchorX = anchorX
+            if (!trayPopup.requestedVisible)
+                trayPopup.toggle()
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "tray" || outputName !== root.outputName)
+                return
+
+            if (trayPopup.requestedVisible)
+                trayPopup.dismiss()
+            else
+                BarPanelCoordinator.reportClosed("tray", root.outputName)
+        }
+    }
+
+    Connections {
+        target: trayPopup
+
+        function onRequestedVisibleChanged() {
+            BarPanelCoordinator.synchronizeIndependentPanel(
+                "tray",
+                root.outputName,
+                trayPopup.requestedVisible
+            )
+        }
     }
 
     Connections {
