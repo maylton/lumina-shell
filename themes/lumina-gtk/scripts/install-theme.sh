@@ -25,11 +25,16 @@ install_variant() {
   local target="$THEMES_DIR/$variant"
 
   rm -rf "$target"
-  mkdir -p "$target/common" "$target/gtk-3.0" "$target/gtk-4.0"
+  mkdir -p \
+    "$target/common" \
+    "$target/assets" \
+    "$target/gtk-3.0" \
+    "$target/gtk-4.0"
 
   cp "$ROOT_DIR/common/base.css" "$target/common/base.css"
   cp "$ROOT_DIR/common/$palette" "$target/common/colors.css"
   cp "$ROOT_DIR/index.theme" "$target/index.theme"
+  cp "$ROOT_DIR/assets/"*.svg "$target/assets/"
 
   sed 's#../common/colors-dark.css#../common/colors.css#' \
     "$ROOT_DIR/gtk-3.0/gtk.css" > "$target/gtk-3.0/gtk.css"
@@ -61,4 +66,5 @@ if command -v flatpak >/dev/null 2>&1; then
 fi
 
 printf 'Installed Lumina-Dark and Lumina-Light in %s\n' "$THEMES_DIR"
+printf 'Installed Android-style window control assets.\n'
 printf 'Run %s/scripts/apply-theme.sh dark|light to activate a variant.\n' "$ROOT_DIR"
