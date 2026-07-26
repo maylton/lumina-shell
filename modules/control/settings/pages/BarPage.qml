@@ -214,8 +214,20 @@ SettingsPage {
                 "Anchor the bar to the screen edge"
             )
             options: [
-                { value: "top", label: "Top" },
-                { value: "bottom", label: "Bottom" }
+                {
+                    value: "top",
+                    label: I18n.tr(
+                        "settings.bar.surface.position.top",
+                        "Top"
+                    )
+                },
+                {
+                    value: "bottom",
+                    label: I18n.tr(
+                        "settings.bar.surface.position.bottom",
+                        "Bottom"
+                    )
+                }
             ]
             currentValue: ConfigStore.barPosition
             onSelected: value => ConfigStore.setBarValue(
@@ -231,16 +243,34 @@ SettingsPage {
                 "Surface geometry"
             )
             description: ConfigStore.barSurfaceMode === "edge-to-edge"
-                ? "Fill the screen edge"
-                : "Reserve space around the visible surface"
+                ? I18n.tr(
+                    "settings.bar.surface.geometry.edgeDescription",
+                    "Fill the screen edge"
+                )
+                : I18n.tr(
+                    "settings.bar.surface.geometry.floatingDescription",
+                    "Reserve space around the visible surface"
+                )
             controlWidth: 340
 
             SettingsSegmentedControl {
                 width: parent.width
                 height: 44
                 options: [
-                    { value: "edge-to-edge", label: "Edge-to-edge" },
-                    { value: "floating", label: "Floating" }
+                    {
+                        value: "edge-to-edge",
+                        label: I18n.tr(
+                            "settings.bar.surface.geometry.edge",
+                            "Edge-to-edge"
+                        )
+                    },
+                    {
+                        value: "floating",
+                        label: I18n.tr(
+                            "settings.bar.surface.geometry.floating",
+                            "Floating"
+                        )
+                    }
                 ]
                 currentValue: ConfigStore.barSurfaceMode
                 onSelected: value => ConfigStore.setBarValue(
@@ -291,15 +321,29 @@ SettingsPage {
         SettingsSliderRow {
             width: parent.width
             title: ConfigStore.barAutoScaleContents
-                ? "Effective content scale"
-                : "Content scale"
+                ? I18n.tr(
+                    "settings.bar.surface.effectiveScale",
+                    "Effective content scale"
+                )
+                : I18n.tr(
+                    "settings.bar.surface.contentScale",
+                    "Content scale"
+                )
             description: ConfigStore.barAutoScaleContents
-                ? "Calculated from the selected bar height"
-                : "Manual scale for bar contents"
+                ? I18n.tr(
+                    "settings.bar.surface.effectiveScaleDescription",
+                    "Calculated from the selected bar height"
+                )
+                : I18n.tr(
+                    "settings.bar.surface.contentScaleDescription",
+                    "Manual scale for bar contents"
+                )
             available: !ConfigStore.barAutoScaleContents
-            availabilityText:
-                "Calculated automatically from "
-                + ConfigStore.barHeight + " px bar height"
+            availabilityText: I18n.tr(
+                "settings.bar.surface.autoScaleValue",
+                "Calculated automatically from %1 px bar height",
+                [ConfigStore.barHeight]
+            )
             from: ConfigStore.barAutoScaleContents
                 ? BarScalePolicy.effectiveScale(
                     40, true, 1, ConfigStore.compactMode
@@ -332,8 +376,10 @@ SettingsPage {
                 "Space around a floating bar"
             )
             available: ConfigStore.barSurfaceMode === "floating"
-            availabilityText:
+            availabilityText: I18n.tr(
+                "settings.bar.surface.marginUnavailable",
                 "Edge-to-edge mode does not use an outer margin"
+            )
             from: 0
             to: 18
             stepSize: 1
