@@ -57,4 +57,14 @@ TestCase {
             "Silenciar"
         )
     }
+
+    function test_notificationsUseLiteralDoNotDisturbTranslation() {
+        compare(
+            RuntimeMessages.message(
+                "pt-BR",
+                "notifications.center.dndShort"
+            ),
+            "Não perturbe"
+        )
+    }
 }

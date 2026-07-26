@@ -139,4 +139,56 @@ TestCase {
             JSON.stringify(["launcher"])
         )
     }
+
+    function test_moveToAreaTransfersWithoutDuplicates() {
+        const moved = BarWidgetState.moveToArea(
+            {
+                left: ["launcher", "workspaces"],
+                center: ["context"],
+                right: ["network", "audio"]
+            },
+            "center",
+            "network",
+            [
+                "launcher",
+                "workspaces",
+                "context",
+                "network",
+                "audio"
+            ]
+        )
+
+        compare(
+            JSON.stringify(moved.left),
+            JSON.stringify(["launcher", "workspaces"])
+        )
+        compare(
+            JSON.stringify(moved.center),
+            JSON.stringify(["context", "network"])
+        )
+        compare(
+            JSON.stringify(moved.right),
+            JSON.stringify(["audio"])
+        )
+        compare(
+            new Set(
+                moved.left.concat(moved.center, moved.right)
+            ).size,
+            5
+        )
+    }
+
+    function test_moveActiveWorksInCenterOrder() {
+        const moved = BarWidgetState.moveActive(
+            ["context", "network", "audio"],
+            ["context", "network", "audio"],
+            "network",
+            -1
+        )
+
+        compare(
+            JSON.stringify(moved),
+            JSON.stringify(["network", "context", "audio"])
+        )
+    }
 }

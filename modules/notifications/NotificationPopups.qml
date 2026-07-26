@@ -81,14 +81,14 @@ Scope {
 
                     Repeater {
                         model: ScriptModel {
-                            values: NotificationService.popupEntries
+                            values: NotificationService.popupKeys
                         }
 
                         delegate: NotificationCard {
-                            required property var modelData
+                            required property string modelData
 
                             width: popupStack.width
-                            entry: modelData
+                            entryKey: modelData
                             popupMode: true
                         }
                     }

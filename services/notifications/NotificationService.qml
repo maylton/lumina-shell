@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 import qs.stores.config
 import qs.stores.niri
 import qs.stores.shell
+import "NotificationModel.js" as NotificationModel
 
 Singleton {
     id: root
@@ -18,21 +19,18 @@ Singleton {
         OverlayStore.activeSurface === "notifications"
             ? OverlayStore.activeOutputName
             : ""
-    readonly property int unreadCount: {
-        var count = 0
-
-        for (var i = 0; i < history.length; ++i) {
-            if (!history[i].read)
-                count += 1
-        }
-
-        return count
-    }
+    readonly property var historyKeys:
+        NotificationModel.entryKeys(history)
+    readonly property var popupKeys:
+        NotificationModel.entryKeys(popupEntries)
 
     property var history: []
     property var popupEntries: []
+    property int unreadCount: 0
     property string popupOutputName: ""
     property int generation: 0
+    property int presentationRevision: 0
+    property var nativeEntries: ({})
 
     signal received(var entry)
 
@@ -106,24 +104,109 @@ Singleton {
 
     function entryFor(notification) {
         generation += 1
+        const key = String(notification.id) + "-" + generation
+        const nativeActions = []
+        const actions = notification.actions || []
 
-        return {
-            key: String(notification.id) + "-" + generation,
-            notificationId: notification.id,
+        for (var i = 0; i < actions.length; ++i)
+            nativeActions.push(actions[i])
+
+        nativeEntries[key] = {
             notification: notification,
-            appName: String(notification.appName || "Application"),
-            summary: plainText(notification.summary) || "Notification",
-            body: plainText(notification.body),
-            icon: iconFor(notification),
-            urgency: notification.urgency,
-            actions: notification.actions || [],
-            expireTimeout: Number(notification.expireTimeout),
-            resident: Boolean(notification.resident),
-            transient: Boolean(notification.transient),
-            receivedAt: Date.now(),
-            read: doNotDisturb,
-            closed: false
+            actions: nativeActions
         }
+
+        return NotificationModel.presentationEntry(
+            {
+                id: notification.id,
+                appName: notification.appName,
+                summary: plainText(notification.summary) || "Notification",
+                body: plainText(notification.body),
+                urgency: notification.urgency,
+                actions: actions,
+                expireTimeout: notification.expireTimeout,
+                resident: notification.resident,
+                transient: notification.transient
+            },
+            key,
+            iconFor(notification),
+            doNotDisturb,
+            Date.now()
+        )
+    }
+
+    function nativeEntryForKey(entryKey) {
+        return nativeEntries[String(entryKey || "")] || null
+    }
+
+    function entryForKey(entryKey) {
+        // Reading the revision makes existing cards refresh after an in-place
+        // presentation update without replacing the ScriptModel.
+        const revision = presentationRevision
+        const entry = NotificationModel.entryForKey(
+            history,
+            popupEntries,
+            entryKey
+        )
+
+        if (revision < 0 || !entry)
+            return NotificationModel.emptyEntry(entryKey)
+
+        return NotificationModel.copyEntry(entry, {})
+    }
+
+    function cleanupNativeEntries() {
+        const retained = {}
+        const retainedNotifications = []
+        const collections = [history, popupEntries]
+
+        for (var collectionIndex = 0;
+             collectionIndex < collections.length;
+             ++collectionIndex) {
+            const collection = collections[collectionIndex]
+
+            for (var entryIndex = 0;
+                 entryIndex < collection.length;
+                 ++entryIndex) {
+                const key = String(collection[entryIndex].key || "")
+                const nativeEntry = nativeEntries[key]
+
+                retained[key] = true
+
+                if (nativeEntry && nativeEntry.notification)
+                    retainedNotifications.push(nativeEntry.notification)
+            }
+        }
+
+        for (const nativeKey in nativeEntries) {
+            if (retained[nativeKey])
+                continue
+
+            const discarded = nativeEntries[nativeKey]
+            const notification = discarded
+                ? discarded.notification
+                : null
+            let stillTracked = false
+
+            for (var notificationIndex = 0;
+                 notificationIndex < retainedNotifications.length;
+                 ++notificationIndex) {
+                if (retainedNotifications[notificationIndex] === notification) {
+                    stillTracked = true
+                    break
+                }
+            }
+
+            if (notification && !stillTracked)
+                notification.tracked = false
+
+            delete nativeEntries[nativeKey]
+        }
+    }
+
+    function refreshPresentation() {
+        unreadCount = NotificationModel.unreadCount(history)
+        presentationRevision += 1
     }
 
     function receiveNotification(notification) {
@@ -138,22 +221,10 @@ Singleton {
         for (var i = 0; i < history.length; ++i) {
             if (history[i].notificationId !== notification.id) {
                 nextHistory.push(history[i])
-            } else if (history[i].notification
-                && history[i].notification !== notification) {
-                history[i].notification.tracked = false
             }
         }
 
         const trimmed = nextHistory.slice(0, historyLimit)
-
-        for (var discardedIndex = historyLimit;
-             discardedIndex < nextHistory.length;
-             ++discardedIndex) {
-            const discarded = nextHistory[discardedIndex]
-
-            if (discarded.notification)
-                discarded.notification.tracked = false
-        }
 
         history = ConfigStore.notificationKeepHistory ? trimmed : []
         popupOutputName = defaultOutputName()
@@ -166,6 +237,9 @@ Singleton {
             ).slice(0, popupLimit)
         }
 
+        cleanupNativeEntries()
+        refreshPresentation()
+
         notification.closed.connect(function(reason) {
             root.handleClosed(entry.key, reason)
         })
@@ -174,15 +248,7 @@ Singleton {
     }
 
     function updatedEntry(entry, changes) {
-        const copy = {}
-
-        for (const key in entry)
-            copy[key] = entry[key]
-
-        for (const changeKey in changes)
-            copy[changeKey] = changes[changeKey]
-
-        return copy
+        return NotificationModel.copyEntry(entry, changes)
     }
 
     function handleClosed(entryKey, reason) {
@@ -202,10 +268,14 @@ Singleton {
         popupEntries = popupEntries.filter(entry => {
             return entry.key !== entryKey
         })
+        cleanupNativeEntries()
+        refreshPresentation()
     }
 
     function dismissPopup(key) {
         popupEntries = popupEntries.filter(entry => entry.key !== key)
+        cleanupNativeEntries()
+        presentationRevision += 1
     }
 
     function expire(key) {
@@ -215,60 +285,68 @@ Singleton {
             if (entry.key !== key)
                 continue
 
+            const nativeEntry = nativeEntryForKey(key)
+
+            if (nativeEntry && nativeEntry.notification && !entry.closed)
+                nativeEntry.notification.expire()
+
             dismissPopup(key)
-
-            if (entry.notification && !entry.closed)
-                entry.notification.expire()
-
             return
         }
     }
 
-    function dismissNotification(entry) {
+    function dismissNotification(entryKey) {
+        const entry = NotificationModel.entryForKey(
+            history,
+            popupEntries,
+            entryKey
+        )
+
         if (!entry)
             return
 
-        dismissPopup(entry.key)
+        const nativeEntry = nativeEntryForKey(entry.key)
 
-        if (entry.notification && !entry.closed)
-            entry.notification.dismiss()
+        if (nativeEntry && nativeEntry.notification && !entry.closed)
+            nativeEntry.notification.dismiss()
+
+        dismissPopup(entry.key)
     }
 
-    function invokeAction(entry, action) {
+    function invokeAction(entryKey, actionIndex) {
+        const entry = NotificationModel.entryForKey(
+            history,
+            popupEntries,
+            entryKey
+        )
+        const nativeEntry = nativeEntryForKey(entryKey)
+        const action = nativeEntry
+            && nativeEntry.actions
+            && actionIndex >= 0
+            && actionIndex < nativeEntry.actions.length
+                ? nativeEntry.actions[actionIndex]
+                : null
+
         if (!entry || !action)
             return
 
         action.invoke()
 
         if (!entry.resident)
-            dismissPopup(entry.key)
+            dismissPopup(entryKey)
     }
 
     function markAllRead() {
-        const next = []
-        let changed = false
-
-        for (var i = 0; i < history.length; ++i) {
-            const entry = history[i]
-
-            if (!entry.read) {
-                next.push(updatedEntry(entry, { read: true }))
-                changed = true
-            } else {
-                next.push(entry)
-            }
-        }
-
-        if (changed)
-            history = next
+        if (NotificationModel.markAllRead(history))
+            refreshPresentation()
     }
 
     function openCenter(outputName) {
+        markAllRead()
         OverlayStore.openFor(
             "notifications",
             resolvedOutputName(outputName)
         )
-        markAllRead()
     }
 
     function closeCenter() {
@@ -287,8 +365,11 @@ Singleton {
     function setDoNotDisturb(enabled) {
         ConfigStore.setDoNotDisturb(enabled)
 
-        if (Boolean(enabled))
+        if (Boolean(enabled)) {
             popupEntries = []
+            cleanupNativeEntries()
+            presentationRevision += 1
+        }
     }
 
     function toggleDoNotDisturb() {
@@ -296,15 +377,9 @@ Singleton {
     }
 
     function clearHistory() {
-        for (var i = 0; i < history.length; ++i) {
-            const entry = history[i]
-            const stillPopup = popupEntries.some(item => item.key === entry.key)
-
-            if (!stillPopup && entry.notification)
-                entry.notification.tracked = false
-        }
-
         history = []
+        cleanupNativeEntries()
+        refreshPresentation()
     }
 
     NotificationServer {

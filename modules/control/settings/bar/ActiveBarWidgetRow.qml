@@ -94,6 +94,7 @@ Rectangle {
         }
 
         BarWidgetActionButton {
+            objectName: "moveUpButton"
             iconName: "go-up-symbolic"
             fallbackSymbol: "↑"
             accessibleName: I18n.tr(
@@ -106,6 +107,7 @@ Rectangle {
         }
 
         BarWidgetActionButton {
+            objectName: "moveDownButton"
             iconName: "go-down-symbolic"
             fallbackSymbol: "↓"
             accessibleName: I18n.tr(

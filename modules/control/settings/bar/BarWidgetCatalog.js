@@ -3,6 +3,7 @@
 var LEFT = "left"
 var CENTER = "center"
 var RIGHT = "right"
+var AREAS = [LEFT, CENTER, RIGHT]
 
 var entries = [
     {
@@ -10,7 +11,7 @@ var entries = [
         title: "Launcher",
         description: "Search and open applications",
         icon: "system-search-symbolic",
-        side: LEFT,
+        defaultArea: LEFT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -26,7 +27,7 @@ var entries = [
         title: "Overview",
         description: "Niri workspaces and windows overview",
         icon: "view-grid-symbolic",
-        side: LEFT,
+        defaultArea: LEFT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -41,7 +42,7 @@ var entries = [
         title: "Workspaces",
         description: "Workspaces available on this output",
         icon: "view-paged-symbolic",
-        side: LEFT,
+        defaultArea: LEFT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -57,7 +58,7 @@ var entries = [
         title: "Date and time",
         description: "Clock, date, and calendar",
         icon: "preferences-system-time-symbolic",
-        side: LEFT,
+        defaultArea: LEFT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -77,7 +78,7 @@ var entries = [
         title: "Window context",
         description: "Focused window and Niri layout context",
         icon: "view-grid-symbolic",
-        side: CENTER,
+        defaultArea: CENTER,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -93,11 +94,26 @@ var entries = [
         }
     },
     {
+        id: "bluetooth",
+        title: "Bluetooth",
+        description: "Bluetooth state, devices, and controls",
+        icon: "bluetooth-symbolic",
+        defaultArea: RIGHT,
+        configurable: true,
+        available: true,
+        unavailableReason: "",
+        component: "BluetoothWidgetSettings",
+        defaults: {
+            showBackground: false,
+            surfacePlacement: "near-widget"
+        }
+    },
+    {
         id: "tray",
         title: "System tray",
         description: "StatusNotifier application items",
         icon: "view-more-horizontal-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -114,7 +130,7 @@ var entries = [
         title: "Notifications",
         description: "Notification center and unread state",
         icon: "preferences-system-notifications-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -131,7 +147,7 @@ var entries = [
         title: "Network",
         description: "Current wired or wireless connection",
         icon: "network-wireless-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -147,7 +163,7 @@ var entries = [
         title: "Audio",
         description: "Output volume and audio controls",
         icon: "audio-volume-high-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -163,7 +179,7 @@ var entries = [
         title: "Battery",
         description: "Battery level and charging state",
         icon: "battery-good-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -179,7 +195,7 @@ var entries = [
         title: "User avatar",
         description: "Dashboard and session entry point",
         icon: "avatar-default-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -196,7 +212,7 @@ var entries = [
         title: "Wallpaper",
         description: "Open the wallpaper picker",
         icon: "preferences-desktop-wallpaper-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -212,7 +228,7 @@ var entries = [
         title: "Session",
         description: "Session and layout actions",
         icon: "system-shutdown-symbolic",
-        side: RIGHT,
+        defaultArea: RIGHT,
         configurable: true,
         available: true,
         unavailableReason: "",
@@ -245,10 +261,10 @@ function all() {
     return entries.map(clone)
 }
 
-function forSide(side) {
-    var requested = String(side || "")
+function forDefaultArea(area) {
+    var requested = String(area || "")
     return entries.filter(function(entry) {
-        return entry.side === requested
+        return entry.defaultArea === requested
     }).map(clone)
 }
 
@@ -263,8 +279,26 @@ function find(widgetId) {
     return null
 }
 
-function idsForSide(side) {
-    return forSide(side).map(function(entry) {
+function idsForDefaultArea(area) {
+    return forDefaultArea(area).map(function(entry) {
+        return entry.id
+    })
+}
+
+function supportsArea(widgetId, area) {
+    return find(widgetId) !== null
+        && AREAS.indexOf(String(area || "")) >= 0
+}
+
+function forArea(area) {
+    if (AREAS.indexOf(String(area || "")) < 0)
+        return []
+
+    return all()
+}
+
+function idsForArea(area) {
+    return forArea(area).map(function(entry) {
         return entry.id
     })
 }

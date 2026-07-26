@@ -94,7 +94,7 @@ var PT = {
     "notifications.center.recent.one": "%1 notificação recente",
     "notifications.center.recent.other": "%1 notificações recentes",
     "notifications.center.dnd": "Não perturbe",
-    "notifications.center.dndShort": "NP",
+    "notifications.center.dndShort": "Não perturbe",
     "notifications.center.clearAccessible": "Limpar histórico de notificações",
     "notifications.center.clear": "Limpar",
     "notifications.center.quietTitle": "O modo silencioso está ativado",

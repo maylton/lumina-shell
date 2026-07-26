@@ -1,7 +1,7 @@
 .pragma library
 .import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
 
-var CURRENT_VERSION = 10
+var CURRENT_VERSION = 12
 
 function defaults() {
     return {
@@ -39,6 +39,7 @@ function defaults() {
         barShowWorkspaces: true,
         barShowKeyboardLayout: true,
         barShowPrivacyIndicators: true,
+        barShowBluetooth: true,
         barShowTray: true,
         barShowNotifications: true,
         barShowDashboardButton: true,
@@ -54,13 +55,19 @@ function defaults() {
             "workspaces",
             "datetime"
         ],
+        barCenterWidgetOrder: [
+            "context"
+        ],
         barRightWidgetOrder: [
+            "bluetooth",
             "tray",
             "notifications",
             "network",
             "audio",
             "battery",
-            "dashboard"
+            "dashboard",
+            "wallpaper",
+            "session"
         ],
         barWidgetSettings: BarWidgetCatalog.defaultSettings(),
         dashboardDefaultPage: "dashboard",
@@ -215,6 +222,7 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
     if ([
         "launcher",
         "datetime",
+        "bluetooth",
         "tray",
         "notifications",
         "network",
@@ -311,29 +319,57 @@ function normalizeWidgetSettings(value) {
     return result
 }
 
-function normalizedOrder(value, requiredIds, optionalIds) {
-    var input = arrayValue(value)
-    var required = arrayValue(requiredIds)
-    var optional = arrayValue(optionalIds)
-    var allowed = required.concat(optional)
-    var result = []
+function normalizedWidgetAreas(left, center, right, defaultsByArea) {
+    var areas = ["left", "center", "right"]
+    var inputByArea = {
+        left: arrayValue(left),
+        center: arrayValue(center),
+        right: arrayValue(right)
+    }
+    var allowed = BarWidgetCatalog.all().map(function(entry) {
+        return entry.id
+    })
+    var result = {
+        left: [],
+        center: [],
+        right: []
+    }
+    var assigned = []
 
-    for (var index = 0; index < input.length; ++index) {
-        var id = String(input[index] || "")
+    for (var areaIndex = 0; areaIndex < areas.length; ++areaIndex) {
+        var area = areas[areaIndex]
+        var input = inputByArea[area]
 
-        if (allowed.indexOf(id) < 0 || result.indexOf(id) >= 0)
-            continue
+        for (var index = 0; index < input.length; ++index) {
+            var id = String(input[index] || "")
 
-        result.push(id)
+            if (allowed.indexOf(id) < 0
+                || assigned.indexOf(id) >= 0)
+                continue
+
+            result[area].push(id)
+            assigned.push(id)
+        }
     }
 
-    for (var requiredIndex = 0;
-        requiredIndex < required.length;
-        ++requiredIndex) {
-        var requiredId = required[requiredIndex]
+    for (var defaultAreaIndex = 0;
+        defaultAreaIndex < areas.length;
+        ++defaultAreaIndex) {
+        var defaultArea = areas[defaultAreaIndex]
+        var defaultOrder = arrayValue(defaultsByArea[defaultArea])
 
-        if (result.indexOf(requiredId) < 0)
-            result.push(requiredId)
+        for (var defaultIndex = 0;
+            defaultIndex < defaultOrder.length;
+            ++defaultIndex) {
+            var defaultId = String(defaultOrder[defaultIndex] || "")
+
+            if (allowed.indexOf(defaultId) < 0
+                || assigned.indexOf(defaultId) >= 0)
+                continue
+
+            result[defaultArea].push(defaultId)
+            assigned.push(defaultId)
+        }
     }
 
     return result
@@ -537,6 +573,7 @@ function normalize(source) {
         "barShowWorkspaces",
         "barShowKeyboardLayout",
         "barShowPrivacyIndicators",
+        "barShowBluetooth",
         "barShowTray",
         "barShowNotifications",
         "barShowDashboardButton",
@@ -585,16 +622,19 @@ function normalize(source) {
         )
     }
 
-    result.barLeftWidgetOrder = normalizedOrder(
+    var normalizedAreas = normalizedWidgetAreas(
         result.barLeftWidgetOrder,
-        base.barLeftWidgetOrder,
-        []
-    )
-    result.barRightWidgetOrder = normalizedOrder(
+        result.barCenterWidgetOrder,
         result.barRightWidgetOrder,
-        base.barRightWidgetOrder,
-        ["wallpaper", "session"]
+        {
+            left: base.barLeftWidgetOrder,
+            center: base.barCenterWidgetOrder,
+            right: base.barRightWidgetOrder
+        }
     )
+    result.barLeftWidgetOrder = normalizedAreas.left
+    result.barCenterWidgetOrder = normalizedAreas.center
+    result.barRightWidgetOrder = normalizedAreas.right
 
     if (!isArrayValue(result.dashboardCardOrder))
         result.dashboardCardOrder = base.dashboardCardOrder.slice()
@@ -841,6 +881,19 @@ function migrate(source) {
         delete input.barShowSystemStatus
     }
 
+    if (version < 11) {
+        var bluetoothOrder = arrayValue(input.barRightWidgetOrder)
+
+        if (bluetoothOrder.indexOf("bluetooth") < 0)
+            bluetoothOrder.unshift("bluetooth")
+
+        input.barRightWidgetOrder = bluetoothOrder
+        input.barShowBluetooth = true
+    }
+
+    if (version < 12)
+        input.barCenterWidgetOrder = ["context"]
+
     return normalize(input)
 }
 
@@ -878,6 +931,7 @@ function defaultsForCategory(categoryName) {
             "barShowWorkspaces",
             "barShowKeyboardLayout",
             "barShowPrivacyIndicators",
+            "barShowBluetooth",
             "barShowTray",
             "barShowNotifications",
             "barShowDashboardButton",
@@ -888,6 +942,7 @@ function defaultsForCategory(categoryName) {
             "barShowSessionButton",
             "barShowClock",
             "barLeftWidgetOrder",
+            "barCenterWidgetOrder",
             "barRightWidgetOrder",
             "barWidgetSettings",
             "showStatusDetails"

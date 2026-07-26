@@ -23,6 +23,12 @@ SystemStatusItem {
             "near-widget"
         )
     )
+    readonly property string localizedSummary:
+        ConnectivityService.wifiConnected
+            ? ConnectivityService.wifiName
+            : ConnectivityService.wiredConnected
+                ? I18n.tr("dashboard.status.wired", "Wired")
+                : I18n.tr("dashboard.status.offline", "Offline")
     readonly property string statusLabel: {
         if (textMode === "icon")
             return ""
@@ -30,18 +36,16 @@ SystemStatusItem {
         if (textMode === "name") {
             return ConnectivityService.wifiConnected
                 ? ConnectivityService.wifiName
-                : ConnectivityService.networkSummary
+                : localizedSummary
         }
 
         if (textMode === "type") {
             return ConnectivityService.wifiConnected
                 ? "Wi-Fi"
-                : ConnectivityService.wiredConnected
-                    ? I18n.tr("dashboard.status.wired", "Wired")
-                    : I18n.tr("dashboard.status.offline", "Offline")
+                : localizedSummary
         }
 
-        return ConnectivityService.networkSummary
+        return localizedSummary
     }
     readonly property string statusIcon:
         ConnectivityService.wifiConnected
@@ -59,14 +63,16 @@ SystemStatusItem {
     showLabel: !compact && textMode !== "icon"
     iconName: statusIcon
     fallbackSymbol:
-        ConnectivityService.networkSummary === "Offline" ? "×" : "◉"
+        !ConnectivityService.wifiConnected
+            && !ConnectivityService.wiredConnected ? "×" : "◉"
     label: statusLabel
     description: I18n.tr(
         "bar.network.accessible",
         "Network %1",
-        [ConnectivityService.networkSummary]
+        [localizedSummary]
     )
-    alert: ConnectivityService.networkSummary === "Offline"
+    alert: !ConnectivityService.wifiConnected
+        && !ConnectivityService.wiredConnected
     onActivated: localX => togglePopup(localX)
 
     function mappedAnchorGeometry(localX) {

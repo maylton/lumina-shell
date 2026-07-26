@@ -66,6 +66,8 @@ Singleton {
         stateAdapter.barShowKeyboardLayout
     property alias barShowPrivacyIndicators:
         stateAdapter.barShowPrivacyIndicators
+    property alias barShowBluetooth:
+        stateAdapter.barShowBluetooth
     property alias barShowTray: stateAdapter.barShowTray
     property alias barShowNotifications:
         stateAdapter.barShowNotifications
@@ -84,6 +86,8 @@ Singleton {
     property alias barShowClock: stateAdapter.barShowClock
     property alias barLeftWidgetOrder:
         stateAdapter.barLeftWidgetOrder
+    property alias barCenterWidgetOrder:
+        stateAdapter.barCenterWidgetOrder
     property alias barRightWidgetOrder:
         stateAdapter.barRightWidgetOrder
     property alias barWidgetSettings:
@@ -399,6 +403,7 @@ Singleton {
             context: [],
             privacy: ["barShowPrivacyIndicators"],
             keyboard: ["barShowKeyboardLayout"],
+            bluetooth: ["barShowBluetooth"],
             tray: ["barShowTray"],
             notifications: ["barShowNotifications"],
             network: ["barShowNetworkStatus"],
@@ -457,11 +462,7 @@ Singleton {
     }
 
     function moveBarWidget(side, widgetId, offset) {
-        const key = String(side) === "left"
-            ? "barLeftWidgetOrder"
-            : String(side) === "right"
-                ? "barRightWidgetOrder"
-                : ""
+        const key = barWidgetOrderKey(side)
 
         if (!key)
             return
@@ -486,15 +487,13 @@ Singleton {
 
     function activeBarWidgets(side) {
         const requested = String(side || "")
-
-        if (requested === "center")
-            return barWidgetVisible("context") ? ["context"] : []
-
         const order = requested === "left"
             ? cloneList(barLeftWidgetOrder)
-            : requested === "right"
-                ? cloneList(barRightWidgetOrder)
-                : []
+            : requested === "center"
+                ? cloneList(barCenterWidgetOrder)
+                : requested === "right"
+                    ? cloneList(barRightWidgetOrder)
+                    : []
         const result = []
 
         for (var index = 0; index < order.length; ++index) {
@@ -507,11 +506,7 @@ Singleton {
 
     function moveActiveBarWidget(side, widgetId, offset) {
         const requested = String(side || "")
-        const key = requested === "left"
-            ? "barLeftWidgetOrder"
-            : requested === "right"
-                ? "barRightWidgetOrder"
-                : ""
+        const key = barWidgetOrderKey(requested)
 
         if (!key)
             return
@@ -532,32 +527,69 @@ Singleton {
         const id = String(widgetId || "")
         const entry = BarWidgetCatalog.find(id)
 
-        if (!entry || entry.side !== requested || !entry.available)
+        if (!entry
+            || !BarWidgetCatalog.supportsArea(id, requested)
+            || !entry.available)
             return
 
-        if (requested === "center") {
-            setBarWidgetVisible("context", true)
-            return
+        const moved = BarWidgetState.moveToArea(
+            {
+                left: barLeftWidgetOrder,
+                center: barCenterWidgetOrder,
+                right: barRightWidgetOrder
+            },
+            requested,
+            id,
+            BarWidgetCatalog.idsForArea(requested)
+        )
+        setBarWidgetOrders(moved)
+        setBarWidgetVisible(id, true)
+    }
+
+    function barWidgetOrderKey(side) {
+        const requested = String(side || "")
+
+        if (requested === "left")
+            return "barLeftWidgetOrder"
+
+        if (requested === "center")
+            return "barCenterWidgetOrder"
+
+        if (requested === "right")
+            return "barRightWidgetOrder"
+
+        return ""
+    }
+
+    function setBarWidgetOrders(orders) {
+        const source = orders && typeof orders === "object"
+            ? orders
+            : {}
+        const candidate = snapshot()
+        candidate.barLeftWidgetOrder = cloneList(source.left)
+        candidate.barCenterWidgetOrder = cloneList(source.center)
+        candidate.barRightWidgetOrder = cloneList(source.right)
+        const normalized = ConfigSchema.normalize(candidate)
+        const keys = [
+            "barLeftWidgetOrder",
+            "barCenterWidgetOrder",
+            "barRightWidgetOrder"
+        ]
+        var changed = false
+
+        for (var index = 0; index < keys.length; ++index) {
+            const key = keys[index]
+
+            if (JSON.stringify(stateAdapter[key])
+                === JSON.stringify(normalized[key]))
+                continue
+
+            stateAdapter[key] = normalized[key]
+            changed = true
         }
 
-        const key = requested === "left"
-            ? "barLeftWidgetOrder"
-            : requested === "right"
-                ? "barRightWidgetOrder"
-                : ""
-
-        if (!key)
-            return
-
-        setValue(
-            key,
-            BarWidgetState.addAtEnd(
-                stateAdapter[key],
-                id,
-                BarWidgetCatalog.idsForSide(requested)
-            )
-        )
-        setBarWidgetVisible(id, true)
+        if (changed)
+            scheduleSave()
     }
 
     function removeBarWidget(widgetId) {
@@ -686,6 +718,7 @@ Singleton {
             property bool barShowWorkspaces: true
             property bool barShowKeyboardLayout: true
             property bool barShowPrivacyIndicators: true
+            property bool barShowBluetooth: true
             property bool barShowTray: true
             property bool barShowNotifications: true
             property bool barShowDashboardButton: true
@@ -697,6 +730,8 @@ Singleton {
             property bool barShowClock: true
             property var barLeftWidgetOrder:
                 ConfigSchema.defaults().barLeftWidgetOrder
+            property var barCenterWidgetOrder:
+                ConfigSchema.defaults().barCenterWidgetOrder
             property var barRightWidgetOrder:
                 ConfigSchema.defaults().barRightWidgetOrder
             property var barWidgetSettings:
