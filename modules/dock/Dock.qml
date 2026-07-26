@@ -109,7 +109,7 @@ Scope {
                     if (!item || !sourceItem)
                         return
 
-                    const point = sourceItem.mapToItem(panel, 0, 0)
+                    const point = sourceItem.mapToItem(null, 0, 0)
                     contextItem = item
                     contextAnchorX = point.x + sourceItem.width / 2
                     revealRequested = true
