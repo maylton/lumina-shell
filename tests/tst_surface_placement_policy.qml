@@ -24,6 +24,17 @@ TestCase {
         )
     }
 
+    function test_floatingBarOffsetEndsAtVisualBarEdge() {
+        compare(
+            SurfacePlacementPolicy.barWindowHeight(56, "edge-to-edge", 12),
+            56
+        )
+        compare(
+            SurfacePlacementPolicy.barWindowHeight(56, "floating", 12),
+            68
+        )
+    }
+
     function test_horizontalPositionFollowsAndClampsAnchor() {
         compare(
             SurfacePlacementPolicy.horizontalX(
