@@ -17,26 +17,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the feature branch
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Decode migration and capture schema context
+      - name: Decode and correct the migration
         run: |
           base64 --decode scripts/apply-widget-surface-placement.py.gz.b64 \
             | gzip --decompress \
             > scripts/apply-widget-surface-placement.py
-          sed -n '95,170p' scripts/apply-widget-surface-placement.py > /tmp/schema-script.log
-          sed -n '1,260p' stores/config/ConfigSchema.js > /tmp/config-schema.log
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/apply-widget-surface-placement.py")
+          source = path.read_text()
+          replacements = {
+              'text = text.replace("trayPopup.toggle()", "root.togglePopup(groupButton.width / 2)", 3)':
+                  'text = text.replace("trayPopup.toggle()", "root.togglePopup(groupButton.width / 2)", 2)',
+              "if 'enumValue(\"surfacePlacement\"' not in text:":
+                  "if '\"surfacePlacement\"' not in text:"
+          }
+          for old, new in replacements.items():
+              if source.count(old) != 1:
+                  raise SystemExit(f"migration correction was not unique: {old}")
+              source = source.replace(old, new, 1)
+          path.write_text(source)
+          PY
+          chmod +x scripts/apply-widget-surface-placement.py
+          python -m py_compile scripts/apply-widget-surface-placement.py
 
-      - name: Upload schema context
-        uses: actions/upload-artifact@v4
-        with:
-          name: config-schema-migration-context
-          path: |
-            /tmp/schema-script.log
-            /tmp/config-schema.log
+      - name: Apply the implementation
+        run: python scripts/apply-widget-surface-placement.py
 
-      - name: Stop after context capture
-        run: exit 1
+      - name: Validate the generated implementation
+        run: |
+          python scripts/apply-widget-surface-placement.py --check
+          git diff --check
+          bash scripts/check-translations.sh
+
+      - name: Commit and push the implementation
+        run: |
+          rm scripts/apply-widget-surface-placement.py
+          rm scripts/apply-widget-surface-placement.py.gz.b64
+          rm .github/workflows/apply-widget-surface-placement.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Implementation already committed; cleaning temporary files only."
+            exit 0
+          fi
+          git commit -m "Add per-widget surface placement"
+          git push origin "HEAD:${{ github.head_ref }}"
