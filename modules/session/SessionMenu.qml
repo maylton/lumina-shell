@@ -211,6 +211,7 @@ Scope {
                 screen: modelData
                 surfaceItem: menuSurface
                 surfaceRadius: menuSurface.radius
+                blurBackdrop: true
                 onDismissRequested: {
                     SessionService.cancel()
                     SessionMenuStore.close()

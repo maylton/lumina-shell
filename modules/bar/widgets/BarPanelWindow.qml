@@ -17,6 +17,7 @@ PanelWindow {
     property string layerNamespace: "lumina-bar-panel-" + panelId
     property Item surfaceItem: null
     property real surfaceRadius: 0
+    property bool blurBackdrop: false
     property string surfaceAnchorEdge: ""
     property real surfaceAnchorTop: -1
     property double visibilityRequestedAt: 0
@@ -98,12 +99,14 @@ PanelWindow {
     }
 
     BackgroundEffect.blurRegion:
-        surfaceItem
-        && ShellSurfacePolicy.requestsBackdropBlur(
-            ConfigStore.shellBackgroundMode
-        )
-            ? panelBlurRegion
-            : null
+        blurBackdrop
+            ? backdropBlurRegion
+            : surfaceItem
+                && ShellSurfacePolicy.requestsBackdropBlur(
+                    ConfigStore.shellBackgroundMode
+                )
+                    ? panelBlurRegion
+                    : null
 
     onBackingWindowVisibleChanged: {
         if (backingWindowVisible && visibilityRequestedAt > 0) {
@@ -151,6 +154,18 @@ PanelWindow {
     Component.onDestruction: {
         if (OverlayStore.isOpenFor(panelId, panelOutputName))
             OverlayStore.close(panelId)
+    }
+
+    Region {
+        id: backdropBlurRegion
+
+        Region {
+            x: 0
+            y: 0
+            width: root.width
+            height: root.height
+            radius: 0
+        }
     }
 
     Region {
