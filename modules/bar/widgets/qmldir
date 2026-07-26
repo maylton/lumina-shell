@@ -6,6 +6,8 @@ ContextCapsule 1.0 ContextCapsule.qml
 DateTimeCluster 1.0 DateTimeCluster.qml
 ExpressiveBatteryIcon 1.0 ExpressiveBatteryIcon.qml
 KeyboardLayoutIndicator 1.0 KeyboardLayoutIndicator.qml
+NetworkConnectionRow 1.0 NetworkConnectionRow.qml
+NetworkPopup 1.0 NetworkPopup.qml
 OverviewButton 1.0 OverviewButton.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml
 SystemStatusCluster 1.0 SystemStatusCluster.qml
