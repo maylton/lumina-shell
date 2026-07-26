@@ -143,3 +143,75 @@ function mergeBluetoothDevices(allText, pairedText, connectedText) {
         return left.name.localeCompare(right.name)
     })
 }
+
+function stripAnsi(text) {
+    return String(text || "")
+        .replace(/\x1B\[[0-?]*[ -\/]*[@-~]/g, "")
+}
+
+function parseBluetoothInfo(text) {
+    const input = lines(stripAnsi(text))
+    const result = {
+        valid: false,
+        address: "",
+        name: "",
+        paired: false,
+        bonded: false,
+        trusted: false,
+        connected: false,
+        blocked: false
+    }
+
+    for (let index = 0; index < input.length; ++index) {
+        const deviceMatch = input[index].match(
+            /^Device\s+([0-9A-Fa-f:]{17})(?:\s+(.+))?$/
+        )
+        if (deviceMatch) {
+            result.address = deviceMatch[1].toUpperCase()
+            if (deviceMatch[2])
+                result.name = deviceMatch[2].trim()
+            continue
+        }
+
+        const propertyMatch = input[index].match(
+            /^(Name|Alias|Paired|Bonded|Trusted|Connected|Blocked):\s*(.+)$/
+        )
+        if (!propertyMatch)
+            continue
+
+        const key = propertyMatch[1]
+        const value = propertyMatch[2].trim()
+        if ((key === "Name" || key === "Alias") && value) {
+            result.name = value
+        } else if (key === "Paired") {
+            result.paired = value.toLowerCase() === "yes"
+        } else if (key === "Bonded") {
+            result.bonded = value.toLowerCase() === "yes"
+        } else if (key === "Trusted") {
+            result.trusted = value.toLowerCase() === "yes"
+        } else if (key === "Connected") {
+            result.connected = value.toLowerCase() === "yes"
+        } else if (key === "Blocked") {
+            result.blocked = value.toLowerCase() === "yes"
+        }
+    }
+
+    result.valid = result.address.length === 17
+    return result
+}
+
+function bluetoothCommandSummary(text) {
+    const input = lines(stripAnsi(text)).filter(function(line) {
+        return !/^\[(NEW|CHG|DEL|SIGNAL)\]/.test(line)
+            && line !== "Discovery started"
+            && line !== "Discovery stopped"
+            && line !== "Agent registered"
+            && line !== "Default agent request successful"
+    })
+
+    if (input.length === 0)
+        return ""
+
+    const summary = input[input.length - 1]
+    return summary.length > 240 ? summary.slice(0, 237) + "..." : summary
+}
