@@ -367,40 +367,6 @@ FloatingWindow {
                 }
 
                 Rectangle {
-                    visible: root.flow
-                        && String(root.flow.actionId || "").length > 0
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: Math.max(116, detailsText.implicitWidth + 34)
-                    height: 32
-                    radius: root.luminaDesign.shape.full
-                    color: detailsMouse.containsMouse
-                        ? root.luminaDesign.color.surfaceMuted
-                        : "transparent"
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outlineVariant
-
-                    Text {
-                        id: detailsText
-                        anchors.centerIn: parent
-                        text: root.detailsExpanded
-                            ? PolkitStrings.text(I18n.locale, "hideDetails")
-                            : PolkitStrings.text(I18n.locale, "showDetails")
-                        color: root.luminaDesign.color.textMuted
-                        font.pixelSize:
-                            root.luminaDesign.typography.labelMedium
-                        font.weight: Font.DemiBold
-                    }
-
-                    MouseArea {
-                        id: detailsMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.detailsExpanded = !root.detailsExpanded
-                    }
-                }
-
-                Rectangle {
                     visible: root.detailsExpanded
                         && root.flow
                         && String(root.flow.actionId || "").length > 0
@@ -529,8 +495,65 @@ FloatingWindow {
                     height: 44
 
                     Row {
-                        anchors.right: parent.right
+                        anchors.horizontalCenter: parent.horizontalCenter
                         spacing: root.luminaDesign.spacing.medium
+
+                        Rectangle {
+                            id: detailsButton
+
+                            visible: root.flow
+                                && String(root.flow.actionId || "").length > 0
+                            width: visible ? Math.max(
+                                112,
+                                detailsText.implicitWidth + 30
+                            ) : 0
+                            height: 42
+                            radius: root.luminaDesign.shape.full
+                            color: detailsMouse.containsMouse
+                                ? root.luminaDesign.color.surfaceMuted
+                                : "transparent"
+                            activeFocusOnTab: visible
+                            border.width: activeFocus ? 2 : 1
+                            border.color: activeFocus
+                                ? root.luminaDesign.color.primary
+                                : root.luminaDesign.color.outlineVariant
+
+                            Keys.onSpacePressed: event => {
+                                root.detailsExpanded = !root.detailsExpanded
+                                event.accepted = true
+                            }
+                            Keys.onReturnPressed: event => {
+                                root.detailsExpanded = !root.detailsExpanded
+                                event.accepted = true
+                            }
+
+                            Text {
+                                id: detailsText
+                                anchors.centerIn: parent
+                                text: root.detailsExpanded
+                                    ? PolkitStrings.text(
+                                        I18n.locale,
+                                        "hideDetails"
+                                    )
+                                    : PolkitStrings.text(
+                                        I18n.locale,
+                                        "showDetails"
+                                    )
+                                color: root.luminaDesign.color.textMuted
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.DemiBold
+                            }
+
+                            MouseArea {
+                                id: detailsMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked:
+                                    root.detailsExpanded = !root.detailsExpanded
+                            }
+                        }
 
                         Rectangle {
                             id: cancelButton
