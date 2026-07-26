@@ -6,7 +6,7 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 catalog_dir="${repository_dir}/i18n"
 source_catalog="${catalog_dir}/en-US.json"
 pt_br_catalog="${catalog_dir}/pt-BR.json"
-appearance_messages="${repository_dir}/services/i18n/AppearanceMessages.js"
+supplemental_dir="${repository_dir}/services/i18n"
 
 command -v jq >/dev/null 2>&1 || {
     printf 'jq is required to validate translation catalogs.\n' >&2
@@ -29,9 +29,13 @@ command -v perl >/dev/null 2>&1 || {
     exit 1
 }
 
-[[ -f "${appearance_messages}" ]] || {
-    printf 'Missing supplemental appearance translations: %s\n' \
-        "${appearance_messages}" >&2
+mapfile -t supplemental_files < <(
+    find "${supplemental_dir}" -maxdepth 1 -type f \
+        -name '*Messages.js' | sort
+)
+
+[[ "${#supplemental_files[@]}" -gt 0 ]] || {
+    printf 'No supplemental translation catalogs were found.\n' >&2
     exit 1
 }
 
@@ -85,7 +89,7 @@ fi
 jq -e '
     .["control.tab.dashboard"] == "Dashboard"
     and .["settings.category.dashboard.label"] == "Dashboard"
-    and (.["control.header.dashboardSubtitle"] | startswith("Dashboard"))
+    and (. ["control.header.dashboardSubtitle"] | startswith("Dashboard"))
 ' "${pt_br_catalog}" >/dev/null || {
     printf 'The product term Dashboard must remain Dashboard in pt-BR.\n' >&2
     exit 1
@@ -93,7 +97,15 @@ jq -e '
 
 supplemental_has_key() {
     local message_id="$1"
-    grep -Fq "\"${message_id}\"" "${appearance_messages}"
+    local supplemental_path
+
+    for supplemental_path in "${supplemental_files[@]}"; do
+        if grep -Fq "\"${message_id}\"" "${supplemental_path}"; then
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 missing_source_keys="$(
