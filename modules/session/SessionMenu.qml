@@ -234,7 +234,6 @@ Scope {
                 panelVisible: menuVisible
                 layerNamespace: "lumina-session-menu"
                 screen: modelData
-                scrimColor: root.luminaDesign.color.scrim
                 surfaceItem: menuSurface
                 surfaceRadius: menuSurface.radius
                 onDismissRequested: {

@@ -41,7 +41,6 @@ Scope {
                 panelVisible: pickerVisible
                 layerNamespace: "lumina-wallpaper-picker"
                 screen: modelData
-                scrimColor: root.luminaDesign.color.scrim
                 surfaceItem: pickerSurface
                 surfaceRadius: pickerSurface.radius
                 onDismissRequested: WallpaperService.closePicker()
