@@ -30,6 +30,78 @@ jobs:
             > scripts/apply-widget-surface-placement.py
           chmod +x scripts/apply-widget-surface-placement.py
 
+      - name: Patch precise surface roots
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/apply-widget-surface-placement.py")
+          source = path.read_text()
+
+          wallpaper_old = '''        text = replace_once(
+              text,
+              "                    anchors.centerIn: parent\\n",
+              fullscreen_position_block("pickerWindow", "pickerSurface", "root.luminaDesign.spacing.extraLarge"),
+              "Wallpaper surface position",
+          )
+          '''
+          wallpaper_new = '''        text = replace_once(
+              text,
+              """                Rectangle {
+                      id: pickerSurface
+
+                      anchors.centerIn: parent
+          """,
+              """                Rectangle {
+                      id: pickerSurface
+
+          """
+              + fullscreen_position_block(
+                  "pickerWindow",
+                  "pickerSurface",
+                  "root.luminaDesign.spacing.extraLarge"
+              ),
+              "Wallpaper surface position",
+          )
+          '''
+          session_old = '''        text = replace_once(
+              text,
+              "                    anchors.centerIn: parent\\n",
+              fullscreen_position_block("sessionWindow", "menuSurface", "root.luminaDesign.spacing.extraLarge"),
+              "Session surface position",
+          )
+          '''
+          session_new = '''        text = replace_once(
+              text,
+              """                Rectangle {
+                      id: menuSurface
+
+                      anchors.centerIn: parent
+          """,
+              """                Rectangle {
+                      id: menuSurface
+
+          """
+              + fullscreen_position_block(
+                  "sessionWindow",
+                  "menuSurface",
+                  "root.luminaDesign.spacing.extraLarge"
+              ),
+              "Session surface position",
+          )
+          '''
+
+          if source.count(wallpaper_old) != 1:
+              raise SystemExit("wallpaper migration block was not unique")
+          if source.count(session_old) != 1:
+              raise SystemExit("session migration block was not unique")
+
+          source = source.replace(wallpaper_old, wallpaper_new, 1)
+          source = source.replace(session_old, session_new, 1)
+          path.write_text(source)
+          PY
+          python -m py_compile scripts/apply-widget-surface-placement.py
+
       - name: Apply the implementation
         id: migration
         continue-on-error: true
