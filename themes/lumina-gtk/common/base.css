@@ -1,4 +1,4 @@
-/* Shared GTK 3/4 styling. Keep selectors conservative for compatibility. */
+/* Shared GTK 3/4 styling. See ../DESIGN.md for the design scale. */
 
 * {
   -GtkWidget-focus-padding: 0;
@@ -9,12 +9,10 @@ button:focus,
 entry:focus,
 spinbutton:focus,
 textview:focus,
-switch:focus,
-scale:focus,
-notebook > header > tabs > tab:focus,
-row:focus,
+menuitem:focus,
 modelbutton:focus,
-menuitem:focus {
+row:focus,
+tab:focus {
   outline-color: alpha(@lumina_primary, 0.76);
   outline-style: solid;
   outline-width: 2px;
@@ -29,25 +27,26 @@ window,
 
 headerbar,
 .titlebar {
+  min-height: 48px;
+  padding: 8px;
   color: @lumina_on_surface;
   background-color: @lumina_surface_container;
   border: 0;
-  box-shadow: inset 0 -1px alpha(@lumina_outline_variant, 0.42);
-  padding: 6px;
+  box-shadow: inset 0 -1px alpha(@lumina_outline_variant, 0.34);
 }
 
 headerbar.titlebar,
 .titlebar {
-  border-radius: 14px 14px 0 0;
+  border-radius: 16px 16px 0 0;
 }
 
 button {
-  min-height: 32px;
-  min-width: 32px;
-  padding: 4px 12px;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0 12px;
   color: @lumina_on_surface;
   background-color: @lumina_surface_container_high;
-  border: 1px solid alpha(@lumina_outline_variant, 0.65);
+  border: 1px solid transparent;
   border-radius: 12px;
   box-shadow: none;
 }
@@ -61,6 +60,20 @@ button:checked {
   color: @lumina_on_primary_container;
   background-color: @lumina_primary_container;
   border-color: transparent;
+}
+
+button.flat {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+button.flat:hover {
+  background-color: alpha(@lumina_on_surface, 0.08);
+}
+
+button.circular {
+  padding: 0;
+  border-radius: 999px;
 }
 
 button.suggested-action {
@@ -81,15 +94,15 @@ textview,
 .view {
   color: @lumina_on_surface;
   background-color: @lumina_surface_container_low;
-  border: 1px solid @lumina_outline_variant;
-  border-radius: 10px;
+  border: 1px solid alpha(@lumina_outline_variant, 0.72);
+  border-radius: 12px;
   box-shadow: none;
 }
 
 entry,
 spinbutton {
-  min-height: 34px;
-  padding: 3px 10px;
+  min-height: 40px;
+  padding: 0 12px;
 }
 
 entry:focus,
@@ -102,19 +115,19 @@ textview:focus {
 popover,
 menu,
 .context-menu {
+  padding: 8px;
   color: @lumina_on_surface;
   background-color: @lumina_surface_container_high;
-  border: 1px solid alpha(@lumina_outline_variant, 0.62);
-  border-radius: 14px;
+  border: 1px solid alpha(@lumina_outline_variant, 0.48);
+  border-radius: 16px;
   box-shadow: 0 8px 24px @lumina_shadow;
-  padding: 6px;
 }
 
 menuitem,
 modelbutton {
-  min-height: 34px;
-  padding: 4px 10px;
-  border-radius: 9px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
 }
 
 menuitem:hover,
@@ -123,18 +136,19 @@ modelbutton:hover {
 }
 
 notebook > header {
+  padding: 4px 8px 0;
   background-color: @lumina_surface_container_low;
   border: 0;
 }
 
 notebook > header > tabs > tab {
-  min-height: 36px;
-  margin: 3px 2px 0;
-  padding: 4px 12px;
+  min-height: 40px;
+  margin: 4px 2px 0;
+  padding: 0 12px;
   color: @lumina_on_surface_variant;
   background-color: transparent;
   border: 1px solid transparent;
-  border-radius: 10px 10px 0 0;
+  border-radius: 12px 12px 0 0;
   box-shadow: none;
 }
 
@@ -146,7 +160,7 @@ notebook > header > tabs > tab:hover {
 notebook > header > tabs > tab:checked {
   color: @lumina_on_surface;
   background-color: mix(@lumina_surface_container_high, @lumina_primary, 0.08);
-  border-color: alpha(@lumina_primary, 0.30);
+  border-color: alpha(@lumina_primary, 0.24);
   box-shadow: inset 0 -2px @lumina_primary;
 }
 
@@ -169,19 +183,19 @@ selection {
 separator {
   min-width: 1px;
   min-height: 1px;
-  background-color: alpha(@lumina_outline_variant, 0.56);
+  background-color: alpha(@lumina_outline_variant, 0.48);
 }
 
 tooltip {
+  padding: 6px 8px;
   color: @lumina_inverse_on_surface;
   background-color: @lumina_inverse_surface;
   border-radius: 8px;
-  padding: 6px 8px;
 }
 
 switch {
-  min-width: 46px;
-  min-height: 26px;
+  min-width: 52px;
+  min-height: 32px;
   background-color: @lumina_surface_container_highest;
   border: 1px solid @lumina_outline;
   border-radius: 999px;
@@ -193,9 +207,9 @@ switch:checked {
 }
 
 switch slider {
-  min-width: 20px;
-  min-height: 20px;
-  margin: 2px;
+  min-width: 24px;
+  min-height: 24px;
+  margin: 3px;
   background-color: @lumina_outline;
   border-radius: 999px;
 }
@@ -206,14 +220,14 @@ switch:checked slider {
 
 progressbar trough,
 scale trough {
-  min-height: 6px;
+  min-height: 8px;
   background-color: @lumina_surface_container_highest;
   border-radius: 999px;
 }
 
 progressbar progress,
 scale highlight {
-  min-height: 6px;
+  min-height: 8px;
   background-color: @lumina_primary;
   border-radius: 999px;
 }
@@ -222,7 +236,7 @@ scale highlight {
 boxed-list,
 frame {
   background-color: @lumina_surface_container_low;
-  border: 1px solid alpha(@lumina_outline_variant, 0.5);
-  border-radius: 14px;
+  border: 1px solid alpha(@lumina_outline_variant, 0.42);
+  border-radius: 16px;
   box-shadow: none;
 }
