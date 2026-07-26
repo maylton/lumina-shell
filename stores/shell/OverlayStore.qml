@@ -29,20 +29,38 @@ Singleton {
         pendingAnchorX = -1
     }
 
-    function prepareFor(surfaceName, outputName, placement, anchorX) {
+    function prepareFor(
+        surfaceName,
+        outputName,
+        placement,
+        anchorX,
+        anchorTop,
+        anchorBottom
+    ) {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
         const numericAnchor = Number(anchorX)
+        const normalizedPlacement = SurfacePlacementPolicy.normalize(placement)
 
         if (!surface || !output) {
             clearPending()
+            SurfacePlacementPolicy.clearAnchorGeometry()
             return
         }
 
         pendingSurface = surface
         pendingOutputName = output
-        pendingPlacement = SurfacePlacementPolicy.normalize(placement)
+        pendingPlacement = normalizedPlacement
         pendingAnchorX = isFinite(numericAnchor) ? numericAnchor : -1
+
+        if (normalizedPlacement === SurfacePlacementPolicy.NEAR_WIDGET) {
+            SurfacePlacementPolicy.captureAnchorGeometry(
+                anchorTop,
+                anchorBottom
+            )
+        } else {
+            SurfacePlacementPolicy.clearAnchorGeometry()
+        }
     }
 
     function outputExists(outputName) {
@@ -80,6 +98,7 @@ Singleton {
 
         if (!surface || !output) {
             clearPending()
+            SurfacePlacementPolicy.clearAnchorGeometry()
             return
         }
 
@@ -90,6 +109,10 @@ Singleton {
             ? SurfacePlacementPolicy.normalize(pendingPlacement)
             : SurfacePlacementPolicy.CENTERED
         activeAnchorX = prepared ? pendingAnchorX : -1
+
+        if (!prepared)
+            SurfacePlacementPolicy.clearAnchorGeometry()
+
         clearPending()
         activeSurface = surface
         activeOutputName = output
@@ -109,6 +132,7 @@ Singleton {
         activePlacement = SurfacePlacementPolicy.CENTERED
         activeAnchorX = -1
         clearPending()
+        SurfacePlacementPolicy.clearAnchorGeometry()
 
         if (closedSurface)
             surfaceClosed(closedSurface)
