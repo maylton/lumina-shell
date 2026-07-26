@@ -225,25 +225,35 @@ statuspage > scrolledwindow > viewport {
   background-color: @lumina_surface;
 }
 
-windowcontrols button {
+/* Window controls use their own compact circular state layer. */
+headerbar windowcontrols {
+  padding: 0;
+  margin: 0;
+  border-spacing: 4px;
+  background-color: transparent;
+}
+
+headerbar windowcontrols button:not(.suggested-action):not(.destructive-action) {
   min-width: 28px;
   min-height: 28px;
   padding: 0;
-  border-color: transparent;
+  border: 0;
   border-radius: 999px;
   background-color: transparent;
   box-shadow: none;
 }
 
-windowcontrols button:hover {
+headerbar windowcontrols button:not(.suggested-action):not(.destructive-action):hover {
+  color: @lumina_on_surface;
   background-color: alpha(@lumina_on_surface, 0.075);
 }
 
-windowcontrols button:active {
+headerbar windowcontrols button:not(.suggested-action):not(.destructive-action):active {
+  color: @lumina_on_surface;
   background-color: alpha(@lumina_on_surface, 0.12);
 }
 
-windowcontrols button.close:hover {
+headerbar windowcontrols button.close:not(.suggested-action):not(.destructive-action):hover {
   color: @lumina_on_error_container;
   background-color: alpha(@lumina_error, 0.78);
 }
