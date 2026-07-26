@@ -17,6 +17,7 @@ DashboardNotifications 1.0 DashboardNotifications.qml
 DashboardOverview 1.0 DashboardOverview.qml
 DashboardStatus 1.0 DashboardStatus.qml
 DashboardView 1.0 DashboardView.qml
+ExpressiveLoadingIndicator 1.0 ExpressiveLoadingIndicator.qml
 QuickToggle 1.0 QuickToggle.qml
 ShellSettingsView 1.0 ShellSettingsView.qml
 UserAvatar 1.0 UserAvatar.qml
