@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.stores.config
 import qs.stores.launcher
 import qs.stores.shell
@@ -58,7 +59,10 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open application launcher"
+    Accessible.name: I18n.tr(
+        "bar.launcher.accessibleName",
+        "Open application launcher"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -150,7 +154,7 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showLabel
-            text: "Apps"
+            text: I18n.tr("bar.launcher.label", "Apps")
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
