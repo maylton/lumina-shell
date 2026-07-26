@@ -20,108 +20,52 @@ AGENT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AGENT)
 
 
-class BluetoothPairingAgentPatterns(unittest.TestCase):
-    def test_confirmation_code_is_detected(self):
-        match = AGENT.CONFIRM_RE.search(
-            "[agent] Confirm passkey 123456 (yes/no):"
-        )
-        self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), "123456")
+class FakeVariant:
+    def __init__(self, value):
+        self.value = value
 
-    def test_pairing_code_wording_is_detected(self):
-        match = AGENT.CONFIRM_RE.search(
-            "Confirm pairing code 420042 (yes/no):"
-        )
-        self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), "420042")
 
-    def test_verify_pairing_code_wording_is_detected(self):
-        match = AGENT.CONFIRM_RE.search(
-            "Verify pairing code: 004200 (yes/no):"
-        )
-        self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), "004200")
-
-    def test_pin_and_passkey_prompts_are_distinct(self):
-        self.assertIsNotNone(
-            AGENT.PIN_RE.search("[agent] Enter PIN code:")
-        )
-        self.assertIsNotNone(
-            AGENT.PASSKEY_RE.search(
-                "[agent] Enter passkey (number in 0-999999):"
-            )
-        )
-
-    def test_authorization_service_is_detected(self):
-        match = AGENT.AUTHORIZE_RE.search(
-            "[agent] Authorize service 0000110b-0000-1000-8000-00805f9b34fb (yes/no):"
-        )
-        self.assertIsNotNone(match)
+class BluetoothPairingAgentTests(unittest.TestCase):
+    def test_address_is_normalized(self):
         self.assertEqual(
-            match.group(1),
-            "0000110b-0000-1000-8000-00805f9b34fb",
+            AGENT.normalize_address("3c:0a:7a:a0:b0:ad"),
+            "3C:0A:7A:A0:B0:AD",
         )
+        self.assertEqual(AGENT.normalize_address("invalid"), "")
 
-    def test_displayed_codes_are_detected(self):
-        pin = AGENT.DISPLAY_PIN_RE.search("[agent] PIN code: 004200")
-        passkey = AGENT.DISPLAY_PASSKEY_RE.search(
-            "[agent] Passkey: 654321 entered 3"
-        )
-        self.assertIsNotNone(pin)
-        self.assertIsNotNone(passkey)
-        self.assertEqual(pin.group(1), "004200")
-        self.assertEqual(passkey.group(1), "654321")
-        self.assertEqual(passkey.group(2), "3")
+    def test_numeric_confirmation_keeps_leading_zeroes(self):
+        self.assertEqual(AGENT.pairing_code(4200), "004200")
+        self.assertEqual(AGENT.pairing_code(123456), "123456")
 
-    def test_agent_registration_is_detected(self):
-        self.assertIsNotNone(
-            AGENT.AGENT_READY_RE.search("Agent registered")
-        )
-        self.assertIsNotNone(
-            AGENT.AGENT_READY_RE.search("Agent is already registered")
-        )
+    def test_device_and_adapter_are_resolved_from_object_manager(self):
+        managed = {
+            "/org/bluez/hci0": {
+                "org.bluez.Adapter1": {
+                    "Address": FakeVariant("AA:BB:CC:DD:EE:FF")
+                }
+            },
+            "/org/bluez/hci0/dev_3C_0A_7A_A0_B0_AD": {
+                "org.bluez.Device1": {
+                    "Address": FakeVariant("3C:0A:7A:A0:B0:AD"),
+                    "Adapter": FakeVariant("/org/bluez/hci0"),
+                }
+            },
+        }
 
-    def test_default_agent_and_pairable_readiness_are_detected(self):
-        self.assertIsNotNone(
-            AGENT.DEFAULT_AGENT_READY_RE.search(
-                "Default agent request successful"
-            )
-        )
-        self.assertIsNotNone(
-            AGENT.PAIRABLE_READY_RE.search(
-                "Changing pairable on succeeded"
-            )
-        )
-        self.assertIsNotNone(
-            AGENT.PAIRABLE_READY_RE.search(
-                "[CHG] Controller AA:BB:CC:DD:EE:FF Pairable: yes"
-            )
-        )
-
-    def test_terminal_sequences_are_cleaned(self):
-        raw = (
-            "\x1b]0;bluetoothctl\x07"
-            "\x1b[0;94m[agent]\x1b[0m Confirm passkey 123456 "
-            "(yes/no):\r\n"
+        device, adapter = AGENT.find_device_paths(
+            managed,
+            "3c:0a:7a:a0:b0:ad",
         )
         self.assertEqual(
-            AGENT.cleaned(raw),
-            "[agent] Confirm passkey 123456 (yes/no):\n",
+            device,
+            "/org/bluez/hci0/dev_3C_0A_7A_A0_B0_AD",
         )
+        self.assertEqual(adapter, "/org/bluez/hci0")
 
-    def test_multiple_osc_sequences_do_not_swallow_prompt(self):
-        raw = (
-            "\x1b]0;bluetoothctl\x07"
-            "[agent] Confirm passkey 123456 (yes/no):"
-            "\x1b]2;device\x1b\\"
-        )
-        self.assertEqual(
-            AGENT.cleaned(raw),
-            "[agent] Confirm passkey 123456 (yes/no):",
-        )
-
-    def test_backspaces_are_collapsed(self):
-        self.assertEqual(AGENT.cleaned("PairX\bing"), "Pairing")
+    def test_unknown_device_returns_empty_paths(self):
+        device, adapter = AGENT.find_device_paths({}, "3C:0A:7A:A0:B0:AD")
+        self.assertEqual(device, "")
+        self.assertEqual(adapter, "")
 
 
 if __name__ == "__main__":
