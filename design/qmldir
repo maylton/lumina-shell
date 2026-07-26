@@ -1,2 +1,3 @@
 module qs.design
 singleton Theme 1.0 Theme.qml
+ThemeTokenDefaults 1.0 ThemeTokenDefaults.qml
