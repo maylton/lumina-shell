@@ -26,8 +26,10 @@ Column {
     width: parent ? parent.width : 0
     spacing: luminaDesign.spacing.controlSectionGap
 
-    Component.onCompleted: BluetoothManagerService.setActive(true)
-    Component.onDestruction: BluetoothManagerService.setActive(false)
+    Component.onCompleted: {
+        BluetoothManagerService.setActive(true)
+        BluetoothManagerService.refresh()
+    }
 
     function activateDevice(device) {
         if (device.connected) {
@@ -134,7 +136,7 @@ Column {
         case "authentication-required":
             return I18n.tr(
                 "settings.connectivity.bluetooth.status.authenticationRequired",
-                "%1 requires a PIN or confirmation that Lumina does not support yet",
+                "%1 requires pairing confirmation",
                 replacements
             )
         case "pair-failed":
