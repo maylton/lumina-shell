@@ -29,6 +29,22 @@ if [[ -n "${pointer_focus_matches}" ]]; then
     exit 1
 fi
 
+async_pixmap_matches="$({
+    rg -n \
+        'asynchronous:[[:space:]]*true' \
+        "${repository_dir}/modules/control/UserAvatar.qml" \
+        "${repository_dir}/modules/wallpaper/Wallpaper.qml" \
+        "${repository_dir}/modules/notifications/NotificationCard.qml" \
+        || true
+})"
+
+if [[ -n "${async_pixmap_matches}" ]]; then
+    printf '%s\n' \
+        'Critical local images must avoid QQuickPixmapReader:' \
+        "${async_pixmap_matches}" >&2
+    exit 1
+fi
+
 if command -v qmltestrunner >/dev/null 2>&1; then
     qml_test_runner="$(command -v qmltestrunner)"
 elif [[ -x /usr/lib/qt6/bin/qmltestrunner ]]; then
