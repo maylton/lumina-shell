@@ -7,6 +7,14 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 
 "${repository_dir}/scripts/check-translations.sh"
 
+PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
+    python3 -m py_compile \
+    "${repository_dir}/services/connectivity/BluetoothPairingAgent.py"
+
+PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
+    python3 -m unittest \
+    "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
+
 pointer_focus_matches="$({
     rg -n \
         'forceActiveFocus\(Qt\.MouseFocusReason\)' \
