@@ -83,6 +83,21 @@ TestCase {
         )
     }
 
+    function test_nearWidgetGapIsCappedAtEightPixels() {
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 64, 24, 16
+            ),
+            72
+        )
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "bottom", 300, 900, 64, 24, 16
+            ),
+            528
+        )
+    }
+
     function test_popupYUsesParentWindowCoordinates() {
         compare(
             SurfacePlacementPolicy.popupY(
