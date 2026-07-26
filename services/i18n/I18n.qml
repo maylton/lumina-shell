@@ -7,6 +7,7 @@ import "I18n.js" as I18nLogic
 import "AppearanceMessages.js" as AppearanceMessages
 import "BarMessages.js" as BarMessages
 import "BehaviorMessages.js" as BehaviorMessages
+import "ConnectivityMessages.js" as ConnectivityMessages
 import "SettingsMessages.js" as SettingsMessages
 import "WidgetMessages.js" as WidgetMessages
 import "RuntimeMessages.js" as RuntimeMessages
@@ -58,6 +59,7 @@ Singleton {
         const supplementalValue = AppearanceMessages.message(locale, key)
             || BarMessages.message(locale, key)
             || BehaviorMessages.message(locale, key)
+            || ConnectivityMessages.message(locale, key)
             || SettingsMessages.message(locale, key)
             || WidgetMessages.message(locale, key)
             || RuntimeMessages.message(locale, key)
