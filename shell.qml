@@ -9,6 +9,7 @@ import qs.modules.dock
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.osd
+import qs.modules.polkit
 import qs.modules.settings
 import qs.modules.session
 import qs.modules.wallpaper
@@ -27,4 +28,5 @@ ShellRoot {
     Settings {}
     SessionMenu {}
     BluetoothPairingDialog {}
+    PolkitDialog {}
 }
