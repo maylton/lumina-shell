@@ -1,7 +1,7 @@
 .pragma library
 .import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
 
-var CURRENT_VERSION = 12
+var CURRENT_VERSION = 13
 
 function defaults() {
     return {
@@ -45,6 +45,7 @@ function defaults() {
         barShowDashboardButton: true,
         barShowNetworkStatus: true,
         barShowAudioStatus: true,
+        barShowSystemMonitor: false,
         barShowBatteryStatus: true,
         barShowWallpaperButton: false,
         barShowSessionButton: false,
@@ -64,6 +65,7 @@ function defaults() {
             "notifications",
             "network",
             "audio",
+            "system-monitor",
             "battery",
             "dashboard",
             "wallpaper",
@@ -227,6 +229,7 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
         "notifications",
         "network",
         "audio",
+        "system-monitor",
         "battery",
         "dashboard",
         "wallpaper",
@@ -283,6 +286,9 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
             "textMode",
             ["icon", "percentage", "state"]
         )
+    } else if (widgetId === "system-monitor") {
+        enumValue("textMode", ["icon", "percentage"])
+        enumValue("refreshInterval", ["1000", "2000", "5000"])
     } else if (widgetId === "battery") {
         enumValue(
             "textMode",
@@ -579,6 +585,7 @@ function normalize(source) {
         "barShowDashboardButton",
         "barShowNetworkStatus",
         "barShowAudioStatus",
+        "barShowSystemMonitor",
         "barShowBatteryStatus",
         "barShowWallpaperButton",
         "barShowSessionButton",

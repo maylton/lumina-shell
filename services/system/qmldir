@@ -1,3 +1,4 @@
 module qs.services.system
 PerformanceDiagnostics 1.0 PerformanceDiagnostics.qml
 singleton SystemDiagnosticsService 1.0 SystemDiagnosticsService.qml
+singleton SystemMonitorService 1.0 SystemMonitorService.qml

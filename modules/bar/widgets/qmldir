@@ -17,6 +17,12 @@ NetworkWidget 1.0 NetworkWidget.qml
 OverviewButton 1.0 OverviewButton.qml
 PrivacyIndicator 1.0 PrivacyIndicator.qml
 SystemStatusItem 1.0 SystemStatusItem.qml
+SystemMonitorCpuChart 1.0 SystemMonitorCpuChart.qml
+SystemMonitorCardHeader 1.0 SystemMonitorCardHeader.qml
+SystemMonitorIconBadge 1.0 SystemMonitorIconBadge.qml
+SystemMonitorPanel 1.0 SystemMonitorPanel.qml
+SystemMonitorProgressBar 1.0 SystemMonitorProgressBar.qml
+SystemMonitorWidget 1.0 SystemMonitorWidget.qml
 UserAvatarButton 1.0 UserAvatarButton.qml
 TrayItem 1.0 TrayItem.qml
 TrayMenu 1.0 TrayMenu.qml

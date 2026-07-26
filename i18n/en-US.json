@@ -199,6 +199,8 @@
   "settings.bar.catalog.overview.title": "Overview",
   "settings.bar.catalog.session.description": "Lock, suspend, log out, or power off",
   "settings.bar.catalog.session.title": "Session",
+  "settings.bar.catalog.system-monitor.description": "Live processor, memory, graphics, storage, and network data",
+  "settings.bar.catalog.system-monitor.title": "System monitor",
   "settings.bar.catalog.tray.description": "StatusNotifier application items",
   "settings.bar.catalog.tray.title": "System tray",
   "settings.bar.catalog.wallpaper.description": "Open the wallpaper picker",

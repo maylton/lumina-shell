@@ -9,10 +9,14 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 
 PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
     python3 -m py_compile \
-    "${repository_dir}/services/connectivity/BluetoothPairingAgent.py"
+    "${repository_dir}/services/connectivity/BluetoothPairingAgent.py" \
+    "${repository_dir}/services/system/SystemMonitorProbe.py"
 
 PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
-    python3 "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
+python3 "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
+
+PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
+    python3 "${repository_dir}/tests/test_system_monitor_probe.py"
 
 pointer_focus_matches="$({
     rg -n \

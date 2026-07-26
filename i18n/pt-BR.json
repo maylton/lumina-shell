@@ -199,6 +199,8 @@
   "settings.bar.catalog.overview.title": "Visão geral",
   "settings.bar.catalog.session.description": "Bloqueie, suspenda, saia ou desligue",
   "settings.bar.catalog.session.title": "Sessão",
+  "settings.bar.catalog.system-monitor.description": "Dados em tempo real de processador, memória, vídeo, armazenamento e rede",
+  "settings.bar.catalog.system-monitor.title": "Monitor do sistema",
   "settings.bar.catalog.tray.description": "Itens StatusNotifier dos aplicativos",
   "settings.bar.catalog.tray.title": "Bandeja do sistema",
   "settings.bar.catalog.wallpaper.description": "Abre o seletor de papel de parede",

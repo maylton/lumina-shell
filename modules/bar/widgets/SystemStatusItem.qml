@@ -6,6 +6,7 @@ Rectangle {
     id: root
 
     property string iconName: ""
+    property string customIconSource: ""
     property string fallbackSymbol: ""
     property string label: ""
     property string description: ""
@@ -106,6 +107,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: !root.expressiveBattery
             iconName: root.iconName
+            customSource: root.customIconSource
             fallbackSymbol: root.fallbackSymbol
             iconColor: root.alert
                 ? root.luminaDesign.color.urgent

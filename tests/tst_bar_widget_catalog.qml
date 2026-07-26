@@ -10,11 +10,12 @@ TestCase {
         const entries = BarWidgetCatalog.all()
         const ids = entries.map(entry => entry.id)
 
-        compare(entries.length, 14)
+        compare(entries.length, 15)
         compare(new Set(ids).size, entries.length)
         verify(ids.indexOf("bluetooth") >= 0)
         verify(ids.indexOf("network") >= 0)
         verify(ids.indexOf("audio") >= 0)
+        verify(ids.indexOf("system-monitor") >= 0)
         verify(ids.indexOf("battery") >= 0)
         verify(ids.indexOf("system-status") < 0)
         verify(ids.indexOf("privacy") < 0)
@@ -72,6 +73,12 @@ TestCase {
         compare(settings.notifications.surfacePlacement, "near-widget")
         compare(settings.network.surfacePlacement, "near-widget")
         compare(settings.audio.surfacePlacement, "near-widget")
+        compare(
+            settings["system-monitor"].surfacePlacement,
+            "near-widget"
+        )
+        compare(settings["system-monitor"].textMode, "percentage")
+        compare(settings["system-monitor"].refreshInterval, "2000")
         compare(settings.battery.surfacePlacement, "near-widget")
         compare(settings.dashboard.surfacePlacement, "centered")
         compare(settings.wallpaper.surfacePlacement, "centered")

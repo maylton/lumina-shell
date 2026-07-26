@@ -50,6 +50,7 @@ Controls.Popup {
         notifications: notificationsSettings,
         network: networkSettings,
         audio: audioSettings,
+        "system-monitor": systemMonitorSettings,
         battery: batterySettings,
         dashboard: userAvatarSettings,
         wallpaper: wallpaperSettings,
@@ -397,6 +398,11 @@ Controls.Popup {
     Component {
         id: audioSettings
         AudioWidgetSettings {}
+    }
+
+    Component {
+        id: systemMonitorSettings
+        SystemMonitorWidgetSettings {}
     }
 
     Component {

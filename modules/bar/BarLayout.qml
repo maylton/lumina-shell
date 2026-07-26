@@ -59,6 +59,7 @@ Item {
         notifications: notificationsComponent,
         network: networkComponent,
         audio: audioComponent,
+        "system-monitor": systemMonitorComponent,
         battery: batteryComponent,
         dashboard: dashboardComponent,
         wallpaper: wallpaperComponent,
@@ -77,6 +78,7 @@ Item {
         notifications: ConfigStore.barShowNotifications,
         network: ConfigStore.barShowNetworkStatus,
         audio: ConfigStore.barShowAudioStatus,
+        "system-monitor": ConfigStore.barShowSystemMonitor,
         battery: ConfigStore.barShowBatteryStatus,
         dashboard: ConfigStore.barShowDashboardButton,
         wallpaper: ConfigStore.barShowWallpaperButton
@@ -311,6 +313,16 @@ Item {
         id: audioComponent
 
         AudioWidget {
+            compact: !root.wideLayout
+            outputName: root.outputName
+            panelWindow: root.panelWindow
+        }
+    }
+
+    Component {
+        id: systemMonitorComponent
+
+        SystemMonitorWidget {
             compact: !root.wideLayout
             outputName: root.outputName
             panelWindow: root.panelWindow

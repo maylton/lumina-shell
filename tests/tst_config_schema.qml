@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema12FlexibleWidgetAreas() {
+    function test_defaultsUseSchema13SystemMonitorWidget() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 12)
+        compare(state.schemaVersion, 13)
         compare(state.themeMode, "auto")
         compare(state.shellBackgroundMode, "solid")
         compare(state.shellSurfaceOpacity, 0.82)
@@ -25,6 +25,14 @@ TestCase {
         compare(state.barWidgetSettings.context.mode, "contextual")
         compare(state.barWidgetSettings.network.textMode, "summary")
         compare(state.barWidgetSettings.audio.textMode, "percentage")
+        compare(
+            state.barWidgetSettings["system-monitor"].textMode,
+            "percentage"
+        )
+        compare(
+            state.barWidgetSettings["system-monitor"].refreshInterval,
+            "2000"
+        )
         compare(state.barWidgetSettings.battery.textMode, "percentage")
         verify(state.barWidgetSettings["system-status"] === undefined)
         compare(state.barWidgetSettings.tray.mode, "grouped")
@@ -49,10 +57,11 @@ TestCase {
         compare(state.barShowWallpaperButton, false)
         compare(state.barShowSessionButton, false)
         compare(state.barShowBluetooth, true)
+        compare(state.barShowSystemMonitor, false)
         compare(state.barLeftWidgetOrder.length, 4)
         compare(state.barCenterWidgetOrder.length, 1)
         compare(state.barCenterWidgetOrder[0], "context")
-        compare(state.barRightWidgetOrder.length, 9)
+        compare(state.barRightWidgetOrder.length, 10)
         compare(state.barRightWidgetOrder[0], "bluetooth")
         compare(
             state.barWidgetSettings.bluetooth.surfacePlacement,
@@ -73,7 +82,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -94,7 +103,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -157,6 +166,7 @@ TestCase {
                 "network",
                 "audio",
                 "battery",
+                "system-monitor",
                 "wallpaper",
                 "session"
             ])
@@ -176,7 +186,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
         compare(migrated.shellBackgroundMode, "blur")
@@ -217,7 +227,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -279,7 +289,7 @@ TestCase {
             barBackgroundMode: "frosted"
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.shellBackgroundMode, "blur")
         compare(migrated.shellSurfaceOpacity, 0.74)
         compare(migrated.barBackgroundMode, "frosted")
@@ -293,7 +303,7 @@ TestCase {
             barHeight: 64
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.barHeight, 64)
         compare(migrated.barPanelGap, 8)
     }
@@ -325,7 +335,7 @@ TestCase {
             barShowSystemStatus: false
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(
             JSON.stringify(migrated.barRightWidgetOrder),
             JSON.stringify([
@@ -336,6 +346,7 @@ TestCase {
                 "battery",
                 "notifications",
                 "dashboard",
+                "system-monitor",
                 "wallpaper",
                 "session"
             ])
@@ -368,7 +379,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.barShowBluetooth, true)
         compare(
             JSON.stringify(migrated.barRightWidgetOrder),
@@ -380,6 +391,7 @@ TestCase {
                 "audio",
                 "battery",
                 "dashboard",
+                "system-monitor",
                 "wallpaper",
                 "session"
             ])
@@ -411,7 +423,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(
             JSON.stringify(migrated.barLeftWidgetOrder),
             JSON.stringify([
@@ -435,6 +447,7 @@ TestCase {
                 "network",
                 "audio",
                 "battery",
+                "system-monitor",
                 "wallpaper",
                 "session"
             ])
@@ -477,7 +490,7 @@ TestCase {
                 state.barCenterWidgetOrder,
                 state.barRightWidgetOrder
             )
-        compare(combined.length, 14)
+        compare(combined.length, 15)
         compare(new Set(combined).size, combined.length)
     }
 
@@ -499,6 +512,44 @@ TestCase {
         )
         verify(
             state.barWidgetSettings.context.surfacePlacement === undefined
+        )
+    }
+
+    function test_systemMonitorWidgetSettingsAreNormalized() {
+        const state = ConfigSchema.normalize({
+            barWidgetSettings: {
+                "system-monitor": {
+                    textMode: "icon",
+                    refreshInterval: "5000",
+                    surfacePlacement: "centered"
+                }
+            }
+        })
+        const invalid = ConfigSchema.normalize({
+            barWidgetSettings: {
+                "system-monitor": {
+                    textMode: "graph",
+                    refreshInterval: "250"
+                }
+            }
+        })
+
+        compare(state.barWidgetSettings["system-monitor"].textMode, "icon")
+        compare(
+            state.barWidgetSettings["system-monitor"].refreshInterval,
+            "5000"
+        )
+        compare(
+            state.barWidgetSettings["system-monitor"].surfacePlacement,
+            "centered"
+        )
+        compare(
+            invalid.barWidgetSettings["system-monitor"].textMode,
+            "percentage"
+        )
+        compare(
+            invalid.barWidgetSettings["system-monitor"].refreshInterval,
+            "2000"
         )
     }
 
@@ -634,7 +685,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 12)
+        compare(migrated.schemaVersion, 13)
         compare(migrated.barBackgroundMode, "blur")
     }
 
@@ -673,6 +724,7 @@ TestCase {
                 "notifications",
                 "network",
                 "audio",
+                "system-monitor",
                 "battery",
                 "wallpaper"
             ])
@@ -735,6 +787,7 @@ TestCase {
                 "notifications",
                 "tray",
                 "bluetooth",
+                "system-monitor",
                 "wallpaper",
                 "session"
             ])
@@ -764,7 +817,7 @@ TestCase {
         compare(bar.barWidgetSettings.tray.mode, "grouped")
         compare(bar.barShowDashboardButton, true)
         compare(bar.barCenterWidgetOrder.length, 1)
-        compare(bar.barRightWidgetOrder.length, 9)
+        compare(bar.barRightWidgetOrder.length, 10)
         verify(bar.themeMode === undefined)
         compare(dashboard.dashboardUseUserAvatarImage, true)
         compare(dashboard.dashboardUserAvatarPath, "")

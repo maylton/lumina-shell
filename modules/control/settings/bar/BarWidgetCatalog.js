@@ -175,6 +175,24 @@ var entries = [
         }
     },
     {
+        id: "system-monitor",
+        title: "System monitor",
+        description:
+            "Live processor, memory, graphics, storage, and network data",
+        icon: "utilities-system-monitor-symbolic",
+        defaultArea: RIGHT,
+        configurable: true,
+        available: true,
+        unavailableReason: "",
+        component: "SystemMonitorWidgetSettings",
+        defaults: {
+            showBackground: true,
+            surfacePlacement: "near-widget",
+            textMode: "percentage",
+            refreshInterval: "2000"
+        }
+    },
+    {
         id: "battery",
         title: "Battery",
         description: "Battery level and charging state",

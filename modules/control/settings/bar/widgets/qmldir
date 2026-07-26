@@ -13,3 +13,4 @@ NetworkWidgetSettings 1.0 NetworkWidgetSettings.qml
 UserAvatarWidgetSettings 1.0 UserAvatarWidgetSettings.qml
 WallpaperWidgetSettings 1.0 WallpaperWidgetSettings.qml
 SessionWidgetSettings 1.0 SessionWidgetSettings.qml
+SystemMonitorWidgetSettings 1.0 SystemMonitorWidgetSettings.qml
