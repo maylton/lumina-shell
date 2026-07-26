@@ -1,80 +1,32 @@
 #!/usr/bin/env python3
-"""Interactive bluetoothctl pairing bridge for Lumina Shell.
+"""BlueZ pairing agent bridge for Lumina Shell.
 
-The process speaks newline-delimited JSON on stdout and accepts newline-delimited
-JSON commands on stdin. bluetoothctl is attached to a PTY so prompts that do not
-end with a newline remain observable.
+The helper exports org.bluez.Agent1 on the system bus, sends newline-delimited
+JSON events to QML, and accepts newline-delimited JSON responses on stdin.
 """
 
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
-import os
-import pty
 import re
-import selectors
 import signal
 import sys
-import termios
-import time
 from typing import Any
 
-CSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
-OSC_RE = re.compile(
-    r"\x1b\](?:[^\x07\x1b]|\x1b(?!\\))*(?:\x07|\x1b\\)"
-)
-AGENT_READY_RE = re.compile(
-    r"Agent registered|Agent is already registered",
-    re.IGNORECASE,
-)
-DEFAULT_AGENT_READY_RE = re.compile(
-    r"Default agent request successful",
-    re.IGNORECASE,
-)
-PAIRABLE_READY_RE = re.compile(
-    r"Changing pairable on succeeded|Pairable\s*:\s*yes",
-    re.IGNORECASE,
-)
-AGENT_FAILURE_RE = re.compile(
-    r"Failed to register agent|No agent is registered|"
-    r"Failed to request default agent",
-    re.IGNORECASE,
-)
-CONFIRM_RE = re.compile(
-    r"(?:Confirm|Verify)\s+"
-    r"(?:passkey|pairing(?:\s+code)?)\s*:?\s*([0-9]{1,6})"
-    r"(?:\s+\((?:yes/no|yes\\/no)\))?\s*:?",
-    re.IGNORECASE,
-)
-PIN_RE = re.compile(r"Enter PIN code\s*:", re.IGNORECASE)
-PASSKEY_RE = re.compile(
-    r"Enter passkey(?:\s+\(number in 0-999999\))?\s*:",
-    re.IGNORECASE,
-)
-AUTHORIZE_RE = re.compile(
-    r"Authorize service\s+([^\s]+)"
-    r"(?:\s+\((?:yes/no|yes\\/no)\))?\s*:",
-    re.IGNORECASE,
-)
-DISPLAY_PIN_RE = re.compile(
-    r"(?:\[agent\]\s+)?PIN code:\s*([0-9A-Za-z]{1,16})",
-    re.IGNORECASE,
-)
-DISPLAY_PASSKEY_RE = re.compile(
-    r"(?:\[agent\]\s+)?Passkey:\s*([0-9]{1,6})"
-    r"(?:\s+entered\s+([0-9]+))?",
-    re.IGNORECASE,
-)
-SUCCESS_RE = re.compile(r"Pairing successful", re.IGNORECASE)
-FAILURE_RE = re.compile(
-    r"(?:Failed to pair|Pairing failed|AuthenticationFailed|"
-    r"AuthenticationCanceled|AuthenticationRejected|"
-    r"AuthenticationTimeout|org\.bluez\.Error\.[A-Za-z]+)"
-    r"\s*:?\s*([^\r\n]*)",
-    re.IGNORECASE,
-)
 ADDRESS_RE = re.compile(r"^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$")
+BLUEZ_SERVICE = "org.bluez"
+BLUEZ_ROOT = "/org/bluez"
+OBJECT_MANAGER_PATH = "/"
+AGENT_PATH = "/org/lumina/BluetoothAgent"
+AGENT_INTERFACE = "org.bluez.Agent1"
+AGENT_MANAGER_INTERFACE = "org.bluez.AgentManager1"
+DEVICE_INTERFACE = "org.bluez.Device1"
+ADAPTER_INTERFACE = "org.bluez.Adapter1"
+PROPERTIES_INTERFACE = "org.freedesktop.DBus.Properties"
+OBJECT_MANAGER_INTERFACE = "org.freedesktop.DBus.ObjectManager"
+CAPABILITY = "KeyboardDisplay"
 
 
 def emit(event_type: str, **payload: Any) -> None:
@@ -83,60 +35,364 @@ def emit(event_type: str, **payload: Any) -> None:
     sys.stdout.flush()
 
 
-def collapse_backspaces(text: str) -> str:
-    result: list[str] = []
-    for character in text:
-        if character == "\b":
-            if result:
-                result.pop()
-        else:
-            result.append(character)
-    return "".join(result)
+def normalize_address(value: str) -> str:
+    address = str(value or "").strip().upper()
+    return address if ADDRESS_RE.fullmatch(address) else ""
 
 
-def cleaned(text: str) -> str:
-    value = OSC_RE.sub("", text)
-    value = CSI_RE.sub("", value)
-    value = collapse_backspaces(value)
-    value = value.replace("\r", "")
-    return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f]", "", value)
+def variant_value(value: Any) -> Any:
+    return getattr(value, "value", value)
 
 
-def useful_tail(text: str) -> str:
-    lines = [line.strip() for line in cleaned(text).splitlines()]
-    lines = [line for line in lines if line and not line.endswith("#")]
-    return lines[-1][:240] if lines else ""
+def pairing_code(value: int) -> str:
+    return f"{int(value):06d}"
 
 
-def write_fd(fd: int, text: str) -> None:
-    os.write(fd, text.encode("utf-8"))
+def find_device_paths(managed_objects: dict[str, Any], address: str) -> tuple[str, str]:
+    requested = normalize_address(address)
+    if not requested:
+        return "", ""
+
+    for path, interfaces in managed_objects.items():
+        properties = interfaces.get(DEVICE_INTERFACE)
+        if not properties:
+            continue
+
+        candidate = str(variant_value(properties.get("Address", ""))).upper()
+        if candidate != requested:
+            continue
+
+        adapter_path = str(variant_value(properties.get("Adapter", "")))
+        return str(path), adapter_path
+
+    return "", ""
 
 
-def terminate_child(pid: int, fd: int) -> None:
+async def stream_reader() -> asyncio.StreamReader:
+    reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(reader)
+    loop = asyncio.get_running_loop()
+    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+    return reader
+
+
+async def run(address: str) -> int:
     try:
-        write_fd(fd, "quit\n")
-    except OSError:
-        pass
+        from dbus_next import DBusError, Variant
+        from dbus_next.aio import MessageBus
+        from dbus_next.constants import BusType
+        from dbus_next.service import ServiceInterface, method
+    except ImportError as error:
+        emit(
+            "failed",
+            code="missing-dbus-next",
+            message="Install python-dbus-next to use Bluetooth authentication",
+        )
+        sys.stderr.write(str(error) + "\n")
+        return 8
 
-    deadline = time.monotonic() + 1.0
-    while time.monotonic() < deadline:
+    class LuminaBluetoothAgent(ServiceInterface):
+        def __init__(self) -> None:
+            super().__init__(AGENT_INTERFACE)
+            self.pending: asyncio.Future[Any] | None = None
+            self.pending_kind = ""
+
+        def _clear_pending(self) -> None:
+            self.pending = None
+            self.pending_kind = ""
+
+        async def _request(self, kind: str, **payload: Any) -> Any:
+            if self.pending is not None and not self.pending.done():
+                raise DBusError(
+                    "org.bluez.Error.Rejected",
+                    "another pairing request is already pending",
+                )
+
+            future: asyncio.Future[Any] = asyncio.get_running_loop().create_future()
+            self.pending = future
+            self.pending_kind = kind
+            emit("prompt", kind=kind, **payload)
+
+            try:
+                return await future
+            finally:
+                if self.pending is future:
+                    self._clear_pending()
+
+        def accept(self, value: Any = True) -> bool:
+            if self.pending is None or self.pending.done():
+                return False
+            self.pending.set_result(value)
+            return True
+
+        def reject(self, reason: str = "user rejected pairing") -> bool:
+            if self.pending is None or self.pending.done():
+                return False
+            self.pending.set_exception(
+                DBusError("org.bluez.Error.Rejected", reason)
+            )
+            return True
+
+        def cancel_pending(self, reason: str = "pairing canceled") -> bool:
+            if self.pending is None or self.pending.done():
+                return False
+            self.pending.set_exception(
+                DBusError("org.bluez.Error.Canceled", reason)
+            )
+            return True
+
+        @method()
+        def Release(self) -> None:
+            self.cancel_pending("BlueZ released the pairing agent")
+
+        @method()
+        async def RequestPinCode(self, device: "o") -> "s":
+            value = await self._request("pin", device=str(device))
+            return str(value)
+
+        @method()
+        def DisplayPinCode(self, device: "o", pincode: "s") -> None:
+            emit(
+                "display",
+                kind="display-pin",
+                device=str(device),
+                code=str(pincode),
+            )
+
+        @method()
+        async def RequestPasskey(self, device: "o") -> "u":
+            value = await self._request("passkey", device=str(device))
+            return int(value)
+
+        @method()
+        def DisplayPasskey(
+            self,
+            device: "o",
+            passkey: "u",
+            entered: "q",
+        ) -> None:
+            emit(
+                "display",
+                kind="display-passkey",
+                device=str(device),
+                code=pairing_code(passkey),
+                entered=int(entered),
+            )
+
+        @method()
+        async def RequestConfirmation(
+            self,
+            device: "o",
+            passkey: "u",
+        ) -> None:
+            accepted = await self._request(
+                "confirmation",
+                device=str(device),
+                code=pairing_code(passkey),
+            )
+            if not accepted:
+                raise DBusError(
+                    "org.bluez.Error.Rejected",
+                    "user rejected pairing confirmation",
+                )
+
+        @method()
+        async def RequestAuthorization(self, device: "o") -> None:
+            accepted = await self._request("authorize", device=str(device))
+            if not accepted:
+                raise DBusError(
+                    "org.bluez.Error.Rejected",
+                    "user rejected pairing authorization",
+                )
+
+        @method()
+        async def AuthorizeService(self, device: "o", uuid: "s") -> None:
+            accepted = await self._request(
+                "authorize",
+                device=str(device),
+                service=str(uuid),
+            )
+            if not accepted:
+                raise DBusError(
+                    "org.bluez.Error.Rejected",
+                    "user rejected Bluetooth service",
+                )
+
+        @method()
+        def Cancel(self) -> None:
+            self.cancel_pending("BlueZ canceled pairing")
+
+    async def proxy_interface(bus: Any, path: str, interface_name: str) -> Any:
+        introspection = await bus.introspect(BLUEZ_SERVICE, path)
+        proxy = bus.get_proxy_object(BLUEZ_SERVICE, path, introspection)
+        return proxy.get_interface(interface_name)
+
+    async def command_loop(
+        reader: asyncio.StreamReader,
+        agent: LuminaBluetoothAgent,
+        cancel_event: asyncio.Event,
+    ) -> None:
+        while not cancel_event.is_set():
+            line = await reader.readline()
+            if not line:
+                agent.cancel_pending("Lumina pairing UI closed")
+                cancel_event.set()
+                return
+
+            try:
+                command = json.loads(line.decode("utf-8", "replace"))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+
+            action = str(command.get("action", ""))
+            if action == "accept":
+                agent.accept(True)
+            elif action == "reject":
+                agent.reject()
+            elif action == "value":
+                value = str(command.get("value", "")).strip()
+                if agent.pending_kind == "pin":
+                    valid = 1 <= len(value) <= 16 and "\n" not in value
+                    if valid:
+                        agent.accept(value)
+                    else:
+                        emit("invalid-response", kind="pin")
+                elif agent.pending_kind == "passkey":
+                    valid = value.isdigit() and 1 <= len(value) <= 6
+                    valid = valid and int(value) <= 999999
+                    if valid:
+                        agent.accept(int(value))
+                    else:
+                        emit("invalid-response", kind="passkey")
+            elif action == "cancel":
+                agent.cancel_pending(str(command.get("reason", "user canceled")))
+                cancel_event.set()
+                return
+
+    bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+    agent = LuminaBluetoothAgent()
+    bus.export(AGENT_PATH, agent)
+
+    agent_manager = None
+    command_task: asyncio.Task[None] | None = None
+    pair_task: asyncio.Task[Any] | None = None
+
+    try:
+        object_manager = await proxy_interface(
+            bus,
+            OBJECT_MANAGER_PATH,
+            OBJECT_MANAGER_INTERFACE,
+        )
+        managed_objects = await object_manager.call_get_managed_objects()
+        device_path, adapter_path = find_device_paths(managed_objects, address)
+        if not device_path or not adapter_path:
+            emit(
+                "failed",
+                code="device-not-found",
+                message=f"Bluetooth device {address} is no longer available",
+            )
+            return 4
+
+        agent_manager = await proxy_interface(
+            bus,
+            BLUEZ_ROOT,
+            AGENT_MANAGER_INTERFACE,
+        )
+        await agent_manager.call_register_agent(AGENT_PATH, CAPABILITY)
+        await agent_manager.call_request_default_agent(AGENT_PATH)
+        emit("agent-ready", address=address)
+
+        adapter_properties = await proxy_interface(
+            bus,
+            adapter_path,
+            PROPERTIES_INTERFACE,
+        )
+        await adapter_properties.call_set(
+            ADAPTER_INTERFACE,
+            "Powered",
+            Variant("b", True),
+        )
+        await adapter_properties.call_set(
+            ADAPTER_INTERFACE,
+            "Pairable",
+            Variant("b", True),
+        )
+
+        device = await proxy_interface(bus, device_path, DEVICE_INTERFACE)
+        reader = await stream_reader()
+        cancel_event = asyncio.Event()
+        loop = asyncio.get_running_loop()
+
+        for handled_signal in (signal.SIGINT, signal.SIGTERM):
+            try:
+                loop.add_signal_handler(handled_signal, cancel_event.set)
+            except NotImplementedError:
+                pass
+
+        command_task = asyncio.create_task(
+            command_loop(reader, agent, cancel_event)
+        )
+        pair_task = asyncio.create_task(device.call_pair())
+        cancel_task = asyncio.create_task(cancel_event.wait())
+        emit("ready", address=address)
+
+        done, _ = await asyncio.wait(
+            {pair_task, cancel_task},
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+
+        if cancel_task in done and cancel_event.is_set():
+            agent.cancel_pending("user canceled pairing")
+            try:
+                await device.call_cancel_pairing()
+            except Exception:
+                pass
+            if not pair_task.done():
+                pair_task.cancel()
+            await asyncio.gather(pair_task, return_exceptions=True)
+            emit("cancelled", reason="user")
+            return 3
+
+        cancel_task.cancel()
+        await asyncio.gather(cancel_task, return_exceptions=True)
+        await pair_task
+        emit("completed", address=address)
+        return 0
+    except DBusError as error:
+        error_type = str(getattr(error, "type", "org.bluez.Error.Failed"))
+        error_text = str(getattr(error, "text", "") or error)
+        emit(
+            "failed",
+            code="pair-failed",
+            dbusError=error_type,
+            message=error_text,
+        )
+        return 5
+    except Exception as error:
+        emit(
+            "failed",
+            code="agent-failed",
+            message=str(error),
+        )
+        return 6
+    finally:
+        agent.cancel_pending("pairing agent stopped")
+        if command_task is not None:
+            command_task.cancel()
+            await asyncio.gather(command_task, return_exceptions=True)
+        if pair_task is not None and not pair_task.done():
+            pair_task.cancel()
+            await asyncio.gather(pair_task, return_exceptions=True)
+        if agent_manager is not None:
+            try:
+                await agent_manager.call_unregister_agent(AGENT_PATH)
+            except Exception:
+                pass
         try:
-            waited, _ = os.waitpid(pid, os.WNOHANG)
-        except ChildProcessError:
-            return
-        if waited == pid:
-            return
-        time.sleep(0.05)
-
-    try:
-        os.kill(pid, signal.SIGTERM)
-    except ProcessLookupError:
-        return
-
-    try:
-        os.waitpid(pid, 0)
-    except ChildProcessError:
-        pass
+            bus.unexport(AGENT_PATH, agent)
+        except Exception:
+            pass
+        bus.disconnect()
 
 
 def main() -> int:
@@ -144,297 +400,17 @@ def main() -> int:
     parser.add_argument("address")
     args = parser.parse_args()
 
-    address = args.address.strip().upper()
-    if not ADDRESS_RE.fullmatch(address):
-        emit("failed", code="invalid-address", message="Invalid Bluetooth address")
-        return 2
-
-    try:
-        pid, master_fd = pty.fork()
-    except OSError as error:
-        emit("failed", code="agent-start-failed", message=str(error))
-        return 2
-
-    if pid == 0:
-        try:
-            os.environ["LC_ALL"] = "C"
-            os.environ["LANG"] = "C"
-            os.environ["TERM"] = "dumb"
-            os.environ["NO_COLOR"] = "1"
-            os.execvp("bluetoothctl", ["bluetoothctl"])
-        except OSError as error:
-            sys.stderr.write(str(error))
-            os._exit(127)
-
-    try:
-        attributes = termios.tcgetattr(master_fd)
-        attributes[3] &= ~termios.ECHO
-        termios.tcsetattr(master_fd, termios.TCSANOW, attributes)
-    except (OSError, termios.error):
-        pass
-
-    os.set_blocking(master_fd, False)
-    selector = selectors.DefaultSelector()
-    selector.register(master_fd, selectors.EVENT_READ, "bluetoothctl")
-    selector.register(sys.stdin, selectors.EVENT_READ, "ui")
-
-    agent_requested = False
-    agent_ready = False
-    default_agent_requested = False
-    pairable_requested = False
-    pairable_ready = False
-    pair_requested = False
-    current_prompt = ""
-    buffer = ""
-    emitted_displays: set[str] = set()
-    started_at = time.monotonic()
-    agent_retry_at = started_at + 2.0
-    setup_deadline = started_at + 10.0
-    deadline = started_at + 100.0
-    finished = False
-
-    emit("started", address=address)
-
-    def request_agent() -> None:
-        nonlocal agent_requested
-        write_fd(master_fd, "agent KeyboardDisplay\n")
-        agent_requested = True
-
-    def request_default_agent() -> None:
-        nonlocal default_agent_requested
-        if default_agent_requested:
-            return
-        write_fd(master_fd, "default-agent\n")
-        default_agent_requested = True
-
-    def request_pairable() -> None:
-        nonlocal pairable_requested
-        if pairable_requested:
-            return
-        write_fd(master_fd, "pairable on\n")
-        pairable_requested = True
-
-    def start_pairing() -> None:
-        nonlocal pair_requested, buffer
-        if pair_requested or not agent_ready:
-            return
-        pair_requested = True
-        buffer = ""
-        emit("ready", address=address)
-        write_fd(master_fd, f"pair {address}\n")
-
-    request_agent()
-
-    try:
-        while time.monotonic() < deadline:
-            now = time.monotonic()
-
-            if not pair_requested and now >= setup_deadline:
-                emit(
-                    "failed",
-                    code="agent-not-ready",
-                    message=useful_tail(buffer)
-                    or "Bluetooth authentication agent did not become ready",
-                )
-                return 7
-
-            if not agent_ready and now >= agent_retry_at:
-                request_agent()
-                agent_retry_at = now + 2.0
-
-            for key, _ in selector.select(timeout=0.10):
-                if key.data == "ui":
-                    line = sys.stdin.readline()
-                    if line == "":
-                        emit("cancelled", reason="ui-closed")
-                        return 3
-
-                    try:
-                        command = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-
-                    action = str(command.get("action", ""))
-                    if action == "cancel":
-                        if current_prompt in {"confirmation", "authorize"}:
-                            write_fd(master_fd, "no\n")
-                        else:
-                            try:
-                                os.kill(pid, signal.SIGINT)
-                            except ProcessLookupError:
-                                pass
-                        emit("cancelled", reason=str(command.get("reason", "user")))
-                        return 3
-
-                    if action == "accept" and current_prompt in {
-                        "confirmation",
-                        "authorize",
-                    }:
-                        write_fd(master_fd, "yes\n")
-                        current_prompt = ""
-                        buffer = ""
-                        continue
-
-                    if action == "reject" and current_prompt in {
-                        "confirmation",
-                        "authorize",
-                    }:
-                        write_fd(master_fd, "no\n")
-                        current_prompt = ""
-                        buffer = ""
-                        continue
-
-                    if action == "value" and current_prompt in {
-                        "pin",
-                        "passkey",
-                    }:
-                        value = str(command.get("value", "")).strip()
-                        if current_prompt == "pin":
-                            valid = 1 <= len(value) <= 16 and "\n" not in value
-                        else:
-                            valid = (
-                                value.isdigit()
-                                and 1 <= len(value) <= 6
-                                and int(value) <= 999999
-                            )
-                        if valid:
-                            write_fd(master_fd, value + "\n")
-                            current_prompt = ""
-                            buffer = ""
-                        else:
-                            emit("invalid-response", kind=current_prompt)
-                        continue
-
-                try:
-                    chunk = os.read(master_fd, 4096)
-                except BlockingIOError:
-                    continue
-                except OSError:
-                    chunk = b""
-
-                if not chunk:
-                    if not finished:
-                        emit(
-                            "failed",
-                            code="agent-exited",
-                            message="bluetoothctl exited before pairing completed",
-                        )
-                    return 4
-
-                buffer = (
-                    buffer + cleaned(chunk.decode("utf-8", "replace"))
-                )[-16384:]
-
-                if not agent_ready and AGENT_READY_RE.search(buffer):
-                    agent_ready = True
-                    emit("agent-ready", address=address)
-                    request_default_agent()
-                    request_pairable()
-
-                if agent_ready and DEFAULT_AGENT_READY_RE.search(buffer):
-                    emit("default-agent-ready", address=address)
-
-                if agent_ready and PAIRABLE_READY_RE.search(buffer):
-                    pairable_ready = True
-
-                if not pair_requested and agent_ready and pairable_ready:
-                    start_pairing()
-                    continue
-
-                if not pair_requested and AGENT_FAILURE_RE.search(buffer):
-                    emit(
-                        "failed",
-                        code="agent-registration-failed",
-                        message=useful_tail(buffer)
-                        or "Bluetooth authentication agent registration failed",
-                    )
-                    return 7
-
-                if not current_prompt:
-                    confirmation = CONFIRM_RE.search(buffer)
-                    if confirmation:
-                        current_prompt = "confirmation"
-                        emit(
-                            "prompt",
-                            kind="confirmation",
-                            code=confirmation.group(1).zfill(6),
-                        )
-                        continue
-
-                    if PIN_RE.search(buffer):
-                        current_prompt = "pin"
-                        emit("prompt", kind="pin")
-                        continue
-
-                    if PASSKEY_RE.search(buffer):
-                        current_prompt = "passkey"
-                        emit("prompt", kind="passkey")
-                        continue
-
-                    authorization = AUTHORIZE_RE.search(buffer)
-                    if authorization:
-                        current_prompt = "authorize"
-                        emit(
-                            "prompt",
-                            kind="authorize",
-                            service=authorization.group(1),
-                        )
-                        continue
-
-                display_pin = DISPLAY_PIN_RE.search(buffer)
-                if display_pin:
-                    signature = f"pin:{display_pin.group(1)}"
-                    if signature not in emitted_displays:
-                        emitted_displays.add(signature)
-                        emit(
-                            "display",
-                            kind="display-pin",
-                            code=display_pin.group(1),
-                        )
-
-                display_passkey = DISPLAY_PASSKEY_RE.search(buffer)
-                if display_passkey:
-                    entered = int(display_passkey.group(2) or 0)
-                    code = display_passkey.group(1).zfill(6)
-                    signature = f"passkey:{code}:{entered}"
-                    if signature not in emitted_displays:
-                        emitted_displays.add(signature)
-                        emit(
-                            "display",
-                            kind="display-passkey",
-                            code=code,
-                            entered=entered,
-                        )
-
-                if SUCCESS_RE.search(buffer):
-                    finished = True
-                    emit("completed", address=address)
-                    return 0
-
-                failure = FAILURE_RE.search(buffer)
-                if failure:
-                    finished = True
-                    message = (failure.group(1) or "").strip()
-                    emit(
-                        "failed",
-                        code="pair-failed",
-                        message=message or useful_tail(buffer) or failure.group(0),
-                    )
-                    return 5
-
+    address = normalize_address(args.address)
+    if not address:
         emit(
             "failed",
-            code="timeout",
-            message=useful_tail(buffer) or "Bluetooth pairing timed out",
+            code="invalid-address",
+            message="Invalid Bluetooth address",
         )
-        return 6
-    finally:
-        selector.close()
-        terminate_child(pid, master_fd)
-        try:
-            os.close(master_fd)
-        except OSError:
-            pass
+        return 2
+
+    emit("started", address=address)
+    return asyncio.run(run(address))
 
 
 if __name__ == "__main__":
