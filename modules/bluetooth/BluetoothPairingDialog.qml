@@ -30,7 +30,7 @@ FloatingWindow {
 
     visible: BluetoothManagerService.authenticationPending
     width: 460
-    height: inputPrompt ? 344 : 320
+    height: displayPrompt ? 360 : inputPrompt ? 344 : 320
     minimumSize: Qt.size(width, height)
     maximumSize: Qt.size(width, height)
     color: "transparent"
@@ -179,6 +179,8 @@ FloatingWindow {
         Qt.callLater(function() {
             if (root.inputPrompt)
                 authInput.forceActiveFocus(Qt.PopupFocusReason)
+            else if (root.displayPrompt)
+                cancelButton.forceActiveFocus(Qt.PopupFocusReason)
             else
                 confirmButton.forceActiveFocus(Qt.PopupFocusReason)
         })
