@@ -1,0 +1,54 @@
+name: Apply widget surface placement
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Decode the migration
+        run: |
+          base64 --decode scripts/apply-widget-surface-placement.py.gz.b64 \
+            | gzip --decompress \
+            > scripts/apply-widget-surface-placement.py
+          chmod +x scripts/apply-widget-surface-placement.py
+
+      - name: Apply the implementation
+        run: python scripts/apply-widget-surface-placement.py
+
+      - name: Validate the generated implementation
+        run: |
+          python scripts/apply-widget-surface-placement.py --check
+          git diff --check
+          bash scripts/check-translations.sh
+
+      - name: Commit and push the implementation
+        run: |
+          rm scripts/apply-widget-surface-placement.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Add per-widget surface placement"
+          git push origin "HEAD:${{ github.head_ref }}"
