@@ -25,6 +25,8 @@ Item {
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
+    width: implicitWidth
+    height: implicitHeight
 
     Component.onCompleted: {
         BluetoothManagerService.setActive(true)
