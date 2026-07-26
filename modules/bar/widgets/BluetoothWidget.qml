@@ -71,10 +71,10 @@ Item {
         id: bluetoothButton
 
         anchors.fill: parent
-        radius: bluetoothPopup.visible || buttonMouse.pressed
+        radius: bluetoothPanel.visible || buttonMouse.pressed
             ? root.luminaDesign.shape.barIconActivated
             : height / 2
-        color: bluetoothPopup.visible || buttonMouse.containsMouse
+        color: bluetoothPanel.visible || buttonMouse.containsMouse
             ? root.luminaDesign.color.accentContainer
             : root.connectedCount > 0
                 ? root.luminaDesign.color.surfaceMuted
@@ -86,7 +86,7 @@ Item {
         border.color: root.luminaDesign.color.primary
 
         Accessible.role: Accessible.Button
-        Accessible.name: bluetoothPopup.visible
+        Accessible.name: bluetoothPanel.visible
             ? I18n.tr(
                 "bar.bluetooth.accessible.close",
                 "Close Bluetooth panel"
@@ -156,7 +156,7 @@ Item {
                     : "bluetooth-symbolic"
                 : "bluetooth-disabled-symbolic"
             fallbackSymbol: "ᛒ"
-            iconColor: bluetoothPopup.visible
+            iconColor: bluetoothPanel.visible
                 ? root.luminaDesign.color.onAccentContainer
                 : root.bluetoothEnabled
                     ? root.luminaDesign.color.onSurface
@@ -246,13 +246,13 @@ Item {
                     "dashboard.status.disabled",
                     "Disabled"
                 )
-        shown: root.tooltipVisible && !bluetoothPopup.visible
+        shown: root.tooltipVisible && !bluetoothPanel.visible
     }
 
-    BluetoothPopup {
-        id: bluetoothPopup
+    BluetoothPanel {
+        id: bluetoothPanel
 
-        anchorItem: bluetoothButton
+        outputName: root.outputName
         panelWindow: root.panelWindow
     }
 
@@ -270,35 +270,23 @@ Item {
             if (panelId !== "bluetooth" || outputName !== root.outputName)
                 return
 
-            bluetoothPopup.placement = placement
-            bluetoothPopup.anchorX = anchorX
-            if (!bluetoothPopup.requestedVisible)
-                bluetoothPopup.toggle()
+            OverlayStore.prepareFor(
+                "bluetooth",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            bluetoothPanel.prepareContent()
+            OverlayStore.openFor("bluetooth", root.outputName)
         }
 
         function onCloseRequested(panelId, outputName) {
             if (panelId !== "bluetooth" || outputName !== root.outputName)
                 return
 
-            if (bluetoothPopup.requestedVisible)
-                bluetoothPopup.dismiss()
-            else
-                BarPanelCoordinator.reportClosed(
-                    "bluetooth",
-                    root.outputName
-                )
-        }
-    }
-
-    Connections {
-        target: bluetoothPopup
-
-        function onRequestedVisibleChanged() {
-            BarPanelCoordinator.synchronizeIndependentPanel(
-                "bluetooth",
-                root.outputName,
-                bluetoothPopup.requestedVisible
-            )
+            OverlayStore.close("bluetooth")
         }
     }
 }

@@ -29,6 +29,7 @@
   "dashboard.status.connection": "Connection",
   "dashboard.status.disabled": "Disabled",
   "dashboard.status.offline": "Offline",
+  "dashboard.status.unavailable": "Unavailable",
   "dashboard.status.title": "System status",
   "dashboard.status.uptime": "Uptime",
   "dashboard.status.wifi.notConnected": "Not connected",

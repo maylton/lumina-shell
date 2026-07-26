@@ -114,6 +114,16 @@ Rectangle {
         }
     }
 
+    function validAnchorGeometry(anchor) {
+        return anchor
+            && isFinite(Number(anchor.x))
+            && isFinite(Number(anchor.top))
+            && isFinite(Number(anchor.bottom))
+            && Number(anchor.x) >= 0
+            && Number(anchor.top) >= 0
+            && Number(anchor.bottom) >= Number(anchor.top)
+    }
+
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
@@ -151,13 +161,25 @@ Rectangle {
             if (panelId !== "notifications" || outputName !== root.outputName)
                 return
 
+            const currentAnchor = root.mappedAnchorGeometry(root.width / 2)
+            const anchor = root.visible
+                && root.width > 0
+                && root.height > 0
+                && root.validAnchorGeometry(currentAnchor)
+                ? currentAnchor
+                : {
+                    x: anchorX,
+                    top: anchorTop,
+                    bottom: anchorBottom
+                }
+
             OverlayStore.prepareFor(
                 "notifications",
                 root.outputName,
                 placement,
-                anchorX,
-                anchorTop,
-                anchorBottom
+                anchor.x,
+                anchor.top,
+                anchor.bottom
             )
             NotificationService.openCenter(root.outputName)
         }

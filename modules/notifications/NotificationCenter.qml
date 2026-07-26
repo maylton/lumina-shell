@@ -3,14 +3,13 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import qs.design
+import qs.modules.bar.widgets
 import qs.modules.control
 import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 import qs.stores.shell
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
@@ -42,7 +41,7 @@ Scope {
         model: Quickshell.screens
 
         delegate: Component {
-            PanelWindow {
+            BarPanelWindow {
                 id: centerWindow
 
                 required property var modelData
@@ -58,44 +57,20 @@ Scope {
                         ConfigStore.barMargin
                     )
 
+                panelId: "notifications"
+                panelOutputName: outputName
+                panelVisible: centerVisible
+                layerNamespace: "lumina-notification-center"
                 screen: modelData
-                visible: centerVisible
-                color: "transparent"
-                surfaceFormat.opaque: false
-                focusable: centerVisible
-                exclusiveZone: 0
-
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "lumina-notification-center"
-                WlrLayershell.keyboardFocus: centerVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
-
-      BackgroundEffect.blurRegion:
-          ShellSurfacePolicy.requestsBackdropBlur(
-              ConfigStore.shellBackgroundMode
-          )
-              ? shellBlurRegion
-              : null
-
-      Region {
-          id: shellBlurRegion
-
-          Region {
-              x: centerSurface.x
-              y: centerSurface.y
-              width: centerSurface.width
-              height: centerSurface.height
-              radius: centerSurface.radius
-          }
-      }
+                surfaceItem: centerSurface
+                surfaceRadius: centerSurface.radius
+                scrimColor: Qt.rgba(
+                    root.luminaDesign.color.scrim.r,
+                    root.luminaDesign.color.scrim.g,
+                    root.luminaDesign.color.scrim.b,
+                    0.34
+                )
+                onDismissRequested: NotificationService.closeCenter()
 
                 FocusScope {
                     anchors.fill: parent
@@ -104,21 +79,6 @@ Scope {
                     Keys.onEscapePressed: event => {
                         NotificationService.closeCenter()
                         event.accepted = true
-                    }
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: Qt.rgba(
-                        root.luminaDesign.color.scrim.r,
-                        root.luminaDesign.color.scrim.g,
-                        root.luminaDesign.color.scrim.b,
-                        0.34
-                    )
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: NotificationService.closeCenter()
                     }
                 }
 
@@ -151,7 +111,9 @@ Scope {
                         centerWindow.height,
                         centerWindow.barWindowHeight,
                         root.luminaDesign.spacing.barPanelGap,
-                        root.luminaDesign.spacing.medium
+                        root.luminaDesign.spacing.medium,
+                        OverlayStore.activeAnchorTop,
+                        OverlayStore.activeAnchorBottom
                     )
 
                     width: Math.min(

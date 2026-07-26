@@ -5,10 +5,6 @@ import "../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 TestCase {
     name: "SurfacePlacementPolicy"
 
-    function cleanup() {
-        SurfacePlacementPolicy.clearAnchorGeometry()
-    }
-
     function test_normalizeUsesCenteredFallback() {
         compare(
             SurfacePlacementPolicy.normalize("near-widget"),
@@ -87,29 +83,25 @@ TestCase {
         )
     }
 
-    function test_verticalPositionUsesCapturedWidgetBounds() {
-        SurfacePlacementPolicy.captureAnchorGeometry(12, 52)
-
+    function test_verticalPositionUsesProvidedWidgetBounds() {
         compare(
             SurfacePlacementPolicy.verticalY(
-                "near-widget", "top", 300, 900, 68, 8, 16
+                "near-widget", "top", 300, 900, 68, 8, 16, 12, 52
             ),
             60
         )
         compare(
             SurfacePlacementPolicy.verticalY(
-                "near-widget", "bottom", 300, 900, 68, 8, 16
+                "near-widget", "bottom", 300, 900, 68, 8, 16, 12, 52
             ),
             16
         )
     }
 
-    function test_invalidCapturedGeometryFallsBackToBarEdge() {
-        SurfacePlacementPolicy.captureAnchorGeometry(60, 40)
-
+    function test_invalidProvidedGeometryFallsBackToBarEdge() {
         compare(
             SurfacePlacementPolicy.verticalY(
-                "near-widget", "top", 300, 900, 64, 8, 16
+                "near-widget", "top", 300, 900, 64, 8, 16, 60, 40
             ),
             72
         )
@@ -130,24 +122,4 @@ TestCase {
         )
     }
 
-    function test_popupYUsesParentWindowCoordinates() {
-        compare(
-            SurfacePlacementPolicy.popupY(
-                "near-widget", "top", 300, 900, 64, 8, 16
-            ),
-            72
-        )
-        compare(
-            SurfacePlacementPolicy.popupY(
-                "near-widget", "bottom", 300, 900, 64, 8, 16
-            ),
-            -308
-        )
-        compare(
-            SurfacePlacementPolicy.popupY(
-                "centered", "bottom", 300, 900, 64, 8, 16
-            ),
-            -536
-        )
-    }
 }

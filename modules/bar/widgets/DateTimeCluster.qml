@@ -103,12 +103,6 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    onExpandedChanged: BarPanelCoordinator.synchronizeIndependentPanel(
-        "calendar",
-        root.outputName,
-        root.expanded
-    )
-
     function mappedAnchorGeometry(localX) {
         const top = root.mapToItem(
             null,
@@ -165,8 +159,14 @@ Rectangle {
             if (panelId !== "calendar" || outputName !== root.outputName)
                 return
 
-            calendarPopup.placement = placement
-            calendarPopup.anchorX = anchorX
+            OverlayStore.prepareFor(
+                "calendar",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
             CalendarStore.openFor(root.outputName)
         }
 
@@ -174,10 +174,7 @@ Rectangle {
             if (panelId !== "calendar" || outputName !== root.outputName)
                 return
 
-            if (root.expanded)
-                CalendarStore.dismiss(root.outputName)
-            else
-                BarPanelCoordinator.reportClosed("calendar", root.outputName)
+            CalendarStore.dismiss(root.outputName)
         }
     }
 
@@ -284,12 +281,10 @@ Rectangle {
         shown: dateTimeMouse.containsMouse
     }
 
-    CalendarPopup {
-        id: calendarPopup
+    CalendarPanel {
+        id: calendarPanel
 
-        anchorItem: root
         panelWindow: root.panelWindow
-        placement: root.surfacePlacement
         outputName: root.outputName
         barPosition: root.barPosition
     }

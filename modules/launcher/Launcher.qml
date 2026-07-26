@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import qs.design
+import qs.modules.bar.widgets
 import qs.modules.control
 import qs.modules.dock
 import qs.services.i18n
@@ -13,7 +13,6 @@ import qs.stores.dock
 import qs.stores.launcher
 import qs.stores.shell
 import "../../services/i18n/LauncherStrings.js" as LauncherStrings
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
@@ -52,7 +51,7 @@ Scope {
         model: Quickshell.screens
 
         delegate: Component {
-            PanelWindow {
+            BarPanelWindow {
                 id: launcherWindow
 
                 required property var modelData
@@ -176,44 +175,15 @@ Scope {
                         ConfigStore.barMargin
                     )
 
+                panelId: "launcher"
+                panelOutputName: outputName
+                panelVisible: launcherVisible
+                layerNamespace: "lumina-launcher"
                 screen: modelData
-                visible: launcherVisible
-                color: "transparent"
-                surfaceFormat.opaque: false
-                focusable: launcherVisible
-                exclusiveZone: 0
-
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "lumina-launcher"
-                WlrLayershell.keyboardFocus: launcherVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
-
-                BackgroundEffect.blurRegion:
-                    ShellSurfacePolicy.requestsBackdropBlur(
-                        ConfigStore.shellBackgroundMode
-                    )
-                        ? shellBlurRegion
-                        : null
-
-                Region {
-                    id: shellBlurRegion
-
-                    Region {
-                        x: launcherSurface.x
-                        y: launcherSurface.y
-                        width: launcherSurface.width
-                        height: launcherSurface.height
-                        radius: launcherSurface.radius
-                    }
-                }
+                scrimColor: root.luminaDesign.color.scrim
+                surfaceItem: launcherSurface
+                surfaceRadius: launcherSurface.radius
+                onDismissRequested: LauncherStore.close()
 
                 onVisibleChanged: {
                     if (visible) {
@@ -223,16 +193,6 @@ Scope {
                         })
                     } else {
                         closePinMenu(false)
-                    }
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: root.luminaDesign.color.scrim
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: LauncherStore.close()
                     }
                 }
 
@@ -270,7 +230,9 @@ Scope {
                             launcherWindow.height,
                             launcherWindow.barWindowHeight,
                             4,
-                            root.luminaDesign.spacing.extraLarge
+                            root.luminaDesign.spacing.extraLarge,
+                            OverlayStore.activeAnchorTop,
+                            OverlayStore.activeAnchorBottom
                         )
                         : 0
 

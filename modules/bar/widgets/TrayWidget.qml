@@ -101,10 +101,10 @@ Item {
             visible: root.grouped
             width: visible ? root.luminaDesign.size.barTouchTarget : 0
             height: root.luminaDesign.size.barTouchTarget
-            radius: trayPopup.visible || groupMouse.pressed
+            radius: trayPanel.visible || groupMouse.pressed
                 ? root.luminaDesign.shape.barIconActivated
                 : height / 2
-            color: trayPopup.visible || groupMouse.containsMouse
+            color: trayPanel.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
                 : root.showBackground
                     ? root.luminaDesign.color.surfaceMuted
@@ -114,7 +114,7 @@ Item {
             activeFocusOnTab: visible
 
             Accessible.role: Accessible.Button
-            Accessible.name: trayPopup.visible
+            Accessible.name: trayPanel.visible
                 ? qsTr("Hide system tray")
                 : qsTr("Show system tray")
             Accessible.description: qsTr("%1 active items").arg(
@@ -159,7 +159,7 @@ Item {
                 iconName: "view-more-horizontal-symbolic"
                 fallbackSymbol: "•••"
                 fallbackScale: 0.62
-                iconColor: trayPopup.visible
+                iconColor: trayPanel.visible
                     ? root.luminaDesign.color.onAccentContainer
                     : root.luminaDesign.color.onSurface
                 iconSize: root.luminaDesign.size.barTrayIcon
@@ -239,15 +239,14 @@ Item {
         anchorItem: groupButton
         title: qsTr("System tray")
         description: qsTr("%1 active items").arg(root.itemCount)
-        shown: root.tooltipVisible && !trayPopup.visible
+        shown: root.tooltipVisible && !trayPanel.visible
     }
 
-    TrayPopup {
-        id: trayPopup
+    TrayPanel {
+        id: trayPanel
 
-        anchorItem: groupButton
+        outputName: root.outputName
         panelWindow: root.panelWindow
-        placement: root.surfacePlacement
         items: root.activeItems
     }
 
@@ -265,32 +264,22 @@ Item {
             if (panelId !== "tray" || outputName !== root.outputName)
                 return
 
-            trayPopup.placement = placement
-            trayPopup.anchorX = anchorX
-            if (!trayPopup.requestedVisible)
-                trayPopup.toggle()
+            OverlayStore.prepareFor(
+                "tray",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            OverlayStore.openFor("tray", root.outputName)
         }
 
         function onCloseRequested(panelId, outputName) {
             if (panelId !== "tray" || outputName !== root.outputName)
                 return
 
-            if (trayPopup.requestedVisible)
-                trayPopup.dismiss()
-            else
-                BarPanelCoordinator.reportClosed("tray", root.outputName)
-        }
-    }
-
-    Connections {
-        target: trayPopup
-
-        function onRequestedVisibleChanged() {
-            BarPanelCoordinator.synchronizeIndependentPanel(
-                "tray",
-                root.outputName,
-                trayPopup.requestedVisible
-            )
+            trayPanel.dismiss()
         }
     }
 
@@ -298,7 +287,7 @@ Item {
         target: ConfigStore
 
         function onBarWidgetSettingsChanged() {
-            trayPopup.dismiss()
+            trayPanel.dismiss()
         }
     }
 }

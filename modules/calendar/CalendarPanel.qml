@@ -1,20 +1,18 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 import qs.design
+import qs.modules.bar.widgets
 import qs.stores.time
 import qs.stores.config
+import qs.stores.shell
 import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
-PopupWindow {
+BarPanelWindow {
     id: root
 
-    required property Item anchorItem
     required property string outputName
     property var panelWindow: null
-    property string placement: "near-widget"
-    property real anchorX: -1
     property string barPosition: "top"
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -24,45 +22,46 @@ PopupWindow {
             - luminaDesign.spacing.extraSmall * 6) / 7
     )
 
-    visible: CalendarStore.isOpenFor(outputName)
-        && anchorItem !== null
-        && panelWindow !== null
-    implicitWidth: luminaDesign.size.calendarWidth
-    implicitHeight: calendarContent.implicitHeight + luminaDesign.spacing.large * 2
-    color: "transparent"
-    grabFocus: true
-
-    anchor.window: root.panelWindow
-    anchor.rect.x: SurfacePlacementPolicy.horizontalX(
-        root.placement,
-        root.anchorX,
-        root.implicitWidth,
-        root.panelWindow && root.panelWindow.screen
-            ? root.panelWindow.screen.width
-            : 0,
-        root.luminaDesign.spacing.medium
-    )
-    anchor.rect.y: SurfacePlacementPolicy.popupY(
-        root.placement,
-        root.barPosition,
-        root.implicitHeight,
-        root.panelWindow && root.panelWindow.screen
-            ? root.panelWindow.screen.height
-            : 0,
-        root.panelWindow ? root.panelWindow.height : 0,
-        root.luminaDesign.spacing.barPanelGap,
-        root.luminaDesign.spacing.medium
-    )
-    anchor.edges: Edges.Top | Edges.Left
-    anchor.gravity: Edges.Bottom | Edges.Right
-    anchor.adjustment: PopupAdjustment.All
+    panelId: "calendar"
+    panelOutputName: outputName
+    panelVisible: panelWindow !== null
+        && CalendarStore.isOpenFor(outputName)
+    layerNamespace: "lumina-calendar-panel"
+    screen: panelWindow ? panelWindow.screen : null
+    surfaceItem: calendarSurface
+    surfaceRadius: calendarSurface.radius
+    onDismissRequested: CalendarStore.dismiss(outputName)
 
     onClosed: CalendarStore.dismiss(outputName)
 
     Rectangle {
         id: calendarSurface
 
-        anchors.fill: parent
+        x: SurfacePlacementPolicy.horizontalX(
+            OverlayStore.activePlacement,
+            OverlayStore.activeAnchorX,
+            width,
+            root.width,
+            root.luminaDesign.spacing.medium
+        )
+        y: SurfacePlacementPolicy.verticalY(
+            OverlayStore.activePlacement,
+            root.barPosition,
+            height,
+            root.height,
+            SurfacePlacementPolicy.barWindowHeight(
+                ConfigStore.barHeight,
+                ConfigStore.barSurfaceMode,
+                ConfigStore.barMargin
+            ),
+            root.luminaDesign.spacing.barPanelGap,
+            root.luminaDesign.spacing.medium,
+            OverlayStore.activeAnchorTop,
+            OverlayStore.activeAnchorBottom
+        )
+        width: root.luminaDesign.size.calendarWidth
+        height: calendarContent.implicitHeight
+            + root.luminaDesign.spacing.large * 2
         radius: root.luminaDesign.shape.large
         color: root.luminaDesign.color.surfaceContainer
         border.width: 1

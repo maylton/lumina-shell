@@ -104,10 +104,19 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-control-center"
                 WlrLayershell.keyboardFocus: centerVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
+	          ? WlrKeyboardFocus.Exclusive
+	          : WlrKeyboardFocus.None
 
-      BackgroundEffect.blurRegion:
+                onBackingWindowVisibleChanged: {
+                    BarPanelCoordinator
+                        .reportPanelWindowVisibility(
+                            "dashboard",
+                            outputName,
+                            backingWindowVisible
+                        )
+                }
+
+	      BackgroundEffect.blurRegion:
           ShellSurfacePolicy.requestsBackdropBlur(
               ConfigStore.shellBackgroundMode
           )
@@ -195,7 +204,9 @@ Scope {
                         controlWindow.height,
                         controlWindow.barWindowHeight,
                         4,
-                        controlWindow.safeMargin
+                        controlWindow.safeMargin,
+                        OverlayStore.activeAnchorTop,
+                        OverlayStore.activeAnchorBottom
                     )
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,

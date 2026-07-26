@@ -114,7 +114,7 @@ missing_source_keys="$(
     )
 
     perl -0777 -ne '
-        while (/I18n\.tr\(\s*"([^"]+)"/g) {
+        while (/I18n\.tr\(\s*"([^"]+)"\s*,/g) {
             print "$1\n";
         }
     ' "${qml_files[@]}" \

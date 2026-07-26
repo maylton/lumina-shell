@@ -1,10 +1,9 @@
 pragma Singleton
 
-import QtQuick
-import Quickshell
+import QtQml
 import "SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
-Singleton {
+QtObject {
     id: root
 
     readonly property bool open: activeSurface.length > 0
@@ -13,11 +12,15 @@ Singleton {
     property string activeOutputName: ""
     property string activePlacement: SurfacePlacementPolicy.CENTERED
     property real activeAnchorX: -1
+    property real activeAnchorTop: -1
+    property real activeAnchorBottom: -1
 
     property string pendingSurface: ""
     property string pendingOutputName: ""
     property string pendingPlacement: SurfacePlacementPolicy.CENTERED
     property real pendingAnchorX: -1
+    property real pendingAnchorTop: -1
+    property real pendingAnchorBottom: -1
 
     signal surfaceOpened(string surfaceName, string outputName)
     signal surfaceClosed(string surfaceName)
@@ -27,6 +30,8 @@ Singleton {
         pendingOutputName = ""
         pendingPlacement = SurfacePlacementPolicy.CENTERED
         pendingAnchorX = -1
+        pendingAnchorTop = -1
+        pendingAnchorBottom = -1
     }
 
     function prepareFor(
@@ -40,51 +45,36 @@ Singleton {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
         const numericAnchor = Number(anchorX)
+        const numericAnchorTop = Number(anchorTop)
+        const numericAnchorBottom = Number(anchorBottom)
         const normalizedPlacement = SurfacePlacementPolicy.normalize(placement)
+        const nearWidget = normalizedPlacement
+            === SurfacePlacementPolicy.NEAR_WIDGET
+        const validVerticalAnchor = nearWidget
+            && isFinite(numericAnchorTop)
+            && isFinite(numericAnchorBottom)
+            && numericAnchorTop >= 0
+            && numericAnchorBottom >= numericAnchorTop
 
         if (!surface || !output) {
             clearPending()
-            SurfacePlacementPolicy.clearAnchorGeometry()
             return
         }
 
         pendingSurface = surface
         pendingOutputName = output
         pendingPlacement = normalizedPlacement
-        pendingAnchorX = isFinite(numericAnchor) ? numericAnchor : -1
-
-        if (normalizedPlacement === SurfacePlacementPolicy.NEAR_WIDGET) {
-            SurfacePlacementPolicy.captureAnchorGeometry(
-                anchorTop,
-                anchorBottom
-            )
-        } else {
-            SurfacePlacementPolicy.clearAnchorGeometry()
-        }
-    }
-
-    function outputExists(outputName) {
-        const name = String(outputName || "")
-        const screens = Quickshell.screens || []
-
-        for (var i = 0; i < screens.length; ++i) {
-            if (String(screens[i].name || "") === name)
-                return true
-        }
-
-        return false
-    }
-
-    function defaultOutputName() {
-        const screens = Quickshell.screens || []
-
-        return screens.length > 0 ? String(screens[0].name || "") : ""
+        pendingAnchorX = nearWidget && isFinite(numericAnchor)
+            ? numericAnchor
+            : -1
+        pendingAnchorTop = validVerticalAnchor ? numericAnchorTop : -1
+        pendingAnchorBottom = validVerticalAnchor
+            ? numericAnchorBottom
+            : -1
     }
 
     function resolvedOutputName(outputName) {
-        const requested = String(outputName || "")
-
-        return outputExists(requested) ? requested : defaultOutputName()
+        return String(outputName || "").trim()
     }
 
     function isOpenFor(surfaceName, outputName) {
@@ -98,7 +88,6 @@ Singleton {
 
         if (!surface || !output) {
             clearPending()
-            SurfacePlacementPolicy.clearAnchorGeometry()
             return
         }
 
@@ -109,9 +98,8 @@ Singleton {
             ? SurfacePlacementPolicy.normalize(pendingPlacement)
             : SurfacePlacementPolicy.CENTERED
         activeAnchorX = prepared ? pendingAnchorX : -1
-
-        if (!prepared)
-            SurfacePlacementPolicy.clearAnchorGeometry()
+        activeAnchorTop = prepared ? pendingAnchorTop : -1
+        activeAnchorBottom = prepared ? pendingAnchorBottom : -1
 
         clearPending()
         activeSurface = surface
@@ -131,8 +119,9 @@ Singleton {
         activeOutputName = ""
         activePlacement = SurfacePlacementPolicy.CENTERED
         activeAnchorX = -1
+        activeAnchorTop = -1
+        activeAnchorBottom = -1
         clearPending()
-        SurfacePlacementPolicy.clearAnchorGeometry()
 
         if (closedSurface)
             surfaceClosed(closedSurface)
@@ -148,12 +137,4 @@ Singleton {
             openFor(surface, output)
     }
 
-    Connections {
-        target: Quickshell
-
-        function onScreensChanged() {
-            if (root.open && !root.outputExists(root.activeOutputName))
-                root.close()
-        }
-    }
 }

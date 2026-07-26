@@ -1,9 +1,8 @@
 pragma Singleton
 
 import QtQuick
-import Quickshell
 
-Singleton {
+QtObject {
     id: root
 
     readonly property bool busy: transitionPhase !== "idle"
@@ -17,8 +16,6 @@ Singleton {
     property real pendingAnchorTop: -1
     property real pendingAnchorBottom: -1
     property string transitionPhase: "idle"
-    property string observedOverlaySurface: ""
-    property string observedOverlayOutput: ""
 
     signal openRequested(
         string panelId,
@@ -32,23 +29,6 @@ Singleton {
 
     function normalized(value) {
         return String(value || "").trim()
-    }
-
-    function overlayPanelId(surfaceName) {
-        switch (normalized(surfaceName)) {
-        case "launcher":
-            return "launcher"
-        case "notifications":
-            return "notifications"
-        case "control":
-            return "dashboard"
-        case "wallpaper":
-            return "wallpaper"
-        case "session":
-            return "session"
-        default:
-            return ""
-        }
     }
 
     function clearPending() {
@@ -67,8 +47,6 @@ Singleton {
         activeOutputName = ""
         transitionPhase = "idle"
         clearPending()
-        observedOverlaySurface = normalized(OverlayStore.activeSurface)
-        observedOverlayOutput = normalized(OverlayStore.activeOutputName)
     }
 
     function setPending(
@@ -233,57 +211,18 @@ Singleton {
         }
     }
 
-    function synchronizeIndependentPanel(panelId, outputName, visible) {
+    function reportPanelWindowVisibility(
+        panelId,
+        outputName,
+        visible
+    ) {
         if (Boolean(visible))
             reportOpened(panelId, outputName)
         else
             reportClosed(panelId, outputName)
     }
 
-    function handleOverlayChange() {
-        const previousPanel = overlayPanelId(observedOverlaySurface)
-        const previousOutput = observedOverlayOutput
-        const currentSurface = normalized(OverlayStore.activeSurface)
-        const currentOutput = normalized(OverlayStore.activeOutputName)
-        const currentPanel = overlayPanelId(currentSurface)
-        const changed = observedOverlaySurface !== currentSurface
-            || observedOverlayOutput !== currentOutput
-
-        if (!changed)
-            return
-
-        observedOverlaySurface = currentSurface
-        observedOverlayOutput = currentOutput
-
-        if (previousPanel)
-            reportClosed(previousPanel, previousOutput)
-
-        if (currentPanel)
-            reportOpened(currentPanel, currentOutput)
-    }
-
-    Component.onCompleted: {
-        observedOverlaySurface = normalized(OverlayStore.activeSurface)
-        observedOverlayOutput = normalized(OverlayStore.activeOutputName)
-
-        const panel = overlayPanelId(observedOverlaySurface)
-        if (panel)
-            reportOpened(panel, observedOverlayOutput)
-    }
-
-    Connections {
-        target: OverlayStore
-
-        function onActiveSurfaceChanged() {
-            root.handleOverlayChange()
-        }
-
-        function onActiveOutputNameChanged() {
-            root.handleOverlayChange()
-        }
-    }
-
-    Timer {
+    property Timer handoffTimerObject: Timer {
         id: handoffTimer
 
         interval: 32
@@ -291,7 +230,7 @@ Singleton {
         onTriggered: root.openPending()
     }
 
-    Timer {
+    property Timer transitionTimerObject: Timer {
         id: transitionTimer
 
         interval: 350

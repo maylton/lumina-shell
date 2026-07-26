@@ -2,25 +2,36 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
-import Quickshell
 import qs.design
 import qs.modules.control
 import qs.modules.control.settings.pages.connectivity as ConnectivityViews
 import qs.services.connectivity
 import qs.services.i18n
 import qs.stores.config
+import qs.stores.shell
 import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
-PopupWindow {
+BarPanelWindow {
     id: root
 
-    property var anchorItem: null
+    required property string outputName
     property var panelWindow: null
-    property string placement: "near-widget"
-    property real anchorX: -1
-    property bool requestedVisible: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property real panelWidth: Math.min(520, width - 32)
+    readonly property real panelHeight: Math.max(
+        420,
+        Math.min(
+            620,
+            availableScreenHeight
+                - SurfacePlacementPolicy.barWindowHeight(
+                    ConfigStore.barHeight,
+                    ConfigStore.barSurfaceMode,
+                    ConfigStore.barMargin
+                )
+                - 32
+        )
+    )
     readonly property var wiredProfiles:
         ConnectivityManagerService.wiredProfiles()
     readonly property var wiredDevices:
@@ -45,18 +56,13 @@ PopupWindow {
             ? panelWindow.screen.height
             : 720
 
-    function toggle() {
-        requestedVisible = !requestedVisible
-        if (requestedVisible) {
-            ConnectivityManagerService.setActiveSection("wifi")
-            ConnectivityManagerService.refreshAll()
-        } else {
-            releaseManager()
-        }
+    function prepareContent() {
+        ConnectivityManagerService.setActiveSection("wifi")
+        ConnectivityManagerService.refreshAll()
     }
 
     function dismiss() {
-        requestedVisible = false
+        OverlayStore.close("network")
         passwordDialog.close()
         releaseManager()
     }
@@ -130,54 +136,45 @@ PopupWindow {
         )
     }
 
-    visible: requestedVisible
-        && anchorItem !== null
-        && panelWindow !== null
-    implicitWidth: Math.min(
-        520,
-        panelWindow && panelWindow.screen
-            ? panelWindow.screen.width - 32
-            : 520
-    )
-    implicitHeight: Math.max(
-        420,
-        Math.min(
-            620,
-            availableScreenHeight
-                - (panelWindow ? panelWindow.height : 0)
-                - 32
-        )
-    )
-    color: "transparent"
-    grabFocus: true
-
-    anchor.window: root.panelWindow
-    anchor.rect.x: SurfacePlacementPolicy.horizontalX(
-        root.placement,
-        root.anchorX,
-        root.implicitWidth,
-        root.panelWindow && root.panelWindow.screen
-            ? root.panelWindow.screen.width
-            : 0,
-        root.luminaDesign.spacing.medium
-    )
-    anchor.rect.y: SurfacePlacementPolicy.popupY(
-        root.placement,
-        ConfigStore.barPosition,
-        root.implicitHeight,
-        root.availableScreenHeight,
-        root.panelWindow ? root.panelWindow.height : 0,
-        root.luminaDesign.spacing.barPanelGap,
-        root.luminaDesign.spacing.medium
-    )
-    anchor.edges: Edges.Top | Edges.Left
-    anchor.gravity: Edges.Bottom | Edges.Right
-    anchor.adjustment: PopupAdjustment.All
+    panelId: "network"
+    panelOutputName: outputName
+    panelVisible: panelWindow !== null
+        && OverlayStore.isOpenFor("network", outputName)
+    layerNamespace: "lumina-network-panel"
+    screen: panelWindow ? panelWindow.screen : null
+    surfaceItem: networkSurface
+    surfaceRadius: networkSurface.radius
+    onDismissRequested: dismiss()
 
     onClosed: dismiss()
 
     Rectangle {
-        anchors.fill: parent
+        id: networkSurface
+
+        x: SurfacePlacementPolicy.horizontalX(
+            OverlayStore.activePlacement,
+            OverlayStore.activeAnchorX,
+            width,
+            root.width,
+            root.luminaDesign.spacing.medium
+        )
+        y: SurfacePlacementPolicy.verticalY(
+            OverlayStore.activePlacement,
+            ConfigStore.barPosition,
+            height,
+            root.height,
+            SurfacePlacementPolicy.barWindowHeight(
+                ConfigStore.barHeight,
+                ConfigStore.barSurfaceMode,
+                ConfigStore.barMargin
+            ),
+            root.luminaDesign.spacing.barPanelGap,
+            root.luminaDesign.spacing.medium,
+            OverlayStore.activeAnchorTop,
+            OverlayStore.activeAnchorBottom
+        )
+        width: root.panelWidth
+        height: root.panelHeight
         radius: root.luminaDesign.shape.extraLarge
         color: root.luminaDesign.color.surfaceContainer
         border.width: 1

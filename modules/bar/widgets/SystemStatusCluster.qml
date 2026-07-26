@@ -251,35 +251,23 @@ Rectangle {
             if (panelId !== "network" || outputName !== root.outputName)
                 return
 
-            networkPopup.placement = placement
-            networkPopup.anchorX = anchorX
-            if (!networkPopup.requestedVisible)
-                networkPopup.toggle()
+            OverlayStore.prepareFor(
+                "network",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            networkPanel.prepareContent()
+            OverlayStore.openFor("network", root.outputName)
         }
 
         function onCloseRequested(panelId, outputName) {
             if (panelId !== "network" || outputName !== root.outputName)
                 return
 
-            if (networkPopup.requestedVisible)
-                networkPopup.dismiss()
-            else
-                BarPanelCoordinator.reportClosed(
-                    "network",
-                    root.outputName
-                )
-        }
-    }
-
-    Connections {
-        target: networkPopup
-
-        function onRequestedVisibleChanged() {
-            BarPanelCoordinator.synchronizeIndependentPanel(
-                "network",
-                root.outputName,
-                networkPopup.requestedVisible
-            )
+            networkPanel.dismiss()
         }
     }
 
@@ -353,7 +341,7 @@ Rectangle {
             visible: root.showNetwork
             individual: root.individual
             interactive: true
-            selected: networkPopup.visible
+            selected: networkPanel.visible
             showLabel: !root.compact
                 && root.networkTextMode !== "icon"
             iconName: root.networkIcon
@@ -401,13 +389,13 @@ Rectangle {
         anchorItem: root
         title: "System status"
         description: root.accessibleSummary
-        shown: statusMouse.containsMouse && !networkPopup.visible
+        shown: statusMouse.containsMouse && !networkPanel.visible
     }
 
-    NetworkPopup {
-        id: networkPopup
+    NetworkPanel {
+        id: networkPanel
 
-        anchorItem: networkItem
+        outputName: root.outputName
         panelWindow: root.panelWindow
     }
 }

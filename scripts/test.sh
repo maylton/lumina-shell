@@ -55,7 +55,15 @@ else
     exit 1
 fi
 
+qml_import_dir="$(mktemp -d)"
+ln -s "${repository_dir}" "${qml_import_dir}/qs"
+cleanup_qml_import() {
+    unlink "${qml_import_dir}/qs"
+    rmdir "${qml_import_dir}"
+}
+trap cleanup_qml_import EXIT
+
 QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}" \
     "${qml_test_runner}" \
-        -import "${repository_dir}" \
+        -import "${qml_import_dir}" \
         -input "${repository_dir}/tests"

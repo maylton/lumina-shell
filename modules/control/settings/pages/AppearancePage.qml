@@ -258,7 +258,8 @@ SettingsPage {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            paletteOption.forceActiveFocus(Qt.MouseFocusReason)
+                            paletteOption.forceActiveFocus()
+                            paletteOption.focus = false
                             WallpaperService.setPaletteStyle(
                                 String(paletteOption.modelData.value)
                             )

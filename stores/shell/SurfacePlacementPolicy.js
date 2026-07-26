@@ -3,8 +3,6 @@
 var NEAR_WIDGET = "near-widget"
 var CENTERED = "centered"
 var MAX_NEAR_WIDGET_GAP = 8
-var capturedAnchorTop = -1
-var capturedAnchorBottom = -1
 
 function finiteNumber(value, fallback) {
     var numeric = Number(value)
@@ -28,29 +26,14 @@ function normalize(value, fallback) {
         : CENTERED
 }
 
-function captureAnchorGeometry(anchorTop, anchorBottom) {
+function hasAnchorGeometry(anchorTop, anchorBottom) {
     var top = Number(anchorTop)
     var bottom = Number(anchorBottom)
 
-    if (!isFinite(top) || !isFinite(bottom) || bottom < top) {
-        clearAnchorGeometry()
-        return
-    }
-
-    capturedAnchorTop = top
-    capturedAnchorBottom = bottom
-}
-
-function clearAnchorGeometry() {
-    capturedAnchorTop = -1
-    capturedAnchorBottom = -1
-}
-
-function hasCapturedAnchorGeometry() {
-    return isFinite(Number(capturedAnchorTop))
-        && isFinite(Number(capturedAnchorBottom))
-        && Number(capturedAnchorTop) >= 0
-        && Number(capturedAnchorBottom) >= Number(capturedAnchorTop)
+    return isFinite(top)
+        && isFinite(bottom)
+        && top >= 0
+        && bottom >= top
 }
 
 function barWindowHeight(barHeight, surfaceMode, margin) {
@@ -92,7 +75,9 @@ function verticalY(
     viewportHeight,
     barHeight,
     gap,
-    margin
+    margin,
+    anchorTop,
+    anchorBottom
 ) {
     var height = Math.max(0, finiteNumber(surfaceHeight, 0))
     var viewport = Math.max(height, finiteNumber(viewportHeight, height))
@@ -109,10 +94,10 @@ function verticalY(
     )
     var adjacent
 
-    if (hasCapturedAnchorGeometry()) {
+    if (hasAnchorGeometry(anchorTop, anchorBottom)) {
         adjacent = String(barPosition) === "bottom"
-            ? Number(capturedAnchorTop) - adjacentGap - height
-            : Number(capturedAnchorBottom) + adjacentGap
+            ? Number(anchorTop) - adjacentGap - height
+            : Number(anchorBottom) + adjacentGap
     } else {
         adjacent = String(barPosition) === "bottom"
             ? viewport
@@ -124,31 +109,4 @@ function verticalY(
     }
 
     return clamp(adjacent, inset, maximum)
-}
-
-function popupY(
-    placement,
-    barPosition,
-    popupHeight,
-    screenHeight,
-    parentWindowHeight,
-    gap,
-    margin
-) {
-    var screen = Math.max(0, finiteNumber(screenHeight, 0))
-    var parentHeight = Math.max(0, finiteNumber(parentWindowHeight, 0))
-    var globalY = verticalY(
-        placement,
-        barPosition,
-        popupHeight,
-        screen,
-        parentHeight,
-        gap,
-        margin
-    )
-    var parentOriginY = String(barPosition) === "bottom"
-        ? screen - parentHeight
-        : 0
-
-    return globalY - parentOriginY
 }
