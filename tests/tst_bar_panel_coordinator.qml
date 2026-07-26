@@ -109,15 +109,95 @@ TestCase {
             4,
             52
         )
-        BarPanelCoordinator.reportOpened("network", "DP-1")
 
         compare(closeSpy.count, 1)
         compare(BarPanelCoordinator.pendingPanelId, "")
+        compare(BarPanelCoordinator.transitionPhase, "closing")
 
         BarPanelCoordinator.reportClosed("network", "DP-1")
         tryCompare(BarPanelCoordinator, "transitionPhase", "idle")
         compare(openSpy.count, 1)
         compare(BarPanelCoordinator.activePanelId, "")
+    }
+
+    function test_logicalDismissDuringOpeningClosesImmediately() {
+        BarPanelCoordinator.requestToggle(
+            "network",
+            "DP-1",
+            "near-widget",
+            420,
+            4,
+            52
+        )
+        tryCompare(openSpy, "count", 1)
+        compare(BarPanelCoordinator.activePanelId, "network")
+        compare(BarPanelCoordinator.transitionPhase, "opening")
+
+        BarPanelCoordinator.reportPanelLogicalVisibility(
+            "network",
+            "DP-1",
+            false
+        )
+
+        compare(BarPanelCoordinator.activePanelId, "")
+        compare(BarPanelCoordinator.transitionPhase, "idle")
+        compare(closeSpy.count, 0)
+    }
+
+    function test_backingWindowCloseAfterLogicalDismissIsIdempotent() {
+        BarPanelCoordinator.requestToggle(
+            "network",
+            "DP-1",
+            "near-widget",
+            420,
+            4,
+            52
+        )
+        tryCompare(openSpy, "count", 1)
+
+        BarPanelCoordinator.reportPanelLogicalVisibility(
+            "network",
+            "DP-1",
+            false
+        )
+        BarPanelCoordinator.reportPanelWindowVisibility(
+            "network",
+            "DP-1",
+            false
+        )
+
+        compare(BarPanelCoordinator.activePanelId, "")
+        compare(BarPanelCoordinator.transitionPhase, "idle")
+    }
+
+    function test_switchDuringOpeningClosesBeforeHandoff() {
+        BarPanelCoordinator.requestToggle(
+            "network",
+            "DP-1",
+            "near-widget",
+            420,
+            4,
+            52
+        )
+        tryCompare(openSpy, "count", 1)
+
+        BarPanelCoordinator.requestToggle(
+            "notifications",
+            "DP-1",
+            "near-widget",
+            920,
+            8,
+            56
+        )
+
+        compare(closeSpy.count, 1)
+        compare(closeSpy.signalArguments[0][0], "network")
+        compare(BarPanelCoordinator.pendingPanelId, "notifications")
+        compare(BarPanelCoordinator.transitionPhase, "closing")
+
+        BarPanelCoordinator.reportClosed("network", "DP-1")
+        tryCompare(openSpy, "count", 2)
+        compare(openSpy.signalArguments[1][0], "notifications")
     }
 
     function test_toggleDuringCloseReopensPanel() {

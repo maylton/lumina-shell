@@ -296,7 +296,7 @@ Scope {
                         .reportPanelWindowVisibility(
                             "dashboard",
                             outputName,
-                            backingWindowVisible
+                            backingWindowVisible && centerVisible
                         )
 
                     if (backingWindowVisible) {
@@ -344,6 +344,12 @@ Scope {
                     } else {
                         hidingRequestedAt = Date.now()
                     }
+
+                    BarPanelCoordinator.reportPanelLogicalVisibility(
+                        "dashboard",
+                        outputName,
+                        centerVisible
+                    )
                 }
 
                 Connections {

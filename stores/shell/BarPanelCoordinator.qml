@@ -113,15 +113,25 @@ QtObject {
         }
 
         if (transitionPhase === "opening") {
-            setPending(
-                panel,
-                output,
-                placement,
-                anchorX,
-                anchorTop,
-                anchorBottom,
-                anchorEdge
-            )
+            const togglesOpeningPanel = activePanelId === panel
+                && activeOutputName === output
+
+            if (togglesOpeningPanel) {
+                clearPending()
+            } else {
+                setPending(
+                    panel,
+                    output,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom,
+                    anchorEdge
+                )
+            }
+
+            if (activePanelId)
+                beginClose()
             return
         }
 
@@ -177,6 +187,8 @@ QtObject {
         const anchorEdge = pendingAnchorEdge
 
         clearPending()
+        activePanelId = panel
+        activeOutputName = output
         transitionPhase = "opening"
         transitionTimer.restart()
 
@@ -200,6 +212,11 @@ QtObject {
         if (!panel || !output)
             return
 
+        if (activePanelId
+            && (activePanelId !== panel || activeOutputName !== output)) {
+            return
+        }
+
         activePanelId = panel
         activeOutputName = output
         transitionTimer.stop()
@@ -216,6 +233,28 @@ QtObject {
         } else {
             transitionPhase = "idle"
         }
+    }
+
+    function reportPanelLogicalVisibility(
+        panelId,
+        outputName,
+        visible
+    ) {
+        const panel = normalized(panelId)
+        const output = normalized(outputName)
+
+        if (!panel || !output)
+            return
+
+        if (Boolean(visible)) {
+            if (!activePanelId) {
+                activePanelId = panel
+                activeOutputName = output
+            }
+            return
+        }
+
+        reportClosed(panel, output)
     }
 
     function reportClosed(panelId, outputName) {
@@ -283,8 +322,12 @@ QtObject {
                 root.openPending()
             } else if (root.transitionPhase === "opening") {
                 root.transitionPhase = "idle"
-                if (root.pendingPanelId)
-                    root.openPending()
+                if (root.pendingPanelId) {
+                    if (root.activePanelId)
+                        root.beginClose()
+                    else
+                        root.openPending()
+                }
             }
         }
     }

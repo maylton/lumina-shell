@@ -85,6 +85,12 @@ PanelWindow {
         } else {
             hidingRequestedAt = Date.now()
         }
+
+        BarPanelCoordinator.reportPanelLogicalVisibility(
+            panelId,
+            panelOutputName,
+            panelVisible
+        )
     }
 
     BackgroundEffect.blurRegion:
@@ -134,7 +140,7 @@ PanelWindow {
         BarPanelCoordinator.reportPanelWindowVisibility(
             panelId,
             panelOutputName,
-            backingWindowVisible
+            backingWindowVisible && panelVisible
         )
     }
 
