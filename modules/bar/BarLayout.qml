@@ -136,7 +136,7 @@ Item {
                 required property var modelData
 
                 active: root.widgetEnabled(String(modelData))
-                visible: active
+                visible: BarLayoutPolicy.loadedWidgetVisible(active, item)
                 sourceComponent:
                     root.leftRegistry[String(modelData)] || null
             }
@@ -185,7 +185,7 @@ Item {
                 required property var modelData
 
                 active: root.widgetEnabled(String(modelData))
-                visible: active
+                visible: BarLayoutPolicy.loadedWidgetVisible(active, item)
                 sourceComponent:
                     root.rightRegistry[String(modelData)] || null
             }

@@ -13,6 +13,7 @@ SystemStatusItem {
     property var panelWindow: null
     property bool compact: false
 
+    readonly property bool layoutAvailable: AudioService.ready
     readonly property string textMode: String(
         ConfigStore.widgetSetting("audio", "textMode", "percentage")
     )
@@ -58,7 +59,7 @@ SystemStatusItem {
                             ? "audio-volume-low-symbolic"
                             : "audio-volume-muted-symbolic"
 
-    visible: AudioService.ready
+    visible: layoutAvailable
     individual: true
     interactive: true
     selected: audioPanel.visible

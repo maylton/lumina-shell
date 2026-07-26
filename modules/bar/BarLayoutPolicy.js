@@ -28,3 +28,13 @@ function centerAvailableWidth(
 
     return Math.max(0, clearance * 2 - gap * 2)
 }
+
+function loadedWidgetVisible(active, item) {
+    if (!Boolean(active))
+        return false
+
+    if (!item || item.layoutAvailable === undefined)
+        return true
+
+    return Boolean(item.layoutAvailable)
+}

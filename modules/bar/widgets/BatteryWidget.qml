@@ -14,6 +14,7 @@ SystemStatusItem {
     required property string outputName
     property bool compact: false
 
+    readonly property bool layoutAvailable: PowerService.batteryAvailable
     readonly property string textMode: String(
         ConfigStore.widgetSetting("battery", "textMode", "percentage")
     )
@@ -33,7 +34,7 @@ SystemStatusItem {
                 ? PowerService.batteryState
                 : PowerService.batteryPercentage + "%"
 
-    visible: PowerService.batteryAvailable
+    visible: layoutAvailable
     individual: true
     interactive: true
     selected:
