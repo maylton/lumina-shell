@@ -18,6 +18,28 @@ Column {
     width: parent ? parent.width : 0
     spacing: luminaDesign.spacing.controlSectionGap
 
+    function localizedState(state) {
+        const normalized = String(state || "unknown")
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+        const supported = [
+            "connected",
+            "connecting",
+            "disconnected",
+            "disconnecting",
+            "unavailable",
+            "unmanaged"
+        ]
+        const key = supported.indexOf(normalized) >= 0
+            ? normalized
+            : "unknown"
+
+        return I18n.tr(
+            "settings.connectivity.wired.state." + key,
+            String(state || "Unknown")
+        )
+    }
+
     SettingsSection {
         title: I18n.tr(
             "settings.connectivity.wired.section",
@@ -29,7 +51,8 @@ Column {
                 "No managed Ethernet interface was found"
             )
             : root.wiredDevices.map(function(device) {
-                return device.device + " · " + device.state
+                return device.device + " · "
+                    + root.localizedState(device.state)
             }).join(", ")
 
         Repeater {
