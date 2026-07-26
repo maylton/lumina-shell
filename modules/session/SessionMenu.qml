@@ -266,17 +266,6 @@ Scope {
                         sessionWindow.width,
                         root.luminaDesign.spacing.extraLarge
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        sessionWindow.height,
-                        sessionWindow.barWindowHeight,
-                        ConfigStore.barPanelGap,
-                        root.luminaDesign.spacing.extraLarge,
-                        OverlayStore.activeAnchorTop,
-                        OverlayStore.activeAnchorBottom
-                    )
                     width: Math.min(
                         root.luminaDesign.size.sessionMenuWidth,
                         sessionWindow.width - root.luminaDesign.spacing.extraLarge * 2

@@ -187,18 +187,6 @@ Scope {
                         launcherWindow.width,
                         root.luminaDesign.spacing.extraLarge
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        launcherWindow.height,
-                        launcherWindow.barWindowHeight,
-                        ConfigStore.barPanelGap,
-                        root.luminaDesign.spacing.extraLarge,
-                        OverlayStore.activeAnchorTop,
-                        OverlayStore.activeAnchorBottom
-                    )
-
                     width: Math.min(
                         720,
                         Math.max(360, launcherWindow.width - 32)

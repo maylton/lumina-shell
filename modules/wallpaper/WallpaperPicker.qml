@@ -66,17 +66,6 @@ Scope {
                         pickerWindow.width,
                         root.luminaDesign.spacing.extraLarge
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        pickerWindow.height,
-                        pickerWindow.barWindowHeight,
-                        ConfigStore.barPanelGap,
-                        root.luminaDesign.spacing.extraLarge,
-                        OverlayStore.activeAnchorTop,
-                        OverlayStore.activeAnchorBottom
-                    )
                     width: Math.min(
                         root.luminaDesign.size.wallpaperPickerWidth,
                         pickerWindow.width - root.luminaDesign.spacing.extraLarge * 2

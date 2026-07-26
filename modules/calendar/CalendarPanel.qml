@@ -44,21 +44,6 @@ BarPanelWindow {
             root.width,
             root.luminaDesign.spacing.medium
         )
-        y: SurfacePlacementPolicy.verticalY(
-            OverlayStore.activePlacement,
-            root.barPosition,
-            height,
-            root.height,
-            SurfacePlacementPolicy.barWindowHeight(
-                ConfigStore.barHeight,
-                ConfigStore.barSurfaceMode,
-                ConfigStore.barMargin
-            ),
-            ConfigStore.barPanelGap,
-            root.luminaDesign.spacing.medium,
-            OverlayStore.activeAnchorTop,
-            OverlayStore.activeAnchorBottom
-        )
         width: root.luminaDesign.size.calendarWidth
         height: calendarContent.implicitHeight
             + root.luminaDesign.spacing.large * 2

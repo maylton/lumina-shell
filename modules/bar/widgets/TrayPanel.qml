@@ -44,21 +44,6 @@ BarPanelWindow {
             root.width,
             root.luminaDesign.spacing.medium
         )
-        y: SurfacePlacementPolicy.verticalY(
-            OverlayStore.activePlacement,
-            ConfigStore.barPosition,
-            height,
-            root.height,
-            SurfacePlacementPolicy.barWindowHeight(
-                ConfigStore.barHeight,
-                ConfigStore.barSurfaceMode,
-                ConfigStore.barMargin
-            ),
-            ConfigStore.barPanelGap,
-            root.luminaDesign.spacing.medium,
-            OverlayStore.activeAnchorTop,
-            OverlayStore.activeAnchorBottom
-        )
         width: trayGrid.implicitWidth + root.luminaDesign.spacing.medium * 2
         height: trayGrid.implicitHeight + root.luminaDesign.spacing.medium * 2
         radius: root.luminaDesign.shape.large

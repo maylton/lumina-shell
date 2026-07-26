@@ -22,6 +22,16 @@ PanelWindow {
 
     signal dismissRequested()
 
+    function adjacentSurfaceY(surfaceHeight) {
+        const height = Math.max(0, Number(surfaceHeight) || 0)
+        const maximum = Math.max(0, root.height - height)
+        const gap = Math.max(0, Number(ConfigStore.barPanelGap) || 0)
+
+        return ConfigStore.barPosition === "bottom"
+            ? Math.max(0, maximum - gap)
+            : Math.min(gap, maximum)
+    }
+
     visible: panelVisible
     color: "transparent"
     surfaceFormat.opaque: false
@@ -88,5 +98,14 @@ PanelWindow {
         id: panelLayer
 
         anchors.fill: parent
+    }
+
+    Binding {
+        target: root.surfaceItem
+        property: "y"
+        value: root.adjacentSurfaceY(
+            root.surfaceItem ? root.surfaceItem.height : 0
+        )
+        when: root.surfaceItem !== null
     }
 }

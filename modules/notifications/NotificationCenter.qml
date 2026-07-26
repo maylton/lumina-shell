@@ -105,18 +105,6 @@ Scope {
                         centerWindow.width,
                         root.luminaDesign.spacing.medium
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        centerWindow.height,
-                        centerWindow.barWindowHeight,
-                        ConfigStore.barPanelGap,
-                        root.luminaDesign.spacing.medium,
-                        OverlayStore.activeAnchorTop,
-                        OverlayStore.activeAnchorBottom
-                    )
-
                     width: Math.min(
                         root.luminaDesign.size.notificationCenterWidth,
                         centerWindow.width - root.luminaDesign.spacing.extraLarge * 2
