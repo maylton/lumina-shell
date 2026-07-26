@@ -4,10 +4,10 @@ import QtQuick
 import Quickshell
 import qs.design
 import qs.modules.control
+import qs.modules.control.settings.pages.connectivity as ConnectivityViews
 import qs.services.connectivity
 import qs.services.i18n
 import qs.stores.config
-import qs.modules.control.settings.pages.connectivity as ConnectivityViews
 import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 PopupWindow {
@@ -20,8 +20,6 @@ PopupWindow {
     property bool requestedVisible: false
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property var wifiProfiles:
-        ConnectivityManagerService.wifiProfiles()
     readonly property var wiredProfiles:
         ConnectivityManagerService.wiredProfiles()
     readonly property var wiredDevices:
@@ -31,9 +29,9 @@ PopupWindow {
         values.sort(function(first, second) {
             const activeDifference = Number(Boolean(second.active))
                 - Number(Boolean(first.active))
-            if (activeDifference !== 0)
-                return activeDifference
-            return Number(second.signal || 0) - Number(first.signal || 0)
+            return activeDifference !== 0
+                ? activeDifference
+                : Number(second.signal || 0) - Number(first.signal || 0)
         })
         return values
     }
@@ -45,7 +43,7 @@ PopupWindow {
     function toggle() {
         requestedVisible = !requestedVisible
         if (requestedVisible) {
-            ConnectivityManagerService.setActiveSection("network")
+            ConnectivityManagerService.setActiveSection("wifi")
             ConnectivityManagerService.refreshAll()
         } else {
             releaseManager()
@@ -59,11 +57,11 @@ PopupWindow {
     }
 
     function releaseManager() {
-        if (ConnectivityManagerService.activeSection === "network")
+        if (ConnectivityManagerService.activeSection === "wifi")
             ConnectivityManagerService.setActiveSection("")
     }
 
-    function networkNeedsPassword(network) {
+    function needsPassword(network) {
         const security = String(network && network.security || "").trim()
         return security.length > 0 && security !== "--"
     }
@@ -80,19 +78,15 @@ PopupWindow {
         const saved = ConnectivityManagerService.savedWifiProfile(network.ssid)
         if (saved) {
             ConnectivityManagerService.activateConnection(saved.uuid)
-            return
-        }
-
-        if (networkNeedsPassword(network)) {
+        } else if (needsPassword(network)) {
             passwordDialog.openFor(network)
-            return
+        } else {
+            ConnectivityManagerService.connectWifi(
+                network.ssid,
+                network.security,
+                ""
+            )
         }
-
-        ConnectivityManagerService.connectWifi(
-            network.ssid,
-            network.security,
-            ""
-        )
     }
 
     function localizedWiredState(state) {
@@ -100,12 +94,8 @@ PopupWindow {
             .toLowerCase()
             .replace(/\s+/g, "-")
         const supported = [
-            "connected",
-            "connecting",
-            "disconnected",
-            "disconnecting",
-            "unavailable",
-            "unmanaged"
+            "connected", "connecting", "disconnected",
+            "disconnecting", "unavailable", "unmanaged"
         ]
         const key = supported.indexOf(normalized) >= 0
             ? normalized
@@ -191,10 +181,7 @@ PopupWindow {
 
                     Text {
                         width: parent.width
-                        text: I18n.tr(
-                            "bar.network.panel.title",
-                            "Network"
-                        )
+                        text: I18n.tr("bar.network.panel.title", "Network")
                         color: root.luminaDesign.color.onSurface
                         elide: Text.ElideRight
                         font.pixelSize: root.luminaDesign.typography.titleLarge
@@ -223,43 +210,13 @@ PopupWindow {
                     spacing: root.luminaDesign.spacing.small
 
                     Rectangle {
-                        id: wifiToggle
-                        width: 82
+                        width: 84
                         height: 38
                         radius: root.luminaDesign.shape.full
                         color: ConnectivityService.wifiEnabled
                             ? root.luminaDesign.color.accentContainer
                             : root.luminaDesign.color.surfaceMuted
                         opacity: ConnectivityService.wifiAvailable ? 1 : 0.45
-                        activeFocusOnTab: ConnectivityService.wifiAvailable
-                        border.width: activeFocus ? 2 : 0
-                        border.color: root.luminaDesign.color.primary
-
-                        Accessible.role: Accessible.CheckBox
-                        Accessible.name: I18n.tr(
-                            "bar.network.panel.toggleWifi",
-                            "Toggle Wi-Fi"
-                        )
-                        Accessible.checked: ConnectivityService.wifiEnabled
-                        Accessible.focusable: ConnectivityService.wifiAvailable
-                        Accessible.focused: activeFocus
-                        Accessible.onPressAction:
-                            ConnectivityManagerService.setWifiEnabled(
-                                !ConnectivityService.wifiEnabled
-                            )
-
-                        Keys.onSpacePressed: event => {
-                            ConnectivityManagerService.setWifiEnabled(
-                                !ConnectivityService.wifiEnabled
-                            )
-                            event.accepted = true
-                        }
-                        Keys.onReturnPressed: event => {
-                            ConnectivityManagerService.setWifiEnabled(
-                                !ConnectivityService.wifiEnabled
-                            )
-                            event.accepted = true
-                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -286,7 +243,6 @@ PopupWindow {
                     }
 
                     Rectangle {
-                        id: scanButton
                         width: 38
                         height: 38
                         radius: root.luminaDesign.shape.full
@@ -297,29 +253,6 @@ PopupWindow {
                             && !ConnectivityManagerService.busy
                             ? 1
                             : 0.45
-                        activeFocusOnTab: ConnectivityService.wifiEnabled
-                            && !ConnectivityManagerService.busy
-                        border.width: activeFocus ? 2 : 0
-                        border.color: root.luminaDesign.color.primary
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: I18n.tr(
-                            "bar.network.panel.scan",
-                            "Scan for Wi-Fi networks"
-                        )
-                        Accessible.focusable: activeFocusOnTab
-                        Accessible.focused: activeFocus
-                        Accessible.onPressAction:
-                            ConnectivityManagerService.scanWifi()
-
-                        Keys.onSpacePressed: event => {
-                            ConnectivityManagerService.scanWifi()
-                            event.accepted = true
-                        }
-                        Keys.onReturnPressed: event => {
-                            ConnectivityManagerService.scanWifi()
-                            event.accepted = true
-                        }
 
                         DashboardIcon {
                             anchors.centerIn: parent
@@ -448,15 +381,12 @@ PopupWindow {
                                     && modelData.connection !== "--"
                                     ? modelData.connection
                                     : modelData.device
-                                description: root.localizedWiredState(
-                                    modelData.state
-                                )
+                                description: root.localizedWiredState(modelData.state)
                                 iconName: "network-wired-symbolic"
                                 fallbackSymbol: "↔"
                                 connected: String(modelData.state).toLowerCase()
                                     === "connected"
                                 available: false
-                                actionLabel: ""
                             }
                         }
                     }
