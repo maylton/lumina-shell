@@ -1,0 +1,5 @@
+module qs.modules.control.settings.pages.connectivity
+BluetoothPage 1.0 BluetoothPage.qml
+WifiPage 1.0 WifiPage.qml
+WiredPage 1.0 WiredPage.qml
+WifiPasswordDialog 1.0 WifiPasswordDialog.qml
