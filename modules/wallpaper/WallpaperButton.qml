@@ -85,7 +85,7 @@ Rectangle {
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
-        OverlayStore.prepareFor(
+        BarPanelCoordinator.requestToggle(
             "wallpaper",
             root.outputName,
             root.surfacePlacement,
@@ -93,7 +93,6 @@ Rectangle {
             anchor.top,
             anchor.bottom
         )
-        WallpaperService.togglePicker(root.outputName)
     }
 
     Keys.onSpacePressed: event => {
@@ -104,6 +103,42 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "wallpaper" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "wallpaper",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            WallpaperService.openPicker(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "wallpaper" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                WallpaperService.closePicker()
+            else
+                BarPanelCoordinator.reportClosed("wallpaper", root.outputName)
+        }
     }
 
     Behavior on color {
