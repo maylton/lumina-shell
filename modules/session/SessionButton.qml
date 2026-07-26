@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.services.session
 import qs.stores.config
 import qs.stores.session
@@ -55,7 +56,10 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open session and layout controls"
+    Accessible.name: I18n.tr(
+        "bar.session.accessibleName",
+        "Open session and layout controls"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -153,7 +157,7 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showLabel
-            text: "Session"
+            text: I18n.tr("bar.session.label", "Session")
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
