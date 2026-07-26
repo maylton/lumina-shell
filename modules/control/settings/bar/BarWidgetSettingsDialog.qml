@@ -16,6 +16,8 @@ Controls.Popup {
     property var widget: BarWidgetCatalog.find(widgetId)
     property Item restoreFocusItem: null
     property double openRequestedAt: 0
+    property bool openPending: false
+    property int openRequestGeneration: 0
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property string displayTitle: widget
@@ -75,12 +77,36 @@ Controls.Popup {
         if (!requested || !requested.configurable)
             return
 
+        const generation = ++openRequestGeneration
         widgetId = requested.id
         restoreFocusItem = sourceItem && sourceItem.activeFocus
             ? sourceItem
             : null
         openRequestedAt = Date.now()
-        open()
+        openPending = true
+        PerformanceTrace.recordInstant(
+            "popup",
+            "bar-widget-settings",
+            "requested",
+            { widgetId: widgetId }
+        )
+
+        Qt.callLater(function() {
+            if (!root.openPending
+                || generation !== root.openRequestGeneration) {
+                return
+            }
+
+            root.openPending = false
+            root.open()
+        })
+    }
+
+    function dismiss() {
+        ++openRequestGeneration
+        openPending = false
+        openRequestedAt = 0
+        close()
     }
 
     onOpened: {
@@ -111,6 +137,8 @@ Controls.Popup {
     }
 
     onClosed: {
+        openPending = false
+
         if (restoreFocusItem)
             restoreFocusItem.forceActiveFocus(Qt.PopupFocusReason)
 

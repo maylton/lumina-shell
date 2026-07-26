@@ -21,8 +21,8 @@ SettingsPage {
         )
 
     function togglePerformanceWidgetDialog(widgetId) {
-        if (widgetDialog.opened)
-            widgetDialog.close()
+        if (widgetDialog.visible || widgetDialog.openPending)
+            widgetDialog.dismiss()
         else
             widgetDialog.openFor(String(widgetId || "launcher"), null)
     }
