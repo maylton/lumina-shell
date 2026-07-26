@@ -70,21 +70,35 @@ Rectangle {
         event.accepted = true
     }
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
+        const anchor = mappedAnchorGeometry(localX)
+
         OverlayStore.prepareFor(
             "session",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
 
         if (expanded) {
