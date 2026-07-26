@@ -5,8 +5,6 @@ The helper exports org.bluez.Agent1 on the system bus, sends newline-delimited
 JSON events to QML, and accepts newline-delimited JSON responses on stdin.
 """
 
-from __future__ import annotations
-
 import argparse
 import asyncio
 import json
@@ -142,7 +140,7 @@ async def run(address: str) -> int:
             return True
 
         @method()
-        def Release(self) -> None:
+        def Release(self):
             self.cancel_pending("BlueZ released the pairing agent")
 
         @method()
@@ -151,7 +149,7 @@ async def run(address: str) -> int:
             return str(value)
 
         @method()
-        def DisplayPinCode(self, device: "o", pincode: "s") -> None:
+        def DisplayPinCode(self, device: "o", pincode: "s"):
             emit(
                 "display",
                 kind="display-pin",
@@ -170,7 +168,7 @@ async def run(address: str) -> int:
             device: "o",
             passkey: "u",
             entered: "q",
-        ) -> None:
+        ):
             emit(
                 "display",
                 kind="display-passkey",
@@ -184,7 +182,7 @@ async def run(address: str) -> int:
             self,
             device: "o",
             passkey: "u",
-        ) -> None:
+        ):
             accepted = await self._request(
                 "confirmation",
                 device=str(device),
@@ -197,7 +195,7 @@ async def run(address: str) -> int:
                 )
 
         @method()
-        async def RequestAuthorization(self, device: "o") -> None:
+        async def RequestAuthorization(self, device: "o"):
             accepted = await self._request("authorize", device=str(device))
             if not accepted:
                 raise DBusError(
@@ -206,7 +204,7 @@ async def run(address: str) -> int:
                 )
 
         @method()
-        async def AuthorizeService(self, device: "o", uuid: "s") -> None:
+        async def AuthorizeService(self, device: "o", uuid: "s"):
             accepted = await self._request(
                 "authorize",
                 device=str(device),
@@ -219,7 +217,7 @@ async def run(address: str) -> int:
                 )
 
         @method()
-        def Cancel(self) -> None:
+        def Cancel(self):
             self.cancel_pending("BlueZ canceled pairing")
 
     async def proxy_interface(bus: Any, path: str, interface_name: str) -> Any:
