@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "I18n.js" as I18nLogic
+import "AppearanceMessages.js" as AppearanceMessages
 
 Singleton {
     id: root
@@ -49,7 +50,9 @@ Singleton {
             && typeof messages[key] === "string"
             ? messages[key]
             : ""
+        const supplementalValue = AppearanceMessages.message(locale, key)
         const sourceValue = catalogValue
+            || supplementalValue
             || String(fallback || key)
 
         return interpolate(sourceValue, replacements)
