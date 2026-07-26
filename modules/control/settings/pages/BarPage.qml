@@ -394,6 +394,27 @@ SettingsPage {
         SettingsSliderRow {
             width: parent.width
             title: I18n.tr(
+                "settings.bar.surface.panelGap",
+                "Panel distance"
+            )
+            description: I18n.tr(
+                "settings.bar.surface.panelGapDescription",
+                "Vertical space between the bar and widget panels"
+            )
+            from: 0
+            to: 48
+            stepSize: 1
+            value: ConfigStore.barPanelGap
+            valueLabel: Math.round(value) + " px"
+            onValueEdited: value => ConfigStore.setBarValue(
+                "barPanelGap",
+                value
+            )
+        }
+
+        SettingsSliderRow {
+            width: parent.width
+            title: I18n.tr(
                 "settings.bar.surface.spacing",
                 "Widget spacing"
             )

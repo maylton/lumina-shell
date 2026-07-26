@@ -64,25 +64,6 @@ Scope {
                     && LauncherStore.activeOutputName === outputName
                 readonly property bool browsingApplications:
                     LauncherStore.query.trim().length === 0
-                readonly property int bottomBarOffset:
-                    ConfigStore.barPosition === "bottom"
-                        ? ConfigStore.barHeight
-                            + (ConfigStore.barSurfaceMode === "floating"
-                                ? ConfigStore.barMargin * 2
-                                : 0)
-                        : 0
-                readonly property int dockOffset:
-                    DockPreferences.enabled
-                        ? DockPreferences.iconSize
-                            + 24
-                            + (DockPreferences.mode === "floating"
-                                ? DockPreferences.margin
-                                : 0)
-                            + 12
-                        : 24
-                readonly property int surfaceBottomOffset:
-                    bottomBarOffset + dockOffset
-
                 property var contextResult: null
                 property string contextIdentifier: ""
                 property real contextMenuX: 0
@@ -199,42 +180,24 @@ Scope {
                 ShellSurface {
                     id: launcherSurface
 
-                    readonly property bool nearWidgetPlacement:
-                        OverlayStore.activePlacement
-                            === SurfacePlacementPolicy.NEAR_WIDGET
-
-                    anchors {
-                        horizontalCenter: launcherSurface.nearWidgetPlacement
-                            ? undefined
-                            : parent.horizontalCenter
-                        bottom: launcherSurface.nearWidgetPlacement
-                            ? undefined
-                            : parent.bottom
-                        bottomMargin: launcherWindow.surfaceBottomOffset
-                    }
-
-                    x: launcherSurface.nearWidgetPlacement
-                        ? SurfacePlacementPolicy.horizontalX(
-                            OverlayStore.activePlacement,
-                            OverlayStore.activeAnchorX,
-                            width,
-                            launcherWindow.width,
-                            root.luminaDesign.spacing.extraLarge
-                        )
-                        : 0
-                    y: launcherSurface.nearWidgetPlacement
-                        ? SurfacePlacementPolicy.verticalY(
-                            OverlayStore.activePlacement,
-                            ConfigStore.barPosition,
-                            height,
-                            launcherWindow.height,
-                            launcherWindow.barWindowHeight,
-                            4,
-                            root.luminaDesign.spacing.extraLarge,
-                            OverlayStore.activeAnchorTop,
-                            OverlayStore.activeAnchorBottom
-                        )
-                        : 0
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        launcherWindow.width,
+                        root.luminaDesign.spacing.extraLarge
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        launcherWindow.height,
+                        launcherWindow.barWindowHeight,
+                        ConfigStore.barPanelGap,
+                        root.luminaDesign.spacing.extraLarge,
+                        OverlayStore.activeAnchorTop,
+                        OverlayStore.activeAnchorBottom
+                    )
 
                     width: Math.min(
                         720,
@@ -245,8 +208,9 @@ Scope {
                         Math.max(
                             360,
                             launcherWindow.height
-                                - launcherWindow.surfaceBottomOffset
-                                - 48
+                                - launcherWindow.barWindowHeight
+                                - ConfigStore.barPanelGap
+                                - root.luminaDesign.spacing.extraLarge
                         )
                     )
                     radius: root.luminaDesign.shape.extraLargeIncreased

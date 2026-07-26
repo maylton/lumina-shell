@@ -2,7 +2,6 @@
 
 var NEAR_WIDGET = "near-widget"
 var CENTERED = "centered"
-var MAX_NEAR_WIDGET_GAP = 8
 
 function finiteNumber(value, fallback) {
     var numeric = Number(value)
@@ -69,7 +68,7 @@ function horizontalX(
 }
 
 function verticalY(
-    placement,
+    _placement,
     barPosition,
     surfaceHeight,
     viewportHeight,
@@ -83,15 +82,7 @@ function verticalY(
     var viewport = Math.max(height, finiteNumber(viewportHeight, height))
     var inset = Math.max(0, finiteNumber(margin, 0))
     var maximum = Math.max(inset, viewport - height - inset)
-    var centered = (viewport - height) / 2
-
-    if (normalize(placement) !== NEAR_WIDGET)
-        return clamp(centered, inset, maximum)
-
-    var adjacentGap = Math.min(
-        MAX_NEAR_WIDGET_GAP,
-        Math.max(0, finiteNumber(gap, 0))
-    )
+    var adjacentGap = Math.max(0, finiteNumber(gap, 0))
     var adjacent
 
     if (hasAnchorGeometry(anchorTop, anchorBottom)) {

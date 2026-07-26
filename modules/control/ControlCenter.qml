@@ -174,14 +174,14 @@ Scope {
                         fill: parent
                         topMargin:
                             ConfigStore.barPosition === "top"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : root.luminaDesign.spacing.barPanelGap
+                                ? controlWindow.barWindowHeight
+                                    + ConfigStore.barPanelGap
+                                : controlWindow.safeMargin
                         bottomMargin:
                             ConfigStore.barPosition === "bottom"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : root.luminaDesign.spacing.barPanelGap
+                                ? controlWindow.barWindowHeight
+                                    + ConfigStore.barPanelGap
+                                : controlWindow.safeMargin
                         leftMargin: controlWindow.safeMargin
                         rightMargin: controlWindow.safeMargin
                     }
@@ -203,7 +203,7 @@ Scope {
                         height,
                         controlWindow.height,
                         controlWindow.barWindowHeight,
-                        4,
+                        ConfigStore.barPanelGap,
                         controlWindow.safeMargin,
                         OverlayStore.activeAnchorTop,
                         OverlayStore.activeAnchorBottom

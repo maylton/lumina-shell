@@ -132,6 +132,8 @@
   "settings.bar.surface.opacity": "Opacidade da tonalidade do fundo",
   "settings.bar.surface.opacityDescription": "Controla a tonalidade do cliente; o compositor controla a intensidade do desfoque",
   "settings.bar.surface.opacityUnavailable": "Escolha Translúcido, Desfoque ou Vidro fosco primeiro",
+  "settings.bar.surface.panelGap": "Distância dos painéis",
+  "settings.bar.surface.panelGapDescription": "Espaço vertical entre a barra e os painéis dos widgets",
   "settings.bar.surface.position": "Posição",
   "settings.bar.surface.positionDescription": "Ancora a barra à borda da tela",
   "settings.bar.surface.spacing": "Espaçamento dos widgets",

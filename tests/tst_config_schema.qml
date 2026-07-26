@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema8WidgetSettings() {
+    function test_defaultsUseSchema9WidgetSettings() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 8)
+        compare(state.schemaVersion, 9)
         compare(state.themeMode, "auto")
         compare(state.shellBackgroundMode, "solid")
         compare(state.shellSurfaceOpacity, 0.82)
@@ -45,6 +45,7 @@ TestCase {
         compare(state.dashboardUserAvatarPath, "")
         compare(state.barWidgetSettings.context.timeout, 3500)
         compare(state.barHeight, 56)
+        compare(state.barPanelGap, 8)
         compare(state.barShowWallpaperButton, false)
         compare(state.barShowSessionButton, false)
         compare(state.barLeftWidgetOrder.length, 4)
@@ -64,7 +65,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -85,7 +86,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -162,7 +163,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
         compare(migrated.shellBackgroundMode, "blur")
@@ -203,7 +204,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -276,12 +277,23 @@ TestCase {
             barBackgroundMode: "frosted"
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         compare(migrated.shellBackgroundMode, "blur")
         compare(migrated.shellSurfaceOpacity, 0.74)
         compare(migrated.barBackgroundMode, "frosted")
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
+    }
+
+    function test_schema8MigrationAddsPanelGap() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 8,
+            barHeight: 64
+        })
+
+        compare(migrated.schemaVersion, 9)
+        compare(migrated.barHeight, 64)
+        compare(migrated.barPanelGap, 8)
     }
 
     function test_widgetSurfacePlacementNormalization() {
@@ -336,6 +348,7 @@ TestCase {
             cornerRadiusScale: 0,
             barHeight: 500,
             barMargin: -4,
+            barPanelGap: 80,
             barWidgetSettings: {
                 context: { timeout: 50 }
             },
@@ -352,6 +365,7 @@ TestCase {
         compare(state.cornerRadiusScale, 0.6)
         compare(state.barHeight, 80)
         compare(state.barMargin, 0)
+        compare(state.barPanelGap, 48)
         compare(state.barWidgetSettings.context.timeout, 1000)
         compare(state.notificationPopupDuration, 3000)
         compare(state.notificationPopupMaximum, 5)
@@ -362,19 +376,23 @@ TestCase {
     function test_barAppearanceValuesUseIndependentBounds() {
         const minimum = ConfigSchema.normalize({
             barHeight: 2,
+            barPanelGap: -5,
             barSurfaceOpacity: -1,
             barContentScale: 0.1
         })
         const maximum = ConfigSchema.normalize({
             barHeight: 200,
+            barPanelGap: 80,
             barSurfaceOpacity: 5,
             barContentScale: 3
         })
 
         compare(minimum.barHeight, 40)
+        compare(minimum.barPanelGap, 0)
         compare(minimum.barSurfaceOpacity, 0)
         compare(minimum.barContentScale, 0.8)
         compare(maximum.barHeight, 80)
+        compare(maximum.barPanelGap, 48)
         compare(maximum.barSurfaceOpacity, 1)
         compare(maximum.barContentScale, 1.4)
     }
@@ -431,7 +449,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 8)
+        compare(migrated.schemaVersion, 9)
         compare(migrated.barBackgroundMode, "blur")
     }
 
@@ -538,6 +556,7 @@ TestCase {
         compare(appearance.paletteStyle, "auto")
         verify(appearance.barHeight === undefined)
         compare(bar.barHeight, 56)
+        compare(bar.barPanelGap, 8)
         verify(bar.barVisualStyle === undefined)
         verify(bar.barWidgetOrder === undefined)
         compare(bar.barSurfaceMode, "edge-to-edge")

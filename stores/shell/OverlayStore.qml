@@ -50,8 +50,7 @@ QtObject {
         const normalizedPlacement = SurfacePlacementPolicy.normalize(placement)
         const nearWidget = normalizedPlacement
             === SurfacePlacementPolicy.NEAR_WIDGET
-        const validVerticalAnchor = nearWidget
-            && isFinite(numericAnchorTop)
+        const validVerticalAnchor = isFinite(numericAnchorTop)
             && isFinite(numericAnchorBottom)
             && numericAnchorTop >= 0
             && numericAnchorBottom >= numericAnchorTop

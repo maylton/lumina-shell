@@ -89,7 +89,8 @@ Scope {
                         0,
                         centerWindow.height
                             - centerWindow.barWindowHeight
-                            - root.luminaDesign.spacing.barPanelGap * 2
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.medium
                     )
                     readonly property real desiredContentHeight:
                         root.luminaDesign.spacing.extraLarge * 2
@@ -110,7 +111,7 @@ Scope {
                         height,
                         centerWindow.height,
                         centerWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
+                        ConfigStore.barPanelGap,
                         root.luminaDesign.spacing.medium,
                         OverlayStore.activeAnchorTop,
                         OverlayStore.activeAnchorBottom

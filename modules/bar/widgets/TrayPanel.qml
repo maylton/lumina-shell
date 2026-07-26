@@ -54,7 +54,7 @@ BarPanelWindow {
                 ConfigStore.barSurfaceMode,
                 ConfigStore.barMargin
             ),
-            root.luminaDesign.spacing.barPanelGap,
+            ConfigStore.barPanelGap,
             root.luminaDesign.spacing.medium,
             OverlayStore.activeAnchorTop,
             OverlayStore.activeAnchorBottom

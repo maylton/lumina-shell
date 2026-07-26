@@ -272,7 +272,7 @@ Scope {
                         height,
                         sessionWindow.height,
                         sessionWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
+                        ConfigStore.barPanelGap,
                         root.luminaDesign.spacing.extraLarge,
                         OverlayStore.activeAnchorTop,
                         OverlayStore.activeAnchorBottom
@@ -283,7 +283,10 @@ Scope {
                     )
                     height: Math.min(
                         root.luminaDesign.size.sessionMenuHeight,
-                        sessionWindow.height - root.luminaDesign.spacing.extraLarge * 2
+                        sessionWindow.height
+                            - sessionWindow.barWindowHeight
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.extraLarge
                     )
                     radius: root.luminaDesign.shape.extraLarge
 

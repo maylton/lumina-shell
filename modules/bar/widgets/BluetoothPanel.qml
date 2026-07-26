@@ -30,7 +30,8 @@ BarPanelWindow {
                     ConfigStore.barSurfaceMode,
                     ConfigStore.barMargin
                 )
-                - 32
+                - ConfigStore.barPanelGap
+                - luminaDesign.spacing.medium
         )
     )
     readonly property var connectedDevices:
@@ -220,7 +221,7 @@ BarPanelWindow {
                 ConfigStore.barSurfaceMode,
                 ConfigStore.barMargin
             ),
-            root.luminaDesign.spacing.barPanelGap,
+            ConfigStore.barPanelGap,
             root.luminaDesign.spacing.medium,
             OverlayStore.activeAnchorTop,
             OverlayStore.activeAnchorBottom

@@ -61,6 +61,23 @@ TestCase {
         compare(OverlayStore.pendingAnchorBottom, -1)
     }
 
+    function test_centeredPlacementKeepsVerticalAnchorGeometry() {
+        OverlayStore.prepareFor(
+            "launcher",
+            outputName,
+            "centered",
+            120,
+            8,
+            56
+        )
+        OverlayStore.openFor("launcher", outputName)
+
+        compare(OverlayStore.activePlacement, "centered")
+        compare(OverlayStore.activeAnchorX, -1)
+        compare(OverlayStore.activeAnchorTop, 8)
+        compare(OverlayStore.activeAnchorBottom, 56)
+    }
+
     function test_openForDoesNotTransferStalePreparedGeometry() {
         OverlayStore.prepareFor(
             "notifications",

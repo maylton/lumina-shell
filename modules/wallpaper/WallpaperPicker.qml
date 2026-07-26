@@ -72,7 +72,7 @@ Scope {
                         height,
                         pickerWindow.height,
                         pickerWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
+                        ConfigStore.barPanelGap,
                         root.luminaDesign.spacing.extraLarge,
                         OverlayStore.activeAnchorTop,
                         OverlayStore.activeAnchorBottom
@@ -83,7 +83,10 @@ Scope {
                     )
                     height: Math.min(
                         root.luminaDesign.size.wallpaperPickerHeight,
-                        pickerWindow.height - root.luminaDesign.spacing.extraLarge * 2
+                        pickerWindow.height
+                            - pickerWindow.barWindowHeight
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.extraLarge
                     )
                     radius: root.luminaDesign.shape.extraLarge
 

@@ -79,7 +79,7 @@ TestCase {
             SurfacePlacementPolicy.verticalY(
                 "centered", "top", 300, 900, 64, 8, 16
             ),
-            300
+            72
         )
     }
 
@@ -107,18 +107,33 @@ TestCase {
         )
     }
 
-    function test_nearWidgetGapIsCappedAtEightPixels() {
+    function test_verticalPositionUsesConfiguredGap() {
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "top", 300, 900, 64, 24, 16
             ),
-            72
+            88
         )
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "bottom", 300, 900, 64, 24, 16
             ),
-            528
+            512
+        )
+    }
+
+    function test_centeredPlacementKeepsVerticalWidgetBounds() {
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "centered", "top", 300, 900, 68, 8, 16, 12, 52
+            ),
+            60
+        )
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "centered", "bottom", 300, 900, 68, 8, 16, 848, 888
+            ),
+            540
         )
     }
 
