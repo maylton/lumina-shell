@@ -44,8 +44,8 @@ lumina-gtk/
 
 ```bash
 cd themes/lumina-gtk
-./scripts/install-theme.sh
-./scripts/apply-theme.sh dark
+bash scripts/install-theme.sh
+bash scripts/apply-theme.sh dark
 ```
 
 Use `light` instead of `dark` to switch variants.
