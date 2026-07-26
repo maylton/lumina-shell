@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.services.wallpaper
 import qs.stores.config
 import qs.stores.shell
@@ -54,7 +55,10 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open wallpaper picker"
+    Accessible.name: I18n.tr(
+        "bar.wallpaper.accessibleName",
+        "Open wallpaper picker"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -146,7 +150,7 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showLabel
-            text: "Wallpaper"
+            text: I18n.tr("bar.wallpaper.label", "Wallpaper")
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface
