@@ -36,8 +36,14 @@ SettingsPage {
         )
         fileMode: FileDialog.OpenFile
         nameFilters: [
-            "Images (*.png *.jpg *.jpeg *.webp *.bmp)",
-            "All files (*)"
+            I18n.tr(
+                "settings.dashboard.fileFilter.images",
+                "Images (*.png *.jpg *.jpeg *.webp *.bmp)"
+            ),
+            I18n.tr(
+                "settings.dashboard.fileFilter.all",
+                "All files (*)"
+            )
         ]
         onAccepted: ConfigStore.setDashboardValue(
             "dashboardUserAvatarPath",
@@ -132,15 +138,30 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Opening"
+        title: I18n.tr(
+            "settings.dashboard.opening.section",
+            "Opening"
+        )
 
         SettingsComboRow {
             width: parent.width
-            title: "Default page"
-            description: "Used when the last page is not remembered"
+            title: I18n.tr(
+                "settings.dashboard.opening.defaultPage",
+                "Default page"
+            )
+            description: I18n.tr(
+                "settings.dashboard.opening.defaultPageDescription",
+                "Used when the last page is not remembered"
+            )
             options: [
                 { value: "dashboard", label: "Dashboard" },
-                { value: "settings", label: "Settings" }
+                {
+                    value: "settings",
+                    label: I18n.tr(
+                        "settings.dashboard.opening.settings",
+                        "Settings"
+                    )
+                }
             ]
             currentValue: ConfigStore.dashboardDefaultPage
             onSelected: value =>
@@ -152,8 +173,14 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Remember last page"
-            description: "Reopen on the page used most recently"
+            title: I18n.tr(
+                "settings.dashboard.opening.rememberPage",
+                "Remember last page"
+            )
+            description: I18n.tr(
+                "settings.dashboard.opening.rememberPageDescription",
+                "Reopen on the page used most recently"
+            )
             checked: ConfigStore.dashboardRememberPage
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -164,8 +191,14 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Remember settings category"
-            description: "Return to the most recent category"
+            title: I18n.tr(
+                "settings.dashboard.opening.rememberCategory",
+                "Remember settings category"
+            )
+            description: I18n.tr(
+                "settings.dashboard.opening.rememberCategoryDescription",
+                "Return to the most recent category"
+            )
             checked: ConfigStore.dashboardRememberCategory
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -176,12 +209,36 @@ SettingsPage {
 
         SettingsComboRow {
             width: parent.width
-            title: "Card density"
-            description: "Adjust spacing without shrinking text"
+            title: I18n.tr(
+                "settings.dashboard.density.title",
+                "Card density"
+            )
+            description: I18n.tr(
+                "settings.dashboard.density.description",
+                "Adjust spacing without shrinking text"
+            )
             options: [
-                { value: "compact", label: "Compact" },
-                { value: "comfortable", label: "Comfortable" },
-                { value: "spacious", label: "Spacious" }
+                {
+                    value: "compact",
+                    label: I18n.tr(
+                        "settings.dashboard.density.compact",
+                        "Compact"
+                    )
+                },
+                {
+                    value: "comfortable",
+                    label: I18n.tr(
+                        "settings.dashboard.density.comfortable",
+                        "Comfortable"
+                    )
+                },
+                {
+                    value: "spacious",
+                    label: I18n.tr(
+                        "settings.dashboard.density.spacious",
+                        "Spacious"
+                    )
+                }
             ]
             currentValue: ConfigStore.dashboardDensity
             onSelected: value =>
@@ -193,12 +250,21 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Visible cards"
-        description: "Disabled cards release their layout space"
+        title: I18n.tr(
+            "settings.dashboard.cards.section",
+            "Visible cards"
+        )
+        description: I18n.tr(
+            "settings.dashboard.cards.description",
+            "Disabled cards release their layout space"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Overview and workspaces"
+            title: I18n.tr(
+                "settings.dashboard.cards.overview",
+                "Overview and workspaces"
+            )
             checked: ConfigStore.dashboardShowOverview
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -232,7 +298,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Quick controls"
+            title: I18n.tr(
+                "settings.dashboard.cards.controls",
+                "Quick controls"
+            )
             checked: ConfigStore.dashboardShowControls
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -243,7 +312,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Notifications"
+            title: I18n.tr(
+                "settings.dashboard.cards.notifications",
+                "Notifications"
+            )
             checked: ConfigStore.dashboardShowNotifications
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -254,7 +326,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Media"
+            title: I18n.tr(
+                "settings.dashboard.cards.media",
+                "Media"
+            )
             checked: ConfigStore.dashboardShowMedia
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -265,7 +340,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "System status"
+            title: I18n.tr(
+                "settings.dashboard.cards.system",
+                "System status"
+            )
             checked: ConfigStore.dashboardShowSystem
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -276,7 +354,10 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Calendar"
+            title: I18n.tr(
+                "settings.dashboard.cards.calendar",
+                "Calendar"
+            )
             checked: ConfigStore.dashboardShowCalendar
             onToggled: value =>
                 ConfigStore.setDashboardValue(
@@ -287,8 +368,14 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Session action"
-            description: "Show the session shortcut in the header"
+            title: I18n.tr(
+                "settings.dashboard.cards.session",
+                "Session action"
+            )
+            description: I18n.tr(
+                "settings.dashboard.cards.sessionDescription",
+                "Show the session shortcut in the header"
+            )
             checked: ConfigStore.dashboardShowSessionActions
             onToggled: value =>
                 ConfigStore.setDashboardValue(
