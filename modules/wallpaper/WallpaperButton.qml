@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.services.wallpaper
 import qs.stores.config
 import qs.stores.shell
@@ -54,28 +55,44 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open wallpaper picker"
+    Accessible.name: I18n.tr(
+        "bar.wallpaper.accessibleName",
+        "Open wallpaper picker"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
-        OverlayStore.prepareFor(
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
             "wallpaper",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
-        WallpaperService.togglePicker(root.outputName)
     }
 
     Keys.onSpacePressed: event => {
@@ -86,6 +103,42 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "wallpaper" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "wallpaper",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            WallpaperService.openPicker(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "wallpaper" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                WallpaperService.closePicker()
+            else
+                BarPanelCoordinator.reportClosed("wallpaper", root.outputName)
+        }
     }
 
     Behavior on color {
@@ -132,7 +185,7 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showLabel
-            text: "Wallpaper"
+            text: I18n.tr("bar.wallpaper.label", "Wallpaper")
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface

@@ -1,7 +1,7 @@
 .pragma library
 .import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
 
-var CURRENT_VERSION = 8
+var CURRENT_VERSION = 9
 
 function defaults() {
     return {
@@ -32,6 +32,7 @@ function defaults() {
         barPosition: "top",
         barHeight: 56,
         barMargin: 5,
+        barPanelGap: 8,
         barWidgetSpacing: 10,
         barShowLauncher: true,
         barShowOverview: true,
@@ -436,6 +437,9 @@ function normalize(source) {
     result.barMargin = Math.round(
         boundedNumber(result.barMargin, base.barMargin, 0, 18)
     )
+    result.barPanelGap = Math.round(
+        boundedNumber(result.barPanelGap, base.barPanelGap, 0, 48)
+    )
     result.barWidgetSpacing = Math.round(
         boundedNumber(
             result.barWidgetSpacing,
@@ -753,6 +757,9 @@ function migrate(source) {
         delete input.surfaceOpacity
     }
 
+    if (version < 9 && input.barPanelGap === undefined)
+        input.barPanelGap = defaults().barPanelGap
+
     return normalize(input)
 }
 
@@ -783,6 +790,7 @@ function defaultsForCategory(categoryName) {
             "barPosition",
             "barHeight",
             "barMargin",
+            "barPanelGap",
             "barWidgetSpacing",
             "barShowLauncher",
             "barShowOverview",

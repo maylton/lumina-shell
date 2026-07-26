@@ -5,12 +5,14 @@ import qs.services.connectivity
 import qs.services.power
 import qs.stores.config
 import qs.stores.control
+import qs.stores.shell
 import "ExpressiveBatteryGeometry.js" as BatteryGeometry
 
 Rectangle {
     id: root
 
     required property string outputName
+    property var panelWindow: null
     property bool compact: false
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -39,7 +41,7 @@ Rectangle {
             "showAudio",
             true
         ))
-        && AudioService.outputAvailable
+        && AudioService.ready
     readonly property bool showBattery:
         Boolean(ConfigStore.widgetSetting(
             "system-status",
@@ -72,22 +74,26 @@ Rectangle {
         if (networkTextMode === "icon")
             return ""
 
-        if (networkTextMode === "name")
+        if (networkTextMode === "name") {
             return ConnectivityService.wifiConnected
                 ? ConnectivityService.wifiName
                 : ConnectivityService.networkSummary
+        }
 
-        if (networkTextMode === "type")
+        if (networkTextMode === "type") {
             return ConnectivityService.wifiConnected
                 ? "Wi-Fi"
                 : ConnectivityService.wiredConnected
                     ? "Wired"
                     : "Offline"
+        }
 
         return ConnectivityService.networkSummary
     }
     readonly property string audioLabel:
-        audioTextMode === "icon"
+        !AudioService.outputAvailable
+            ? audioTextMode === "icon" ? "" : "Unavailable"
+            : audioTextMode === "icon"
             ? ""
             : audioTextMode === "state"
                 ? AudioService.outputMuted ? "Muted" : "Active"
@@ -114,7 +120,9 @@ Rectangle {
                 ? "network-wired-symbolic"
                 : "network-offline-symbolic"
     readonly property string audioIcon:
-        AudioService.outputMuted
+        !AudioService.outputAvailable
+            ? "audio-card-symbolic"
+            : AudioService.outputMuted
             ? "audio-volume-muted-symbolic"
             : AudioService.outputVolume >= 0.66
                 ? "audio-volume-high-symbolic"
@@ -130,11 +138,13 @@ Rectangle {
             ? "Network " + ConnectivityService.networkSummary
             : "",
         showAudio
-            ? "Volume "
-                + Math.round(AudioService.outputVolume * 100)
-                + " percent"
-                + (AudioService.outputMuted ? ", muted" : "")
-                + ", " + AudioService.outputName
+            ? AudioService.outputAvailable
+                ? "Volume "
+                    + Math.round(AudioService.outputVolume * 100)
+                    + " percent"
+                    + (AudioService.outputMuted ? ", muted" : "")
+                    + ", " + AudioService.outputName
+                : AudioService.outputName
             : "",
         showBattery
             ? "Battery " + PowerService.batteryPercentage
@@ -162,9 +172,7 @@ Rectangle {
             : showBackground
                 ? luminaDesign.color.surfaceMuted
                 : "transparent"
-    scale: statusMouse.pressed
-        ? 0.96
-        : 1
+    scale: statusMouse.pressed ? 0.96 : 1
     activeFocusOnTab: visible
     border.width: activeFocus ? 2 : 0
     border.color: luminaDesign.color.primary
@@ -174,20 +182,138 @@ Rectangle {
     Accessible.description: accessibleSummary
     Accessible.focusable: visible
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activate()
+    Accessible.onPressAction: root.activate(root.width / 2)
 
-    function activate() {
-        ControlCenterStore.openFor(outputName, "dashboard")
+    function mappedAnchorGeometry(item, localX) {
+        const target = item || root
+        const top = target.mapToItem(
+            null,
+            Number(localX),
+            0
+        )
+        const bottom = target.mapToItem(
+            null,
+            Number(localX),
+            target.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
+    }
+
+    function activate(localX) {
+        const anchor = mappedAnchorGeometry(
+            root,
+            isFinite(Number(localX)) ? Number(localX) : root.width / 2
+        )
+
+        BarPanelCoordinator.requestToggle(
+            "dashboard",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
+    }
+
+    function toggleNetworkPopup(localX) {
+        const anchor = mappedAnchorGeometry(networkItem, localX)
+
+        BarPanelCoordinator.requestToggle(
+            "network",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
+    }
+
+    function toggleAudioPopup(localX) {
+        const anchor = mappedAnchorGeometry(audioItem, localX)
+
+        BarPanelCoordinator.requestToggle(
+            "audio",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     Keys.onSpacePressed: event => {
-        activate()
+        activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        activate()
+        activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (outputName !== root.outputName)
+                return
+
+            if (panelId === "network") {
+                OverlayStore.prepareFor(
+                    "network",
+                    root.outputName,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom
+                )
+                networkPanel.prepareContent()
+                OverlayStore.openFor("network", root.outputName)
+            } else if (panelId === "audio") {
+                OverlayStore.prepareFor(
+                    "audio",
+                    root.outputName,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom
+                )
+                OverlayStore.openFor("audio", root.outputName)
+            }
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (outputName !== root.outputName)
+                return
+
+            if (panelId === "network")
+                networkPanel.dismiss()
+            else if (panelId === "audio")
+                audioPanel.dismiss()
+        }
+    }
+
+    Connections {
+        target: AudioService
+
+        function onPanelToggleRequested(outputName) {
+            if (String(outputName || "") !== root.outputName)
+                return
+
+            root.toggleAudioPopup(audioItem.width / 2)
+        }
     }
 
     Behavior on color {
@@ -222,9 +348,23 @@ Rectangle {
         }
     }
 
+    MouseArea {
+        id: statusMouse
+
+        z: 0
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: mouse => {
+            root.focus = false
+            root.activate(mouse.x)
+        }
+    }
+
     Row {
         id: statusRow
 
+        z: 1
         anchors.centerIn: parent
         spacing: root.individual
             ? root.luminaDesign.spacing.barItemGap
@@ -241,8 +381,12 @@ Rectangle {
         }
 
         SystemStatusItem {
+            id: networkItem
+
             visible: root.showNetwork
             individual: root.individual
+            interactive: true
+            selected: networkPanel.visible
             showLabel: !root.compact
                 && root.networkTextMode !== "icon"
             iconName: root.networkIcon
@@ -254,18 +398,25 @@ Rectangle {
             description: "Network "
                 + ConnectivityService.networkSummary
             alert: ConnectivityService.networkSummary === "Offline"
+            onActivated: localX => root.toggleNetworkPopup(localX)
         }
 
         SystemStatusItem {
+            id: audioItem
+
             visible: root.showAudio
             individual: root.individual
+            interactive: true
+            selected: audioPanel.visible
             showLabel: !root.compact
                 && root.audioTextMode !== "icon"
             iconName: root.audioIcon
             fallbackSymbol: AudioService.outputMuted ? "×" : "♪"
             label: root.audioLabel
             description: AudioService.outputName
-            alert: AudioService.outputMuted
+            alert: AudioService.outputAvailable
+                && AudioService.outputMuted
+            onActivated: localX => root.toggleAudioPopup(localX)
         }
 
         SystemStatusItem {
@@ -285,22 +436,26 @@ Rectangle {
         }
     }
 
-    MouseArea {
-        id: statusMouse
-
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.focus = false
-            root.activate()
-        }
-    }
-
     TrayTooltip {
         anchorItem: root
         title: "System status"
         description: root.accessibleSummary
         shown: statusMouse.containsMouse
+            && !networkPanel.visible
+            && !audioPanel.visible
+    }
+
+    NetworkPanel {
+        id: networkPanel
+
+        outputName: root.outputName
+        panelWindow: root.panelWindow
+    }
+
+    AudioPanel {
+        id: audioPanel
+
+        outputName: root.outputName
+        panelWindow: root.panelWindow
     }
 }

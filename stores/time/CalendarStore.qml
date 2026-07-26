@@ -58,9 +58,12 @@ Singleton {
     )
     readonly property bool showingCurrentMonth: visibleYear === currentDate.getFullYear()
         && visibleMonth === currentDate.getMonth()
+    readonly property string activeOutputName:
+        OverlayStore.activeSurface === "calendar"
+            ? OverlayStore.activeOutputName
+            : ""
     readonly property bool open: activeOutputName.length > 0
 
-    property string activeOutputName: ""
     property int visibleYear: currentDate.getFullYear()
     property int visibleMonth: currentDate.getMonth()
     property string selectedDateKey: todayKey
@@ -139,7 +142,7 @@ Singleton {
             return
 
         goToToday()
-        activeOutputName = name
+        OverlayStore.openFor("calendar", name)
     }
 
     function toggle(outputName) {
@@ -160,14 +163,14 @@ Singleton {
         const name = String(outputName)
 
         if (activeOutputName === name)
-            activeOutputName = ""
+            OverlayStore.close("calendar")
 
         recentlyDismissedOutput = name
         recentlyDismissedAt = Date.now()
     }
 
     function close() {
-        activeOutputName = ""
+        OverlayStore.close("calendar")
     }
 
     function showPreviousMonth() {
@@ -208,12 +211,4 @@ Singleton {
         }
     }
 
-    Connections {
-        target: OverlayStore
-
-        function onActiveSurfaceChanged() {
-            if (OverlayStore.open)
-                root.close()
-        }
-    }
 }

@@ -4,6 +4,7 @@ import QtQuick
 import qs.design
 import qs.modules.bar.widgets
 import qs.modules.control
+import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 import qs.stores.shell
@@ -70,36 +71,70 @@ Rectangle {
 
     Accessible.role: Accessible.Button
     Accessible.name: expanded
-        ? qsTr("Close notifications")
-        : qsTr("Open notifications")
-    Accessible.description: NotificationService.unreadCount
-        + qsTr(" unread notifications")
-        + (
-            NotificationService.doNotDisturb
-                ? qsTr(". Do Not Disturb is enabled")
-                : ""
+        ? I18n.tr(
+            "bar.notifications.close",
+            "Close notifications"
         )
+        : I18n.tr(
+            "bar.notifications.open",
+            "Open notifications"
+        )
+    Accessible.description: I18n.tr(
+        "bar.notifications.unread",
+        "%1 unread notifications",
+        [NotificationService.unreadCount]
+    ) + (
+        NotificationService.doNotDisturb
+            ? ". " + I18n.tr(
+                "bar.notifications.dndDescription",
+                "Do Not Disturb is enabled"
+            )
+            : ""
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
+    }
+
+    function validAnchorGeometry(anchor) {
+        return anchor
+            && isFinite(Number(anchor.x))
+            && isFinite(Number(anchor.top))
+            && isFinite(Number(anchor.bottom))
+            && Number(anchor.x) >= 0
+            && Number(anchor.top) >= 0
+            && Number(anchor.bottom) >= Number(anchor.top)
     }
 
     function activate(localX) {
-        OverlayStore.prepareFor(
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
             "notifications",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
-        NotificationService.toggleCenter(root.outputName)
     }
 
     Keys.onSpacePressed: event => {
@@ -110,6 +145,57 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "notifications" || outputName !== root.outputName)
+                return
+
+            const currentAnchor = root.mappedAnchorGeometry(root.width / 2)
+            const anchor = root.visible
+                && root.width > 0
+                && root.height > 0
+                && root.validAnchorGeometry(currentAnchor)
+                ? currentAnchor
+                : {
+                    x: anchorX,
+                    top: anchorTop,
+                    bottom: anchorBottom
+                }
+
+            OverlayStore.prepareFor(
+                "notifications",
+                root.outputName,
+                placement,
+                anchor.x,
+                anchor.top,
+                anchor.bottom
+            )
+            NotificationService.openCenter(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "notifications" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                NotificationService.closeCenter()
+            else
+                BarPanelCoordinator.reportClosed(
+                    "notifications",
+                    root.outputName
+                )
+        }
     }
 
     Behavior on color {
@@ -234,11 +320,24 @@ Rectangle {
     TrayTooltip {
         anchorItem: root
         title: NotificationService.doNotDisturb
-            ? qsTr("Notifications · DND")
-            : qsTr("Notifications")
+            ? I18n.tr(
+                "bar.notifications.tooltipDnd",
+                "Notifications · DND"
+            )
+            : I18n.tr(
+                "bar.notifications.tooltip",
+                "Notifications"
+            )
         description: NotificationService.unreadCount > 0
-            ? qsTr("%1 unread").arg(NotificationService.unreadCount)
-            : qsTr("No unread notifications")
+            ? I18n.tr(
+                "bar.notifications.unreadCount",
+                "%1 unread",
+                [NotificationService.unreadCount]
+            )
+            : I18n.tr(
+                "bar.notifications.noneUnread",
+                "No unread notifications"
+            )
         shown: root.tooltipVisible && !root.expanded
     }
 }

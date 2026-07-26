@@ -1,0 +1,2 @@
+module qs.modules.bluetooth
+BluetoothPairingDialog 1.0 BluetoothPairingDialog.qml

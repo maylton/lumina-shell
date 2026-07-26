@@ -3,10 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import qs.design
+import qs.modules.bar.widgets
 import qs.modules.control
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.services.niri
 import qs.services.session
 import qs.stores.session
@@ -214,7 +213,7 @@ Scope {
         model: Quickshell.screens
 
         delegate: Component {
-            PanelWindow {
+            BarPanelWindow {
                 id: sessionWindow
 
                 required property var modelData
@@ -230,44 +229,18 @@ Scope {
                         ConfigStore.barMargin
                     )
 
+                panelId: "session"
+                panelOutputName: outputName
+                panelVisible: menuVisible
+                layerNamespace: "lumina-session-menu"
                 screen: modelData
-                visible: menuVisible
-                color: "transparent"
-                surfaceFormat.opaque: false
-                focusable: menuVisible
-                exclusiveZone: 0
-
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
+                scrimColor: root.luminaDesign.color.scrim
+                surfaceItem: menuSurface
+                surfaceRadius: menuSurface.radius
+                onDismissRequested: {
+                    SessionService.cancel()
+                    SessionMenuStore.close()
                 }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "lumina-session-menu"
-                WlrLayershell.keyboardFocus: menuVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
-
-      BackgroundEffect.blurRegion:
-          ShellSurfacePolicy.requestsBackdropBlur(
-              ConfigStore.shellBackgroundMode
-          )
-              ? shellBlurRegion
-              : null
-
-      Region {
-          id: shellBlurRegion
-
-          Region {
-              x: menuSurface.x
-              y: menuSurface.y
-              width: menuSurface.width
-              height: menuSurface.height
-              radius: menuSurface.radius
-          }
-      }
 
                 FocusScope {
                     anchors.fill: parent
@@ -283,19 +256,6 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    color: root.luminaDesign.color.scrim
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            SessionService.cancel()
-                            SessionMenuStore.close()
-                        }
-                    }
-                }
-
                 ShellSurface {
           id: menuSurface
 
@@ -306,22 +266,16 @@ Scope {
                         sessionWindow.width,
                         root.luminaDesign.spacing.extraLarge
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        sessionWindow.height,
-                        sessionWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
-                        root.luminaDesign.spacing.extraLarge
-                    )
                     width: Math.min(
                         root.luminaDesign.size.sessionMenuWidth,
                         sessionWindow.width - root.luminaDesign.spacing.extraLarge * 2
                     )
                     height: Math.min(
                         root.luminaDesign.size.sessionMenuHeight,
-                        sessionWindow.height - root.luminaDesign.spacing.extraLarge * 2
+                        sessionWindow.height
+                            - sessionWindow.barWindowHeight
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.extraLarge
                     )
                     radius: root.luminaDesign.shape.extraLarge
 

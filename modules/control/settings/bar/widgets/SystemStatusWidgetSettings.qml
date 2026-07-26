@@ -6,13 +6,19 @@ import qs.stores.config
 Column {
     width: parent ? parent.width : 0
     SettingsSection {
-        title: "Status layout"
-        description: "Group available native service information"
+        title: I18n.tr("settings.widget.status.section", "Status layout")
+        description: I18n.tr(
+            "settings.widget.status.description",
+            "Group available native service information"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Background"
-            description: "Show tonal surfaces behind status items"
+            title: I18n.tr("settings.widget.common.background", "Background")
+            description: I18n.tr(
+                "settings.widget.status.backgroundDescription",
+                "Show tonal surfaces behind status items"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showBackground", true
             ))
@@ -23,11 +29,26 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Layout"
-            description: "Use one cluster or individual status items"
+            title: I18n.tr("settings.widget.status.layout", "Layout")
+            description: I18n.tr(
+                "settings.widget.status.layoutDescription",
+                "Use one cluster or individual status items"
+            )
             options: [
-                { value: "grouped", label: "Grouped" },
-                { value: "individual", label: "Individual" }
+                {
+                    value: "grouped",
+                    label: I18n.tr(
+                        "settings.widget.status.grouped",
+                        "Grouped"
+                    )
+                },
+                {
+                    value: "individual",
+                    label: I18n.tr(
+                        "settings.widget.status.individual",
+                        "Individual"
+                    )
+                }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "system-status", "layout", "grouped"
@@ -39,13 +60,22 @@ Column {
     }
 
     SettingsSection {
-        title: "Network"
-        description: "Only real connectivity data is displayed"
+        title: I18n.tr("settings.widget.status.networkSection", "Network")
+        description: I18n.tr(
+            "settings.widget.status.networkDescription",
+            "Only real connectivity data is displayed"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show network"
-            description: "Keep the network status icon"
+            title: I18n.tr(
+                "settings.widget.status.showNetwork",
+                "Show network"
+            )
+            description: I18n.tr(
+                "settings.widget.status.showNetworkDescription",
+                "Keep the network status icon"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showNetwork", true
             ))
@@ -56,16 +86,22 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Network text"
-            description: "Choose the real connection detail"
+            title: I18n.tr(
+                "settings.widget.status.networkText",
+                "Network text"
+            )
+            description: I18n.tr(
+                "settings.widget.status.networkTextDescription",
+                "Choose the real connection detail"
+            )
             available: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showNetwork", true
             ))
             options: [
-                { value: "icon", label: "Icon only" },
-                { value: "summary", label: "Summary" },
-                { value: "name", label: "Connection name" },
-                { value: "type", label: "Connection type" }
+                { value: "icon", label: I18n.tr("settings.widget.status.iconOnly", "Icon only") },
+                { value: "summary", label: I18n.tr("settings.widget.status.summary", "Summary") },
+                { value: "name", label: I18n.tr("settings.widget.status.connectionName", "Connection name") },
+                { value: "type", label: I18n.tr("settings.widget.status.connectionType", "Connection type") }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "system-status", "networkTextMode", "summary"
@@ -77,13 +113,19 @@ Column {
     }
 
     SettingsSection {
-        title: "Audio"
-        description: "Choose the visible audio status and text"
+        title: I18n.tr("settings.widget.status.audioSection", "Audio")
+        description: I18n.tr(
+            "settings.widget.status.audioDescription",
+            "Choose the visible audio status and text"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show audio"
-            description: "Show audio when an output is available"
+            title: I18n.tr("settings.widget.status.showAudio", "Show audio")
+            description: I18n.tr(
+                "settings.widget.status.showAudioDescription",
+                "Show audio when an output is available"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showAudio", true
             ))
@@ -94,15 +136,18 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Audio text"
-            description: "Show a percentage, state, or icon only"
+            title: I18n.tr("settings.widget.status.audioText", "Audio text")
+            description: I18n.tr(
+                "settings.widget.status.audioTextDescription",
+                "Show a percentage, state, or icon only"
+            )
             available: Boolean(ConfigStore.widgetSetting(
                 "system-status", "showAudio", true
             ))
             options: [
-                { value: "icon", label: "Icon only" },
-                { value: "percentage", label: "Percentage" },
-                { value: "state", label: "State" }
+                { value: "icon", label: I18n.tr("settings.widget.status.iconOnly", "Icon only") },
+                { value: "percentage", label: I18n.tr("settings.widget.status.percentage", "Percentage") },
+                { value: "state", label: I18n.tr("settings.widget.status.state", "State") }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "system-status", "audioTextMode", "percentage"

@@ -62,60 +62,79 @@ TestCase {
         )
     }
 
-    function test_verticalPositionRespectsBarEdge() {
+    function test_verticalPositionStartsAtUsableAreaEdge() {
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "top", 300, 900, 64, 8, 16
             ),
-            72
+            8
         )
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "bottom", 300, 900, 64, 8, 16
             ),
-            528
+            592
         )
         compare(
             SurfacePlacementPolicy.verticalY(
                 "centered", "top", 300, 900, 64, 8, 16
             ),
-            300
+            8
         )
     }
 
-    function test_nearWidgetGapIsCappedAtEightPixels() {
+    function test_verticalPositionDoesNotReuseBarWindowCoordinates() {
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 68, 8, 16, 12, 52
+            ),
+            8
+        )
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "bottom", 300, 900, 68, 8, 16, 848, 888
+            ),
+            592
+        )
+    }
+
+    function test_invalidProvidedGeometryDoesNotAffectUsableAreaEdge() {
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 64, 8, 16, 60, 40
+            ),
+            8
+        )
+    }
+
+    function test_verticalPositionUsesConfiguredGap() {
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "top", 300, 900, 64, 24, 16
             ),
-            72
+            24
         )
         compare(
             SurfacePlacementPolicy.verticalY(
                 "near-widget", "bottom", 300, 900, 64, 24, 16
             ),
-            528
+            576
         )
     }
 
-    function test_popupYUsesParentWindowCoordinates() {
+    function test_zeroGapTouchesUsableAreaEdge() {
         compare(
-            SurfacePlacementPolicy.popupY(
-                "near-widget", "top", 300, 900, 64, 8, 16
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 68, 0, 16, 12, 52
             ),
-            72
+            0
         )
         compare(
-            SurfacePlacementPolicy.popupY(
-                "near-widget", "bottom", 300, 900, 64, 8, 16
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "bottom", 300, 900, 68, 0, 16, 848, 888
             ),
-            -308
-        )
-        compare(
-            SurfacePlacementPolicy.popupY(
-                "centered", "bottom", 300, 900, 64, 8, 16
-            ),
-            -536
+            600
         )
     }
+
 }

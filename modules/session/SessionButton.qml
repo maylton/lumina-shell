@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.services.session
 import qs.stores.config
 import qs.stores.session
@@ -55,7 +56,10 @@ Rectangle {
     activeFocusOnTab: true
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open session and layout controls"
+    Accessible.name: I18n.tr(
+        "bar.session.accessibleName",
+        "Open session and layout controls"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -70,28 +74,72 @@ Rectangle {
         event.accepted = true
     }
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
-        OverlayStore.prepareFor(
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
             "session",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
+    }
 
-        if (expanded) {
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "session" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "session",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            SessionMenuStore.openFor(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "session" || outputName !== root.outputName)
+                return
+
             SessionService.cancel()
-            SessionMenuStore.close()
-        } else {
-            SessionMenuStore.openFor(outputName)
+            if (root.expanded)
+                SessionMenuStore.close()
+            else
+                BarPanelCoordinator.reportClosed("session", root.outputName)
         }
     }
 
@@ -139,7 +187,7 @@ Rectangle {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.showLabel
-            text: "Session"
+            text: I18n.tr("bar.session.label", "Session")
             color: root.expanded
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.onSurface

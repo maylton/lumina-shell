@@ -14,11 +14,21 @@ Item {
     property color iconColor: luminaDesign.color.onSurface
     property real iconSize: 18
     property real fallbackScale: 1
+    property bool loading: false
+    property bool refreshAnimationLatched: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool forceFallback:
+        iconName === "view-visible-symbolic"
+        || iconName === "view-hidden-symbolic"
+    readonly property bool refreshAnimationActive:
+        iconName === "view-refresh-symbolic"
+        && refreshAnimationLatched
+    readonly property bool showExpressiveLoading:
+        loading || refreshAnimationActive
     readonly property string iconSource: customSource.length > 0
         ? customSource
-        : iconName.length > 0
+        : iconName.length > 0 && !forceFallback
             ? Quickshell.iconPath(iconName, "")
             : ""
     readonly property bool iconReady: iconSource.length > 0
@@ -27,10 +37,33 @@ Item {
     implicitWidth: iconSize
     implicitHeight: iconSize
 
+    onRotationChanged: {
+        if (iconName !== "view-refresh-symbolic")
+            return
+
+        if (Math.abs(rotation) > 0.01) {
+            refreshAnimationLatched = true
+            refreshReleaseTimer.stop()
+        } else if (refreshAnimationLatched) {
+            refreshReleaseTimer.restart()
+        }
+    }
+
     Behavior on iconColor {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
             easing.type: root.luminaDesign.motion.effectsEasing
+        }
+    }
+
+    Timer {
+        id: refreshReleaseTimer
+
+        interval: 120
+        repeat: false
+        onTriggered: {
+            if (Math.abs(root.rotation) <= 0.01)
+                root.refreshAnimationLatched = false
         }
     }
 
@@ -40,15 +73,24 @@ Item {
         anchors.fill: parent
         source: root.iconSource
         color: root.iconColor
-        asynchronous: true
-        visible: root.iconReady
+        asynchronous: false
+        visible: !root.showExpressiveLoading && root.iconReady
         sourceSize.width: root.iconSize
         sourceSize.height: root.iconSize
     }
 
+    ExpressiveLoadingIndicator {
+        anchors.centerIn: parent
+        visible: root.showExpressiveLoading
+        running: visible
+        indicatorColor: root.iconColor
+        indicatorSize: root.iconSize
+        rotation: -root.rotation
+    }
+
     Text {
         anchors.centerIn: parent
-        visible: !root.iconReady
+        visible: !root.showExpressiveLoading && !root.iconReady
         text: root.fallbackSymbol
         color: root.iconColor
         font.pixelSize: root.iconSize * root.fallbackScale

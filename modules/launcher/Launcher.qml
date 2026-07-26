@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import qs.design
+import qs.modules.bar.widgets
 import qs.modules.control
 import qs.modules.dock
 import qs.services.i18n
@@ -13,7 +13,6 @@ import qs.stores.dock
 import qs.stores.launcher
 import qs.stores.shell
 import "../../services/i18n/LauncherStrings.js" as LauncherStrings
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
@@ -52,7 +51,7 @@ Scope {
         model: Quickshell.screens
 
         delegate: Component {
-            PanelWindow {
+            BarPanelWindow {
                 id: launcherWindow
 
                 required property var modelData
@@ -65,25 +64,6 @@ Scope {
                     && LauncherStore.activeOutputName === outputName
                 readonly property bool browsingApplications:
                     LauncherStore.query.trim().length === 0
-                readonly property int bottomBarOffset:
-                    ConfigStore.barPosition === "bottom"
-                        ? ConfigStore.barHeight
-                            + (ConfigStore.barSurfaceMode === "floating"
-                                ? ConfigStore.barMargin * 2
-                                : 0)
-                        : 0
-                readonly property int dockOffset:
-                    DockPreferences.enabled
-                        ? DockPreferences.iconSize
-                            + 24
-                            + (DockPreferences.mode === "floating"
-                                ? DockPreferences.margin
-                                : 0)
-                            + 12
-                        : 24
-                readonly property int surfaceBottomOffset:
-                    bottomBarOffset + dockOffset
-
                 property var contextResult: null
                 property string contextIdentifier: ""
                 property real contextMenuX: 0
@@ -176,44 +156,15 @@ Scope {
                         ConfigStore.barMargin
                     )
 
+                panelId: "launcher"
+                panelOutputName: outputName
+                panelVisible: launcherVisible
+                layerNamespace: "lumina-launcher"
                 screen: modelData
-                visible: launcherVisible
-                color: "transparent"
-                surfaceFormat.opaque: false
-                focusable: launcherVisible
-                exclusiveZone: 0
-
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "lumina-launcher"
-                WlrLayershell.keyboardFocus: launcherVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
-
-                BackgroundEffect.blurRegion:
-                    ShellSurfacePolicy.requestsBackdropBlur(
-                        ConfigStore.shellBackgroundMode
-                    )
-                        ? shellBlurRegion
-                        : null
-
-                Region {
-                    id: shellBlurRegion
-
-                    Region {
-                        x: launcherSurface.x
-                        y: launcherSurface.y
-                        width: launcherSurface.width
-                        height: launcherSurface.height
-                        radius: launcherSurface.radius
-                    }
-                }
+                scrimColor: root.luminaDesign.color.scrim
+                surfaceItem: launcherSurface
+                surfaceRadius: launcherSurface.radius
+                onDismissRequested: LauncherStore.close()
 
                 onVisibleChanged: {
                     if (visible) {
@@ -226,54 +177,16 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    color: root.luminaDesign.color.scrim
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: LauncherStore.close()
-                    }
-                }
-
                 ShellSurface {
                     id: launcherSurface
 
-                    readonly property bool nearWidgetPlacement:
-                        OverlayStore.activePlacement
-                            === SurfacePlacementPolicy.NEAR_WIDGET
-
-                    anchors {
-                        horizontalCenter: launcherSurface.nearWidgetPlacement
-                            ? undefined
-                            : parent.horizontalCenter
-                        bottom: launcherSurface.nearWidgetPlacement
-                            ? undefined
-                            : parent.bottom
-                        bottomMargin: launcherWindow.surfaceBottomOffset
-                    }
-
-                    x: launcherSurface.nearWidgetPlacement
-                        ? SurfacePlacementPolicy.horizontalX(
-                            OverlayStore.activePlacement,
-                            OverlayStore.activeAnchorX,
-                            width,
-                            launcherWindow.width,
-                            root.luminaDesign.spacing.extraLarge
-                        )
-                        : 0
-                    y: launcherSurface.nearWidgetPlacement
-                        ? SurfacePlacementPolicy.verticalY(
-                            OverlayStore.activePlacement,
-                            ConfigStore.barPosition,
-                            height,
-                            launcherWindow.height,
-                            launcherWindow.barWindowHeight,
-                            4,
-                            root.luminaDesign.spacing.extraLarge
-                        )
-                        : 0
-
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        launcherWindow.width,
+                        root.luminaDesign.spacing.extraLarge
+                    )
                     width: Math.min(
                         720,
                         Math.max(360, launcherWindow.width - 32)
@@ -283,8 +196,9 @@ Scope {
                         Math.max(
                             360,
                             launcherWindow.height
-                                - launcherWindow.surfaceBottomOffset
-                                - 48
+                                - launcherWindow.barWindowHeight
+                                - ConfigStore.barPanelGap
+                                - root.luminaDesign.spacing.extraLarge
                         )
                     )
                     radius: root.luminaDesign.shape.extraLargeIncreased

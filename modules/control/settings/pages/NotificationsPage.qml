@@ -19,14 +19,26 @@ SettingsPage {
     )
 
     SettingsSection {
-        title: "Interruptions"
+        title: I18n.tr(
+            "settings.notifications.interruptions.section",
+            "Interruptions"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Do Not Disturb"
+            title: I18n.tr(
+                "settings.notifications.dnd.title",
+                "Do Not Disturb"
+            )
             description: checked
-                ? "Popups are paused; history remains available"
-                : "New notifications may appear as popups"
+                ? I18n.tr(
+                    "settings.notifications.dnd.enabled",
+                    "Popups are paused; history remains available"
+                )
+                : I18n.tr(
+                    "settings.notifications.dnd.disabled",
+                    "New notifications may appear as popups"
+                )
             checked: ConfigStore.doNotDisturb
             onToggled: value =>
                 NotificationService.setDoNotDisturb(value)
@@ -34,17 +46,50 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Popups"
+        title: I18n.tr(
+            "settings.notifications.popups.section",
+            "Popups"
+        )
 
         SettingsComboRow {
             width: parent.width
-            title: "Position"
-            description: "Screen corner used for notification popups"
+            title: I18n.tr(
+                "settings.notifications.popups.position",
+                "Position"
+            )
+            description: I18n.tr(
+                "settings.notifications.popups.positionDescription",
+                "Screen corner used for notification popups"
+            )
             options: [
-                { value: "top-left", label: "Top left" },
-                { value: "top-right", label: "Top right" },
-                { value: "bottom-left", label: "Bottom left" },
-                { value: "bottom-right", label: "Bottom right" }
+                {
+                    value: "top-left",
+                    label: I18n.tr(
+                        "settings.notifications.position.topLeft",
+                        "Top left"
+                    )
+                },
+                {
+                    value: "top-right",
+                    label: I18n.tr(
+                        "settings.notifications.position.topRight",
+                        "Top right"
+                    )
+                },
+                {
+                    value: "bottom-left",
+                    label: I18n.tr(
+                        "settings.notifications.position.bottomLeft",
+                        "Bottom left"
+                    )
+                },
+                {
+                    value: "bottom-right",
+                    label: I18n.tr(
+                        "settings.notifications.position.bottomRight",
+                        "Bottom right"
+                    )
+                }
             ]
             currentValue: ConfigStore.notificationPopupPosition
             onSelected: value =>
@@ -56,8 +101,14 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Default duration"
-            description: "Applications may request a longer safe timeout"
+            title: I18n.tr(
+                "settings.notifications.popups.duration",
+                "Default duration"
+            )
+            description: I18n.tr(
+                "settings.notifications.popups.durationDescription",
+                "Applications may request a longer safe timeout"
+            )
             from: 3000
             to: 15000
             stepSize: 1000
@@ -72,8 +123,14 @@ SettingsPage {
 
         SettingsSliderRow {
             width: parent.width
-            title: "Maximum visible"
-            description: "Limit simultaneous popup cards"
+            title: I18n.tr(
+                "settings.notifications.popups.maximum",
+                "Maximum visible"
+            )
+            description: I18n.tr(
+                "settings.notifications.popups.maximumDescription",
+                "Limit simultaneous popup cards"
+            )
             from: 1
             to: 5
             stepSize: 1
@@ -88,8 +145,14 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Show images"
-            description: "Display application icons and supplied artwork"
+            title: I18n.tr(
+                "settings.notifications.popups.images",
+                "Show images"
+            )
+            description: I18n.tr(
+                "settings.notifications.popups.imagesDescription",
+                "Display application icons and supplied artwork"
+            )
             checked: ConfigStore.notificationShowImages
             onToggled: value =>
                 ConfigStore.setNotificationValue(
@@ -100,12 +163,21 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "History"
+        title: I18n.tr(
+            "settings.notifications.history.section",
+            "History"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Keep notification history"
-            description: "Retain up to 50 entries for this shell session"
+            title: I18n.tr(
+                "settings.notifications.history.keep",
+                "Keep notification history"
+            )
+            description: I18n.tr(
+                "settings.notifications.history.keepDescription",
+                "Retain up to 50 entries for this shell session"
+            )
             checked: ConfigStore.notificationKeepHistory
             onToggled: value =>
                 ConfigStore.setNotificationValue(
@@ -116,10 +188,19 @@ SettingsPage {
 
         SettingsActionRow {
             width: parent.width
-            title: "Clear history"
-            description: NotificationService.history.length
-                + " entries currently retained"
-            actionLabel: "Clear"
+            title: I18n.tr(
+                "settings.notifications.history.clear",
+                "Clear history"
+            )
+            description: I18n.tr(
+                "settings.notifications.history.entries",
+                "%1 entries currently retained",
+                [NotificationService.history.length]
+            )
+            actionLabel: I18n.tr(
+                "settings.notifications.history.clearAction",
+                "Clear"
+            )
             onActivated: NotificationService.clearHistory()
         }
     }

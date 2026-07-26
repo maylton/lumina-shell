@@ -1,6 +1,7 @@
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.stores.config
 import qs.stores.control
 import qs.stores.system
@@ -66,36 +67,49 @@ Rectangle {
     border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open dashboard for "
-        + SystemInfoStore.displayName
-    Accessible.description: "Quick controls and session actions"
+    Accessible.name: I18n.tr(
+        "bar.dashboard.accessibleName",
+        "Open Dashboard for %1",
+        [SystemInfoStore.displayName]
+    )
+    Accessible.description: I18n.tr(
+        "bar.dashboard.accessibleDescription",
+        "Quick controls and session actions"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
-        OverlayStore.prepareFor(
-            "control",
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
+            "dashboard",
             root.outputName,
             root.surfacePlacement,
-            mappedAnchorX(localX)
+            anchor.x,
+            anchor.top,
+            anchor.bottom
         )
-
-        if (expanded
-            && ControlCenterStore.activePage === "dashboard") {
-            ControlCenterStore.close()
-        } else {
-            ControlCenterStore.openFor(outputName, "dashboard")
-        }
     }
 
     Keys.onSpacePressed: event => {
@@ -175,7 +189,10 @@ Rectangle {
     TrayTooltip {
         anchorItem: root
         title: SystemInfoStore.displayName
-        description: "Open Dashboard and session actions"
+        description: I18n.tr(
+            "bar.dashboard.tooltipDescription",
+            "Open Dashboard and session actions"
+        )
         shown: avatarMouse.containsMouse
     }
 }

@@ -5,10 +5,12 @@ import Quickshell.Services.SystemTray
 import qs.design
 import qs.modules.control
 import qs.stores.config
+import qs.stores.shell
 
 Item {
     id: root
 
+    required property string outputName
     property var panelWindow: null
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -51,18 +53,36 @@ Item {
 
     property bool tooltipVisible: false
 
-    function mappedAnchorX(localX) {
-        const point = groupButton.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = groupButton.mapToItem(
             null,
             Number(localX),
-            groupButton.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = groupButton.mapToItem(
+            null,
+            Number(localX),
+            groupButton.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function togglePopup(localX) {
-        trayPopup.anchorX = mappedAnchorX(localX)
-        root.togglePopup(groupButton.width / 2)
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
+            "tray",
+            root.outputName,
+            root.surfacePlacement,
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     visible: itemCount > 0
@@ -81,10 +101,10 @@ Item {
             visible: root.grouped
             width: visible ? root.luminaDesign.size.barTouchTarget : 0
             height: root.luminaDesign.size.barTouchTarget
-            radius: trayPopup.visible || groupMouse.pressed
+            radius: trayPanel.visible || groupMouse.pressed
                 ? root.luminaDesign.shape.barIconActivated
                 : height / 2
-            color: trayPopup.visible || groupMouse.containsMouse
+            color: trayPanel.visible || groupMouse.containsMouse
                 ? root.luminaDesign.color.accentContainer
                 : root.showBackground
                     ? root.luminaDesign.color.surfaceMuted
@@ -94,7 +114,7 @@ Item {
             activeFocusOnTab: visible
 
             Accessible.role: Accessible.Button
-            Accessible.name: trayPopup.visible
+            Accessible.name: trayPanel.visible
                 ? qsTr("Hide system tray")
                 : qsTr("Show system tray")
             Accessible.description: qsTr("%1 active items").arg(
@@ -110,7 +130,7 @@ Item {
             }
 
             Keys.onReturnPressed: event => {
-                trayPopup.toggle()
+                root.togglePopup(groupButton.width / 2)
                 event.accepted = true
             }
 
@@ -139,7 +159,7 @@ Item {
                 iconName: "view-more-horizontal-symbolic"
                 fallbackSymbol: "•••"
                 fallbackScale: 0.62
-                iconColor: trayPopup.visible
+                iconColor: trayPanel.visible
                     ? root.luminaDesign.color.onAccentContainer
                     : root.luminaDesign.color.onSurface
                 iconSize: root.luminaDesign.size.barTrayIcon
@@ -219,23 +239,55 @@ Item {
         anchorItem: groupButton
         title: qsTr("System tray")
         description: qsTr("%1 active items").arg(root.itemCount)
-        shown: root.tooltipVisible && !trayPopup.visible
+        shown: root.tooltipVisible && !trayPanel.visible
     }
 
-    TrayPopup {
-        id: trayPopup
+    TrayPanel {
+        id: trayPanel
 
-        anchorItem: groupButton
+        outputName: root.outputName
         panelWindow: root.panelWindow
-        placement: root.surfacePlacement
         items: root.activeItems
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "tray" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "tray",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            OverlayStore.openFor("tray", root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "tray" || outputName !== root.outputName)
+                return
+
+            trayPanel.dismiss()
+        }
     }
 
     Connections {
         target: ConfigStore
 
         function onBarWidgetSettingsChanged() {
-            trayPopup.dismiss()
+            trayPanel.dismiss()
         }
     }
 }

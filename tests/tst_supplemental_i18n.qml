@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import "../services/i18n/LauncherStrings.js" as LauncherStrings
+import "../services/i18n/RuntimeMessages.js" as RuntimeMessages
 import "../services/i18n/SettingsStrings.js" as SettingsStrings
 
 TestCase {
@@ -40,6 +41,20 @@ TestCase {
         compare(
             SettingsStrings.text("pt-BR", "restartRequired"),
             "Reinicialização necessária"
+        )
+    }
+
+    function test_audioPanelUsesBrazilianPortuguese() {
+        compare(
+            RuntimeMessages.message(
+                "pt-BR",
+                "bar.audio.section.applications"
+            ),
+            "Aplicativos"
+        )
+        compare(
+            RuntimeMessages.message("pt-BR", "bar.audio.mute"),
+            "Silenciar"
         )
     }
 }

@@ -7,6 +7,13 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 
 "${repository_dir}/scripts/check-translations.sh"
 
+PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
+    python3 -m py_compile \
+    "${repository_dir}/services/connectivity/BluetoothPairingAgent.py"
+
+PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
+    python3 "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
+
 pointer_focus_matches="$({
     rg -n \
         'forceActiveFocus\(Qt\.MouseFocusReason\)' \
@@ -22,6 +29,23 @@ if [[ -n "${pointer_focus_matches}" ]]; then
     exit 1
 fi
 
+async_pixmap_matches="$({
+    rg -n \
+        'asynchronous:[[:space:]]*true' \
+        "${repository_dir}/modules/control/DashboardIcon.qml" \
+        "${repository_dir}/modules/control/UserAvatar.qml" \
+        "${repository_dir}/modules/wallpaper/Wallpaper.qml" \
+        "${repository_dir}/modules/notifications/NotificationCard.qml" \
+        || true
+})"
+
+if [[ -n "${async_pixmap_matches}" ]]; then
+    printf '%s\n' \
+        'Critical local images and shared icons must avoid QQuickPixmapReader:' \
+        "${async_pixmap_matches}" >&2
+    exit 1
+fi
+
 if command -v qmltestrunner >/dev/null 2>&1; then
     qml_test_runner="$(command -v qmltestrunner)"
 elif [[ -x /usr/lib/qt6/bin/qmltestrunner ]]; then
@@ -31,5 +55,15 @@ else
     exit 1
 fi
 
+qml_import_dir="$(mktemp -d)"
+ln -s "${repository_dir}" "${qml_import_dir}/qs"
+cleanup_qml_import() {
+    unlink "${qml_import_dir}/qs"
+    rmdir "${qml_import_dir}"
+}
+trap cleanup_qml_import EXIT
+
 QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}" \
-    "${qml_test_runner}" -input "${repository_dir}/tests"
+    "${qml_test_runner}" \
+        -import "${qml_import_dir}" \
+        -input "${repository_dir}/tests"

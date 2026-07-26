@@ -1,16 +1,21 @@
 # Installation
 
-Lumina Shell targets CachyOS and Arch Linux with Niri and the validated `noctalia-qs` runtime.
+Lumina Shell targets CachyOS and Arch Linux with Niri and the official Arch Linux `quickshell` package.
 
 ## Dependencies
 
-The minimum runtime is:
+Install the minimum runtime:
 
 ```bash
-sudo pacman -S --needed git niri qt6-declarative
+sudo pacman -S --needed \
+    git \
+    niri \
+    quickshell \
+    qt6-declarative \
+    python-dbus-next
 ```
 
-Install a compatible Quickshell package that provides `qs`. The native validation environment uses `noctalia-qs 0.0.12`.
+`python-dbus-next` provides the asynchronous system-bus service used by Lumina to export `org.bluez.Agent1`. This is required for Bluetooth PIN entry, passkeys, service authorization, and six-digit numeric-comparison confirmation.
 
 Daily controls use these services when available:
 

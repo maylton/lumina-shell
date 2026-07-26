@@ -104,10 +104,19 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-control-center"
                 WlrLayershell.keyboardFocus: centerVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
+	          ? WlrKeyboardFocus.Exclusive
+	          : WlrKeyboardFocus.None
 
-      BackgroundEffect.blurRegion:
+                onBackingWindowVisibleChanged: {
+                    BarPanelCoordinator
+                        .reportPanelWindowVisibility(
+                            "dashboard",
+                            outputName,
+                            backingWindowVisible
+                        )
+                }
+
+	      BackgroundEffect.blurRegion:
           ShellSurfacePolicy.requestsBackdropBlur(
               ConfigStore.shellBackgroundMode
           )
@@ -165,14 +174,14 @@ Scope {
                         fill: parent
                         topMargin:
                             ConfigStore.barPosition === "top"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : root.luminaDesign.spacing.barPanelGap
+                                ? controlWindow.barWindowHeight
+                                    + ConfigStore.barPanelGap
+                                : controlWindow.safeMargin
                         bottomMargin:
                             ConfigStore.barPosition === "bottom"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : root.luminaDesign.spacing.barPanelGap
+                                ? controlWindow.barWindowHeight
+                                    + ConfigStore.barPanelGap
+                                : controlWindow.safeMargin
                         leftMargin: controlWindow.safeMargin
                         rightMargin: controlWindow.safeMargin
                     }
@@ -194,8 +203,10 @@ Scope {
                         height,
                         controlWindow.height,
                         controlWindow.barWindowHeight,
-                        4,
-                        controlWindow.safeMargin
+                        ConfigStore.barPanelGap,
+                        controlWindow.safeMargin,
+                        OverlayStore.activeAnchorTop,
+                        OverlayStore.activeAnchorBottom
                     )
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,

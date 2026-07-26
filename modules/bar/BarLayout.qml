@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import qs.design
 import qs.modules.bar.widgets
@@ -7,6 +9,8 @@ import qs.modules.session
 import qs.modules.wallpaper
 import qs.services.niri
 import qs.stores.config
+import qs.stores.control
+import qs.stores.shell
 import "BarLayoutPolicy.js" as BarLayoutPolicy
 
 Item {
@@ -73,6 +77,42 @@ Item {
         return Boolean(widgetVisibility[String(widgetId || "")])
     }
 
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "dashboard" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "control",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            ControlCenterStore.openFor(root.outputName, "dashboard")
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "dashboard" || outputName !== root.outputName)
+                return
+
+            if (ControlCenterStore.activeOutputName === root.outputName)
+                ControlCenterStore.close()
+            else
+                BarPanelCoordinator.reportClosed("dashboard", root.outputName)
+        }
+    }
+
     BarCluster {
         id: leftArea
 
@@ -128,6 +168,11 @@ Item {
                 * 0.65
             )
         )
+
+        BluetoothWidget {
+            outputName: root.outputName
+            panelWindow: root.panelWindow
+        }
 
         Repeater {
             model: ConfigStore.barRightWidgetOrder
@@ -196,6 +241,7 @@ Item {
         id: trayComponent
 
         TrayWidget {
+            outputName: root.outputName
             panelWindow: root.panelWindow
         }
     }
@@ -214,6 +260,7 @@ Item {
         SystemStatusCluster {
             compact: !root.wideLayout
             outputName: root.outputName
+            panelWindow: root.panelWindow
         }
     }
 

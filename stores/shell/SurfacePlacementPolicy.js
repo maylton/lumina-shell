@@ -2,7 +2,6 @@
 
 var NEAR_WIDGET = "near-widget"
 var CENTERED = "centered"
-var MAX_NEAR_WIDGET_GAP = 8
 
 function finiteNumber(value, fallback) {
     var numeric = Number(value)
@@ -59,61 +58,27 @@ function horizontalX(
 }
 
 function verticalY(
-    placement,
+    _placement,
     barPosition,
     surfaceHeight,
     viewportHeight,
-    barHeight,
+    _barHeight,
     gap,
-    margin
+    _margin,
+    _anchorTop,
+    _anchorBottom
 ) {
     var height = Math.max(0, finiteNumber(surfaceHeight, 0))
     var viewport = Math.max(height, finiteNumber(viewportHeight, height))
-    var inset = Math.max(0, finiteNumber(margin, 0))
-    var maximum = Math.max(inset, viewport - height - inset)
-    var centered = (viewport - height) / 2
+    var maximum = Math.max(0, viewport - height)
+    var adjacentGap = Math.max(0, finiteNumber(gap, 0))
 
-    if (normalize(placement) !== NEAR_WIDGET)
-        return clamp(centered, inset, maximum)
-
-    var adjacentGap = Math.min(
-        MAX_NEAR_WIDGET_GAP,
-        Math.max(0, finiteNumber(gap, 0))
-    )
+    // A layer-shell viewport with exclusiveZone 0 already starts after the
+    // bar's reserved area. Widget Y coordinates belong to the bar's window,
+    // so adding either them or the bar height here reserves the bar twice.
     var adjacent = String(barPosition) === "bottom"
-        ? viewport
-            - Math.max(0, finiteNumber(barHeight, 0))
-            - adjacentGap
-            - height
-        : Math.max(0, finiteNumber(barHeight, 0))
-            + adjacentGap
+        ? viewport - height - adjacentGap
+        : adjacentGap
 
-    return clamp(adjacent, inset, maximum)
-}
-
-function popupY(
-    placement,
-    barPosition,
-    popupHeight,
-    screenHeight,
-    parentWindowHeight,
-    gap,
-    margin
-) {
-    var screen = Math.max(0, finiteNumber(screenHeight, 0))
-    var parentHeight = Math.max(0, finiteNumber(parentWindowHeight, 0))
-    var globalY = verticalY(
-        placement,
-        barPosition,
-        popupHeight,
-        screen,
-        parentHeight,
-        gap,
-        margin
-    )
-    var parentOriginY = String(barPosition) === "bottom"
-        ? screen - parentHeight
-        : 0
-
-    return globalY - parentOriginY
+    return clamp(adjacent, 0, maximum)
 }

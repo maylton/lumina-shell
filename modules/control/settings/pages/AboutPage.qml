@@ -17,12 +17,18 @@ SettingsPage {
 
     SettingsSection {
         title: "Lumina Shell"
-        description: "A Niri-first desktop shell built with Quickshell and QML"
+        description: I18n.tr(
+            "settings.about.description",
+            "A Niri-first desktop shell built with Quickshell and QML"
+        )
 
         SettingsRow {
             width: parent.width
-            title: "Version"
-            description: "Development build"
+            title: I18n.tr("settings.about.version", "Version")
+            description: I18n.tr(
+                "settings.about.developmentBuild",
+                "Development build"
+            )
             controlWidth: 180
 
             Text {
@@ -38,7 +44,7 @@ SettingsPage {
 
         SettingsRow {
             width: parent.width
-            title: "License"
+            title: I18n.tr("settings.about.license", "License")
             description: "GNU General Public License"
             controlWidth: 180
 
@@ -53,7 +59,10 @@ SettingsPage {
 
         SettingsRow {
             width: parent.width
-            title: "Repository"
+            title: I18n.tr(
+                "settings.about.repository",
+                "Repository"
+            )
             description: "maylton/lumina-shell"
             controlWidth: 180
 
@@ -68,25 +77,43 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Technology"
+        title: I18n.tr(
+            "settings.about.technology",
+            "Technology"
+        )
 
         SettingsRow {
             width: parent.width
             title: "Quickshell · QML · Niri"
-            description: "Material 3 Expressive adapted for desktop productivity"
+            description: I18n.tr(
+                "settings.about.technologyDescription",
+                "Material 3 Expressive adapted for desktop productivity"
+            )
             controlWidth: 0
         }
     }
 
     SettingsSection {
-        title: "Local resources"
-        description: "No network request is made by this page"
+        title: I18n.tr(
+            "settings.about.resources",
+            "Local resources"
+        )
+        description: I18n.tr(
+            "settings.about.resourcesDescription",
+            "No network request is made by this page"
+        )
 
         SettingsActionRow {
             width: parent.width
-            title: "Documentation"
+            title: I18n.tr(
+                "settings.about.documentation",
+                "Documentation"
+            )
             description: "docs/user-guide.md"
-            actionLabel: "Open"
+            actionLabel: I18n.tr(
+                "settings.common.action.open",
+                "Open"
+            )
             onActivated: ConfigFileService.openPath(
                 SystemDiagnosticsService.projectRoot
                     + "/docs/user-guide.md"
@@ -95,9 +122,15 @@ SettingsPage {
 
         SettingsActionRow {
             width: parent.width
-            title: "Credits and third-party references"
+            title: I18n.tr(
+                "settings.about.credits",
+                "Credits and third-party references"
+            )
             description: "CREDITS.md"
-            actionLabel: "Open"
+            actionLabel: I18n.tr(
+                "settings.common.action.open",
+                "Open"
+            )
             onActivated: ConfigFileService.openPath(
                 SystemDiagnosticsService.projectRoot
                     + "/CREDITS.md"
@@ -106,9 +139,18 @@ SettingsPage {
 
         SettingsActionRow {
             width: parent.width
-            title: "License text"
-            description: "Copyright © Lumina Shell contributors"
-            actionLabel: "Open"
+            title: I18n.tr(
+                "settings.about.licenseText",
+                "License text"
+            )
+            description: I18n.tr(
+                "settings.about.copyright",
+                "Copyright © Lumina Shell contributors"
+            )
+            actionLabel: I18n.tr(
+                "settings.common.action.open",
+                "Open"
+            )
             onActivated: ConfigFileService.openPath(
                 SystemDiagnosticsService.projectRoot
                     + "/LICENSE"

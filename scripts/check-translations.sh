@@ -6,6 +6,7 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 catalog_dir="${repository_dir}/i18n"
 source_catalog="${catalog_dir}/en-US.json"
 pt_br_catalog="${catalog_dir}/pt-BR.json"
+supplemental_dir="${repository_dir}/services/i18n"
 
 command -v jq >/dev/null 2>&1 || {
     printf 'jq is required to validate translation catalogs.\n' >&2
@@ -25,6 +26,16 @@ command -v perl >/dev/null 2>&1 || {
 [[ -f "${pt_br_catalog}" ]] || {
     printf 'Missing maintained Brazilian Portuguese catalog: %s\n' \
         "${pt_br_catalog}" >&2
+    exit 1
+}
+
+mapfile -t supplemental_files < <(
+    find "${supplemental_dir}" -maxdepth 1 -type f \
+        -name '*Messages.js' | sort
+)
+
+[[ "${#supplemental_files[@]}" -gt 0 ]] || {
+    printf 'No supplemental translation catalogs were found.\n' >&2
     exit 1
 }
 
@@ -78,10 +89,23 @@ fi
 jq -e '
     .["control.tab.dashboard"] == "Dashboard"
     and .["settings.category.dashboard.label"] == "Dashboard"
-    and (.["control.header.dashboardSubtitle"] | startswith("Dashboard"))
+    and (. ["control.header.dashboardSubtitle"] | startswith("Dashboard"))
 ' "${pt_br_catalog}" >/dev/null || {
     printf 'The product term Dashboard must remain Dashboard in pt-BR.\n' >&2
     exit 1
+}
+
+supplemental_has_key() {
+    local message_id="$1"
+    local supplemental_path
+
+    for supplemental_path in "${supplemental_files[@]}"; do
+        if grep -Fq "\"${message_id}\"" "${supplemental_path}"; then
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 missing_source_keys="$(
@@ -90,7 +114,7 @@ missing_source_keys="$(
     )
 
     perl -0777 -ne '
-        while (/I18n\.tr\(\s*"([^"]+)"/g) {
+        while (/I18n\.tr\(\s*"([^"]+)"\s*,/g) {
             print "$1\n";
         }
     ' "${qml_files[@]}" \
@@ -98,12 +122,13 @@ missing_source_keys="$(
         | while IFS= read -r message_id; do
             jq -e --arg key "${message_id}" \
                 'has($key)' "${source_catalog}" >/dev/null \
+                || supplemental_has_key "${message_id}" \
                 || printf '%s\n' "${message_id}"
         done
 )"
 
 if [[ -n "${missing_source_keys}" ]]; then
-    printf 'Translation keys missing from en-US.json:\n%s\n' \
+    printf 'Translation keys missing from en-US.json or supplemental catalogs:\n%s\n' \
         "${missing_source_keys}" >&2
     exit 1
 fi

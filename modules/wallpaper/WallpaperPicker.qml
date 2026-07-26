@@ -2,14 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Wayland
 import Qt.labs.folderlistmodel
 import qs.design
+import qs.modules.bar.widgets
 import qs.modules.control
 import qs.stores.config
-import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.services.wallpaper
-import qs.stores.config
 import qs.stores.shell
 import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
@@ -22,7 +20,7 @@ Scope {
         model: Quickshell.screens
 
         delegate: Component {
-            PanelWindow {
+            BarPanelWindow {
                 id: pickerWindow
 
                 required property var modelData
@@ -38,44 +36,15 @@ Scope {
                         ConfigStore.barMargin
                     )
 
+                panelId: "wallpaper"
+                panelOutputName: outputName
+                panelVisible: pickerVisible
+                layerNamespace: "lumina-wallpaper-picker"
                 screen: modelData
-                visible: pickerVisible
-                color: "transparent"
-                surfaceFormat.opaque: false
-                focusable: pickerVisible
-                exclusiveZone: 0
-
-                anchors {
-                    top: true
-                    bottom: true
-                    left: true
-                    right: true
-                }
-
-                WlrLayershell.layer: WlrLayer.Overlay
-                WlrLayershell.namespace: "lumina-wallpaper-picker"
-                WlrLayershell.keyboardFocus: pickerVisible
-          ? WlrKeyboardFocus.Exclusive
-          : WlrKeyboardFocus.None
-
-      BackgroundEffect.blurRegion:
-          ShellSurfacePolicy.requestsBackdropBlur(
-              ConfigStore.shellBackgroundMode
-          )
-              ? shellBlurRegion
-              : null
-
-      Region {
-          id: shellBlurRegion
-
-          Region {
-              x: pickerSurface.x
-              y: pickerSurface.y
-              width: pickerSurface.width
-              height: pickerSurface.height
-              radius: pickerSurface.radius
-          }
-      }
+                scrimColor: root.luminaDesign.color.scrim
+                surfaceItem: pickerSurface
+                surfaceRadius: pickerSurface.radius
+                onDismissRequested: WallpaperService.closePicker()
 
                 FocusScope {
                     anchors.fill: parent
@@ -84,16 +53,6 @@ Scope {
                     Keys.onEscapePressed: event => {
                         WallpaperService.closePicker()
                         event.accepted = true
-                    }
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: root.luminaDesign.color.scrim
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: WallpaperService.closePicker()
                     }
                 }
 
@@ -107,22 +66,16 @@ Scope {
                         pickerWindow.width,
                         root.luminaDesign.spacing.extraLarge
                     )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        pickerWindow.height,
-                        pickerWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
-                        root.luminaDesign.spacing.extraLarge
-                    )
                     width: Math.min(
                         root.luminaDesign.size.wallpaperPickerWidth,
                         pickerWindow.width - root.luminaDesign.spacing.extraLarge * 2
                     )
                     height: Math.min(
                         root.luminaDesign.size.wallpaperPickerHeight,
-                        pickerWindow.height - root.luminaDesign.spacing.extraLarge * 2
+                        pickerWindow.height
+                            - pickerWindow.barWindowHeight
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.extraLarge
                     )
                     radius: root.luminaDesign.shape.extraLarge
 
