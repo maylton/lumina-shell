@@ -5,12 +5,14 @@ import qs.services.connectivity
 import qs.services.power
 import qs.stores.config
 import qs.stores.control
+import qs.stores.shell
 import "ExpressiveBatteryGeometry.js" as BatteryGeometry
 
 Rectangle {
     id: root
 
     required property string outputName
+    property var panelWindow: null
     property bool compact: false
 
     readonly property var luminaDesign: Theme.luminaTokens
@@ -177,7 +179,25 @@ Rectangle {
     Accessible.onPressAction: root.activate()
 
     function activate() {
+        networkPopup.dismiss()
         ControlCenterStore.openFor(outputName, "dashboard")
+    }
+
+    function mappedNetworkAnchorX(localX) {
+        const point = networkItem.mapToItem(
+            null,
+            Number(localX),
+            networkItem.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function toggleNetworkPopup(localX) {
+        const opening = !networkPopup.requestedVisible
+        if (opening)
+            OverlayStore.close()
+        networkPopup.anchorX = mappedNetworkAnchorX(localX)
+        networkPopup.toggle()
     }
 
     Keys.onSpacePressed: event => {
@@ -188,6 +208,15 @@ Rectangle {
     Keys.onReturnPressed: event => {
         activate()
         event.accepted = true
+    }
+
+    Connections {
+        target: OverlayStore
+
+        function onActiveSurfaceChanged() {
+            if (OverlayStore.activeSurface.length > 0)
+                networkPopup.dismiss()
+        }
     }
 
     Behavior on color {
@@ -241,8 +270,12 @@ Rectangle {
         }
 
         SystemStatusItem {
+            id: networkItem
+
             visible: root.showNetwork
             individual: root.individual
+            interactive: true
+            selected: networkPopup.visible
             showLabel: !root.compact
                 && root.networkTextMode !== "icon"
             iconName: root.networkIcon
@@ -254,6 +287,7 @@ Rectangle {
             description: "Network "
                 + ConnectivityService.networkSummary
             alert: ConnectivityService.networkSummary === "Offline"
+            onActivated: localX => root.toggleNetworkPopup(localX)
         }
 
         SystemStatusItem {
@@ -301,6 +335,13 @@ Rectangle {
         anchorItem: root
         title: "System status"
         description: root.accessibleSummary
-        shown: statusMouse.containsMouse
+        shown: statusMouse.containsMouse && !networkPopup.visible
+    }
+
+    NetworkPopup {
+        id: networkPopup
+
+        anchorItem: networkItem
+        panelWindow: root.panelWindow
     }
 }
