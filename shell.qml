@@ -1,7 +1,6 @@
 //@ pragma UseQApplication
 
 import Quickshell
-import qs.design
 import qs.services
 import qs.modules.bar
 import qs.modules.bluetooth
@@ -15,7 +14,6 @@ import qs.modules.session
 import qs.modules.wallpaper
 
 ShellRoot {
-    ThemeTokenDefaults {}
     DailyServices {}
     Wallpaper {}
     WallpaperPicker {}
