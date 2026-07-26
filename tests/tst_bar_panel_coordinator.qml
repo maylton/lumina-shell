@@ -50,6 +50,23 @@ TestCase {
         compare(BarPanelCoordinator.transitionPhase, "idle")
     }
 
+    function test_requestCarriesDockAnchorEdge() {
+        BarPanelCoordinator.requestToggle(
+            "launcher",
+            "DP-1",
+            "near-widget",
+            420,
+            700,
+            748,
+            "above"
+        )
+
+        tryCompare(openSpy, "count", 1)
+        compare(openSpy.signalArguments[0][0], "launcher")
+        compare(openSpy.signalArguments[0][6], "above")
+        compare(BarPanelCoordinator.pendingAnchorEdge, "")
+    }
+
     function test_samePanelRequestOnlyCloses() {
         BarPanelCoordinator.reportOpened("network", "DP-1")
         openSpy.clear()

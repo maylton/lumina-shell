@@ -15,6 +15,7 @@ QtObject {
     property real pendingAnchorX: -1
     property real pendingAnchorTop: -1
     property real pendingAnchorBottom: -1
+    property string pendingAnchorEdge: ""
     property string transitionPhase: "idle"
 
     signal openRequested(
@@ -23,7 +24,8 @@ QtObject {
         string placement,
         real anchorX,
         real anchorTop,
-        real anchorBottom
+        real anchorBottom,
+        string anchorEdge
     )
     signal closeRequested(string panelId, string outputName)
 
@@ -38,6 +40,7 @@ QtObject {
         pendingAnchorX = -1
         pendingAnchorTop = -1
         pendingAnchorBottom = -1
+        pendingAnchorEdge = ""
     }
 
     function reset() {
@@ -55,7 +58,8 @@ QtObject {
         placement,
         anchorX,
         anchorTop,
-        anchorBottom
+        anchorBottom,
+        anchorEdge
     ) {
         pendingPanelId = normalized(panelId)
         pendingOutputName = normalized(outputName)
@@ -63,6 +67,9 @@ QtObject {
         pendingAnchorX = Number(anchorX)
         pendingAnchorTop = Number(anchorTop)
         pendingAnchorBottom = Number(anchorBottom)
+        pendingAnchorEdge = String(anchorEdge || "") === "above"
+            ? "above"
+            : ""
     }
 
     function requestToggle(
@@ -71,7 +78,8 @@ QtObject {
         placement,
         anchorX,
         anchorTop,
-        anchorBottom
+        anchorBottom,
+        anchorEdge
     ) {
         const panel = normalized(panelId)
         const output = normalized(outputName)
@@ -98,7 +106,8 @@ QtObject {
                 placement,
                 anchorX,
                 anchorTop,
-                anchorBottom
+                anchorBottom,
+                anchorEdge
             )
             return
         }
@@ -110,7 +119,8 @@ QtObject {
                 placement,
                 anchorX,
                 anchorTop,
-                anchorBottom
+                anchorBottom,
+                anchorEdge
             )
             return
         }
@@ -127,7 +137,8 @@ QtObject {
             placement,
             anchorX,
             anchorTop,
-            anchorBottom
+            anchorBottom,
+            anchorEdge
         )
 
         if (activePanelId)
@@ -163,6 +174,7 @@ QtObject {
         const anchorX = pendingAnchorX
         const anchorTop = pendingAnchorTop
         const anchorBottom = pendingAnchorBottom
+        const anchorEdge = pendingAnchorEdge
 
         clearPending()
         transitionPhase = "opening"
@@ -175,7 +187,8 @@ QtObject {
                 placement,
                 anchorX,
                 anchorTop,
-                anchorBottom
+                anchorBottom,
+                anchorEdge
             )
         })
     }

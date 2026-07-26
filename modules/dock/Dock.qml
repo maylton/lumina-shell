@@ -8,7 +8,7 @@ import qs.modules.control
 import qs.services.i18n
 import qs.stores.config
 import qs.stores.dock
-import qs.stores.launcher
+import qs.stores.shell
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import "DockStrings.js" as DockStrings
 
@@ -84,6 +84,13 @@ Scope {
                 property bool revealRequested: !DockPreferences.autoHide
                 property var contextItem: null
                 property real contextAnchorX: width / 2
+                readonly property string launcherSurfacePlacement: String(
+                    ConfigStore.widgetSetting(
+                        "launcher",
+                        "surfacePlacement",
+                        "centered"
+                    )
+                )
 
                 function closeContextMenu() {
                     const wasOpen = dockPinMenu.opened
@@ -338,24 +345,62 @@ Scope {
                                 Accessible.focusable: true
                                 Accessible.focused: activeFocus
                                 Accessible.onPressAction:
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
+
+                                function anchorGeometry() {
+                                    const horizontal = launcherButton.mapToItem(
+                                        null,
+                                        launcherButton.width / 2,
+                                        0
+                                    )
+                                    const globalTop = launcherButton.mapToGlobal(
+                                        Qt.point(
+                                            launcherButton.width / 2,
+                                            0
+                                        )
+                                    )
+                                    const globalBottom =
+                                        launcherButton.mapToGlobal(
+                                            Qt.point(
+                                                launcherButton.width / 2,
+                                                launcherButton.height
+                                            )
+                                        )
+
+                                    return {
+                                        x: Number(horizontal.x),
+                                        top: Number(globalTop.y),
+                                        bottom: Number(globalBottom.y)
+                                    }
+                                }
+
+                                function activate() {
+                                    panel.closeContextMenu()
+                                    const anchor = anchorGeometry()
+                                    BarPanelCoordinator.requestToggle(
+                                        "launcher",
+                                        panel.outputName,
+                                        panel.launcherSurfacePlacement,
+                                        anchor.x,
+                                        anchor.top,
+                                        anchor.bottom,
+                                        "above"
+                                    )
+                                }
 
                                 function activateFromPointer() {
-                                    panel.closeContextMenu()
                                     launcherButton.forceActiveFocus()
                                     launcherButton.focus = false
-                                    LauncherStore.toggle(panel.outputName)
+                                    activate()
                                 }
 
                                 Keys.onSpacePressed: event => {
-                                    panel.closeContextMenu()
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
                                     event.accepted = true
                                 }
 
                                 Keys.onReturnPressed: event => {
-                                    panel.closeContextMenu()
-                                    LauncherStore.toggle(panel.outputName)
+                                    launcherButton.activate()
                                     event.accepted = true
                                 }
 

@@ -61,6 +61,37 @@ TestCase {
         compare(OverlayStore.pendingAnchorBottom, -1)
     }
 
+    function test_openForTransfersDockAnchorEdge() {
+        OverlayStore.prepareFor(
+            "launcher",
+            outputName,
+            "near-widget",
+            420,
+            700,
+            748,
+            "above"
+        )
+        OverlayStore.openFor("launcher", outputName)
+
+        compare(OverlayStore.activeAnchorEdge, "above")
+        compare(OverlayStore.pendingAnchorEdge, "")
+    }
+
+    function test_centeredPlacementIgnoresDockAnchorEdge() {
+        OverlayStore.prepareFor(
+            "launcher",
+            outputName,
+            "centered",
+            420,
+            700,
+            748,
+            "above"
+        )
+        OverlayStore.openFor("launcher", outputName)
+
+        compare(OverlayStore.activeAnchorEdge, "")
+    }
+
     function test_centeredPlacementKeepsVerticalAnchorGeometry() {
         OverlayStore.prepareFor(
             "launcher",
@@ -123,5 +154,7 @@ TestCase {
         compare(OverlayStore.pendingAnchorX, -1)
         compare(OverlayStore.pendingAnchorTop, -1)
         compare(OverlayStore.pendingAnchorBottom, -1)
+        compare(OverlayStore.activeAnchorEdge, "")
+        compare(OverlayStore.pendingAnchorEdge, "")
     }
 }

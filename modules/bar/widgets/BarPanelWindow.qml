@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs.stores.config
 import qs.stores.shell
 import "../../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
+import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 PanelWindow {
     id: root
@@ -17,6 +18,8 @@ PanelWindow {
     property color scrimColor: "transparent"
     property Item surfaceItem: null
     property real surfaceRadius: 0
+    property string surfaceAnchorEdge: ""
+    property real surfaceAnchorTop: -1
     property double visibilityRequestedAt: 0
     property double hidingRequestedAt: 0
     property double settleRequestedAt: 0
@@ -33,6 +36,22 @@ PanelWindow {
         return ConfigStore.barPosition === "bottom"
             ? Math.max(0, maximum - gap)
             : Math.min(gap, maximum)
+    }
+
+    function resolvedSurfaceY(surfaceHeight) {
+        if (surfaceAnchorEdge !== "above" || surfaceAnchorTop < 0)
+            return adjacentSurfaceY(surfaceHeight)
+
+        const localAnchor = panelLayer.mapFromGlobal(
+            Qt.point(0, surfaceAnchorTop)
+        )
+
+        return SurfacePlacementPolicy.aboveAnchorY(
+            localAnchor.y,
+            surfaceHeight,
+            root.height,
+            ConfigStore.barPanelGap
+        )
     }
 
     visible: panelVisible
@@ -155,7 +174,7 @@ PanelWindow {
     Binding {
         target: root.surfaceItem
         property: "y"
-        value: root.adjacentSurfaceY(
+        value: root.resolvedSurfaceY(
             root.surfaceItem ? root.surfaceItem.height : 0
         )
         when: root.surfaceItem !== null

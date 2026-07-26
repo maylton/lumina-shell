@@ -137,4 +137,30 @@ TestCase {
         )
     }
 
+    function test_aboveAnchorPositionUsesAnchorAndGap() {
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(760, 420, 900, 8),
+            332
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(760, 420, 900, 0),
+            340
+        )
+    }
+
+    function test_aboveAnchorPositionClampsToViewport() {
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(300, 420, 900, 8),
+            0
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(1200, 420, 900, 8),
+            480
+        )
+        compare(
+            SurfacePlacementPolicy.aboveAnchorY(-1, 420, 900, 8),
+            480
+        )
+    }
+
 }

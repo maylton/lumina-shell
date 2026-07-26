@@ -82,3 +82,16 @@ function verticalY(
 
     return clamp(adjacent, 0, maximum)
 }
+
+function aboveAnchorY(anchorTop, surfaceHeight, viewportHeight, gap) {
+    var height = Math.max(0, finiteNumber(surfaceHeight, 0))
+    var viewport = Math.max(height, finiteNumber(viewportHeight, height))
+    var maximum = Math.max(0, viewport - height)
+    var adjacentGap = Math.max(0, finiteNumber(gap, 0))
+    var top = Number(anchorTop)
+
+    if (!isFinite(top) || top < 0)
+        return maximum
+
+    return clamp(top - height - adjacentGap, 0, maximum)
+}
