@@ -23,14 +23,14 @@ FloatingWindow {
     readonly property string deviceName:
         BluetoothManagerService.targetName
         || BluetoothManagerService.targetAddress
-    readonly property string code:
+    readonly property string pairingCode:
         BluetoothManagerService.authenticationCode
 
     property string localError: ""
 
     visible: BluetoothManagerService.authenticationPending
     width: 460
-    height: displayPrompt ? 360 : inputPrompt ? 344 : 320
+    height: inputPrompt ? 350 : 330
     minimumSize: Qt.size(width, height)
     maximumSize: Qt.size(width, height)
     color: "transparent"
@@ -39,9 +39,8 @@ FloatingWindow {
         "Bluetooth pairing"
     )
     modality: Qt.ApplicationModal
-    flags: Qt.Dialog | Qt.FramelessWindowHint
 
-    function titleText() {
+    function heading() {
         switch (promptType) {
         case "confirmation":
             return I18n.tr(
@@ -63,21 +62,15 @@ FloatingWindow {
                 "bluetooth.auth.authorize.title",
                 "Authorize Bluetooth service"
             )
-        case "display-pin":
-        case "display-passkey":
+        default:
             return I18n.tr(
                 "bluetooth.auth.display.title",
                 "Use this pairing code"
             )
-        default:
-            return I18n.tr(
-                "bluetooth.auth.windowTitle",
-                "Bluetooth pairing"
-            )
         }
     }
 
-    function descriptionText() {
+    function description() {
         switch (promptType) {
         case "confirmation":
             return I18n.tr(
@@ -101,48 +94,26 @@ FloatingWindow {
             return I18n.tr(
                 "bluetooth.auth.authorize.description",
                 "Allow %1 to use Bluetooth service %2?",
-                [
-                    deviceName,
-                    BluetoothManagerService.authenticationService
-                ]
+                [deviceName, BluetoothManagerService.authenticationService]
             )
-        case "display-pin":
-        case "display-passkey":
+        default:
             return I18n.tr(
                 "bluetooth.auth.display.description",
                 "Enter this code on %1 to continue pairing.",
                 [deviceName]
             )
-        default:
-            return ""
         }
-    }
-
-    function primaryLabel() {
-        if (inputPrompt) {
-            return I18n.tr(
-                "bluetooth.auth.action.submit",
-                "Submit"
-            )
-        }
-        if (decisionPrompt) {
-            return I18n.tr(
-                "bluetooth.auth.action.confirm",
-                "Confirm"
-            )
-        }
-        return ""
     }
 
     function submit() {
         localError = ""
 
         if (inputPrompt) {
-            const requested = String(authInput.text || "").trim()
+            const value = String(authInput.text || "").trim()
             const valid = promptType === "pin"
-                ? requested.length >= 1 && requested.length <= 16
-                : /^[0-9]{1,6}$/.test(requested)
-                    && Number(requested) <= 999999
+                ? value.length >= 1 && value.length <= 16
+                : /^[0-9]{1,6}$/.test(value)
+                    && Number(value) <= 999999
 
             if (!valid) {
                 localError = promptType === "pin"
@@ -157,12 +128,10 @@ FloatingWindow {
                 return
             }
 
-            BluetoothManagerService.submitAuthentication(requested)
-            return
-        }
-
-        if (decisionPrompt)
+            BluetoothManagerService.submitAuthentication(value)
+        } else if (decisionPrompt) {
             BluetoothManagerService.acceptAuthentication()
+        }
     }
 
     function cancel() {
@@ -179,10 +148,8 @@ FloatingWindow {
         Qt.callLater(function() {
             if (root.inputPrompt)
                 authInput.forceActiveFocus(Qt.PopupFocusReason)
-            else if (root.displayPrompt)
-                cancelButton.forceActiveFocus(Qt.PopupFocusReason)
             else
-                confirmButton.forceActiveFocus(Qt.PopupFocusReason)
+                cancelButton.forceActiveFocus(Qt.PopupFocusReason)
         })
     }
 
@@ -219,8 +186,7 @@ FloatingWindow {
                         anchors.centerIn: parent
                         iconName: "bluetooth-active-symbolic"
                         fallbackSymbol: "ᛒ"
-                        iconColor:
-                            root.luminaDesign.color.onAccentContainer
+                        iconColor: root.luminaDesign.color.onAccentContainer
                         iconSize: 24
                     }
                 }
@@ -231,11 +197,10 @@ FloatingWindow {
 
                     Text {
                         width: parent.width
-                        text: root.titleText()
+                        text: root.heading()
                         color: root.luminaDesign.color.onSurface
                         wrapMode: Text.Wrap
-                        font.pixelSize:
-                            root.luminaDesign.typography.titleLarge
+                        font.pixelSize: root.luminaDesign.typography.titleLarge
                         font.weight: Font.Bold
                     }
 
@@ -244,23 +209,21 @@ FloatingWindow {
                         text: root.deviceName
                         color: root.luminaDesign.color.textMuted
                         elide: Text.ElideRight
-                        font.pixelSize:
-                            root.luminaDesign.typography.labelMedium
+                        font.pixelSize: root.luminaDesign.typography.labelMedium
                     }
                 }
             }
 
             Text {
                 width: parent.width
-                text: root.descriptionText()
+                text: root.description()
                 color: root.luminaDesign.color.onSurface
                 wrapMode: Text.Wrap
                 font.pixelSize: root.luminaDesign.typography.bodyMedium
             }
 
             Rectangle {
-                visible: root.code.length > 0
-                    && !root.inputPrompt
+                visible: root.pairingCode.length > 0 && !root.inputPrompt
                 width: parent.width
                 height: 72
                 radius: root.luminaDesign.shape.large
@@ -270,7 +233,7 @@ FloatingWindow {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.code
+                    text: root.pairingCode
                     color: root.luminaDesign.color.onSurface
                     font.pixelSize: 32
                     font.weight: Font.Bold
@@ -302,8 +265,7 @@ FloatingWindow {
                     verticalAlignment: TextInput.AlignVCenter
                     selectByMouse: true
                     color: root.luminaDesign.color.onSurface
-                    font.pixelSize:
-                        root.luminaDesign.typography.bodyLarge
+                    font.pixelSize: root.luminaDesign.typography.bodyLarge
                     maximumLength: root.promptType === "pin" ? 16 : 6
                     inputMethodHints: root.promptType === "passkey"
                         ? Qt.ImhDigitsOnly
@@ -325,20 +287,6 @@ FloatingWindow {
                 font.pixelSize: root.luminaDesign.typography.labelMedium
             }
 
-            Text {
-                visible: root.promptType === "display-passkey"
-                    && BluetoothManagerService.authenticationEntered > 0
-                width: parent.width
-                text: I18n.tr(
-                    "bluetooth.auth.display.progress",
-                    "%1 of 6 digits entered on the device",
-                    [BluetoothManagerService.authenticationEntered]
-                )
-                color: root.luminaDesign.color.textMuted
-                horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: root.luminaDesign.typography.labelMedium
-            }
-
             Item {
                 width: parent.width
                 height: 44
@@ -350,10 +298,7 @@ FloatingWindow {
                     Rectangle {
                         id: cancelButton
 
-                        width: Math.max(
-                            112,
-                            cancelText.implicitWidth + 30
-                        )
+                        width: Math.max(112, cancelText.implicitWidth + 30)
                         height: 42
                         radius: root.luminaDesign.shape.full
                         color: cancelMouse.containsMouse
@@ -364,21 +309,6 @@ FloatingWindow {
                         border.color: activeFocus
                             ? root.luminaDesign.color.primary
                             : root.luminaDesign.color.outline
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: cancelText.text
-                        Accessible.focusable: true
-                        Accessible.focused: activeFocus
-                        Accessible.onPressAction: root.cancel()
-
-                        Keys.onSpacePressed: event => {
-                            root.cancel()
-                            event.accepted = true
-                        }
-                        Keys.onReturnPressed: event => {
-                            root.cancel()
-                            event.accepted = true
-                        }
 
                         Text {
                             id: cancelText
@@ -393,8 +323,7 @@ FloatingWindow {
                                     "Cancel"
                                 )
                             color: root.luminaDesign.color.onSurface
-                            font.pixelSize:
-                                root.luminaDesign.typography.labelMedium
+                            font.pixelSize: root.luminaDesign.typography.labelMedium
                             font.weight: Font.DemiBold
                         }
 
@@ -408,49 +337,29 @@ FloatingWindow {
                     }
 
                     Rectangle {
-                        id: confirmButton
-
                         visible: !root.displayPrompt
-                        width: visible
-                            ? Math.max(
-                                112,
-                                confirmText.implicitWidth + 30
-                            )
-                            : 0
+                        width: visible ? 112 : 0
                         height: 42
                         radius: root.luminaDesign.shape.full
                         color: confirmMouse.containsMouse
                             ? root.luminaDesign.color.primary
                             : root.luminaDesign.color.accentContainer
-                        activeFocusOnTab: visible
-                        border.width: activeFocus ? 2 : 0
-                        border.color: root.luminaDesign.color.primary
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: root.primaryLabel()
-                        Accessible.focusable: visible
-                        Accessible.focused: activeFocus
-                        Accessible.onPressAction: root.submit()
-
-                        Keys.onSpacePressed: event => {
-                            root.submit()
-                            event.accepted = true
-                        }
-                        Keys.onReturnPressed: event => {
-                            root.submit()
-                            event.accepted = true
-                        }
 
                         Text {
-                            id: confirmText
                             anchors.centerIn: parent
-                            text: root.primaryLabel()
+                            text: root.inputPrompt
+                                ? I18n.tr(
+                                    "bluetooth.auth.action.submit",
+                                    "Submit"
+                                )
+                                : I18n.tr(
+                                    "bluetooth.auth.action.confirm",
+                                    "Confirm"
+                                )
                             color: confirmMouse.containsMouse
                                 ? root.luminaDesign.color.onPrimary
-                                : root.luminaDesign.color
-                                    .onAccentContainer
-                            font.pixelSize:
-                                root.luminaDesign.typography.labelMedium
+                                : root.luminaDesign.color.onAccentContainer
+                            font.pixelSize: root.luminaDesign.typography.labelMedium
                             font.weight: Font.DemiBold
                         }
 
@@ -458,10 +367,7 @@ FloatingWindow {
                             id: confirmMouse
                             anchors.fill: parent
                             hoverEnabled: true
-                            enabled: confirmButton.visible
-                            cursorShape: enabled
-                                ? Qt.PointingHandCursor
-                                : Qt.ArrowCursor
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: root.submit()
                         }
                     }
