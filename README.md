@@ -2,7 +2,7 @@
 
 Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell and QML and guided by Material 3 Expressive design principles.
 
-> Status: early foundation. The repository currently contains only the first runnable shell skeleton and project documentation.
+> Status: public-beta foundation. The 0.2 through 0.5 milestones are implemented; extended-beta work is next.
 
 ## Goals
 
@@ -22,7 +22,7 @@ Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell an
 Install the base tools on CachyOS or Arch Linux:
 
 ```bash
-sudo pacman -S --needed git niri quickshell qt6-declarative
+sudo pacman -S --needed git niri noctalia-qs qt6-declarative
 ```
 
 ## Run from a checkout
@@ -33,20 +33,46 @@ cd lumina-shell
 qs -p .
 ```
 
-The foundation build opens a top panel on every detected output and displays a clock. It intentionally does not start Niri IPC integration yet; that is the next development increment.
+The shell opens a top panel and wallpaper surface on every detected output. It includes reactive Niri state, launcher search, notifications, calendar and tray widgets, daily controls, per-output wallpapers, dynamic color, layout actions, and confirmed session controls.
+
+Validate all native integrations:
+
+```bash
+./scripts/check-environment.sh --require-niri --require-daily
+```
+
+Install or preview a managed Quickshell copy:
+
+```bash
+./scripts/install.sh --dry-run
+./scripts/install.sh
+```
 
 ## Development status
 
-Current milestone: **0.1 — Niri Foundation**
+Current completed milestones: **0.2 — Daily Controls**, **0.3 — Interactive Alpha**, **0.4 — Desktop Alpha**, and **0.5 — Public Beta**
 
-First implementation sequence:
+The current implementation includes:
 
-1. Establish a runnable and modular Quickshell base.
-2. Add a typed, event-driven Niri service.
-3. Display workspaces and the focused window.
-4. Introduce the first reusable Material Expressive components.
+1. A typed, event-driven Niri service and reactive compositor stores.
+2. Per-output bars, wallpapers, and coordinated interactive overlays.
+3. Application, window, and shell-action search.
+4. Notification history, Do Not Disturb, and wallpaper-derived colors.
+5. Advanced layout actions and confirmed session controls.
+6. PipeWire, MPRIS, UPower, NetworkManager, and BlueZ daily controls.
+7. Per-output OSDs and a Material Expressive control center.
+8. Graphical settings, safe configuration recovery, and managed installation tooling.
 
 See [ROADMAP.md](ROADMAP.md) for the complete plan and [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
+
+Documentation:
+
+- [Installation](docs/installation.md)
+- [User guide](docs/user-guide.md)
+- [Architecture](docs/architecture.md)
+- [Compatibility](docs/compatibility.md)
+- [Accessibility](docs/accessibility.md)
+- [Translations](docs/translations.md)
 
 ## Repository structure
 
@@ -55,7 +81,9 @@ lumina-shell/
 ├── shell.qml
 ├── design/
 ├── modules/
-│   └── bar/
+├── services/
+├── stores/
+├── i18n/
 ├── docs/
 ├── scripts/
 └── ROADMAP.md
@@ -63,4 +91,8 @@ lumina-shell/
 
 ## License
 
-The project license has not been selected yet. Do not copy or redistribute the source as an open-source package until a license is added.
+Copyright © 2026 Maylton and Lumina Shell contributors.
+
+Lumina Shell is free software licensed under the [GNU General Public License version 3 or later](LICENSE), identified by SPDX as `GPL-3.0-or-later`.
+
+See [CREDITS.md](CREDITS.md) for the licenses of runtime components and the projects used as architectural or design references.

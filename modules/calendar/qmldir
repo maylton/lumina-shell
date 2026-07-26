@@ -1,0 +1,3 @@
+module qs.modules.calendar
+CalendarActionButton 1.0 CalendarActionButton.qml
+CalendarPopup 1.0 CalendarPopup.qml

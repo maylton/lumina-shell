@@ -1,29 +1,503 @@
 # Architecture Foundation
 
-Lumina Shell starts as a Quickshell process composed of independent QML modules. Niri integration and other system state will live in services and stores rather than visual components.
+Lumina Shell runs as a Quickshell process composed of independent QML modules. Compositor and system integrations live in services and stores rather than visual components.
 
 ```text
-Niri IPC event stream
-        ↓
-NiriService
-        ↓
-Output / Workspace / Window stores
-        ↓
-Bar, launcher, control center, notifications
+Niri IPC event stream ───────────────┐
+                                     ↓
+niri msg --json outputs → NiriService
+                                     ↓
+              Output / Workspace / Window stores
+                                     ↓
+              Bar, launcher, control center, notifications
 ```
 
 ## Current increment
 
-The first increment intentionally contains only:
+The Niri state increment introduces:
 
-- a `ShellRoot` entry point;
-- a root-relative QML module structure;
-- a multi-output `PanelWindow` bar;
-- a minimal theme singleton;
-- a clock using `SystemClock`;
-- environment diagnostics.
+- `NiriService`, which owns the long-running `niri msg --json event-stream` process;
+- newline-delimited JSON parsing through Quickshell `SplitParser`;
+- automatic reconnection when the event-stream process stops;
+- reactive output, workspace, and window stores;
+- queued overview and workspace actions with reactive completion state;
+- a demo fallback when `$NIRI_SOCKET` is unavailable;
+- Lumina's Material Expressive bar with output-aware workspace, context,
+  date/time, status, launcher, notification, and system-tray widgets.
 
-This establishes the smallest runnable vertical slice before Niri IPC is introduced.
+The Niri event stream supplies a complete initial state followed by incremental updates. Unknown events are ignored so newer Niri versions can add event variants without breaking the shell.
+
+## State ownership
+
+`NiriService` translates compositor events into store operations:
+
+- `WorkspacesChanged`, `WorkspaceActivated`, urgency, and active-window events update `WorkspaceStore`;
+- `WindowsChanged`, window mutation, close, focus, urgency, and layout events update `WindowStore`;
+- `OverviewOpenedOrClosed` updates the service overview state;
+- output snapshots update `OutputStore`.
+
+The stores replace their arrays after mutations so QML bindings receive deterministic change notifications.
+
+`SystemInfoStore` owns session identity metadata shared by the bar and
+Dashboard. It resolves the login name from the process environment, account
+display name and icon through AccountsService, local `.face` sources through
+readable file views, and the distribution name from `/etc/os-release`.
+`UserAvatar` applies the ordered image policy and falls back to detected
+initials without exposing failed image sources. Generic fallbacks keep the
+shell usable when AccountsService or any local image is unavailable.
+
+### Output refresh policy
+
+Niri 26.04 does not expose output changes through the event-stream event enum. Lumina therefore requests `niri msg --json outputs`:
+
+- when `NiriService` starts;
+- after a successful Niri configuration reload;
+- when `Quickshell.screens` changes.
+
+Requests are debounced and coalesced. Lumina does not continuously poll outputs.
+
+### Column position
+
+Niri window state includes `layout.pos_in_scrolling_layout`, a 1-based pair containing the column index and the tile index inside that column. `WindowStore` normalizes this into a compact label for the active window on each output. Floating windows are represented explicitly and windows without a scrolling-layout position omit the indicator.
+
+## Bar composition
+
+`Bar.qml` owns only the per-screen `PanelWindow`, layer-shell geometry, output
+selection, and the state passed directly to the sole `BarLayout`.
+`BarSurface` implements the geometry contract:
+
+- **edge-to-edge:** the surface and `PanelWindow` use `barHeight`, with no
+  outer margin and a subtle edge divider;
+- **floating:** `barHeight` remains the visible surface height while the
+  window and exclusive zone add the configured margins.
+
+Its background contract is independent from global shell transparency:
+
+- **solid:** forces the tonal container background to alpha 1;
+- **translucent:** draws an alpha-only tonal surface and never requests
+  compositor blur;
+- **blur:** requests native background blur and draws a clean neutral tint
+  plus subtle contrast protection;
+- **frosted glass:** requests the same bounded native blur, then adds a
+  stronger neutral tint, directional highlight, extremely subtle static
+  grain, and persistent glass edge;
+- **transparent:** removes the background, edge divider, and floating border.
+
+`BarSurface` paints ordered base, tint, contrast-protection, Frosted-only
+highlight/grain, content, and outline layers. No ancestor opacity is applied,
+so bar widgets and popup surfaces remain fully opaque. Semantic colors live in
+`Theme`; deterministic alpha, outline, fallback, and region calculations live
+in `BarSurfacePolicy`. Short color and opacity transitions use the existing
+effects motion tokens and do not animate a compositor-owned blur radius.
+
+Every mode reserves the full layer-shell height, so tiled windows never sit
+behind bar controls. The wallpaper `PanelWindow` uses
+`ExclusionMode.Ignore`, allowing its image to cover the whole output beneath
+that reserved area; Transparent therefore reveals the wallpaper rather than a
+compositor-colored strip.
+
+Only Blur and Frosted Glass make a `BackgroundEffect.blurRegion` request. The
+edge-to-edge region covers the visible bar with zero radius. The floating
+region excludes the outer margins and uses exactly `BarSurface.radius`. It
+never includes a popup, margin, or full-screen area. Solid, Translucent, and
+Transparent explicitly request no compositor blur. `PanelWindow.surfaceFormat`
+stays non-opaque from startup so all modes can change live without recreating
+the window.
+
+The validated Quickshell API exposes no reliable capability callback and no
+per-surface blur-radius control. Lumina therefore does not claim that a
+request is active and does not expose fake compositor sliders. If Niri ignores
+or disables the request, the client-owned tint and contrast layer remain
+readable. Pure `fallbackMode()` and `fallbackAlpha()` policy functions define
+the stronger Translucent fallback for a future reliable capability source
+without overwriting the selected preference. Schema-7 configurations may
+select the new alpha-only Translucent mode; schema-6 values named
+`translucent` retain their historical Blur meaning during migration.
+
+`BarLayout` implements Lumina's Material Expressive bar. Its left and right
+orders are registries of `Component` objects instantiated through `Loader`;
+preferences therefore reorder or hide widgets without duplicating the layout.
+Edge-to-edge and floating are geometry modes of this same implementation. The
+default edge-to-edge surface is 56 pixels high with 40-pixel interaction
+targets.
+
+Schema 7 stores individual widget presentation under `barWidgetSettings`.
+`BarWidgetCatalog.js` is the single inventory for supported left, center, and
+right widgets, their metadata, defaults, and settings component. Privacy and
+keyboard indicators are deliberately absent until a native event source is
+validated. Each widget consumes only its own normalized settings. Active/open,
+pointer, focus, urgent, and error states remain component-owned, and popup
+windows never inherit a widget's resting-background preference.
+
+Bar settings derive three active-only lists from the existing visibility and
+order state. Moving an active widget swaps it only with an adjacent active
+widget, preserving hidden slots and preventing duplicate or unknown IDs.
+Removing a widget keeps its individual settings and moves it to the bounded
+Add widgets menu for its allowed side. The center inventory contains only the
+context capsule; removing it maps to Hidden and adding it restores Contextual
+mode. A modal in-process `Controls.Popup` loads the catalog's settings page,
+contains keyboard focus, closes on Escape or outside press, restores focus to
+the invoking gear, and resets only the selected widget.
+
+`BarScalePolicy` derives automatic content scale directly as
+`clamp(barHeight, 40, 80) / 56`, so the supported automatic range is about
+71–143%. Manual mode keeps the persisted 80–140% range. Compact mode applies a
+0.94 density factor without discarding the selected height or scale. The
+policy does not transform `BarLayout`; `Theme.luminaTokens` instead exposes
+proportional widget geometry, typography, padding, gaps, and bar-specific
+shape roles consumed by each widget. Small legibility and interaction floors
+apply only at the lowest combinations of height and compact density. Touch
+targets retain a 36-pixel minimum, while typography and spacing use moderated
+curves so an 80-pixel bar does not resemble a globally enlarged mobile UI.
+
+Each output owns its own `ContextCapsule` and timeout. Window, application,
+column, workspace, and action-error property changes restart that local timer;
+there is no polling or process boundary in the visual component. Primary
+window context and secondary workspace/application/layout metadata use
+separate typography roles. `BarLayoutPolicy` derives the responsive profile
+and bounds the centered capsule by the smaller left/right clearance, preventing
+asymmetric clusters from overlapping it. Date/time continues to use the shared
+`CalendarStore`, while its popup anchors below a top bar and above a bottom
+bar.
+
+`SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
+`PowerService` directly and opens the existing Dashboard through
+`ControlCenterStore`. Missing capabilities are omitted. It never creates a
+second quick-controls popup. Per-widget network, audio, and battery text modes
+choose icon-only, real summary/percentage, or a service-backed state; icons,
+service state, tooltips, accessibility, and activation remain intact.
+Responsive compaction takes precedence when the available width cannot safely
+retain secondary labels.
+
+`UserAvatarButton` is the final right-side Dashboard entry point. It retains
+the existing `dashboard` widget identifier and `ControlCenterStore` action so
+saved visibility/order preferences and overlay ownership do not change.
+`dashboardUseUserAvatarImage` and `dashboardUserAvatarPath` affect the shared
+bar and Dashboard avatar without duplicating account state.
+
+## Process policy
+
+The event-stream process is persistent and read-only. Output snapshots and compositor actions use separate short-lived `Process` objects, because an IPC connection that has entered event-stream mode cannot also accept regular requests.
+
+When the event stream exits unexpectedly, Lumina immediately clears compositor-owned state, stops an in-flight output snapshot, and reconnects with bounded exponential backoff. A new stream remains in the synchronizing state until output, workspace, and window snapshots arrive; a five-second initial-state timeout restarts an incomplete connection. The bar exposes connecting, synchronizing, connected, reconnecting, and demo states without blocking the UI.
+
+### Niri action lifecycle
+
+Visual components submit typed requests to `NiriService`; they never start command processes themselves. The service serializes requests so rapid workspace or overview clicks cannot replace a process that is still running.
+
+For each action, the service:
+
+- exposes `running`, `succeeded`, or `failed` state;
+- captures standard output and standard error;
+- treats the process exit code as the source of truth;
+- emits a completion signal with the action name and message;
+- retains the most recent action error for diagnostics.
+
+The bar presents failures through the Niri status indicator for six seconds. A later successful queued action does not erase an earlier failure before that feedback interval expires.
+
+## System tray
+
+Lumina consumes Quickshell's shared `SystemTray.items` object model and creates
+one visual view per output. Registration and item state remain process-global,
+so adding more bars does not create duplicate activation or menu actions. The
+tray widget's schema-7 `mode` chooses between a compact per-output popover and
+direct inline presentation without copying item state.
+
+Each tray item owns its hover, pressed, attention, tooltip, activation,
+secondary activation, scrolling, and menu behavior in either presentation.
+`QsMenuOpener` exposes DBus menu entries to a Lumina-styled popup with
+separators, selection controls, disabled states, and nested entries.
+
+## Launcher and search providers
+
+`LauncherStore` owns the launcher query, selection, active output, and ranked results. It combines three event-driven sources:
+
+- `DesktopEntries.applications` for installed applications;
+- `WindowStore.windows` for currently open Niri windows;
+- typed shell actions exposed by `NiriService`.
+
+The ranking layer sorts every matching visible desktop entry without applying
+a fixed result cap. The `ListView` virtualizes the complete result set, so
+large application catalogs remain scrollable without creating every delegate
+at once. Desktop entries marked `NoDisplay` remain intentionally excluded.
+
+The launcher creates one overlay surface per screen but makes only the requested output visible. It takes exclusive keyboard focus while open, supports arrow-key navigation, and releases the surface after launching or closing.
+
+The `launcher` IPC target allows Niri key bindings to open the surface without routing commands through visual components:
+
+```bash
+qs ipc -p /home/maylton/Development/lumina-shell call launcher toggle DP-1
+```
+
+Application launches use the native `DesktopEntry.execute()` method. Window and shell results call typed `NiriService` functions.
+
+## Notifications
+
+`NotificationService` owns Quickshell's native `NotificationServer` and retains at most 50 tracked notification generations. Incoming notifications are reduced into immutable history entries while retaining the original object only for lifecycle and action calls.
+
+The service provides:
+
+- a three-item popup queue on the focused output;
+- bounded timeouts with longer visibility for critical notifications;
+- replacement handling without stale close events affecting newer generations;
+- action invocation and client-visible dismiss/expire reasons;
+- unread state, bounded history, clearing, and Do Not Disturb.
+
+Do Not Disturb suppresses new popup surfaces without discarding history. The notification center and popups each create a surface only on the selected output, and visual components call service methods instead of owning the D-Bus integration.
+
+The notification center anchors to the configured bar edge but sizes itself
+from its history content, with compact empty and bounded maximum heights.
+`ListView` keeps longer histories virtualized and scrollable. The same
+contained `NotificationCard` presentation is shared by history and transient
+popups, including urgency, actions, dismissal, and keyboard focus.
+
+## Daily-control services
+
+Daily hardware state is split into typed singleton services:
+
+- `AudioService` binds the current PipeWire sink and source through `PwObjectTracker`, then exposes volume and mute operations.
+- `BrightnessService` contains the optional `brightnessctl --class=backlight` process boundary. Systems without a backlight remain usable and report the capability as unavailable.
+- `PowerService` consumes native UPower battery state and the power-profiles daemon.
+- `MediaService` selects the currently playing MPRIS client, then a paused session, and distinguishes native playing, paused, and stopped states so stale player metadata is not presented as active playback.
+- `ConnectivityService` consumes the native NetworkManager and BlueZ models for network, Wi-Fi, adapter, and connected-device status.
+- `WeatherService` resolves an explicit location or the system timezone through Open-Meteo geocoding, then refreshes current conditions and a three-day forecast every 30 minutes.
+
+Every service exposes a read-only `status` IPC operation for diagnostics. Visual components only call typed service methods and never execute the underlying system tools.
+
+## OSD and control center
+
+`OsdStore` reduces volume, microphone, brightness, session-lock, and explicit lock-key events into one timed presentation state. The OSD resolves the focused Niri output, never requests keyboard focus, and closes if that output disappears. The `osd` IPC target allows compositor key bindings to publish lock-key state without embedding input-device assumptions in the shell.
+
+The Material control center is a centered desktop surface with stable
+dimensions and two views. `DashboardView` combines the active workspace and
+output, clock, weather, daily controls, notification history, media,
+connectivity, power, and calendar. `ShellSettingsView` provides persistent
+configuration through focused category components. `ControlTabBar` switches
+between them with a short spatial transition and a shared moving indicator.
+`SettingsPageFrame` keeps every category instantiated, preserves its scroll
+position, and coordinates direction, opacity, focus, and input state when the
+active category changes.
+
+The preferred unified surface is 1440 by 920 logical pixels and remains
+bounded by the selected output's usable area. Dashboard content targets a
+1280-by-752 logical minimum, scaling as one unit below that threshold instead
+of clipping individual cards. Semantic 18-pixel card gaps, 22-pixel content
+insets, and a 42.5/57.5 overview-to-controls split preserve complete daily
+controls while giving media, status, and calendar cards more breathing room.
+
+
+Primary shell panels use the shared `ShellSurface` composition. Solid draws an
+opaque tonal container. Blur requests a shaped `BackgroundEffect.blurRegion`
+that exactly matches the rounded panel and overlays a clean neutral tint plus
+contrast protection. Frosted Glass uses the same bounded request, then adds a
+richer neutral tint, directional highlight, extremely subtle static grain, and
+a clearer glass edge. Child cards, controls, text, and icons remain opaque; no
+ancestor opacity is used. Launcher, Control Center, Notification Center,
+Wallpaper Picker, Session Menu, and OSD share this policy. The bar keeps its
+independent background configuration.
+
+
+Transient heads-up notification cards remain opaque semantic surfaces rather
+than requesting one large blur region across the gaps of their multi-card
+stack. Calendar and tray popups remain owned by the independent bar surface
+policy. This preserves urgency, avoids blur leaking through transparent gaps,
+and keeps shell and bar configuration boundaries explicit.
+
+Audio and brightness sliders, media actions, Wi-Fi and Bluetooth toggles, Do
+Not Disturb, dynamic color, battery status, and power profiles all call the
+same typed service methods used by IPC. `ControlCenterStore` owns `activePage`,
+`settingsCategory`, the selected output, and uptime presentation. It
+participates in `OverlayStore`, so Dashboard and Settings never create
+competing surfaces or duplicate focus state.
+
+## Graphical settings
+
+Settings use reusable page, section, row, switch, slider, combo, action,
+segmented-control, sidebar, and preview components. The fixed sidebar exposes
+Appearance, Bar, Dashboard, Behavior, Notifications, OSD, Session, System,
+and About; only the right content area scrolls. Every visible preference calls
+a typed `ConfigStore` setter or an existing service, and consumer modules
+observe the same state immediately.
+
+Standard section rows render inside one tonal group surface. The section owns
+the outer expressive contour and clipping, while rows contribute interaction
+states and inset dividers instead of independent resting capsules. Visual
+preview sections can opt out when their cards already provide containment.
+Section-level segmented selectors occupy a separate header slot above that
+surface. Grouped-row hover and focus use inset state layers, so transient input
+feedback never redraws or squares the shared outer contour.
+
+Settings sliders draw active and inactive tracks as separate segments around a
+shared handle. Pure geometry clamps values, reserves the handle gap, and
+collapses the absent segment at either endpoint without changing interaction
+or persisted values.
+
+Dashboard Daily Controls reuse that geometry for continuous volume,
+microphone, and brightness sliders. Their compact desktop treatment retains
+the Material 3 vertical handle, explicit track gap, smaller corners facing the
+handle, fully rounded outer endpoints, end stop indicator, and pointer-to-handle
+travel mapping while continuing to call the existing audio and brightness
+services. Each track segment is rendered as one vector contour so disabled
+opacity cannot darken overlapping cap layers.
+
+Settings combo rows keep their typed `options`, `currentValue`, and `selected`
+contract, but present choices in a shared overlay dropdown rather than cycling
+on click. The menu retains selected and highlighted states, supports arrow,
+Home, End, Enter, Space, Escape, and outside dismissal, and flips above its
+anchor when the output viewport has insufficient room below.
+
+`ConfigFileService` owns argument-array `xdg-open` processes.
+`SystemDiagnosticsService` owns local version and diagnostic processes.
+Visual components never construct shell command strings.
+`modules/settings/Settings.qml` remains an IPC bridge into the control center,
+not a second visual surface. IPC can open a category directly; `wallpaper`
+temporarily normalizes to Appearance.
+
+## Internationalization
+
+`I18n` resolves `LUMINA_LOCALE` or the Qt system locale to a supported regional
+catalog under `i18n/`. Catalogs are flat UTF-8 JSON objects keyed by stable
+message IDs. Every lookup carries an English source fallback, so incomplete,
+missing, or invalid translations do not prevent the shell from loading.
+
+The service watches the active catalog during development and exposes status
+and reload IPC operations. `scripts/check-translations.sh` validates catalog
+shape, rejects keys absent from the source catalog, and confirms that every
+`I18n.tr()` ID referenced by QML exists in `en-US.json`. Initial migration
+covers the unified Control Center tabs and header, Settings navigation, page
+headers, save state, reset actions, and their accessibility labels. Other
+surfaces can migrate incrementally without changing service or store state.
+
+## Persistent configuration
+
+`ConfigStore` persists user state through an atomic Quickshell `FileView` and
+`JsonAdapter`. Schema 4 added semantic appearance, dashboard, behavior,
+notification, OSD, session, and navigation preferences. Schema 5 added
+edge/floating bar surfaces, context policy, date/status options, widget
+visibility, and independent left/right orders. Schema 6 added independent bar
+background mode/opacity and automatic or manual content scaling. Schema 7 adds
+the normalized `barWidgetSettings` map and active-widget management APIs.
+Schema 8 replaces global alpha transparency with persisted Solid, Blur, and
+Frosted Glass shell surface styles plus bounded tint opacity.
+
+The default path is `Quickshell.stateDir/lumina-state.json`.
+`LUMINA_STATE_PATH` can redirect it for isolated validation. Schema v2
+migrated the single-string wallpaper shape into a default plus per-output map.
+Schema v3 added OSD and bar-detail preferences. Schema v4 normalizes missing
+and out-of-range values. Schema v5 migrates v4 in place, filters unknown or
+duplicate widget IDs, preserves valid ordering, and restores required IDs
+without changing wallpapers or preferences outside the Bar category. Retired
+layout-selection and single-order keys are ignored safely and disappear the
+next time the adapter writes the configuration. Schema v6 migrates schema v5
+global transparency into an equivalent initial bar background, then separates
+future bar changes from `transparencyEnabled` and `surfaceOpacity`.
+Schema v7 reads the original schema-v6 JSON before the adapter writes, maps
+legacy pill, context, date/time, tray, status, and avatar preferences into
+catalog defaults, preserves visibility and order, ignores unknown nested keys,
+and retires old widget-specific public fields on the next save.
+
+Writes are debounced and only occur after initialization, so loading,
+migration, and slider movement cannot continuously rewrite the file.
+`dirty`, `saving`, `lastSavedAt`, `lastSaveSucceeded`, and
+`saveStatusLabel` expose progress. Category defaults and full defaults share
+the pure `ConfigSchema.js` definitions used by migration tests.
+
+Before accepting loaded state, `ConfigStore` parses the original JSON independently of `JsonAdapter`. Invalid JSON is copied to the adjacent `.invalid` path, replaced atomically with defaults, and surfaced through graphical settings and the `config status` IPC operation.
+
+## Wallpaper and dynamic color
+
+Lumina owns one background-layer wallpaper surface per output. `WallpaperService` resolves a per-output assignment with a shared default fallback and exposes typed setters plus a `wallpaper` IPC target.
+
+Quickshell's `ColorQuantizer` samples the focused output wallpaper. The service
+scores quantized colors for saturation and mid-tone contrast, then derives
+accent roles plus low-chroma neutral and neutral-variant tones for surfaces,
+containers, text, and outlines. These tonal levels give the bar and overlays a
+wallpaper-related tint without using saturated accent colors as large
+backgrounds. Disabling dynamic color restores the static Lumina palette
+immediately.
+
+The wallpaper picker uses Qt's `FolderListModel` with image-only filters. It targets the output from which it was opened, previews the configured directory without copying files, and persists paths containing spaces or URL encoding through the same service boundary.
+
+## Layout and session controls
+
+Advanced layout requests remain typed methods on `NiriService`. The session surface exposes focus, move, center, width, floating, fullscreen, and tabbed-column operations without placing Niri commands in QML visual components. A subset is also available through launcher action results.
+
+`SessionService` owns lock, suspend, logout, restart, and power-off execution.
+Destructive confirmation follows schema-backed policy; lock and suspend submit
+directly. Logout uses `NiriService.quitSession()`; the remaining operations use
+argument-array `loginctl` or `systemctl` processes and report their exit state.
+
+The `session` IPC target can open the menu and describe the resolved command without executing it. This provides a safe diagnostics path for session integration.
+
+## Multi-output surfaces
+
+`OverlayStore` is the process-wide coordinator for launcher, the unified
+control center, notification center, wallpaper picker, and session menu
+surfaces. It records the active surface and output so opening one full-screen
+interactive overlay closes the previous one instead of stacking competing
+keyboard surfaces.
+
+Every overlay request resolves its target against `Quickshell.screens`. A missing or stale output name falls back to the first connected screen. If the active screen disappears, the overlay closes; notification popups move to the fallback screen; calendars on the removed screen close; context timers are destroyed with their bar delegate; and persisted wallpaper assignments remain available for a later reconnect.
+
+Each module still creates one lightweight surface delegate per connected screen. The coordinator only makes the selected delegate visible, preserving independent per-output geometry without duplicating service state.
+
+## Design system
+
+Lumina uses Material 3 Expressive as its visual foundation while adapting it to desktop productivity and Niri's spatial workflow.
+
+Design values are exposed through the single `Theme.luminaTokens` namespace:
+
+- semantic color roles rather than component-specific hex values;
+- a Material shape scale from `none` through `extraExtraLarge` and `full`;
+- larger outer containers, smaller nested controls, and animated shape changes
+  for resting, pressed, selected, and focused states;
+- shared spacing and sizing scales;
+- height-responsive semantic bar size, typography, padding, and gap roles;
+- typography roles for labels, body text, and titles;
+- semantic motion families used consistently by interactive components.
+
+Motion follows the Material separation between spatial transitions and visual
+effects. `spatialFast`, `spatialDefault`, and `spatialSlow` coordinate changes
+to position, bounds, spacing, and corner shape. `effectsFast`,
+`effectsDefault`, and `effectsSlow` handle color and opacity without changing
+geometry. Prominent workspace, context, tab, and page transitions use a small
+expressive overshoot; pressed feedback uses the shorter `press` token.
+
+Spacing likewise has semantic roles for bar items, bar clusters, control-center
+cards, settings sections, and content insets. Components can therefore change
+density without introducing local one-off gaps. Disabling animation or
+enabling reduced motion shortens every family through the existing global
+motion scale and removes spatial overshoot while preserving focus, shape, and
+selected-state feedback.
+
+Determinate media progress uses a reusable linear wavy indicator. Its active
+path follows the Material Expressive stroke, amplitude, wavelength, track-gap,
+and stop-indicator proportions; MPRIS position updates animate smoothly, and
+the wave advances only while playback and the Dashboard are active. Pausing
+smoothly collapses the waveform into a flat determinate line, while resuming
+restores its amplitude. Reduced motion disables phase movement without removing
+progress information.
+
+The token namespace is the boundary for wallpaper-derived dynamic color.
+Visual modules consume semantic roles and must not know how the palette was
+generated.
+
+`ThemePalette.js` owns complete static Light and Dark schemes, semantic-role
+validation, mode selection, and contrast-test helpers. The validated Dark
+foundation remains unchanged. The Light scheme defines its own surface
+hierarchy, foregrounds, outlines, primary roles, error roles, and state-layer
+colors instead of deriving them by inversion.
+
+Wallpaper color generation produces both Light and Dark tonal variants from
+the same source color. `Theme` stores those variants and selects one
+reactively, so changing modes never depends on signal ordering and cannot
+retain the previous mode's surface colors. In the validated runtime, Auto
+continues to use the documented Dark fallback because no stable system
+color-scheme preference is available.
+
+Other Quickshell desktops, including Sleex, are useful architectural references for modular widgets and centralized adaptive theming. Lumina does not inherit their compositor assumptions or visual identity: it remains Niri-first and develops its own Material Expressive component language.
+
+Lumina's source is licensed under `GPL-3.0-or-later`. Runtime dependencies and external architectural or design references are listed separately in [`CREDITS.md`](../CREDITS.md); reference projects do not become source dependencies unless explicitly recorded there.
 
 ## Layer policy
 
@@ -36,17 +510,12 @@ The bar uses the top layer so it remains visible over Niri's overview.
 
 ## Boundaries
 
-Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands directly. Those integrations will be introduced behind service APIs.
+Visual modules must not invoke `niri msg`, `wpctl`, `nmcli`, or similar commands directly. They call typed service functions such as `NiriService.focusWorkspace()` and `NiriService.toggleOverview()`.
 
 ## Next increment
 
-Create `NiriService` and consume `niri msg --json event-stream` to expose:
+The next open implementation areas are:
 
-- outputs;
-- workspaces;
-- focused workspace;
-- windows;
-- focused window;
-- overview state.
-
-The first consumer will be the bar's workspace and focused-window indicators.
+- laptop backlight and battery validation;
+- physical two-output hotplug validation;
+- 0.7 extended-beta features.

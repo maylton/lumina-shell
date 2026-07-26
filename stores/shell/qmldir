@@ -1,0 +1,2 @@
+module qs.stores.shell
+singleton OverlayStore 1.0 OverlayStore.qml

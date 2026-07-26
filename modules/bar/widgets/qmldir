@@ -1,0 +1,18 @@
+module qs.modules.bar.widgets
+ContextCapsule 1.0 ContextCapsule.qml
+DateTimeCluster 1.0 DateTimeCluster.qml
+ExpressiveBatteryIcon 1.0 ExpressiveBatteryIcon.qml
+KeyboardLayoutIndicator 1.0 KeyboardLayoutIndicator.qml
+OverviewButton 1.0 OverviewButton.qml
+PrivacyIndicator 1.0 PrivacyIndicator.qml
+SystemStatusCluster 1.0 SystemStatusCluster.qml
+SystemStatusItem 1.0 SystemStatusItem.qml
+UserAvatarButton 1.0 UserAvatarButton.qml
+TrayItem 1.0 TrayItem.qml
+TrayMenu 1.0 TrayMenu.qml
+TrayMenuEntry 1.0 TrayMenuEntry.qml
+TrayPopup 1.0 TrayPopup.qml
+TrayTooltip 1.0 TrayTooltip.qml
+TrayWidget 1.0 TrayWidget.qml
+WorkspacePill 1.0 WorkspacePill.qml
+WorkspaceStrip 1.0 WorkspaceStrip.qml

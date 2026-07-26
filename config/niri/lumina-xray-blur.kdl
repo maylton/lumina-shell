@@ -1,0 +1,13 @@
+// Optional explicit efficient profile for Lumina's bar.
+//
+// Niri already uses xray by default. This scoped rule documents and preserves
+// that behavior without forcing blur for non-blur Lumina background modes.
+layer-rule {
+    match namespace="^lumina-bar$"
+
+    background-effect {
+        xray true
+        noise 0.01
+        saturation 1.05
+    }
+}

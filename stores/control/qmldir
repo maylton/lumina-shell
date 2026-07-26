@@ -1,0 +1,2 @@
+module qs.stores.control
+singleton ControlCenterStore 1.0 ControlCenterStore.qml

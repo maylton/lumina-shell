@@ -1,0 +1,2 @@
+module qs.services.media
+singleton MediaService 1.0 MediaService.qml
