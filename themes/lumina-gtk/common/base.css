@@ -112,7 +112,21 @@ textview:focus {
   box-shadow: 0 0 0 1px @lumina_primary;
 }
 
-popover,
+/*
+ * GTK 4 popovers have a structural outer node plus an inner `contents` node.
+ * Keep the outer node transparent so libadwaita menus do not render as nested
+ * cards with a large empty frame around the actual menu surface.
+ */
+popover {
+  padding: 0;
+  color: @lumina_on_surface;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+popover > contents,
 menu,
 .context-menu {
   padding: 8px;
