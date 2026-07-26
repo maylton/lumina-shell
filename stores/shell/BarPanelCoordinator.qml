@@ -61,6 +61,7 @@ Singleton {
     }
 
     function reset() {
+        handoffTimer.stop()
         transitionTimer.stop()
         activePanelId = ""
         activeOutputName = ""
@@ -155,12 +156,15 @@ Singleton {
             return
         }
 
+        handoffTimer.stop()
         transitionPhase = "closing"
         transitionTimer.restart()
         closeRequested(activePanelId, activeOutputName)
     }
 
     function openPending() {
+        handoffTimer.stop()
+
         if (!pendingPanelId) {
             transitionPhase = "idle"
             transitionTimer.stop()
@@ -223,9 +227,7 @@ Singleton {
         transitionTimer.stop()
 
         if (transitionPhase === "closing") {
-            Qt.callLater(function() {
-                root.openPending()
-            })
+            handoffTimer.restart()
         } else {
             transitionPhase = "idle"
         }
@@ -279,6 +281,14 @@ Singleton {
         function onActiveOutputNameChanged() {
             root.handleOverlayChange()
         }
+    }
+
+    Timer {
+        id: handoffTimer
+
+        interval: 32
+        repeat: false
+        onTriggered: root.openPending()
     }
 
     Timer {
