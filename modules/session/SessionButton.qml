@@ -58,7 +58,7 @@ Rectangle {
     Accessible.role: Accessible.Button
     Accessible.name: I18n.tr(
         "bar.session.accessibleName",
-        "Open session and layout controls"
+        "Open session controls"
     )
     Accessible.focusable: true
     Accessible.focused: activeFocus

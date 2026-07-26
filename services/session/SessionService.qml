@@ -54,7 +54,7 @@ Singleton {
         case "suspend":
             return "Suspend this computer"
         case "logout":
-            return "Exit the current Niri session"
+            return "End the current desktop session"
         case "reboot":
             return "Restart the operating system"
         case "poweroff":
@@ -158,7 +158,7 @@ Singleton {
             NiriService.quitSession()
             activeAction = ""
             status = "submitted"
-            finished(action, true, "Logout submitted to Niri")
+            finished(action, true, "Logout submitted")
             return
         }
 
