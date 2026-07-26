@@ -12,8 +12,7 @@ PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
     "${repository_dir}/services/connectivity/BluetoothPairingAgent.py"
 
 PYTHONPYCACHEPREFIX="${TMPDIR:-/tmp}/lumina-shell-pycache" \
-    python3 -m unittest \
-    "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
+    python3 "${repository_dir}/tests/test_bluetooth_pairing_agent.py"
 
 pointer_focus_matches="$({
     rg -n \
