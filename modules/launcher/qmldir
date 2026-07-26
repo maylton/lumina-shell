@@ -1,4 +1,5 @@
 module qs.modules.launcher
 Launcher 1.0 Launcher.qml
+LauncherAppTile 1.0 LauncherAppTile.qml
 LauncherButton 1.0 LauncherButton.qml
 LauncherResult 1.0 LauncherResult.qml

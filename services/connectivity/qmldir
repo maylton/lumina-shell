@@ -1,2 +1,3 @@
 module qs.services.connectivity
 singleton ConnectivityService 1.0 ConnectivityService.qml
+singleton ConnectivityManagerService 1.0 ConnectivityManagerService.qml

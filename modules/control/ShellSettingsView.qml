@@ -6,6 +6,7 @@ import qs.modules.control.settings
 import qs.modules.control.settings.pages
 import qs.services.i18n
 import qs.stores.control
+import "../dock/DockStrings.js" as DockStrings
 
 FocusScope {
     id: root
@@ -65,6 +66,42 @@ FocusScope {
             ),
             iconName: "view-grid-symbolic",
             symbol: "▦"
+        },
+        {
+            id: "dock",
+            label: "Dock",
+            description: DockStrings.text(
+                I18n.locale,
+                "categoryDescription"
+            ),
+            iconName: "user-desktop-symbolic",
+            symbol: "▱"
+        },
+        {
+            id: "weather",
+            label: I18n.tr(
+                "settings.category.weather.label",
+                "Weather"
+            ),
+            description: I18n.tr(
+                "settings.category.weather.description",
+                "Location and forecast"
+            ),
+            iconName: "weather-clear-symbolic",
+            symbol: "☀"
+        },
+        {
+            id: "connectivity",
+            label: I18n.tr(
+                "settings.category.connectivity.label",
+                "Connectivity"
+            ),
+            description: I18n.tr(
+                "settings.category.connectivity.description",
+                "Wi-Fi, Ethernet, and Bluetooth"
+            ),
+            iconName: "network-wireless-symbolic",
+            symbol: "⌁"
         },
         {
             id: "behavior",
@@ -208,8 +245,48 @@ FocusScope {
 
             SettingsPageFrame {
                 anchors.fill: parent
-                categoryId: "behavior"
+                categoryId: "dock"
                 categoryIndex: 3
+                activeIndex: root.activeCategoryIndex
+                pageActive:
+                    ControlCenterStore.settingsCategory === "dock"
+
+                DockPage {
+                    anchors.fill: parent
+                }
+            }
+
+            SettingsPageFrame {
+                anchors.fill: parent
+                categoryId: "weather"
+                categoryIndex: 4
+                activeIndex: root.activeCategoryIndex
+                pageActive:
+                    ControlCenterStore.settingsCategory === "weather"
+
+                WeatherPage {
+                    anchors.fill: parent
+                }
+            }
+
+            SettingsPageFrame {
+                anchors.fill: parent
+                categoryId: "connectivity"
+                categoryIndex: 5
+                activeIndex: root.activeCategoryIndex
+                pageActive:
+                    ControlCenterStore.settingsCategory
+                        === "connectivity"
+
+                ConnectivityPage {
+                    anchors.fill: parent
+                }
+            }
+
+            SettingsPageFrame {
+                anchors.fill: parent
+                categoryId: "behavior"
+                categoryIndex: 6
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory
@@ -223,7 +300,7 @@ FocusScope {
             SettingsPageFrame {
                 anchors.fill: parent
                 categoryId: "notifications"
-                categoryIndex: 4
+                categoryIndex: 7
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory
@@ -237,7 +314,7 @@ FocusScope {
             SettingsPageFrame {
                 anchors.fill: parent
                 categoryId: "osd"
-                categoryIndex: 5
+                categoryIndex: 8
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory === "osd"
@@ -250,7 +327,7 @@ FocusScope {
             SettingsPageFrame {
                 anchors.fill: parent
                 categoryId: "session"
-                categoryIndex: 6
+                categoryIndex: 9
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory === "session"
@@ -263,7 +340,7 @@ FocusScope {
             SettingsPageFrame {
                 anchors.fill: parent
                 categoryId: "system"
-                categoryIndex: 7
+                categoryIndex: 10
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory === "system"
@@ -276,7 +353,7 @@ FocusScope {
             SettingsPageFrame {
                 anchors.fill: parent
                 categoryId: "about"
-                categoryIndex: 8
+                categoryIndex: 11
                 activeIndex: root.activeCategoryIndex
                 pageActive:
                     ControlCenterStore.settingsCategory === "about"

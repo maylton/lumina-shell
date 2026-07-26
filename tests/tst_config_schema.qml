@@ -5,11 +5,15 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema8WidgetSettings() {
+    function test_defaultsUseSchema7WidgetSettings() {
         const state = ConfigSchema.defaults()
 
         compare(state.schemaVersion, 8)
         compare(state.themeMode, "auto")
+        compare(state.shellBackgroundMode, "solid")
+        compare(state.shellSurfaceOpacity, 0.82)
+        verify(state.transparencyEnabled === undefined)
+        verify(state.surfaceOpacity === undefined)
         compare(state.paletteStyle, "auto")
         verify(state.barVisualStyle === undefined)
         verify(state.barWidgetOrder === undefined)
@@ -29,14 +33,6 @@ TestCase {
             "24"
         )
         compare(state.barWidgetSettings.launcher.showBackground, false)
-        compare(
-            state.barWidgetSettings.launcher.surfacePlacement,
-            "centered"
-        )
-        compare(
-            state.barWidgetSettings.datetime.surfacePlacement,
-            "near-widget"
-        )
         compare(state.dashboardUseUserAvatarImage, true)
         compare(state.dashboardUserAvatarPath, "")
         compare(state.barWidgetSettings.context.timeout, 3500)
@@ -159,8 +155,10 @@ TestCase {
         })
 
         compare(migrated.schemaVersion, 8)
-        compare(migrated.transparencyEnabled, true)
-        compare(migrated.surfaceOpacity, 0.78)
+        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.78)
         compare(migrated.barBackgroundMode, "blur")
         compare(migrated.barSurfaceOpacity, 0.78)
         compare(migrated.barAutoScaleContents, true)
@@ -262,25 +260,20 @@ TestCase {
         )
     }
 
-    function test_widgetSurfacePlacementNormalization() {
-        const state = ConfigSchema.normalize({
-            barWidgetSettings: {
-                launcher: { surfacePlacement: "near-widget" },
-                datetime: { surfacePlacement: "follow-pointer" }
-            }
+    function test_schema7TransparencyMigratesToShellSurfaceStyle() {
+        const migrated = ConfigSchema.migrate({
+  schemaVersion: 7,
+  transparencyEnabled: true,
+  surfaceOpacity: 0.74,
+  barBackgroundMode: "frosted"
         })
 
-        compare(
-            state.barWidgetSettings.launcher.surfacePlacement,
-            "near-widget"
-        )
-        compare(
-            state.barWidgetSettings.datetime.surfacePlacement,
-            "near-widget"
-        )
-        verify(
-            state.barWidgetSettings.context.surfacePlacement === undefined
-        )
+        compare(migrated.schemaVersion, 8)
+        compare(migrated.shellBackgroundMode, "blur")
+        compare(migrated.shellSurfaceOpacity, 0.74)
+        compare(migrated.barBackgroundMode, "frosted")
+        verify(migrated.transparencyEnabled === undefined)
+        verify(migrated.surfaceOpacity === undefined)
     }
 
     function test_paletteStyleNormalization() {
@@ -307,7 +300,7 @@ TestCase {
 
     function test_numericValuesAreClamped() {
         const state = ConfigSchema.normalize({
-            surfaceOpacity: 0.1,
+            shellSurfaceOpacity: 0.1,
             barSurfaceOpacity: -2,
             barContentScale: 8,
             animationScale: 8,
@@ -323,7 +316,7 @@ TestCase {
             osdSize: 3
         })
 
-        compare(state.surfaceOpacity, 0.72)
+        compare(state.shellSurfaceOpacity, 0.55)
         compare(state.barSurfaceOpacity, 0)
         compare(state.barContentScale, 1.4)
         compare(state.animationScale, 2)

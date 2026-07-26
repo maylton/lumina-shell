@@ -76,11 +76,14 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 - [x] User and contributor documentation.
 - [x] Recovery from invalid configuration.
 - [x] Runtime internationalization foundation and contributor catalogs.
+- [x] Configurable weather location and refresh behavior.
+- [x] Wi-Fi, wired-network, and Bluetooth management split into focused subpages with bounded lists.
+- [x] Bottom application drawer with pinned applications, a complete app grid, and localized search results.
 
 ## 0.7 — Extended Beta
 
 - [ ] Secure session lock.
-- [ ] Optional dock.
+- [x] Optional dock with floating and task-panel presentation.
 - [ ] Optional desktop widgets.
 - [ ] Performance profiling and long-running tests.
 
@@ -111,10 +114,10 @@ Lumina Shell is a Niri-first desktop shell built with Quickshell and QML. This r
 
 ### Sprint 6 — Public beta
 
-This sprint completes the 0.5 public-beta foundation:
+This sprint completes the 0.5 public-beta foundation and begins the first 0.7 surface:
 
-1. Graphical configuration with schema v7 persistence and safe schema
-   v3/v4/v5/v6 migration.
+1. Graphical configuration with schema v8 persistence and safe schema
+   v3/v4/v5/v6/v7 migration.
 2. Automatic backup and recovery for invalid configuration.
 3. Safe managed installation and removal.
 4. Native environment and service diagnostics.
@@ -124,6 +127,23 @@ This sprint completes the 0.5 public-beta foundation:
    per-output context, active-widget management, individual widget settings,
    independent background, responsive content scaling, and edge-to-edge or
    floating geometry.
+8. Maintained Brazilian Portuguese catalog with localized Dashboard and
+   Launcher surfaces and explicit product terminology.
+9. Weather settings with optional display, GeoIP or manual-city location,
+   feature-scoped persistence, expiring coordinate cache, and selectable
+   refresh intervals.
+10. Connectivity settings with focused Wi-Fi, wired-network, and Bluetooth
+    subpages, bounded independently scrollable lists, service-owned Wi-Fi
+    discovery and connection, saved-profile and wired-profile management,
+    bounded Bluetooth discovery, pairing, connection, and removal, and
+    section-scoped refreshes.
+11. Optional per-output application dock with a compact floating mode, a
+    full-width task-panel mode with centered icons, Niri window grouping,
+    pinned desktop entries, auto-hide, click-through masking, shell-surface
+    styling, and feature-scoped persistence.
+12. Aluminium-inspired bottom Launcher drawer with a visual handle, Dock
+    favorites, a complete application grid, localized Niri actions, and a
+    detailed search-result mode for applications, windows, and shell actions.
 
 ### Acceptance criteria
 
@@ -135,7 +155,7 @@ This sprint completes the 0.5 public-beta foundation:
 - Output name, resolution, and scale match `niri msg --json outputs`.
 - Opening and closing the overview updates the bar state.
 - Disconnecting and reconnecting the event stream does not leave stale state.
-- No visual component invokes `niri msg` directly.
+- No visual component invokes `niri msg` or daily-integration commands directly.
 - Only one full-screen interactive overlay is active at a time.
 - An unavailable target output falls back to a connected output.
 - Missing batteries or backlights degrade to an unavailable state.
@@ -145,15 +165,20 @@ This sprint completes the 0.5 public-beta foundation:
 - Primary exclusive surfaces support keyboard dismissal and traversal.
 - Dashboard and graphical settings share one overlay, service layer, and
   persistent configuration store.
-- Graphical settings provide nine keyboard-accessible categories, direct IPC
-  navigation, scoped reset, and debounced save feedback.
+- Graphical settings provide twelve keyboard-accessible categories, direct IPC
+  navigation, scoped reset where supported, and debounced save feedback.
 - Lumina's Material Expressive bar is the only bar layout and supports both
   edge-to-edge and floating surfaces.
 - The default edge-to-edge bar uses a substantial 56-pixel surface, clear
   clock/date hierarchy, and expressive workspace state without shrinking
   interaction targets.
+- Primary shell surfaces support Solid, Android-inspired Blur, and Frosted
+  Glass independently of the bar. Blur remains clean and grain-free; Frosted
+  adds a richer tint, directional highlight, and subtle static texture. Both
+  request native blur only inside their rounded panel bounds, while semantic
+  cards and controls remain opaque.
 - The bar supports solid, translucent, blur, frosted-glass, and transparent
-  backgrounds independently of global surface transparency. Only Blur and
+  backgrounds independently of shell surface style. Only Blur and
   Frosted request native Niri blur, bounded to the visible rounded surface;
   Translucent is alpha-only, children remain opaque, and all modes reserve work
   area while the wallpaper continues beneath the transparent surface.
@@ -208,6 +233,32 @@ This sprint completes the 0.5 public-beta foundation:
   bounded placement, outside dismissal, and keyboard navigation.
 - Runtime locale detection, regional fallback, live catalog reload, and
   translation validation support incremental community localization.
+- Brazilian Portuguese is a maintained complete catalog for all extracted
+  message IDs; Dashboard remains Dashboard, and localized Settings surfaces
+  update through the runtime catalog without changing persisted IDs.
+- Weather can be disabled without background requests; automatic mode resolves
+  an approximate city from the public IP without storing the IP, caches only
+  city/region/coordinates for 24 hours, and falls back to a manually entered
+  city with 15–120 minute refresh choices.
+- The Connectivity category keeps Wi-Fi, wired networking, and Bluetooth in
+  separate internal subpages; nearby networks, saved profiles, and Bluetooth
+  device groups use bounded lists, and only the selected integration receives
+  detailed periodic refreshes. Visual QML does not run commands. Password-
+  protected Wi-Fi uses a temporary `0600` secret file passed to NetworkManager
+  and removes it after the attempt.
+- The optional dock is disabled by default and appears per output when enabled.
+  Floating mode sizes the surface to its content; task-panel mode spans the
+  output while keeping icons centered. Both modes group Niri windows by app ID,
+  launch pinned desktop entries, cycle existing windows, follow Solid/Blur/
+  Frosted shell styling, keep transparent regions click-through, and bound long
+  application lists with horizontal scrolling.
+- Dock auto-hide uses a bottom-edge reveal region and a delayed collapse.
+  Workspace reservation is applied only while the dock is always visible and
+  includes any bottom-bar offset.
+- The Launcher opens as a centered bottom drawer above the bottom bar or Dock,
+  displays Dock favorites and an alphabetic application grid when idle, and
+  switches to localized application/window/action results while searching.
+  Right-click pinning uses the same explicit context menu in all Launcher modes.
 - Dashboard media progress uses a determinate Material Expressive wavy
   indicator driven by the existing MPRIS position and playback state.
 - The unified control center expands when screen space permits and preserves
@@ -215,10 +266,10 @@ This sprint completes the 0.5 public-beta foundation:
   through its responsive scale policy.
 - Responsive policies are covered at 1920, ultrawide, compact-desktop, narrow,
   and very narrow widths; centered context never overlaps asymmetric clusters.
-- Schema v4 bar preferences migrate through schema v5 and schema v6 into
-  schema v7 without losing valid widget ordering, visibility, global
-  transparency, or existing shell preferences; retired widget-specific keys
-  are ignored safely after migration.
+- Schema v4 bar preferences migrate through schema v5, schema v6, and
+  schema v7 into schema v8 without losing valid widget ordering, visibility,
+  shell style, or existing preferences; legacy global transparency becomes
+  bounded Blur and retired keys are ignored safely after migration.
 - Privacy and keyboard-layout indicators remain hidden until their native
   event sources can be validated.
 
@@ -228,4 +279,17 @@ This sprint completes the 0.5 public-beta foundation:
 2. [ ] Validate backlight and battery behavior on a laptop.
 3. [ ] Validate overlay hotplug behavior with two physical outputs.
 4. [x] Select the project license.
-5. [ ] Begin the 0.7 extended-beta work.
+5. [ ] Continue the 0.7 extended-beta work.
+6. [ ] Continue extracting hard-coded English from notifications, session,
+   wallpaper, calendar, OSD, and the remaining Settings pages.
+7. [ ] Validate GeoIP/manual weather switching and cache fallback on the native
+   runtime.
+8. [ ] Validate protected Wi-Fi, saved-profile, wired-profile, and Bluetooth
+   pairing flows against physical hardware and the active system agents.
+9. [ ] Add advanced NetworkManager editing for static IP, DNS, IPv6, VPN,
+   hotspot, and 802.1X only after the basic management flow is stable.
+10. [ ] Validate floating/task-panel switching, multi-output geometry, auto-hide,
+    click-through masking, bottom-bar coexistence, window cycling, and workspace
+    reservation on the native Niri runtime.
+11. [ ] Validate the Launcher drawer geometry, pinned row, app-grid scrolling,
+    keyboard navigation, and localized search results on the native runtime.

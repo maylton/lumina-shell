@@ -1,0 +1,2 @@
+module qs.stores.weather
+singleton WeatherPreferences 1.0 WeatherPreferences.qml

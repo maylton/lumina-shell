@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.design
+import qs.services.i18n
+import "../../services/i18n/LauncherStrings.js" as LauncherStrings
 
 Rectangle {
     id: root
@@ -11,14 +13,26 @@ Rectangle {
     required property bool selected
 
     signal activated
+    signal contextMenuRequested(var sourceItem)
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property bool supportsDockPinning:
+        result
+        && result.kind === "application"
+        && result.entry
+        && String(result.entry.id || "").length > 0
+    readonly property string kindLabel:
+        result.kind === "application"
+            ? LauncherStrings.text(I18n.locale, "kindApplication")
+            : result.kind === "window"
+                ? LauncherStrings.text(I18n.locale, "kindWindow")
+                : LauncherStrings.text(I18n.locale, "kindAction")
 
     implicitHeight: root.luminaDesign.size.launcherRowHeight
     radius: selected
         ? root.luminaDesign.shape.large
         : root.luminaDesign.shape.medium
-    scale: resultMouse.pressed ? 0.98 : 1.0
+    scale: resultMouse.pressed ? 0.98 : 1
     color: selected || resultMouse.containsMouse
         ? root.luminaDesign.color.accentContainer
         : "transparent"
@@ -31,14 +45,15 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: root.luminaDesign.motion.fast
+            duration: root.luminaDesign.motion.effectsFast
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
+            duration: root.luminaDesign.motion.press
+            easing.type: root.luminaDesign.motion.effectsEasing
         }
     }
 
@@ -66,7 +81,7 @@ Rectangle {
     Column {
         anchors {
             left: resultIcon.right
-            right: kindLabel.left
+            right: kindLabelContainer.left
             leftMargin: root.luminaDesign.spacing.medium
             rightMargin: root.luminaDesign.spacing.medium
             verticalCenter: parent.verticalCenter
@@ -99,7 +114,7 @@ Rectangle {
     }
 
     Rectangle {
-        id: kindLabel
+        id: kindLabelContainer
 
         anchors {
             right: parent.right
@@ -118,11 +133,7 @@ Rectangle {
             id: kindText
 
             anchors.centerIn: parent
-            text: root.result.kind === "application"
-                ? "APP"
-                : root.result.kind === "window"
-                    ? "WINDOW"
-                    : "ACTION"
+            text: root.kindLabel
             color: root.selected
                 ? root.luminaDesign.color.onAccentContainer
                 : root.luminaDesign.color.textMuted
@@ -135,8 +146,17 @@ Rectangle {
         id: resultMouse
 
         anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.activated()
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) {
+                if (root.supportsDockPinning)
+                    root.contextMenuRequested(root)
+                return
+            }
+
+            root.activated()
+        }
     }
 }

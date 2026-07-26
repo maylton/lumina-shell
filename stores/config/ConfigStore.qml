@@ -37,9 +37,10 @@ Singleton {
     property alias osdDuration: stateAdapter.osdDuration
     property alias showStatusDetails: stateAdapter.showStatusDetails
     property alias themeMode: stateAdapter.themeMode
-    property alias transparencyEnabled:
-        stateAdapter.transparencyEnabled
-    property alias surfaceOpacity: stateAdapter.surfaceOpacity
+    property alias shellBackgroundMode:
+        stateAdapter.shellBackgroundMode
+    property alias shellSurfaceOpacity:
+        stateAdapter.shellSurfaceOpacity
     property alias animationsEnabled: stateAdapter.animationsEnabled
     property alias animationScale: stateAdapter.animationScale
     property alias cornerRadiusScale: stateAdapter.cornerRadiusScale
@@ -321,8 +322,8 @@ Singleton {
 
     function setAppearanceValue(key, value) {
         if ([
-            "transparencyEnabled",
-            "surfaceOpacity",
+            "shellBackgroundMode",
+            "shellSurfaceOpacity",
             "animationsEnabled",
             "animationScale",
             "cornerRadiusScale",
@@ -657,8 +658,8 @@ Singleton {
             property int osdDuration: 1800
             property bool showStatusDetails: true
             property string themeMode: "auto"
-            property bool transparencyEnabled: false
-            property real surfaceOpacity: 0.96
+            property string shellBackgroundMode: "solid"
+            property real shellSurfaceOpacity: 0.82
             property bool animationsEnabled: true
             property real animationScale: 1
             property real cornerRadiusScale: 1
@@ -852,6 +853,8 @@ Singleton {
                         : "",
                 lastError: root.lastError,
                 themeMode: root.themeMode,
+                shellBackgroundMode: root.shellBackgroundMode,
+                shellSurfaceOpacity: root.shellSurfaceOpacity,
                 dynamicTheme: root.dynamicTheme,
                 paletteStyle: root.paletteStyle,
                 barPosition: root.barPosition,

@@ -72,7 +72,9 @@ Controls.Popup {
             return
 
         widgetId = requested.id
-        restoreFocusItem = sourceItem || null
+        restoreFocusItem = sourceItem && sourceItem.activeFocus
+            ? sourceItem
+            : null
         open()
     }
 
@@ -208,6 +210,12 @@ Controls.Popup {
                         )
                     }
 
+                    function activateFromPointer() {
+                        resetButton.forceActiveFocus()
+                        resetButton.focus = false
+                        resetButton.activate()
+                    }
+
                     Keys.onSpacePressed: event => {
                         activate()
                         event.accepted = true
@@ -238,7 +246,7 @@ Controls.Popup {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: resetButton.activate()
+                        onClicked: resetButton.activateFromPointer()
                     }
                 }
 

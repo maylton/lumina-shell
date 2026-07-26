@@ -209,10 +209,19 @@ SettingsPage {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Weather"
-            description: "Show Open-Meteo below the clock"
+            title: I18n.tr(
+                "settings.weather.enabled",
+                "Show weather"
+            )
+            description: I18n.tr(
+                "settings.weather.enabledDescription",
+                "Display current conditions below the Dashboard clock"
+            )
             available: ConfigStore.dashboardShowOverview
-            availabilityText: "Enable the overview card first"
+            availabilityText: I18n.tr(
+                "settings.dashboard.weather.enableOverviewFirst",
+                "Enable the overview card first"
+            )
             checked: ConfigStore.dashboardShowWeather
             onToggled: value =>
                 ConfigStore.setDashboardValue(

@@ -49,6 +49,12 @@ Rectangle {
             clicked()
     }
 
+    function activateFromPointer() {
+        root.forceActiveFocus()
+        root.focus = false
+        root.activate()
+    }
+
     Keys.onSpacePressed: event => {
         activate()
         event.accepted = true
@@ -94,10 +100,7 @@ Rectangle {
         cursorShape: enabled
             ? Qt.PointingHandCursor
             : Qt.ArrowCursor
-        onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
-            root.activate()
-        }
+        onClicked: root.activateFromPointer()
     }
 
     Controls.ToolTip.visible:
@@ -105,4 +108,3 @@ Rectangle {
     Controls.ToolTip.text: root.accessibleName
     Controls.ToolTip.delay: 450
 }
-

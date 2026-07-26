@@ -14,10 +14,7 @@ QtObject {
     readonly property bool lightMode: resolvedMode === "light"
     readonly property bool automaticMode:
         ConfigStore.themeMode === "auto"
-    readonly property real surfaceAlpha:
-        ConfigStore.transparencyEnabled
-            ? ConfigStore.surfaceOpacity
-            : 1
+    readonly property real surfaceAlpha: 1
     readonly property real motionScale:
         !ConfigStore.animationsEnabled
             ? 0

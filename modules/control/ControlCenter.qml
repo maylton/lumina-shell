@@ -10,8 +10,7 @@ import qs.stores.config
 import qs.stores.control
 import qs.stores.settings
 import qs.stores.time
-import qs.stores.shell
-import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
+import "ShellSurfacePolicy.js" as ShellSurfacePolicy
 
 Scope {
     id: root
@@ -69,12 +68,6 @@ Scope {
                     ControlCenterStore.activeOutputName === outputName
                 readonly property real safeMargin:
                     root.luminaDesign.spacing.extraLarge
-                readonly property real barWindowHeight:
-                    SurfacePlacementPolicy.barWindowHeight(
-                        ConfigStore.barHeight,
-                        ConfigStore.barSurfaceMode,
-                        ConfigStore.barMargin
-                    )
                 readonly property real panelScale:
                     ControlCenterStore.activePage === "settings"
                     ? 1
@@ -89,6 +82,7 @@ Scope {
                 screen: modelData
                 visible: centerVisible
                 color: "transparent"
+                surfaceFormat.opaque: false
                 focusable: centerVisible
                 exclusiveZone: 0
 
@@ -102,8 +96,27 @@ Scope {
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-control-center"
                 WlrLayershell.keyboardFocus: centerVisible
-                    ? WlrKeyboardFocus.Exclusive
-                    : WlrKeyboardFocus.None
+          ? WlrKeyboardFocus.Exclusive
+          : WlrKeyboardFocus.None
+
+      BackgroundEffect.blurRegion:
+          ShellSurfacePolicy.requestsBackdropBlur(
+              ConfigStore.shellBackgroundMode
+          )
+              ? shellBlurRegion
+              : null
+
+      Region {
+          id: shellBlurRegion
+
+          Region {
+              x: dashboardSurface.x
+              y: dashboardSurface.y
+              width: dashboardSurface.width
+              height: dashboardSurface.height
+              radius: dashboardSurface.radius
+          }
+      }
 
                 onCenterVisibleChanged: {
                     if (centerVisible) {
@@ -157,25 +170,10 @@ Scope {
                     }
                 }
 
-                Rectangle {
-                    id: dashboardSurface
+                ShellSurface {
+          id: dashboardSurface
 
-                    x: SurfacePlacementPolicy.horizontalX(
-                        OverlayStore.activePlacement,
-                        OverlayStore.activeAnchorX,
-                        width,
-                        controlWindow.width,
-                        controlWindow.safeMargin
-                    )
-                    y: SurfacePlacementPolicy.verticalY(
-                        OverlayStore.activePlacement,
-                        ConfigStore.barPosition,
-                        height,
-                        controlWindow.height,
-                        controlWindow.barWindowHeight,
-                        4,
-                        controlWindow.safeMargin
-                    )
+                    anchors.centerIn: availableArea
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,
                         availableArea.width
@@ -185,10 +183,7 @@ Scope {
                         availableArea.height
                     )
                     radius: root.luminaDesign.shape.extraLarge
-                    color: root.luminaDesign.color.surfaceContainer
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outline
-                    clip: true
+          clip: true
 
                     MouseArea {
                         anchors.fill: parent

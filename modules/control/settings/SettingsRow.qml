@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
+import "../../../services/i18n/SettingsStrings.js" as SettingsStrings
 
 Rectangle {
     id: root
@@ -53,10 +55,25 @@ Rectangle {
     Accessible.name: title
     Accessible.description: description
         + (availabilityText ? ". " + availabilityText : "")
-        + (restartRequired ? ". Restart required" : "")
+        + (restartRequired
+            ? ". " + SettingsStrings.text(
+                I18n.locale,
+                "restartRequired"
+            )
+            : "")
     Accessible.focusable: available
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activated()
+
+    function releasePointerFocus() {
+        root.forceActiveFocus()
+        root.focus = false
+    }
+
+    function activateFromPointer() {
+        releasePointerFocus()
+        root.activated()
+    }
 
     Keys.onSpacePressed: event => {
         if (root.available)
@@ -202,7 +219,10 @@ Rectangle {
                         id: restartText
 
                         anchors.centerIn: parent
-                        text: "Restart"
+                        text: SettingsStrings.text(
+                            I18n.locale,
+                            "restart"
+                        )
                         color:
                             root.luminaDesign.color.onAccentContainer
                         font.pixelSize:
@@ -243,10 +263,7 @@ Rectangle {
         cursorShape: root.available
             ? Qt.PointingHandCursor
             : Qt.ForbiddenCursor
-        onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
-            root.activated()
-        }
+        onClicked: root.activateFromPointer()
     }
 
     Rectangle {

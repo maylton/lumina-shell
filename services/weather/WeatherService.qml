@@ -3,13 +3,23 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services.i18n
+import qs.stores.config
+import qs.stores.weather
 
 Singleton {
     id: root
 
-    readonly property string requestedLocation:
+    readonly property bool enabled: ConfigStore.dashboardShowWeather
+    readonly property string overrideLocation:
         String(Quickshell.env("LUMINA_WEATHER_LOCATION") || "").trim()
-    readonly property bool loading: timezoneProcess.running
+    readonly property string locationMode: overrideLocation.length > 0
+        ? "manual"
+        : WeatherPreferences.locationMode
+    readonly property string manualCity: overrideLocation.length > 0
+        ? overrideLocation
+        : WeatherPreferences.manualCity
+    readonly property bool loading: geoIpProcess.running
         || geocodingProcess.running
         || forecastProcess.running
     readonly property string iconName: iconForCode(weatherCode)
@@ -20,10 +30,30 @@ Singleton {
         ? "H " + Math.round(maximumTemperature)
             + "° · L " + Math.round(minimumTemperature) + "°"
         : ""
+    readonly property string cachePath:
+        Quickshell.cacheDir + "/lumina-weather-location.json"
+    readonly property double cacheLifetime: 24 * 60 * 60 * 1000
+    readonly property var geoIpProviders: [
+        {
+            id: "ipwho.is",
+            url: "https://ipwho.is/"
+                + "?fields=success,message,city,region,latitude,longitude"
+                + (String(I18n.locale || "").toLowerCase()
+                    .indexOf("pt") === 0
+                    ? "&lang=pt-BR"
+                    : "")
+        },
+        {
+            id: "ipapi.co",
+            url: "https://ipapi.co/json/"
+        }
+    ]
 
     property bool available: false
+    property bool cacheLoaded: false
     property string locationName: ""
     property string condition: ""
+    property string locationSource: ""
     property int weatherCode: 0
     property real temperature: 0
     property real apparentTemperature: 0
@@ -34,11 +64,20 @@ Singleton {
     property double lastUpdated: 0
     property string lastError: ""
     property var forecast: []
+    property int geoIpProviderIndex: -1
+    property string activeGeoIpProvider: ""
+    property string geoIpFailure: ""
+
+    function languageCode() {
+        const value = String(I18n.locale || "en-US")
+        return value.split("-")[0] || "en"
+    }
 
     function geocodingUrl(locationQuery) {
         return "https://geocoding-api.open-meteo.com/v1/search"
             + "?name=" + encodeURIComponent(locationQuery)
-            + "&count=1&language=en&format=json"
+            + "&count=1&language=" + encodeURIComponent(languageCode())
+            + "&format=json"
     }
 
     function forecastUrl() {
@@ -52,51 +91,175 @@ Singleton {
             + "&forecast_days=3"
     }
 
-    function timezoneCity(rawTimezone) {
-        const timezone = String(rawTimezone || "").trim()
-        const parts = timezone.split("/")
-        const city = parts.length > 1 ? parts[parts.length - 1] : timezone
-
-        return city.replace(/_/g, " ").trim()
-    }
-
-    function resolveLocation() {
-        if (loading)
-            return
-
-        if (requestedLocation.length > 0) {
-            requestGeocoding(requestedLocation)
-            return
-        }
-
-        timezoneProcess.exec([
-            "timedatectl",
-            "show",
-            "--property=Timezone",
-            "--value"
-        ])
-    }
-
-    function requestGeocoding(locationQuery) {
-        const query = String(locationQuery || "").trim()
-
-        if (!query) {
-            lastError = "Weather location is not configured"
-            return
-        }
-
-        geocodingProcess.exec([
+    function curlCommand(url) {
+        return [
             "curl",
             "--fail",
             "--silent",
             "--show-error",
             "--location",
+            "--connect-timeout",
+            "5",
             "--max-time",
             "10",
             "--user-agent",
             "Lumina-Shell/0.1",
-            geocodingUrl(query)
-        ])
+            String(url || "")
+        ]
+    }
+
+    function cacheIsFresh() {
+        return cacheLoaded
+            && Number(cacheAdapter.updatedAt) > 0
+            && Date.now() - Number(cacheAdapter.updatedAt) < cacheLifetime
+            && isFinite(Number(cacheAdapter.latitude))
+            && isFinite(Number(cacheAdapter.longitude))
+            && String(cacheAdapter.city || "").length > 0
+    }
+
+    function applyLocation(city, region, nextLatitude, nextLongitude, source) {
+        const area = String(city || "").trim()
+        const regionName = String(region || "").trim()
+        const lat = Number(nextLatitude)
+        const lon = Number(nextLongitude)
+
+        if (!area || !isFinite(lat) || !isFinite(lon))
+            return false
+
+        latitude = lat
+        longitude = lon
+        locationName = regionName && regionName !== area
+            ? area + ", " + regionName
+            : area
+        locationSource = String(source || "")
+        return true
+    }
+
+    function applyCachedLocation() {
+        if (!cacheIsFresh())
+            return false
+
+        return applyLocation(
+            cacheAdapter.city,
+            cacheAdapter.region,
+            cacheAdapter.latitude,
+            cacheAdapter.longitude,
+            "automatic-ip-cache"
+        )
+    }
+
+    function writeLocationCache(city, region, lat, lon) {
+        cacheAdapter.city = String(city || "")
+        cacheAdapter.region = String(region || "")
+        cacheAdapter.latitude = Number(lat)
+        cacheAdapter.longitude = Number(lon)
+        cacheAdapter.updatedAt = Date.now()
+        cacheFile.writeAdapter()
+    }
+
+    function clearForecast() {
+        available = false
+        condition = ""
+        weatherCode = 0
+        temperature = 0
+        apparentTemperature = 0
+        maximumTemperature = 0
+        minimumTemperature = 0
+        forecast = []
+        lastUpdated = 0
+    }
+
+    function startGeoIpLookup(providerIndex) {
+        const index = Number(providerIndex)
+
+        if (!enabled
+            || locationMode !== "automatic-ip"
+            || geoIpProcess.running
+            || index < 0
+            || index >= geoIpProviders.length) {
+            return false
+        }
+
+        geoIpProviderIndex = index
+        activeGeoIpProvider = String(geoIpProviders[index].id || "")
+        geoIpProcess.exec(curlCommand(geoIpProviders[index].url))
+        return true
+    }
+
+    function resolveLocation(forceAutomaticLookup) {
+        if (!enabled || loading || !WeatherPreferences.initialized)
+            return
+
+        lastError = ""
+
+        if (locationMode === "manual") {
+            if (!manualCity) {
+                clearForecast()
+                lastError = "Weather city is not configured"
+                return
+            }
+
+            requestGeocoding(manualCity)
+            return
+        }
+
+        if (!forceAutomaticLookup && applyCachedLocation()) {
+            requestForecast()
+            return
+        }
+
+        geoIpFailure = ""
+        geoIpProviderIndex = -1
+        activeGeoIpProvider = ""
+        startGeoIpLookup(0)
+    }
+
+    function requestGeocoding(locationQuery) {
+        const query = String(locationQuery || "").trim()
+
+        if (!query || geocodingProcess.running)
+            return
+
+        geocodingProcess.exec(curlCommand(geocodingUrl(query)))
+    }
+
+    function parseGeoIp(rawText) {
+        let payload
+
+        try {
+            payload = JSON.parse(String(rawText || ""))
+        } catch (error) {
+            lastError = "Automatic weather location response was not valid JSON"
+            return false
+        }
+
+        if (payload.success === false || payload.error) {
+            lastError = String(
+                payload.message
+                    || payload.reason
+                    || "Automatic location unavailable"
+            )
+            return false
+        }
+
+        const city = String(payload.city || "")
+        const region = String(payload.region || payload.region_name || "")
+        const lat = Number(payload.latitude)
+        const lon = Number(payload.longitude)
+
+        if (!applyLocation(
+            city,
+            region,
+            lat,
+            lon,
+            "automatic-ip:" + activeGeoIpProvider
+        )) {
+            lastError = "Automatic weather location was incomplete"
+            return false
+        }
+
+        writeLocationCache(city, region, lat, lon)
+        return true
     }
 
     function parseGeocoding(rawText) {
@@ -115,16 +278,16 @@ Singleton {
         }
 
         const result = payload.results[0]
-        const area = String(result.name || requestedLocation)
+        const area = String(result.name || manualCity)
         const region = String(result.admin1 || "")
 
-        latitude = Number(result.latitude)
-        longitude = Number(result.longitude)
-        locationName = region.length > 0 && region !== area
-            ? area + ", " + region
-            : area
-
-        if (!isFinite(latitude) || !isFinite(longitude)) {
+        if (!applyLocation(
+            area,
+            region,
+            result.latitude,
+            result.longitude,
+            "manual"
+        )) {
             lastError = "Weather location coordinates were invalid"
             return false
         }
@@ -194,31 +357,22 @@ Singleton {
 
         if (value === 0)
             return "Clear"
-
         if ([1, 2].indexOf(value) >= 0)
             return "Partly cloudy"
-
         if (value === 3)
             return "Overcast"
-
         if ([45, 48].indexOf(value) >= 0)
             return "Fog"
-
         if (value >= 51 && value <= 57)
             return "Drizzle"
-
         if (value >= 61 && value <= 67)
             return "Rain"
-
         if (value >= 71 && value <= 77)
             return "Snow"
-
         if (value >= 80 && value <= 82)
             return "Rain showers"
-
         if ([85, 86].indexOf(value) >= 0)
             return "Snow showers"
-
         if (value >= 95)
             return "Thunderstorm"
 
@@ -230,24 +384,18 @@ Singleton {
 
         if (value === 0)
             return "weather-clear-symbolic"
-
         if ([1, 2].indexOf(value) >= 0)
             return "weather-few-clouds-symbolic"
-
         if (value === 3)
             return "weather-overcast-symbolic"
-
         if ([45, 48].indexOf(value) >= 0)
             return "weather-fog-symbolic"
-
         if ((value >= 71 && value <= 77)
             || [85, 86].indexOf(value) >= 0) {
             return "weather-snow-symbolic"
         }
-
         if (value >= 95)
             return "weather-storm-symbolic"
-
         if ((value >= 51 && value <= 67)
             || (value >= 80 && value <= 82)) {
             return "weather-showers-symbolic"
@@ -257,75 +405,167 @@ Singleton {
     }
 
     function requestForecast() {
-        if (!isFinite(latitude)
+        if (!enabled
+            || !isFinite(latitude)
             || !isFinite(longitude)
             || forecastProcess.running) {
             return
         }
 
-        forecastProcess.exec([
-            "curl",
-            "--fail",
-            "--silent",
-            "--show-error",
-            "--location",
-            "--max-time",
-            "10",
-            "--user-agent",
-            "Lumina-Shell/0.1",
-            forecastUrl()
-        ])
+        forecastProcess.exec(curlCommand(forecastUrl()))
     }
 
-    function refresh() {
-        if (loading)
+    function refresh(forceLocation) {
+        if (!enabled) {
+            clearForecast()
             return
+        }
 
-        if (isFinite(latitude) && isFinite(longitude))
+        if (Boolean(forceLocation)) {
+            latitude = NaN
+            longitude = NaN
+            resolveLocation(true)
+        } else if (isFinite(latitude) && isFinite(longitude)) {
             requestForecast()
-        else
-            resolveLocation()
+        } else {
+            resolveLocation(false)
+        }
     }
 
-    Component.onCompleted: resolveLocation()
+    function reconfigure() {
+        clearForecast()
+        latitude = NaN
+        longitude = NaN
+        locationName = ""
+        locationSource = ""
+        lastError = ""
+        geoIpFailure = ""
+        geoIpProviderIndex = -1
+        activeGeoIpProvider = ""
+
+        if (enabled)
+            Qt.callLater(function() { root.resolveLocation(false) })
+    }
+
+    Component.onCompleted: {
+        if (WeatherPreferences.initialized)
+            reconfigure()
+    }
+
+    Connections {
+        target: ConfigStore
+
+        function onDashboardShowWeatherChanged() {
+            root.reconfigure()
+        }
+    }
+
+    Connections {
+        target: WeatherPreferences
+
+        function onInitializedChanged() {
+            if (WeatherPreferences.initialized)
+                root.reconfigure()
+        }
+
+        function onLocationModeChanged() {
+            root.reconfigure()
+        }
+
+        function onManualCityChanged() {
+            if (WeatherPreferences.locationMode === "manual")
+                root.reconfigure()
+        }
+
+        function onRefreshIntervalChanged() {
+            refreshTimer.restart()
+        }
+    }
+
+    FileView {
+        id: cacheFile
+
+        path: root.cachePath
+        preload: true
+        atomicWrites: true
+        watchChanges: false
+        printErrors: false
+
+        adapter: JsonAdapter {
+            id: cacheAdapter
+
+            property string city: ""
+            property string region: ""
+            property real latitude: NaN
+            property real longitude: NaN
+            property double updatedAt: 0
+        }
+
+        onLoaded: {
+            root.cacheLoaded = true
+            if (root.enabled && WeatherPreferences.initialized)
+                root.resolveLocation(false)
+        }
+
+        onLoadFailed: error => {
+            root.cacheLoaded = true
+            if (root.enabled && WeatherPreferences.initialized)
+                root.resolveLocation(false)
+        }
+    }
 
     Process {
-        id: timezoneProcess
+        id: geoIpProcess
 
-        stdout: StdioCollector {
-            id: timezoneOutput
-        }
-
-        stderr: StdioCollector {
-            id: timezoneError
-        }
+        stdout: StdioCollector { id: geoIpOutput }
+        stderr: StdioCollector { id: geoIpError }
 
         onExited: (exitCode, exitStatus) => {
-            const city = exitCode === 0
-                ? root.timezoneCity(timezoneOutput.text)
-                : ""
+            if (!root.enabled || root.locationMode !== "automatic-ip")
+                return
 
-            if (city.length > 0) {
-                root.requestGeocoding(city)
-            } else {
-                root.lastError = String(timezoneError.text || "").trim()
-                    || "Could not derive weather location from timezone"
+            if (exitCode === 0 && root.parseGeoIp(geoIpOutput.text)) {
+                root.requestForecast()
+                return
             }
+
+            const providerError = String(geoIpError.text || "").trim()
+                || root.lastError
+                || "Automatic location unavailable"
+            root.geoIpFailure = root.activeGeoIpProvider
+                ? root.activeGeoIpProvider + ": " + providerError
+                : providerError
+
+            const nextProvider = root.geoIpProviderIndex + 1
+            if (nextProvider < root.geoIpProviders.length) {
+                root.lastError = ""
+                Qt.callLater(function() {
+                    root.startGeoIpLookup(nextProvider)
+                })
+                return
+            }
+
+            if (root.applyCachedLocation()) {
+                root.lastError = ""
+                root.requestForecast()
+                return
+            }
+
+            root.lastError = root.geoIpFailure
+                || "Automatic weather location unavailable"
         }
     }
 
     Process {
         id: geocodingProcess
 
-        stdout: StdioCollector {
-            id: geocodingOutput
-        }
-
-        stderr: StdioCollector {
-            id: geocodingError
-        }
+        stdout: StdioCollector { id: geocodingOutput }
+        stderr: StdioCollector { id: geocodingError }
 
         onExited: (exitCode, exitStatus) => {
+            if (!root.enabled)
+                return
+
             if (exitCode === 0
                 && root.parseGeocoding(geocodingOutput.text)) {
                 root.requestForecast()
@@ -341,15 +581,13 @@ Singleton {
     Process {
         id: forecastProcess
 
-        stdout: StdioCollector {
-            id: forecastOutput
-        }
-
-        stderr: StdioCollector {
-            id: forecastError
-        }
+        stdout: StdioCollector { id: forecastOutput }
+        stderr: StdioCollector { id: forecastError }
 
         onExited: (exitCode, exitStatus) => {
+            if (!root.enabled)
+                return
+
             if (exitCode === 0
                 && root.parseForecast(forecastOutput.text)) {
                 return
@@ -362,24 +600,31 @@ Singleton {
     }
 
     Timer {
-        interval: 30 * 60 * 1000
-        running: true
+        id: refreshTimer
+
+        interval: Math.max(15, WeatherPreferences.refreshInterval)
+            * 60 * 1000
+        running: root.enabled && WeatherPreferences.initialized
         repeat: true
-        onTriggered: root.refresh()
+        onTriggered: root.refresh(false)
     }
 
     IpcHandler {
         target: "weather"
 
         function refresh(): void {
-            root.refresh()
+            root.refresh(true)
         }
 
         function status(): string {
             return JSON.stringify({
-                available: root.available,
+                enabled: root.enabled,
                 loading: root.loading,
+                available: root.available,
+                locationMode: root.locationMode,
+                locationSource: root.locationSource,
                 location: root.locationName,
+                manualCity: root.manualCity,
                 coordinates: {
                     latitude: root.latitude,
                     longitude: root.longitude
@@ -391,8 +636,12 @@ Singleton {
                 minimum: root.minimumTemperature,
                 maximum: root.maximumTemperature,
                 forecast: root.forecast,
+                refreshInterval: WeatherPreferences.refreshInterval,
                 updatedAt: root.lastUpdated,
                 provider: "Open-Meteo",
+                automaticLocationProvider: root.activeGeoIpProvider,
+                automaticLocationProviders: ["ipwho.is", "ipapi.co"],
+                automaticLocationError: root.geoIpFailure,
                 error: root.lastError
             })
         }

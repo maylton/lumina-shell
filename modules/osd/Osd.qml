@@ -4,6 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.design
+import qs.modules.control
+import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.stores.osd
 import qs.stores.config
 
@@ -31,6 +33,7 @@ Scope {
                 implicitWidth: Math.round(360 * ConfigStore.osdSize)
                 implicitHeight: Math.round(104 * ConfigStore.osdSize)
                 color: "transparent"
+                surfaceFormat.opaque: false
                 focusable: false
                 exclusiveZone: 0
 
@@ -48,12 +51,30 @@ Scope {
                 WlrLayershell.namespace: "lumina-osd"
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: root.luminaDesign.shape.extraLarge
-                    color: root.luminaDesign.color.surfaceContainer
-                    border.width: 1
-                    border.color: root.luminaDesign.color.outline
+      BackgroundEffect.blurRegion:
+          ShellSurfacePolicy.requestsBackdropBlur(
+              ConfigStore.shellBackgroundMode
+          )
+              ? shellBlurRegion
+              : null
+
+      Region {
+          id: shellBlurRegion
+
+          Region {
+              x: osdSurface.x
+              y: osdSurface.y
+              width: osdSurface.width
+              height: osdSurface.height
+              radius: osdSurface.radius
+          }
+      }
+
+                ShellSurface {
+          id: osdSurface
+
+          anchors.fill: parent
+          radius: root.luminaDesign.shape.extraLarge
 
                     Row {
                         anchors {

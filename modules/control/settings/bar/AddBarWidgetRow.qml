@@ -50,6 +50,12 @@ Rectangle {
             addPopup.open()
     }
 
+    function toggleFromPointer() {
+        root.forceActiveFocus()
+        root.focus = false
+        root.togglePopup()
+    }
+
     Keys.onSpacePressed: event => {
         togglePopup()
         event.accepted = true
@@ -95,10 +101,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
-            root.togglePopup()
-        }
+        onClicked: root.toggleFromPointer()
     }
 
     Controls.Popup {

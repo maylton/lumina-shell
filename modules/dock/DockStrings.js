@@ -1,0 +1,103 @@
+.pragma library
+
+var ENGLISH = {
+    launcher: "Launcher",
+    openLauncher: "Open the application launcher",
+    running: "Running",
+    pinned: "Pinned",
+    rightClickPin: "Right-click for pin options",
+    rightClickUnpin: "Right-click for unpin options",
+    pinToDock: "Pin to Dock",
+    unpinFromDock: "Unpin from Dock",
+    applicationMenu: "Application menu",
+    categoryDescription: "Favorites and running applications",
+    pageDescription: "Optional application dock behavior and appearance",
+    visibility: "Visibility",
+    visibilityDescription: "The dock is disabled by default and can run on every output",
+    enable: "Enable dock",
+    enableDescription: "Show application access on every monitor",
+    mode: "Presentation",
+    modeDescription: "Choose a compact floating dock or a full-width task panel",
+    modeFloating: "Floating dock",
+    modeTaskPanel: "Task panel",
+    modeFloatingDescription: "A compact centered surface sized to its icons",
+    modeTaskPanelDescription: "A full-width bottom panel with centered application icons",
+    autoHide: "Automatically hide",
+    autoHideDescription: "Reveal the dock by moving the pointer to the bottom edge",
+    showRunning: "Show running applications",
+    showRunningDescription: "Append grouped Niri applications after pinned favorites",
+    reserveSpace: "Reserve workspace space",
+    reserveSpaceDescription: "Keep tiled windows above an always-visible dock or task panel",
+    reserveUnavailable: "Disable automatic hiding first",
+    appearance: "Appearance",
+    appearanceDescription: "The dock follows the shell Solid, Blur, or Frosted Glass style",
+    iconSize: "Icon size",
+    iconSizeDescription: "Size of application icons and interaction targets",
+    margin: "Bottom margin",
+    marginDescription: "Distance between the dock and the screen or bottom bar",
+    favorites: "Pinned applications",
+    favoritesDescription: "Right-click an application in the dock or Launcher, then choose whether to pin or unpin it",
+    noFavorites: "No pinned applications",
+    noFavoritesDescription: "Right-click an installed application in the Launcher and choose Pin to Dock",
+    remove: "Remove",
+    clear: "Clear favorites",
+    clearDescription: "Remove every pinned application from the dock",
+    reset: "Reset dock",
+    resetDescription: "Restore dock visibility, behavior, size, and favorites"
+}
+
+var PORTUGUESE = {
+    launcher: "Launcher",
+    openLauncher: "Abrir o launcher de aplicativos",
+    running: "Em execução",
+    pinned: "Fixado",
+    rightClickPin: "Clique com o botão direito para ver a opção de fixar",
+    rightClickUnpin: "Clique com o botão direito para ver a opção de desafixar",
+    pinToDock: "Fixar no Dock",
+    unpinFromDock: "Desafixar do Dock",
+    applicationMenu: "Menu do aplicativo",
+    categoryDescription: "Favoritos e aplicativos em execução",
+    pageDescription: "Comportamento e aparência do dock opcional",
+    visibility: "Visibilidade",
+    visibilityDescription: "O dock vem desativado e pode aparecer em todas as saídas",
+    enable: "Ativar dock",
+    enableDescription: "Exibe o acesso aos aplicativos em todos os monitores",
+    mode: "Apresentação",
+    modeDescription: "Escolha entre um dock flutuante compacto e um painel de tarefas",
+    modeFloating: "Dock flutuante",
+    modeTaskPanel: "Painel de tarefas",
+    modeFloatingDescription: "Superfície compacta centralizada e ajustada aos ícones",
+    modeTaskPanelDescription: "Painel inferior de largura total com os ícones centralizados",
+    autoHide: "Ocultar automaticamente",
+    autoHideDescription: "Revela o dock ao mover o ponteiro para a borda inferior",
+    showRunning: "Exibir aplicativos em execução",
+    showRunningDescription: "Agrupa aplicativos do Niri depois dos favoritos fixados",
+    reserveSpace: "Reservar espaço da área de trabalho",
+    reserveSpaceDescription: "Mantém as janelas acima do dock ou painel sempre visível",
+    reserveUnavailable: "Desative primeiro a ocultação automática",
+    appearance: "Aparência",
+    appearanceDescription: "O dock segue o estilo Sólido, Desfoque ou Vidro fosco do shell",
+    iconSize: "Tamanho dos ícones",
+    iconSizeDescription: "Tamanho dos ícones e dos alvos de interação",
+    margin: "Margem inferior",
+    marginDescription: "Distância entre o dock e a tela ou barra inferior",
+    favorites: "Aplicativos fixados",
+    favoritesDescription: "Clique com o botão direito em um aplicativo no Dock ou no Launcher e escolha fixar ou desafixar",
+    noFavorites: "Nenhum aplicativo fixado",
+    noFavoritesDescription: "Clique com o botão direito em um aplicativo instalado no Launcher e escolha Fixar no Dock",
+    remove: "Remover",
+    clear: "Limpar favoritos",
+    clearDescription: "Remove todos os aplicativos fixados do dock",
+    reset: "Restaurar dock",
+    resetDescription: "Restaura visibilidade, comportamento, tamanho e favoritos do dock"
+}
+
+function strings(locale) {
+    var normalized = String(locale || "").toLowerCase()
+    return normalized.indexOf("pt") === 0 ? PORTUGUESE : ENGLISH
+}
+
+function text(locale, key) {
+    var values = strings(locale)
+    return values[key] || ENGLISH[key] || String(key || "")
+}

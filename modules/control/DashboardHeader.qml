@@ -78,7 +78,10 @@ Item {
         DashboardAction {
             symbol: "⚙"
             symbolScale: 1.2
-            label: "Open shell settings"
+            label: I18n.tr(
+                "control.action.openSettings",
+                "Open shell settings"
+            )
             checked: ControlCenterStore.activePage === "settings"
             onActivated: ControlCenterStore.setPage("settings")
         }
@@ -87,14 +90,20 @@ Item {
             visible: ConfigStore.dashboardShowSessionActions
             iconName: "system-shutdown-symbolic"
             symbol: "⏻"
-            label: "Open session controls"
+            label: I18n.tr(
+                "control.action.openSession",
+                "Open session controls"
+            )
             onActivated: SessionMenuStore.openFor(root.outputName)
         }
 
         DashboardAction {
             iconName: "notifications-disabled-symbolic"
             symbol: "◐"
-            label: "Do Not Disturb"
+            label: I18n.tr(
+                "control.action.doNotDisturb",
+                "Do Not Disturb"
+            )
             checked: NotificationService.doNotDisturb
             onActivated: NotificationService.toggleDoNotDisturb()
         }
@@ -102,7 +111,10 @@ Item {
         DashboardAction {
             iconName: "window-close-symbolic"
             symbol: "×"
-            label: "Close control center"
+            label: I18n.tr(
+                "control.action.close",
+                "Close control center"
+            )
             onActivated: ControlCenterStore.close()
         }
     }

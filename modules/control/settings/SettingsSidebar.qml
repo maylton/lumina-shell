@@ -15,6 +15,21 @@ DashboardCard {
     required property var categories
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property int selectedIndex: {
+        for (var index = 0; index < categories.length; ++index) {
+            if (String(categories[index].id)
+                === ControlCenterStore.settingsCategory) {
+                return index
+            }
+        }
+
+        return 0
+    }
+
+    function releasePointerFocus(item) {
+        item.forceActiveFocus()
+        item.focus = false
+    }
 
     accessibleName: I18n.tr(
         "settings.sidebar.accessibleName",
@@ -51,10 +66,8 @@ DashboardCard {
 
             Behavior on radius {
                 NumberAnimation {
-                    duration:
-                        root.luminaDesign.motion.spatialFast
-                    easing.type:
-                        root.luminaDesign.motion.spatialEasing
+                    duration: root.luminaDesign.motion.spatialFast
+                    easing.type: root.luminaDesign.motion.spatialEasing
                     easing.overshoot:
                         root.luminaDesign.motion.spatialOvershoot
                 }
@@ -116,9 +129,7 @@ DashboardCard {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    editButton.forceActiveFocus(
-                        Qt.MouseFocusReason
-                    )
+                    root.releasePointerFocus(editButton)
                     ConfigFileService.openConfigFile()
                 }
             }
@@ -158,6 +169,8 @@ DashboardCard {
         }
 
         Rectangle {
+            id: folderButton
+
             width: parent.width
             height: 32
             radius: root.luminaDesign.shape.large
@@ -220,24 +233,50 @@ DashboardCard {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: ConfigFileService.openConfigDirectory()
+                onClicked: {
+                    root.releasePointerFocus(folderButton)
+                    ConfigFileService.openConfigDirectory()
+                }
             }
         }
 
         Rectangle {
+            id: sidebarDivider
+
             width: parent.width
             height: 1
             color: root.luminaDesign.color.outline
             opacity: 0.5
         }
 
-        Repeater {
+        ListView {
+            id: categoryList
+
+            width: parent.width
+            height: Math.max(
+                0,
+                parent.height
+                    - editButton.height
+                    - folderButton.height
+                    - sidebarDivider.height
+                    - parent.spacing * 3
+            )
+            clip: true
+            spacing: root.luminaDesign.spacing.controlItemGap
             model: root.categories
+            currentIndex: root.selectedIndex
+            boundsBehavior: Flickable.StopAtBounds
+            keyNavigationEnabled: true
+
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0)
+                    positionViewAtIndex(currentIndex, ListView.Contain)
+            }
 
             delegate: SettingsNavigationItem {
                 required property var modelData
 
-                width: parent.width
+                width: ListView.view.width
                 compact: root.compact
                 label: String(modelData.label)
                 description: String(modelData.description)

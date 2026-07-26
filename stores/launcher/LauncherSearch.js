@@ -36,6 +36,15 @@ function matchScore(needle, title, details) {
     return 300
 }
 
+function wrappedIndex(index, offset, length) {
+    var count = Math.max(0, Number(length) || 0)
+    if (count === 0)
+        return 0
+
+    var requested = (Number(index) || 0) + (Number(offset) || 0)
+    return ((requested % count) + count) % count
+}
+
 function finalizeResults(matches) {
     var results = matches ? matches.slice() : []
 

@@ -17,7 +17,6 @@ TestCase {
         }
 
         const results = LauncherSearch.finalizeResults(matches)
-
         compare(results.length, 30)
         compare(results[0].title, "Application 01")
         compare(results[29].title, "Application 30")
@@ -52,5 +51,11 @@ TestCase {
             ),
             -1
         )
+    }
+
+    function test_wrappedIndexHandlesGridOffsets() {
+        compare(LauncherSearch.wrappedIndex(0, -4, 3), 2)
+        compare(LauncherSearch.wrappedIndex(2, 4, 3), 0)
+        compare(LauncherSearch.wrappedIndex(0, 1, 0), 0)
     }
 }

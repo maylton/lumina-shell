@@ -67,6 +67,10 @@ Scope {
 
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "lumina-notification-popups"
+
+                // Heads-up notifications intentionally remain opaque semantic
+                // cards. The shared shell style applies to the bounded
+                // Notification Center panel, not the transient multi-card stack.
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
                 Column {

@@ -10,4 +10,5 @@ SettingsSegmentedControl 1.0 SettingsSegmentedControl.qml
 SettingsSidebar 1.0 SettingsSidebar.qml
 SettingsSliderRow 1.0 SettingsSliderRow.qml
 SettingsSwitchRow 1.0 SettingsSwitchRow.qml
+SettingsTextFieldRow 1.0 SettingsTextFieldRow.qml
 ThemePreviewCard 1.0 ThemePreviewCard.qml

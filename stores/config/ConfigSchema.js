@@ -18,8 +18,8 @@ function defaults() {
         osdDuration: 1800,
         showStatusDetails: true,
         themeMode: "auto",
-        transparencyEnabled: false,
-        surfaceOpacity: 0.96,
+        shellBackgroundMode: "solid",
+        shellSurfaceOpacity: 0.82,
         animationsEnabled: true,
         animationScale: 1,
         cornerRadiusScale: 1,
@@ -374,11 +374,16 @@ function normalize(source) {
         ],
         base.paletteStyle
     )
-    result.surfaceOpacity = boundedNumber(
-        result.surfaceOpacity,
-        base.surfaceOpacity,
-        0.72,
-        1
+    result.shellBackgroundMode = choice(
+        result.shellBackgroundMode,
+        ["solid", "blur", "frosted"],
+        base.shellBackgroundMode
+    )
+    result.shellSurfaceOpacity = boundedNumber(
+        result.shellSurfaceOpacity,
+        base.shellSurfaceOpacity,
+        0.55,
+        0.95
     )
     result.animationScale = boundedNumber(
         result.animationScale,
@@ -515,7 +520,6 @@ function normalize(source) {
         "dynamicTheme",
         "osdEnabled",
         "showStatusDetails",
-        "transparencyEnabled",
         "animationsEnabled",
         "compactMode",
         "barAutoScaleContents",
@@ -734,6 +738,21 @@ function migrate(source) {
         input.barWidgetSettings = widgetSettings
     }
 
+    if (version < 8) {
+        input.shellBackgroundMode = booleanValue(
+  input.transparencyEnabled,
+  false
+        ) ? "blur" : "solid"
+        input.shellSurfaceOpacity = boundedNumber(
+  input.surfaceOpacity,
+  defaults().shellSurfaceOpacity,
+  0.55,
+  0.95
+        )
+        delete input.transparencyEnabled
+        delete input.surfaceOpacity
+    }
+
     return normalize(input)
 }
 
@@ -745,8 +764,8 @@ function defaultsForCategory(categoryName) {
             "themeMode",
             "dynamicTheme",
             "paletteStyle",
-            "transparencyEnabled",
-            "surfaceOpacity",
+            "shellBackgroundMode",
+            "shellSurfaceOpacity",
             "animationsEnabled",
             "animationScale",
             "cornerRadiusScale",

@@ -1,0 +1,3 @@
+module qs.stores.dock
+singleton DockPreferences 1.0 DockPreferences.qml
+singleton DockStore 1.0 DockStore.qml

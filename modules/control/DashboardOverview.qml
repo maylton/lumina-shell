@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.services.i18n
 import qs.services.weather
 import qs.stores.system
 import qs.stores.time
@@ -11,6 +12,105 @@ Item {
 
     property bool showWeather: true
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property string weatherUpdating: I18n.tr(
+        "dashboard.weather.updating",
+        "Updating weather"
+    )
+    readonly property string weatherUnavailable: I18n.tr(
+        "dashboard.weather.unavailable",
+        "Weather unavailable"
+    )
+    readonly property string weatherCondition:
+        translatedWeatherCondition(WeatherService.weatherCode)
+    readonly property string weatherRangeLabel: WeatherService.available
+        ? I18n.tr(
+            "dashboard.weather.range",
+            "H %1° · L %2°",
+            [
+                Math.round(WeatherService.maximumTemperature),
+                Math.round(WeatherService.minimumTemperature)
+            ]
+        )
+        : ""
+
+    function translatedWeatherCondition(code) {
+        const value = Number(code || 0)
+
+        if (value === 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.clear",
+                "Clear"
+            )
+        }
+
+        if ([1, 2].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.partlyCloudy",
+                "Partly cloudy"
+            )
+        }
+
+        if (value === 3) {
+            return I18n.tr(
+                "dashboard.weather.condition.overcast",
+                "Overcast"
+            )
+        }
+
+        if ([45, 48].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.fog",
+                "Fog"
+            )
+        }
+
+        if (value >= 51 && value <= 57) {
+            return I18n.tr(
+                "dashboard.weather.condition.drizzle",
+                "Drizzle"
+            )
+        }
+
+        if (value >= 61 && value <= 67) {
+            return I18n.tr(
+                "dashboard.weather.condition.rain",
+                "Rain"
+            )
+        }
+
+        if (value >= 71 && value <= 77) {
+            return I18n.tr(
+                "dashboard.weather.condition.snow",
+                "Snow"
+            )
+        }
+
+        if (value >= 80 && value <= 82) {
+            return I18n.tr(
+                "dashboard.weather.condition.rainShowers",
+                "Rain showers"
+            )
+        }
+
+        if ([85, 86].indexOf(value) >= 0) {
+            return I18n.tr(
+                "dashboard.weather.condition.snowShowers",
+                "Snow showers"
+            )
+        }
+
+        if (value >= 95) {
+            return I18n.tr(
+                "dashboard.weather.condition.thunderstorm",
+                "Thunderstorm"
+            )
+        }
+
+        return I18n.tr(
+            "dashboard.weather.condition.current",
+            "Current conditions"
+        )
+    }
 
     DashboardCard {
         id: welcomeCard
@@ -22,7 +122,10 @@ Item {
         }
 
         height: 152
-        accessibleName: "Welcome"
+        accessibleName: I18n.tr(
+            "dashboard.welcome.accessibleName",
+            "Welcome"
+        )
         emphasized: true
 
         Column {
@@ -40,9 +143,11 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: "Welcome, "
-                    + SystemInfoStore.displayName
-                    + "!"
+                text: I18n.tr(
+                    "dashboard.welcome.greeting",
+                    "Welcome, %1!",
+                    [SystemInfoStore.displayName]
+                )
                 color: root.luminaDesign.color.onSurface
                 elide: Text.ElideRight
                 font.pixelSize: root.luminaDesign.typography.titleLarge
@@ -69,7 +174,10 @@ Item {
             topMargin: root.luminaDesign.spacing.controlCardGap
         }
 
-        accessibleName: "Date and weather"
+        accessibleName: I18n.tr(
+            "dashboard.dateWeather.accessibleName",
+            "Date and weather"
+        )
 
         Column {
             anchors.centerIn: parent
@@ -89,7 +197,7 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: Qt.formatDate(
+                text: Qt.locale(I18n.locale).toString(
                     CalendarStore.currentDate,
                     "dddd, d MMMM yyyy"
                 )
@@ -106,14 +214,14 @@ Item {
 
                 Accessible.role: Accessible.Pane
                 Accessible.name: WeatherService.available
-                    ? WeatherService.condition
+                    ? root.weatherCondition
                         + ", "
                         + WeatherService.temperatureLabel
                         + ", "
                         + WeatherService.locationName
                     : WeatherService.loading
-                        ? "Updating weather"
-                        : "Weather unavailable"
+                        ? root.weatherUpdating
+                        : root.weatherUnavailable
 
                 Row {
                     anchors {
@@ -166,10 +274,10 @@ Item {
                         Text {
                             width: parent.width
                             text: WeatherService.available
-                                ? WeatherService.condition
+                                ? root.weatherCondition
                                 : WeatherService.loading
-                                    ? "Updating weather"
-                                    : "Weather unavailable"
+                                    ? root.weatherUpdating
+                                    : root.weatherUnavailable
                             color: root.luminaDesign.color.onSurface
                             elide: Text.ElideRight
                             font.pixelSize:
@@ -181,7 +289,6 @@ Item {
                             width: parent.width
                             text: WeatherService.available
                                 ? WeatherService.locationName
-                                    + " · Open-Meteo"
                                 : WeatherService.lastError
                             color: root.luminaDesign.color.textMuted
                             elide: Text.ElideRight
@@ -194,7 +301,7 @@ Item {
                         id: weatherRange
 
                         anchors.verticalCenter: parent.verticalCenter
-                        text: WeatherService.rangeLabel
+                        text: root.weatherRangeLabel
                         color: root.luminaDesign.color.textMuted
                         font.pixelSize:
                             root.luminaDesign.typography.labelSmall
