@@ -248,48 +248,26 @@ Rectangle {
             anchorTop,
             anchorBottom
         ) {
-            if (outputName !== root.outputName)
+            if (panelId !== "network" || outputName !== root.outputName)
                 return
 
-            if (panelId === "dashboard") {
-                OverlayStore.prepareFor(
-                    "control",
-                    root.outputName,
-                    placement,
-                    anchorX,
-                    anchorTop,
-                    anchorBottom
-                )
-                ControlCenterStore.openFor(root.outputName, "dashboard")
-            } else if (panelId === "network") {
-                networkPopup.placement = placement
-                networkPopup.anchorX = anchorX
-                if (!networkPopup.requestedVisible)
-                    networkPopup.toggle()
-            }
+            networkPopup.placement = placement
+            networkPopup.anchorX = anchorX
+            if (!networkPopup.requestedVisible)
+                networkPopup.toggle()
         }
 
         function onCloseRequested(panelId, outputName) {
-            if (outputName !== root.outputName)
+            if (panelId !== "network" || outputName !== root.outputName)
                 return
 
-            if (panelId === "dashboard") {
-                if (root.expanded)
-                    ControlCenterStore.close()
-                else
-                    BarPanelCoordinator.reportClosed(
-                        "dashboard",
-                        root.outputName
-                    )
-            } else if (panelId === "network") {
-                if (networkPopup.requestedVisible)
-                    networkPopup.dismiss()
-                else
-                    BarPanelCoordinator.reportClosed(
-                        "network",
-                        root.outputName
-                    )
-            }
+            if (networkPopup.requestedVisible)
+                networkPopup.dismiss()
+            else
+                BarPanelCoordinator.reportClosed(
+                    "network",
+                    root.outputName
+                )
         }
     }
 
