@@ -129,6 +129,10 @@ Item {
             )
         )
 
+        BluetoothWidget {
+            panelWindow: root.panelWindow
+        }
+
         Repeater {
             model: ConfigStore.barRightWidgetOrder
 
