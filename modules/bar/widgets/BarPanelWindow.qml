@@ -15,7 +15,6 @@ PanelWindow {
     property string panelOutputName: ""
     property bool panelVisible: false
     property string layerNamespace: "lumina-bar-panel-" + panelId
-    property color scrimColor: "transparent"
     property Item surfaceItem: null
     property real surfaceRadius: 0
     property string surfaceAnchorEdge: ""
@@ -166,14 +165,9 @@ PanelWindow {
         }
     }
 
-    Rectangle {
+    MouseArea {
         anchors.fill: parent
-        color: root.scrimColor
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.dismissRequested()
-        }
+        onClicked: root.dismissRequested()
     }
 
     Item {

@@ -64,12 +64,6 @@ Scope {
                 screen: modelData
                 surfaceItem: centerSurface
                 surfaceRadius: centerSurface.radius
-                scrimColor: Qt.rgba(
-                    root.luminaDesign.color.scrim.r,
-                    root.luminaDesign.color.scrim.g,
-                    root.luminaDesign.color.scrim.b,
-                    0.34
-                )
                 onDismissRequested: NotificationService.closeCenter()
 
                 FocusScope {

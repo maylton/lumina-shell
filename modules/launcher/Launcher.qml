@@ -201,7 +201,6 @@ Scope {
                 panelVisible: launcherVisible
                 layerNamespace: "lumina-launcher"
                 screen: modelData
-                scrimColor: root.luminaDesign.color.scrim
                 surfaceItem: launcherSurface
                 surfaceRadius: launcherSurface.radius
                 surfaceAnchorEdge: OverlayStore.activeAnchorEdge
