@@ -12,6 +12,7 @@ import qs.services.session
 import qs.stores.session
 import qs.stores.config
 import qs.stores.shell
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -222,6 +223,12 @@ Scope {
                     : ""
                 readonly property bool menuVisible:
                     SessionMenuStore.activeOutputName === outputName
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
 
                 screen: modelData
                 visible: menuVisible
@@ -292,7 +299,22 @@ Scope {
                 ShellSurface {
           id: menuSurface
 
-                    anchors.centerIn: parent
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        sessionWindow.width,
+                        root.luminaDesign.spacing.extraLarge
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        sessionWindow.height,
+                        sessionWindow.barWindowHeight,
+                        root.luminaDesign.spacing.barPanelGap,
+                        root.luminaDesign.spacing.extraLarge
+                    )
                     width: Math.min(
                         root.luminaDesign.size.sessionMenuWidth,
                         sessionWindow.width - root.luminaDesign.spacing.extraLarge * 2

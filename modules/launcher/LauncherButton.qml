@@ -5,6 +5,7 @@ import qs.design
 import qs.modules.control
 import qs.stores.config
 import qs.stores.launcher
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -25,6 +26,13 @@ Rectangle {
     )
     readonly property bool showLabel: Boolean(
         ConfigStore.widgetSetting("launcher", "showLabel", false)
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "launcher",
+            "surfacePlacement",
+            "centered"
+        )
     )
 
     width: showLabel
@@ -53,15 +61,34 @@ Rectangle {
     Accessible.name: "Open application launcher"
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction: LauncherStore.toggle(root.outputName)
+    Accessible.onPressAction: root.activate(root.width / 2)
+
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        OverlayStore.prepareFor(
+            "launcher",
+            root.outputName,
+            root.surfacePlacement,
+            mappedAnchorX(localX)
+        )
+        LauncherStore.toggle(root.outputName)
+    }
 
     Keys.onSpacePressed: event => {
-        LauncherStore.toggle(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        LauncherStore.toggle(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
@@ -125,9 +152,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            LauncherStore.toggle(root.outputName)
+            root.activate(mouse.x)
         }
     }
 }

@@ -6,6 +6,7 @@ import qs.modules.bar.widgets
 import qs.modules.control
 import qs.services.notifications
 import qs.stores.config
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -36,6 +37,13 @@ Rectangle {
             "notifications",
             "showDoNotDisturbState",
             true
+        )
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "notifications",
+            "surfacePlacement",
+            "near-widget"
         )
     )
 
@@ -73,16 +81,34 @@ Rectangle {
         )
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction:
+    Accessible.onPressAction: root.activate(root.width / 2)
+
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        OverlayStore.prepareFor(
+            "notifications",
+            root.outputName,
+            root.surfacePlacement,
+            mappedAnchorX(localX)
+        )
         NotificationService.toggleCenter(root.outputName)
+    }
 
     Keys.onSpacePressed: event => {
-        NotificationService.toggleCenter(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        NotificationService.toggleCenter(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
@@ -190,9 +216,9 @@ Rectangle {
             tooltipTimer.stop()
             root.tooltipVisible = false
         }
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            NotificationService.toggleCenter(root.outputName)
+            root.activate(mouse.x)
         }
     }
 

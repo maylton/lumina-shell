@@ -17,6 +17,7 @@ var entries = [
         component: "LauncherWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "centered",
             showLabel: false
         }
     },
@@ -63,6 +64,7 @@ var entries = [
         component: "DateTimeWidgetSettings",
         defaults: {
             showBackground: true,
+            surfacePlacement: "near-widget",
             clockLayout: "inline",
             hourFormat: "24",
             showSeconds: false,
@@ -102,6 +104,7 @@ var entries = [
         component: "TrayWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "near-widget",
             mode: "grouped",
             showCount: false
         }
@@ -118,6 +121,7 @@ var entries = [
         component: "NotificationsWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "near-widget",
             showUnreadBadge: true,
             showDoNotDisturbState: true
         }
@@ -155,6 +159,7 @@ var entries = [
         component: "UserAvatarWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "centered",
             avatarDisplay: "image",
             showUserName: false
         }
@@ -171,6 +176,7 @@ var entries = [
         component: "WallpaperWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "centered",
             showLabel: false
         }
     },
@@ -186,6 +192,7 @@ var entries = [
         component: "SessionWidgetSettings",
         defaults: {
             showBackground: false,
+            surfacePlacement: "centered",
             showLabel: false
         }
     }

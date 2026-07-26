@@ -11,8 +11,10 @@ import qs.services.i18n
 import qs.stores.config
 import qs.stores.dock
 import qs.stores.launcher
+import qs.stores.shell
 import "../../services/i18n/LauncherStrings.js" as LauncherStrings
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -167,6 +169,12 @@ Scope {
                     LauncherStore.selectOffset(offset)
                     positionSelectedResult()
                 }
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
 
                 screen: modelData
                 visible: launcherVisible
@@ -231,11 +239,40 @@ Scope {
                 ShellSurface {
                     id: launcherSurface
 
+                    readonly property bool nearWidgetPlacement:
+                        OverlayStore.activePlacement
+                            === SurfacePlacementPolicy.NEAR_WIDGET
+
                     anchors {
-                        horizontalCenter: parent.horizontalCenter
-                        bottom: parent.bottom
+                        horizontalCenter: launcherSurface.nearWidgetPlacement
+                            ? undefined
+                            : parent.horizontalCenter
+                        bottom: launcherSurface.nearWidgetPlacement
+                            ? undefined
+                            : parent.bottom
                         bottomMargin: launcherWindow.surfaceBottomOffset
                     }
+
+                    x: launcherSurface.nearWidgetPlacement
+                        ? SurfacePlacementPolicy.horizontalX(
+                            OverlayStore.activePlacement,
+                            OverlayStore.activeAnchorX,
+                            width,
+                            launcherWindow.width,
+                            root.luminaDesign.spacing.extraLarge
+                        )
+                        : 0
+                    y: launcherSurface.nearWidgetPlacement
+                        ? SurfacePlacementPolicy.verticalY(
+                            OverlayStore.activePlacement,
+                            ConfigStore.barPosition,
+                            height,
+                            launcherWindow.height,
+                            launcherWindow.barWindowHeight,
+                            4,
+                            root.luminaDesign.spacing.extraLarge
+                        )
+                        : 0
 
                     width: Math.min(
                         720,

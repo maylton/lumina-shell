@@ -9,6 +9,7 @@ Rectangle {
     id: root
 
     required property string outputName
+    property var panelWindow: null
     property string barPosition: ConfigStore.barPosition
     property bool compact: false
 
@@ -40,6 +41,13 @@ Rectangle {
             "datetime",
             "showBackground",
             true
+        )
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "datetime",
+            "surfacePlacement",
+            "near-widget"
         )
     )
     readonly property bool expanded:
@@ -90,19 +98,29 @@ Rectangle {
         + CalendarStore.formattedTime
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activate()
+    Accessible.onPressAction: root.activate(root.width / 2)
 
-    function activate() {
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        calendarPopup.anchorX = mappedAnchorX(localX)
         CalendarStore.toggle(outputName)
     }
 
     Keys.onSpacePressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
@@ -196,9 +214,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            root.activate()
+            root.activate(mouse.x)
         }
     }
 
@@ -210,7 +228,11 @@ Rectangle {
     }
 
     CalendarPopup {
+        id: calendarPopup
+
         anchorItem: root
+        panelWindow: root.panelWindow
+        placement: root.surfacePlacement
         outputName: root.outputName
         barPosition: root.barPosition
     }

@@ -119,6 +119,7 @@ Scope {
 
                     BarLayout {
                         anchors.fill: parent
+                        panelWindow: panel
                         outputName: panel.outputName
                         visibleWorkspaces: panel.visibleWorkspaces
                         activeWindowTitle: panel.activeWindowTitle

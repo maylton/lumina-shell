@@ -9,6 +9,9 @@ import qs.modules.control
 import qs.stores.config
 import "../control/ShellSurfacePolicy.js" as ShellSurfacePolicy
 import qs.services.wallpaper
+import qs.stores.config
+import qs.stores.shell
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -28,6 +31,12 @@ Scope {
                     : ""
                 readonly property bool pickerVisible:
                     WallpaperService.pickerOutputName === outputName
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
 
                 screen: modelData
                 visible: pickerVisible
@@ -91,7 +100,22 @@ Scope {
                 ShellSurface {
           id: pickerSurface
 
-                    anchors.centerIn: parent
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        pickerWindow.width,
+                        root.luminaDesign.spacing.extraLarge
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        pickerWindow.height,
+                        pickerWindow.barWindowHeight,
+                        root.luminaDesign.spacing.barPanelGap,
+                        root.luminaDesign.spacing.extraLarge
+                    )
                     width: Math.min(
                         root.luminaDesign.size.wallpaperPickerWidth,
                         pickerWindow.width - root.luminaDesign.spacing.extraLarge * 2

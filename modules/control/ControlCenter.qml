@@ -10,7 +10,9 @@ import qs.stores.config
 import qs.stores.control
 import qs.stores.settings
 import qs.stores.time
+import qs.stores.shell
 import "ShellSurfacePolicy.js" as ShellSurfacePolicy
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -68,6 +70,12 @@ Scope {
                     ControlCenterStore.activeOutputName === outputName
                 readonly property real safeMargin:
                     root.luminaDesign.spacing.extraLarge
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
                 readonly property real panelScale:
                     ControlCenterStore.activePage === "settings"
                     ? 1
@@ -173,7 +181,22 @@ Scope {
                 ShellSurface {
           id: dashboardSurface
 
-                    anchors.centerIn: availableArea
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        controlWindow.width,
+                        controlWindow.safeMargin
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        controlWindow.height,
+                        controlWindow.barWindowHeight,
+                        4,
+                        controlWindow.safeMargin
+                    )
                     width: Math.min(
                         root.luminaDesign.size.controlCenterWidth,
                         availableArea.width

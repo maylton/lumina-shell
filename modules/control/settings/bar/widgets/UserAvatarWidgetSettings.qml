@@ -48,5 +48,21 @@ Column {
                 "dashboard", "showUserName", value
             )
         }
+
+        SettingsComboRow {
+            width: parent.width
+            title: "Open position"
+            description: "Open beside the widget or centered on the screen"
+            options: [
+                { value: "near-widget", label: "Near the widget" },
+                { value: "centered", label: "Centered" }
+            ]
+            currentValue: String(ConfigStore.widgetSetting(
+                "dashboard", "surfacePlacement", "centered"
+            ))
+            onSelected: value => ConfigStore.setBarWidgetSetting(
+                "dashboard", "surfacePlacement", value
+            )
+        }
     }
 }

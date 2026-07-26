@@ -207,6 +207,21 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
 
     bool("showBackground")
 
+    if ([
+        "launcher",
+        "datetime",
+        "tray",
+        "notifications",
+        "dashboard",
+        "wallpaper",
+        "session"
+    ].indexOf(widgetId) >= 0) {
+        enumValue(
+            "surfacePlacement",
+            ["near-widget", "centered"]
+        )
+    }
+
     if (["launcher", "overview", "wallpaper", "session"]
         .indexOf(widgetId) >= 0) {
         bool("showLabel")
