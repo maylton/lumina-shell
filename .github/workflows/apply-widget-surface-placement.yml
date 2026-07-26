@@ -31,34 +31,34 @@ jobs:
           chmod +x scripts/apply-widget-surface-placement.py
 
       - name: Apply the implementation
+        id: migration
+        continue-on-error: true
         run: |
-          set +e
           python scripts/apply-widget-surface-placement.py \
             > /tmp/widget-surface-placement.log 2>&1
-          status=$?
           cat /tmp/widget-surface-placement.log
 
-          if [ "$status" -ne 0 ]; then
-            git reset --hard HEAD
-            git clean -fd
-            cp /tmp/widget-surface-placement.log \
-              scripts/widget-surface-placement-error.log
-            git config user.name "github-actions[bot]"
-            git config user.email \
-              "41898282+github-actions[bot]@users.noreply.github.com"
-            git add scripts/widget-surface-placement-error.log
-            git commit -m "Record widget placement migration failure"
-            git push origin "HEAD:${{ github.head_ref }}"
-            exit "$status"
-          fi
+      - name: Upload migration diagnostics
+        if: steps.migration.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-surface-placement-diagnostics
+          path: /tmp/widget-surface-placement.log
+          if-no-files-found: error
+
+      - name: Stop after migration failure
+        if: steps.migration.outcome == 'failure'
+        run: exit 1
 
       - name: Validate the generated implementation
+        if: steps.migration.outcome == 'success'
         run: |
           python scripts/apply-widget-surface-placement.py --check
           git diff --check
           bash scripts/check-translations.sh
 
       - name: Commit and push the implementation
+        if: steps.migration.outcome == 'success'
         run: |
           rm scripts/apply-widget-surface-placement.py
           rm -f scripts/widget-surface-placement-error.log
