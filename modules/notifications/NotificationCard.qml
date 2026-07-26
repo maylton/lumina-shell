@@ -56,7 +56,6 @@ Rectangle {
     Behavior on scale {
         NumberAnimation {
             duration: root.luminaDesign.motion.fast
-            easing.type: Easing.OutCubic
         }
     }
 
@@ -114,7 +113,7 @@ Rectangle {
                     )
                 sourceSize.width: width
                 sourceSize.height: height
-                asynchronous: true
+                asynchronous: false
                 fillMode: Image.PreserveAspectFit
             }
         }
