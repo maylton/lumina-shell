@@ -422,6 +422,7 @@ QtObject {
             labelSmall: 10,
             labelMedium: 12,
             bodyMedium: 13,
+            bodyLarge: 16,
             barClock: BarScalePolicy.scaled(
                 ConfigStore.compactMode ? 14 : 15,
                 root.barTypographyScale,
@@ -458,6 +459,7 @@ QtObject {
                 7,
                 14
             ),
+            titleSmall: 13,
             titleMedium: 14,
             titleLarge: 20
         },
