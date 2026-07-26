@@ -1,6 +1,7 @@
 import QtQuick
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.stores.config
 import qs.stores.control
 import qs.stores.system
@@ -66,9 +67,15 @@ Rectangle {
     border.color: luminaDesign.color.primary
 
     Accessible.role: Accessible.Button
-    Accessible.name: "Open dashboard for "
-        + SystemInfoStore.displayName
-    Accessible.description: "Quick controls and session actions"
+    Accessible.name: I18n.tr(
+        "bar.dashboard.accessibleName",
+        "Open Dashboard for %1",
+        [SystemInfoStore.displayName]
+    )
+    Accessible.description: I18n.tr(
+        "bar.dashboard.accessibleDescription",
+        "Quick controls and session actions"
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -189,7 +196,10 @@ Rectangle {
     TrayTooltip {
         anchorItem: root
         title: SystemInfoStore.displayName
-        description: "Open Dashboard and session actions"
+        description: I18n.tr(
+            "bar.dashboard.tooltipDescription",
+            "Open Dashboard and session actions"
+        )
         shown: avatarMouse.containsMouse
     }
 }
