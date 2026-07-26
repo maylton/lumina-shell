@@ -19,7 +19,8 @@ Rectangle {
     signal activated()
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property bool actionable: available && !busy
+    readonly property bool hasAction: actionLabel.length > 0
+    readonly property bool actionable: available && !busy && hasAction
 
     implicitHeight: 64
     radius: luminaDesign.shape.large
@@ -35,12 +36,15 @@ Rectangle {
         ? luminaDesign.color.primary
         : luminaDesign.color.outlineVariant
 
-    Accessible.role: Accessible.Button
+    Accessible.role: hasAction ? Accessible.Button : Accessible.StaticText
     Accessible.name: title
     Accessible.description: description
     Accessible.focusable: actionable
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activated()
+    Accessible.onPressAction: {
+        if (root.actionable)
+            root.activated()
+    }
 
     Keys.onSpacePressed: event => {
         if (root.actionable)
@@ -98,7 +102,7 @@ Rectangle {
         Column {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 40 - actionButton.width
-                - parent.spacing * 2
+                - parent.spacing * (root.hasAction ? 2 : 1)
             spacing: 2
 
             Text {
@@ -125,7 +129,8 @@ Rectangle {
             id: actionButton
 
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(94, actionText.implicitWidth + 24)
+            visible: root.hasAction
+            width: visible ? Math.max(94, actionText.implicitWidth + 24) : 0
             height: 36
             radius: root.luminaDesign.shape.full
             color: root.actionable
