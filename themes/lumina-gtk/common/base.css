@@ -3,6 +3,18 @@
 * {
   -GtkWidget-focus-padding: 0;
   -GtkWidget-focus-line-width: 0;
+}
+
+button:focus,
+entry:focus,
+spinbutton:focus,
+textview:focus,
+switch:focus,
+scale:focus,
+notebook > header > tabs > tab:focus,
+row:focus,
+modelbutton:focus,
+menuitem:focus {
   outline-color: alpha(@lumina_primary, 0.76);
   outline-style: solid;
   outline-width: 2px;
