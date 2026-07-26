@@ -7,6 +7,7 @@ import "I18n.js" as I18nLogic
 import "AppearanceMessages.js" as AppearanceMessages
 import "BarMessages.js" as BarMessages
 import "BehaviorMessages.js" as BehaviorMessages
+import "SettingsMessages.js" as SettingsMessages
 
 Singleton {
     id: root
@@ -55,6 +56,7 @@ Singleton {
         const supplementalValue = AppearanceMessages.message(locale, key)
             || BarMessages.message(locale, key)
             || BehaviorMessages.message(locale, key)
+            || SettingsMessages.message(locale, key)
         const sourceValue = catalogValue
             || supplementalValue
             || String(fallback || key)
