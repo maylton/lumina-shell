@@ -1,9 +1,9 @@
 name: Rebuild widget placement PR
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
-    types: [synchronize]
+    types: [synchronize, reopened]
 
 permissions:
   contents: write
