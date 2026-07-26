@@ -1,17 +1,24 @@
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 Column {
     width: parent ? parent.width : 0
     SettingsSection {
-        title: "System tray"
-        description: "StatusNotifier presentation"
+        title: I18n.tr("settings.widget.tray.section", "System tray")
+        description: I18n.tr(
+            "settings.widget.tray.description",
+            "StatusNotifier presentation"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Background"
-            description: "Show tonal surfaces behind tray controls"
+            title: I18n.tr("settings.widget.common.background", "Background")
+            description: I18n.tr(
+                "settings.widget.tray.backgroundDescription",
+                "Show tonal surfaces behind tray controls"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "tray", "showBackground", false
             ))
@@ -22,11 +29,26 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Tray icons"
-            description: "Group items in a menu or show them inline"
+            title: I18n.tr("settings.widget.tray.icons", "Tray icons")
+            description: I18n.tr(
+                "settings.widget.tray.iconsDescription",
+                "Group items in a menu or show them inline"
+            )
             options: [
-                { value: "grouped", label: "Grouped" },
-                { value: "inline", label: "Always visible" }
+                {
+                    value: "grouped",
+                    label: I18n.tr(
+                        "settings.widget.tray.grouped",
+                        "Grouped"
+                    )
+                },
+                {
+                    value: "inline",
+                    label: I18n.tr(
+                        "settings.widget.tray.alwaysVisible",
+                        "Always visible"
+                    )
+                }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "tray", "mode", "grouped"
@@ -38,8 +60,11 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Item count"
-            description: "Show the number of active tray items"
+            title: I18n.tr("settings.widget.tray.count", "Item count")
+            description: I18n.tr(
+                "settings.widget.tray.countDescription",
+                "Show the number of active tray items"
+            )
             available: String(ConfigStore.widgetSetting(
                 "tray", "mode", "grouped"
             )) === "grouped"
@@ -53,11 +78,29 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Open position"
-            description: "Open beside the widget or centered on the screen"
+            title: I18n.tr(
+                "settings.widget.common.openPosition",
+                "Open position"
+            )
+            description: I18n.tr(
+                "settings.widget.common.openPositionDescription",
+                "Open beside the widget or centered on the screen"
+            )
             options: [
-                { value: "near-widget", label: "Near the widget" },
-                { value: "centered", label: "Centered" }
+                {
+                    value: "near-widget",
+                    label: I18n.tr(
+                        "settings.widget.common.nearWidget",
+                        "Near the widget"
+                    )
+                },
+                {
+                    value: "centered",
+                    label: I18n.tr(
+                        "settings.widget.common.centered",
+                        "Centered"
+                    )
+                }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "tray", "surfacePlacement", "near-widget"
