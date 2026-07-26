@@ -1,4 +1,7 @@
 module qs.modules.bar.widgets
+BluetoothDeviceRow 1.0 BluetoothDeviceRow.qml
+BluetoothPopup 1.0 BluetoothPopup.qml
+BluetoothWidget 1.0 BluetoothWidget.qml
 ContextCapsule 1.0 ContextCapsule.qml
 DateTimeCluster 1.0 DateTimeCluster.qml
 ExpressiveBatteryIcon 1.0 ExpressiveBatteryIcon.qml
