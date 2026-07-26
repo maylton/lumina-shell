@@ -2,7 +2,7 @@
 
 Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell and QML and guided by Material 3 Expressive design principles.
 
-> Status: repository initialized. The runnable foundation is being prepared in a dedicated development branch.
+> Status: early foundation. The repository currently contains only the first runnable shell skeleton and project documentation.
 
 ## Goals
 
@@ -17,11 +17,49 @@ Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell an
 - QML / Qt Quick
 - Rust later, only where a separate backend is justified
 
+## Requirements
+
+Install the base tools on CachyOS or Arch Linux:
+
+```bash
+sudo pacman -S --needed git niri quickshell qt6-declarative
+```
+
+## Run from a checkout
+
+```bash
+git clone https://github.com/maylton/lumina-shell.git
+cd lumina-shell
+qs -p .
+```
+
+The foundation build opens a top panel on every detected output and displays a clock. It intentionally does not start Niri IPC integration yet; that is the next development increment.
+
 ## Development status
 
 Current milestone: **0.1 — Niri Foundation**
 
-The first implementation is being developed through reviewable pull requests.
+First implementation sequence:
+
+1. Establish a runnable and modular Quickshell base.
+2. Add a typed, event-driven Niri service.
+3. Display workspaces and the focused window.
+4. Introduce the first reusable Material Expressive components.
+
+See [ROADMAP.md](ROADMAP.md) for the complete plan and [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
+
+## Repository structure
+
+```text
+lumina-shell/
+├── shell.qml
+├── design/
+├── modules/
+│   └── bar/
+├── docs/
+├── scripts/
+└── ROADMAP.md
+```
 
 ## License
 
