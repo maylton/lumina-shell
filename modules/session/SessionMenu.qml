@@ -6,7 +6,7 @@ import Quickshell.Io
 import qs.design
 import qs.modules.bar.widgets
 import qs.modules.control
-import qs.services.niri
+import qs.services.i18n
 import qs.services.session
 import qs.stores.session
 import qs.stores.config
@@ -17,96 +17,92 @@ Scope {
     id: root
 
     readonly property var luminaDesign: Theme.luminaTokens
-    readonly property var layoutActions: [
-        {
-            id: "focus-left",
-            title: "Focus left",
-            description: "Previous column",
-            symbol: "←"
-        },
-        {
-            id: "focus-right",
-            title: "Focus right",
-            description: "Next column",
-            symbol: "→"
-        },
-        {
-            id: "center",
-            title: "Center",
-            description: "Center current column",
-            symbol: "◎"
-        },
-        {
-            id: "move-left",
-            title: "Move left",
-            description: "Reorder current column",
-            symbol: "⇤"
-        },
-        {
-            id: "move-right",
-            title: "Move right",
-            description: "Reorder current column",
-            symbol: "⇥"
-        },
-        {
-            id: "width",
-            title: "Column width",
-            description: "Cycle preset width",
-            symbol: "↔"
-        },
-        {
-            id: "floating",
-            title: "Floating",
-            description: "Toggle focused window",
-            symbol: "◇"
-        },
-        {
-            id: "fullscreen",
-            title: "Fullscreen",
-            description: "Toggle focused window",
-            symbol: "□"
-        },
-        {
-            id: "tabbed",
-            title: "Tabbed",
-            description: "Toggle column display",
-            symbol: "▤"
-        }
-    ]
     readonly property var sessionActions: [
         {
             id: "lock",
-            title: "Lock",
-            description: "Lock this session",
-            symbol: "●",
+            title: I18n.tr("session.action.lock.title", "Lock"),
+            description: I18n.tr(
+                "session.action.lock.description",
+                "Secure this session"
+            ),
+            confirmationTitle: I18n.tr(
+                "session.confirmation.lock",
+                "Lock this session?"
+            ),
+            iconName: "system-lock-screen-symbolic",
+            fallbackSymbol: "●",
             destructive: false
         },
         {
             id: "suspend",
-            title: "Suspend",
-            description: "Sleep this computer",
-            symbol: "◐",
+            title: I18n.tr(
+                "session.action.suspend.title",
+                "Suspend"
+            ),
+            description: I18n.tr(
+                "session.action.suspend.description",
+                "Pause and save power"
+            ),
+            confirmationTitle: I18n.tr(
+                "session.confirmation.suspend",
+                "Suspend this computer?"
+            ),
+            iconName: "media-playback-pause-symbolic",
+            fallbackSymbol: "◐",
             destructive: false
         },
         {
             id: "logout",
-            title: "Log out",
-            description: "Exit Niri",
-            symbol: "↪",
+            title: I18n.tr(
+                "session.action.logout.title",
+                "Log out"
+            ),
+            description: I18n.tr(
+                "session.action.logout.description",
+                "End the desktop session"
+            ),
+            confirmationTitle: I18n.tr(
+                "session.confirmation.logout",
+                "Log out of this session?"
+            ),
+            iconName: "system-log-out-symbolic",
+            fallbackSymbol: "↪",
             destructive: true
         },
         {
             id: "reboot",
-            title: "Restart",
-            description: "Restart the system",
-            symbol: "↻",
+            title: I18n.tr(
+                "session.action.reboot.title",
+                "Restart"
+            ),
+            description: I18n.tr(
+                "session.action.reboot.description",
+                "Restart the computer"
+            ),
+            confirmationTitle: I18n.tr(
+                "session.confirmation.reboot",
+                "Restart this computer?"
+            ),
+            iconName: "system-reboot-symbolic",
+            fallbackSymbol: "↻",
             destructive: true
         },
         {
             id: "poweroff",
-            title: "Power off",
-            description: "Shut down the system",
-            symbol: "⏻",
+            title: I18n.tr(
+                "session.action.poweroff.title",
+                "Power off"
+            ),
+            description: I18n.tr(
+                "session.action.poweroff.description",
+                "Shut down the computer"
+            ),
+            confirmationTitle: I18n.tr(
+                "session.confirmation.poweroff",
+                "Power off this computer?"
+            ),
+            iconName: "system-shutdown-symbolic",
+            fallbackSymbol: "⏻",
             destructive: true
         }
     ]
@@ -120,39 +116,22 @@ Scope {
 
             return true
         })
+    readonly property var safeSessionActions:
+        visibleSessionActions.filter(action => !action.destructive)
+    readonly property var destructiveSessionActions:
+        visibleSessionActions.filter(action => action.destructive)
+    readonly property var pendingActionDetails:
+        actionFor(SessionService.pendingAction)
 
-    function invokeLayout(actionId) {
-        switch (String(actionId)) {
-        case "focus-left":
-            NiriService.focusColumnLeft()
-            break
-        case "focus-right":
-            NiriService.focusColumnRight()
-            break
-        case "center":
-            NiriService.centerColumn()
-            break
-        case "move-left":
-            NiriService.moveColumnLeft()
-            break
-        case "move-right":
-            NiriService.moveColumnRight()
-            break
-        case "width":
-            NiriService.switchPresetColumnWidth()
-            break
-        case "floating":
-            NiriService.toggleFloating()
-            break
-        case "fullscreen":
-            NiriService.toggleFullscreen()
-            break
-        case "tabbed":
-            NiriService.toggleTabbedDisplay()
-            break
-        default:
-            break
+    function actionFor(actionId) {
+        const requested = String(actionId)
+
+        for (var index = 0; index < sessionActions.length; ++index) {
+            if (sessionActions[index].id === requested)
+                return sessionActions[index]
         }
+
+        return null
     }
 
     Connections {
@@ -189,10 +168,6 @@ Scope {
 
         function request(actionName: string): void {
             SessionService.request(actionName)
-        }
-
-        function layout(actionName: string): void {
-            root.invokeLayout(actionName)
         }
 
         function cancel(): void {
@@ -256,7 +231,15 @@ Scope {
                 }
 
                 ShellSurface {
-          id: menuSurface
+                    id: menuSurface
+
+                    readonly property real contentInset:
+                        root.luminaDesign.spacing.extraLarge
+                    readonly property real maximumHeight:
+                        sessionWindow.height
+                            - sessionWindow.barWindowHeight
+                            - ConfigStore.barPanelGap
+                            - root.luminaDesign.spacing.extraLarge
 
                     x: SurfacePlacementPolicy.horizontalX(
                         OverlayStore.activePlacement,
@@ -271,10 +254,8 @@ Scope {
                     )
                     height: Math.min(
                         root.luminaDesign.size.sessionMenuHeight,
-                        sessionWindow.height
-                            - sessionWindow.barWindowHeight
-                            - ConfigStore.barPanelGap
-                            - root.luminaDesign.spacing.extraLarge
+                        maximumHeight,
+                        menuContent.implicitHeight + contentInset * 2
                     )
                     radius: root.luminaDesign.shape.extraLarge
 
@@ -283,41 +264,124 @@ Scope {
                     }
 
                     Column {
-                        anchors {
-                            fill: parent
-                            margins: root.luminaDesign.spacing.extraLarge
-                        }
+                        id: menuContent
 
-                        spacing: root.luminaDesign.spacing.medium
+                        x: menuSurface.contentInset
+                        y: menuSurface.contentInset
+                        width: parent.width - menuSurface.contentInset * 2
+                        spacing: root.luminaDesign.spacing.large
 
-                        Text {
-                            text: "Niri layout"
-                            color: root.luminaDesign.color.onSurface
-                            font.pixelSize: root.luminaDesign.typography.titleLarge
-                            font.weight: Font.DemiBold
-                        }
-
-                        Grid {
+                        Row {
                             width: parent.width
-                            columns: 3
-                            columnSpacing: root.luminaDesign.spacing.small
-                            rowSpacing: root.luminaDesign.spacing.small
+                            height: 52
+                            spacing: root.luminaDesign.spacing.medium
 
-                            Repeater {
-                                model: root.layoutActions
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 44
+                                height: 44
+                                radius: root.luminaDesign.shape.full
+                                color:
+                                    root.luminaDesign.color.accentContainer
 
-                                delegate: SessionAction {
-                                    required property var modelData
+                                DashboardIcon {
+                                    anchors.centerIn: parent
+                                    iconName: "system-shutdown-symbolic"
+                                    fallbackSymbol: "⏻"
+                                    iconColor:
+                                        root.luminaDesign.color
+                                            .onAccentContainer
+                                    iconSize: 22
+                                }
+                            }
 
-                                    width: (
-                                        parent.width
-                                        - parent.columnSpacing * 2
-                                    ) / 3
-                                    title: String(modelData.title)
-                                    description: String(modelData.description)
-                                    symbol: String(modelData.symbol)
-                                    onActivated:
-                                        root.invokeLayout(modelData.id)
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                    - 44
+                                    - parent.spacing
+                                spacing: 3
+
+                                Text {
+                                    width: parent.width
+                                    text: I18n.tr(
+                                        "session.menu.title",
+                                        "Session"
+                                    )
+                                    color:
+                                        root.luminaDesign.color.onSurface
+                                    font.pixelSize:
+                                        root.luminaDesign.typography
+                                            .titleLarge
+                                    font.weight: Font.DemiBold
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: I18n.tr(
+                                        "session.menu.description",
+                                        "Lock, pause, or finish your work"
+                                    )
+                                    color:
+                                        root.luminaDesign.color.textMuted
+                                    elide: Text.ElideRight
+                                    font.pixelSize:
+                                        root.luminaDesign.typography
+                                            .bodyMedium
+                                }
+                            }
+                        }
+
+                        Column {
+                            width: parent.width
+                            visible: root.safeSessionActions.length > 0
+                            spacing: root.luminaDesign.spacing.small
+
+                            Text {
+                                text: I18n.tr(
+                                    "session.menu.quickActions",
+                                    "Quick actions"
+                                )
+                                color: root.luminaDesign.color.textMuted
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.DemiBold
+                            }
+
+                            Grid {
+                                width: parent.width
+                                columns: Math.max(
+                                    1,
+                                    root.safeSessionActions.length
+                                )
+                                columnSpacing:
+                                    root.luminaDesign.spacing.small
+                                rowSpacing:
+                                    root.luminaDesign.spacing.small
+
+                                Repeater {
+                                    model: root.safeSessionActions
+
+                                    delegate: SessionAction {
+                                        required property var modelData
+
+                                        width: (
+                                            parent.width
+                                            - parent.columnSpacing
+                                                * (parent.columns - 1)
+                                        ) / parent.columns
+                                        title: String(modelData.title)
+                                        description:
+                                            String(modelData.description)
+                                        iconName:
+                                            String(modelData.iconName)
+                                        fallbackSymbol:
+                                            String(modelData.fallbackSymbol)
+                                        onActivated:
+                                            SessionService.request(
+                                                modelData.id
+                                            )
+                                    }
                                 }
                             }
                         }
@@ -325,40 +389,57 @@ Scope {
                         Rectangle {
                             width: parent.width
                             height: 1
+                            visible: root.safeSessionActions.length > 0
                             color: root.luminaDesign.color.outline
                             opacity: 0.45
                         }
 
-                        Text {
-                            text: "Session"
-                            color: root.luminaDesign.color.onSurface
-                            font.pixelSize: root.luminaDesign.typography.titleMedium
-                            font.weight: Font.DemiBold
-                        }
-
-                        Grid {
+                        Column {
                             width: parent.width
-                            columns: 3
-                            columnSpacing: root.luminaDesign.spacing.small
-                            rowSpacing: root.luminaDesign.spacing.small
+                            spacing: root.luminaDesign.spacing.small
 
-                            Repeater {
-                            model: root.visibleSessionActions
+                            Text {
+                                text: I18n.tr(
+                                    "session.menu.powerActions",
+                                    "Power and access"
+                                )
+                                color: root.luminaDesign.color.textMuted
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.DemiBold
+                            }
 
-                                delegate: SessionAction {
-                                    required property var modelData
+                            Grid {
+                                width: parent.width
+                                columns: 3
+                                columnSpacing:
+                                    root.luminaDesign.spacing.small
+                                rowSpacing:
+                                    root.luminaDesign.spacing.small
 
-                                    width: (
-                                        parent.width
-                                        - parent.columnSpacing * 2
-                                    ) / 3
-                                    title: String(modelData.title)
-                                    description: String(modelData.description)
-                                    symbol: String(modelData.symbol)
-                                    destructive:
-                                        Boolean(modelData.destructive)
-                                    onActivated:
-                                        SessionService.request(modelData.id)
+                                Repeater {
+                                    model: root.destructiveSessionActions
+
+                                    delegate: SessionAction {
+                                        required property var modelData
+
+                                        width: (
+                                            parent.width
+                                            - parent.columnSpacing * 2
+                                        ) / 3
+                                        title: String(modelData.title)
+                                        description:
+                                            String(modelData.description)
+                                        iconName:
+                                            String(modelData.iconName)
+                                        fallbackSymbol:
+                                            String(modelData.fallbackSymbol)
+                                        destructive: true
+                                        onActivated:
+                                            SessionService.request(
+                                                modelData.id
+                                            )
+                                    }
                                 }
                             }
                         }
@@ -379,11 +460,46 @@ Scope {
                             width: Math.min(parent.width - 64, 420)
                             spacing: root.luminaDesign.spacing.large
 
+                            Rectangle {
+                                anchors.horizontalCenter:
+                                    parent.horizontalCenter
+                                width: 52
+                                height: 52
+                                radius: root.luminaDesign.shape.full
+                                color:
+                                    root.luminaDesign.color.errorContainer
+
+                                DashboardIcon {
+                                    anchors.centerIn: parent
+                                    iconName:
+                                        root.pendingActionDetails
+                                            ? String(
+                                                root.pendingActionDetails
+                                                    .iconName
+                                            )
+                                            : ""
+                                    fallbackSymbol:
+                                        root.pendingActionDetails
+                                            ? String(
+                                                root.pendingActionDetails
+                                                    .fallbackSymbol
+                                            )
+                                            : "!"
+                                    iconColor:
+                                        root.luminaDesign.color
+                                            .onErrorContainer
+                                    iconSize: 24
+                                }
+                            }
+
                             Text {
                                 width: parent.width
-                                text: SessionService.actionLabel(
-                                    SessionService.pendingAction
-                                ) + "?"
+                                text: root.pendingActionDetails
+                                    ? String(
+                                        root.pendingActionDetails
+                                            .confirmationTitle
+                                    )
+                                    : ""
                                 horizontalAlignment: Text.AlignHCenter
                                 color: root.luminaDesign.color.onSurface
                                 font.pixelSize:
@@ -393,9 +509,11 @@ Scope {
 
                             Text {
                                 width: parent.width
-                                text: SessionService.actionDescription(
-                                    SessionService.pendingAction
-                                )
+                                text: root.pendingActionDetails
+                                    ? String(
+                                        root.pendingActionDetails.description
+                                    )
+                                    : ""
                                 horizontalAlignment: Text.AlignHCenter
                                 color: root.luminaDesign.color.textMuted
                                 wrapMode: Text.Wrap
@@ -417,7 +535,10 @@ Scope {
                                         id: cancelLabel
 
                                         anchors.centerIn: parent
-                                        text: "Cancel"
+                                        text: I18n.tr(
+                                            "common.cancel",
+                                            "Cancel"
+                                        )
                                         color:
                                             root.luminaDesign.color.onSurface
                                         font.pixelSize:
@@ -443,7 +564,10 @@ Scope {
                                         id: confirmLabel
 
                                         anchors.centerIn: parent
-                                        text: "Confirm"
+                                        text: I18n.tr(
+                                            "common.confirm",
+                                            "Confirm"
+                                        )
                                         color:
                                             root.luminaDesign.color.surfaceBase
                                         font.pixelSize:

@@ -2,13 +2,15 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.design
+import qs.modules.control
 
 Rectangle {
     id: root
 
     required property string title
     required property string description
-    required property string symbol
+    property string iconName: ""
+    property string fallbackSymbol: ""
     property bool destructive: false
 
     signal activated
@@ -59,30 +61,45 @@ Rectangle {
         }
     }
 
-    Text {
+    Rectangle {
+        id: iconContainer
+
         anchors {
             left: parent.left
             leftMargin: root.luminaDesign.spacing.large
             verticalCenter: parent.verticalCenter
         }
-
-        text: root.symbol
+        width: 38
+        height: 38
+        radius: root.luminaDesign.shape.full
         color: root.destructive
             ? actionMouse.containsMouse
-                ? root.luminaDesign.color.onErrorContainer
-                : root.luminaDesign.color.urgent
+                ? root.luminaDesign.color.urgent
+                : root.luminaDesign.color.errorContainer
             : actionMouse.containsMouse
-                ? root.luminaDesign.color.onAccentContainer
-                : root.luminaDesign.color.primary
-        font.pixelSize: 26
-        font.weight: Font.DemiBold
+                ? root.luminaDesign.color.primary
+                : root.luminaDesign.color.accentContainer
+
+        DashboardIcon {
+            anchors.centerIn: parent
+            iconName: root.iconName
+            fallbackSymbol: root.fallbackSymbol
+            iconColor: root.destructive
+                ? actionMouse.containsMouse
+                    ? root.luminaDesign.color.surfaceBase
+                    : root.luminaDesign.color.onErrorContainer
+                : actionMouse.containsMouse
+                    ? root.luminaDesign.color.surfaceBase
+                    : root.luminaDesign.color.onAccentContainer
+            iconSize: 19
+        }
     }
 
     Column {
         anchors {
-            left: parent.left
+            left: iconContainer.right
             right: parent.right
-            leftMargin: 54
+            leftMargin: root.luminaDesign.spacing.medium
             rightMargin: root.luminaDesign.spacing.medium
             verticalCenter: parent.verticalCenter
         }
@@ -120,7 +137,7 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            root.forceActiveFocus(Qt.MouseFocusReason)
+            root.focus = false
             root.activated()
         }
     }
