@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.modules.control
+import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 import qs.stores.shell
@@ -230,7 +231,10 @@ Scope {
 
                                 Text {
                                     width: parent.width
-                                    text: "Notifications"
+                                    text: I18n.tr(
+                                        "notifications.center.title",
+                                        "Notifications"
+                                    )
                                     color: root.luminaDesign.color.onSurface
                                     elide: Text.ElideRight
                                     font.pixelSize:
@@ -242,13 +246,20 @@ Scope {
                                     width: parent.width
                                     text: NotificationService.history.length
                                         === 0
-                                        ? "All caught up"
-                                        : NotificationService.history.length
-                                            + (
-                                                NotificationService.history.length
-                                                    === 1
-                                                    ? " recent notification"
-                                                    : " recent notifications"
+                                        ? I18n.tr(
+                                            "notifications.center.allCaughtUp",
+                                            "All caught up"
+                                        )
+                                        : NotificationService.history.length === 1
+                                            ? I18n.tr(
+                                                "notifications.center.recent.one",
+                                                "%1 recent notification",
+                                                [NotificationService.history.length]
+                                            )
+                                            : I18n.tr(
+                                                "notifications.center.recent.other",
+                                                "%1 recent notifications",
+                                                [NotificationService.history.length]
                                             )
                                     color: root.luminaDesign.color.textMuted
                                     elide: Text.ElideRight
@@ -285,7 +296,10 @@ Scope {
                                         root.luminaDesign.color.primary
 
                                     Accessible.role: Accessible.CheckBox
-                                    Accessible.name: "Do Not Disturb"
+                                    Accessible.name: I18n.tr(
+                                        "notifications.center.dnd",
+                                        "Do Not Disturb"
+                                    )
                                     Accessible.checked:
                                         NotificationService.doNotDisturb
                                     Accessible.focusable: true
@@ -350,7 +364,10 @@ Scope {
                                         Text {
                                             anchors.verticalCenter:
                                                 parent.verticalCenter
-                                            text: "DND"
+                                            text: I18n.tr(
+                                                "notifications.center.dndShort",
+                                                "DND"
+                                            )
                                             color:
                                                 NotificationService
                                                     .doNotDisturb
@@ -401,8 +418,10 @@ Scope {
                                         root.luminaDesign.color.primary
 
                                     Accessible.role: Accessible.Button
-                                    Accessible.name:
+                                    Accessible.name: I18n.tr(
+                                        "notifications.center.clearAccessible",
                                         "Clear notification history"
+                                    )
                                     Accessible.focusable: available
                                     Accessible.focused: activeFocus
                                     Accessible.onPressAction:
@@ -437,7 +456,10 @@ Scope {
                                         id: clearLabel
 
                                         anchors.centerIn: parent
-                                        text: "Clear"
+                                        text: I18n.tr(
+                                            "notifications.center.clear",
+                                            "Clear"
+                                        )
                                         color: clearMouse.containsMouse
                                             ? root.luminaDesign.color
                                                 .onAccentContainer
@@ -532,8 +554,14 @@ Scope {
                                 Text {
                                     width: parent.width
                                     text: NotificationService.doNotDisturb
-                                        ? "Quiet mode is on"
-                                        : "All caught up"
+                                        ? I18n.tr(
+                                            "notifications.center.quietTitle",
+                                            "Quiet mode is on"
+                                        )
+                                        : I18n.tr(
+                                            "notifications.center.allCaughtUp",
+                                            "All caught up"
+                                        )
                                     horizontalAlignment: Text.AlignHCenter
                                     color: root.luminaDesign.color.onSurface
                                     font.pixelSize:
@@ -544,9 +572,14 @@ Scope {
                                 Text {
                                     width: parent.width
                                     text: NotificationService.doNotDisturb
-                                        ? "New notifications stay in history "
-                                            + "without interrupting you"
-                                        : "New notifications will appear here"
+                                        ? I18n.tr(
+                                            "notifications.center.quietDescription",
+                                            "New notifications stay in history without interrupting you"
+                                        )
+                                        : I18n.tr(
+                                            "notifications.center.emptyDescription",
+                                            "New notifications will appear here"
+                                        )
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.Wrap
                                     color: root.luminaDesign.color.textMuted
