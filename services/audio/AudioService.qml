@@ -4,12 +4,28 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import "AudioNodePolicy.js" as AudioNodePolicy
 
 Singleton {
     id: root
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
+    readonly property var trackedNodes: Pipewire.nodes.values
+    readonly property var outputDevices: nodesFor(
+        AudioNodePolicy.OUTPUT_DEVICE
+    )
+    readonly property var inputDevices: nodesFor(
+        AudioNodePolicy.INPUT_DEVICE
+    )
+    readonly property var playbackStreams: nodesFor(
+        AudioNodePolicy.PLAYBACK_STREAM
+    )
+    readonly property var captureStreams: nodesFor(
+        AudioNodePolicy.CAPTURE_STREAM
+    )
+    readonly property var applicationStreams:
+        playbackStreams.concat(captureStreams)
     readonly property bool ready: Pipewire.ready
     readonly property bool outputAvailable: sink
         && sink.ready
@@ -38,19 +54,110 @@ Singleton {
 
     signal outputAdjusted(real value, bool muted)
     signal inputAdjusted(real value, bool muted)
+    signal panelToggleRequested(string outputName)
 
     function clampVolume(value) {
         return Math.max(0, Math.min(1, Number(value) || 0))
     }
 
-    function setOutputVolume(value) {
-        if (!outputAvailable)
+    function nodesFor(requestedKind) {
+        const values = Pipewire.nodes.values || []
+        const result = []
+
+        for (var index = 0; index < values.length; ++index) {
+            const node = values[index]
+
+            if (!node
+                || !node.ready
+                || !node.audio
+                || AudioNodePolicy.kind(node) !== requestedKind)
+                continue
+
+            result.push(node)
+        }
+
+        result.sort(function(first, second) {
+            const firstDefault = isDefaultNode(first)
+            const secondDefault = isDefaultNode(second)
+
+            if (firstDefault !== secondDefault)
+                return firstDefault ? -1 : 1
+
+            return nodeLabel(first).localeCompare(nodeLabel(second))
+        })
+        return result
+    }
+
+    function nodeLabel(node) {
+        return AudioNodePolicy.label(node)
+    }
+
+    function nodeDetail(node) {
+        return AudioNodePolicy.detail(node)
+    }
+
+    function nodeIconName(node) {
+        return AudioNodePolicy.iconName(node)
+    }
+
+    function isPlaybackStream(node) {
+        return AudioNodePolicy.isPlaybackStream(node)
+    }
+
+    function isCaptureStream(node) {
+        return AudioNodePolicy.isCaptureStream(node)
+    }
+
+    function isDefaultOutput(node) {
+        return Boolean(node) && node === sink
+    }
+
+    function isDefaultInput(node) {
+        return Boolean(node) && node === source
+    }
+
+    function isDefaultNode(node) {
+        return isDefaultOutput(node) || isDefaultInput(node)
+    }
+
+    function setDefaultOutput(node) {
+        if (!node || outputDevices.indexOf(node) < 0)
             return
 
-        sink.audio.volume = clampVolume(value)
+        Pipewire.preferredDefaultAudioSink = node
+    }
 
-        if (sink.audio.muted && value > 0)
-            sink.audio.muted = false
+    function setDefaultInput(node) {
+        if (!node || inputDevices.indexOf(node) < 0)
+            return
+
+        Pipewire.preferredDefaultAudioSource = node
+    }
+
+    function setNodeVolume(node, value) {
+        if (!node || !node.ready || !node.audio)
+            return false
+
+        const requested = clampVolume(value)
+        node.audio.volume = requested
+
+        if (node.audio.muted && requested > 0)
+            node.audio.muted = false
+
+        return true
+    }
+
+    function toggleNodeMute(node) {
+        if (!node || !node.ready || !node.audio)
+            return false
+
+        node.audio.muted = !node.audio.muted
+        return true
+    }
+
+    function setOutputVolume(value) {
+        if (!setNodeVolume(sink, value))
+            return
 
         outputAdjusted(sink.audio.volume, sink.audio.muted)
     }
@@ -60,21 +167,15 @@ Singleton {
     }
 
     function toggleOutputMute() {
-        if (!outputAvailable)
+        if (!toggleNodeMute(sink))
             return
 
-        sink.audio.muted = !sink.audio.muted
         outputAdjusted(sink.audio.volume, sink.audio.muted)
     }
 
     function setInputVolume(value) {
-        if (!inputAvailable)
+        if (!setNodeVolume(source, value))
             return
-
-        source.audio.volume = clampVolume(value)
-
-        if (source.audio.muted && value > 0)
-            source.audio.muted = false
 
         inputAdjusted(source.audio.volume, source.audio.muted)
     }
@@ -84,10 +185,9 @@ Singleton {
     }
 
     function toggleInputMute() {
-        if (!inputAvailable)
+        if (!toggleNodeMute(source))
             return
 
-        source.audio.muted = !source.audio.muted
         inputAdjusted(source.audio.volume, source.audio.muted)
     }
 
@@ -105,19 +205,24 @@ Singleton {
                 name: inputName,
                 volume: Math.round(inputVolume * 100),
                 muted: inputMuted
-            }
+            },
+            outputDeviceCount: outputDevices.length,
+            inputDeviceCount: inputDevices.length,
+            playbackStreamCount: playbackStreams.length,
+            captureStreamCount: captureStreams.length
         }
     }
 
     PwObjectTracker {
-        objects: [
-            root.sink,
-            root.source
-        ]
+        objects: root.trackedNodes
     }
 
     IpcHandler {
         target: "audio"
+
+        function panel(outputName: string): void {
+            root.panelToggleRequested(String(outputName || ""))
+        }
 
         function output(percent: int): void {
             root.setOutputVolume(percent / 100)

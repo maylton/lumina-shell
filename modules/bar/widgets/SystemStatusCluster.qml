@@ -41,7 +41,7 @@ Rectangle {
             "showAudio",
             true
         ))
-        && AudioService.outputAvailable
+        && AudioService.ready
     readonly property bool showBattery:
         Boolean(ConfigStore.widgetSetting(
             "system-status",
@@ -91,7 +91,9 @@ Rectangle {
         return ConnectivityService.networkSummary
     }
     readonly property string audioLabel:
-        audioTextMode === "icon"
+        !AudioService.outputAvailable
+            ? audioTextMode === "icon" ? "" : "Unavailable"
+            : audioTextMode === "icon"
             ? ""
             : audioTextMode === "state"
                 ? AudioService.outputMuted ? "Muted" : "Active"
@@ -118,7 +120,9 @@ Rectangle {
                 ? "network-wired-symbolic"
                 : "network-offline-symbolic"
     readonly property string audioIcon:
-        AudioService.outputMuted
+        !AudioService.outputAvailable
+            ? "audio-card-symbolic"
+            : AudioService.outputMuted
             ? "audio-volume-muted-symbolic"
             : AudioService.outputVolume >= 0.66
                 ? "audio-volume-high-symbolic"
@@ -134,11 +138,13 @@ Rectangle {
             ? "Network " + ConnectivityService.networkSummary
             : "",
         showAudio
-            ? "Volume "
-                + Math.round(AudioService.outputVolume * 100)
-                + " percent"
-                + (AudioService.outputMuted ? ", muted" : "")
-                + ", " + AudioService.outputName
+            ? AudioService.outputAvailable
+                ? "Volume "
+                    + Math.round(AudioService.outputVolume * 100)
+                    + " percent"
+                    + (AudioService.outputMuted ? ", muted" : "")
+                    + ", " + AudioService.outputName
+                : AudioService.outputName
             : "",
         showBattery
             ? "Battery " + PowerService.batteryPercentage
@@ -227,6 +233,19 @@ Rectangle {
         )
     }
 
+    function toggleAudioPopup(localX) {
+        const anchor = mappedAnchorGeometry(audioItem, localX)
+
+        BarPanelCoordinator.requestToggle(
+            "audio",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
+    }
+
     Keys.onSpacePressed: event => {
         activate(root.width / 2)
         event.accepted = true
@@ -248,26 +267,52 @@ Rectangle {
             anchorTop,
             anchorBottom
         ) {
-            if (panelId !== "network" || outputName !== root.outputName)
+            if (outputName !== root.outputName)
                 return
 
-            OverlayStore.prepareFor(
-                "network",
-                root.outputName,
-                placement,
-                anchorX,
-                anchorTop,
-                anchorBottom
-            )
-            networkPanel.prepareContent()
-            OverlayStore.openFor("network", root.outputName)
+            if (panelId === "network") {
+                OverlayStore.prepareFor(
+                    "network",
+                    root.outputName,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom
+                )
+                networkPanel.prepareContent()
+                OverlayStore.openFor("network", root.outputName)
+            } else if (panelId === "audio") {
+                OverlayStore.prepareFor(
+                    "audio",
+                    root.outputName,
+                    placement,
+                    anchorX,
+                    anchorTop,
+                    anchorBottom
+                )
+                OverlayStore.openFor("audio", root.outputName)
+            }
         }
 
         function onCloseRequested(panelId, outputName) {
-            if (panelId !== "network" || outputName !== root.outputName)
+            if (outputName !== root.outputName)
                 return
 
-            networkPanel.dismiss()
+            if (panelId === "network")
+                networkPanel.dismiss()
+            else if (panelId === "audio")
+                audioPanel.dismiss()
+        }
+    }
+
+    Connections {
+        target: AudioService
+
+        function onPanelToggleRequested(outputName) {
+            if (String(outputName || "") !== root.outputName)
+                return
+
+            root.toggleAudioPopup(audioItem.width / 2)
         }
     }
 
@@ -357,15 +402,21 @@ Rectangle {
         }
 
         SystemStatusItem {
+            id: audioItem
+
             visible: root.showAudio
             individual: root.individual
+            interactive: true
+            selected: audioPanel.visible
             showLabel: !root.compact
                 && root.audioTextMode !== "icon"
             iconName: root.audioIcon
             fallbackSymbol: AudioService.outputMuted ? "×" : "♪"
             label: root.audioLabel
             description: AudioService.outputName
-            alert: AudioService.outputMuted
+            alert: AudioService.outputAvailable
+                && AudioService.outputMuted
+            onActivated: localX => root.toggleAudioPopup(localX)
         }
 
         SystemStatusItem {
@@ -389,11 +440,20 @@ Rectangle {
         anchorItem: root
         title: "System status"
         description: root.accessibleSummary
-        shown: statusMouse.containsMouse && !networkPanel.visible
+        shown: statusMouse.containsMouse
+            && !networkPanel.visible
+            && !audioPanel.visible
     }
 
     NetworkPanel {
         id: networkPanel
+
+        outputName: root.outputName
+        panelWindow: root.panelWindow
+    }
+
+    AudioPanel {
+        id: audioPanel
 
         outputName: root.outputName
         panelWindow: root.panelWindow
