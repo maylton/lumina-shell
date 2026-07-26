@@ -4,6 +4,7 @@ import QtQuick
 import qs.design
 import qs.modules.bar.widgets
 import qs.modules.control
+import qs.services.i18n
 import qs.services.notifications
 import qs.stores.config
 import qs.stores.shell
@@ -70,15 +71,26 @@ Rectangle {
 
     Accessible.role: Accessible.Button
     Accessible.name: expanded
-        ? qsTr("Close notifications")
-        : qsTr("Open notifications")
-    Accessible.description: NotificationService.unreadCount
-        + qsTr(" unread notifications")
-        + (
-            NotificationService.doNotDisturb
-                ? qsTr(". Do Not Disturb is enabled")
-                : ""
+        ? I18n.tr(
+            "bar.notifications.close",
+            "Close notifications"
         )
+        : I18n.tr(
+            "bar.notifications.open",
+            "Open notifications"
+        )
+    Accessible.description: I18n.tr(
+        "bar.notifications.unread",
+        "%1 unread notifications",
+        [NotificationService.unreadCount]
+    ) + (
+        NotificationService.doNotDisturb
+            ? ". " + I18n.tr(
+                "bar.notifications.dndDescription",
+                "Do Not Disturb is enabled"
+            )
+            : ""
+    )
     Accessible.focusable: true
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
@@ -248,11 +260,24 @@ Rectangle {
     TrayTooltip {
         anchorItem: root
         title: NotificationService.doNotDisturb
-            ? qsTr("Notifications · DND")
-            : qsTr("Notifications")
+            ? I18n.tr(
+                "bar.notifications.tooltipDnd",
+                "Notifications · DND"
+            )
+            : I18n.tr(
+                "bar.notifications.tooltip",
+                "Notifications"
+            )
         description: NotificationService.unreadCount > 0
-            ? qsTr("%1 unread").arg(NotificationService.unreadCount)
-            : qsTr("No unread notifications")
+            ? I18n.tr(
+                "bar.notifications.unreadCount",
+                "%1 unread",
+                [NotificationService.unreadCount]
+            )
+            : I18n.tr(
+                "bar.notifications.noneUnread",
+                "No unread notifications"
+            )
         shown: root.tooltipVisible && !root.expanded
     }
 }
