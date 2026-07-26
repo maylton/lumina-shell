@@ -60,6 +60,16 @@ Singleton {
         pendingAnchorBottom = -1
     }
 
+    function reset() {
+        transitionTimer.stop()
+        activePanelId = ""
+        activeOutputName = ""
+        transitionPhase = "idle"
+        clearPending()
+        observedOverlaySurface = normalized(OverlayStore.activeSurface)
+        observedOverlayOutput = normalized(OverlayStore.activeOutputName)
+    }
+
     function setPending(
         panelId,
         outputName,
@@ -283,6 +293,8 @@ Singleton {
                 root.openPending()
             } else if (root.transitionPhase === "opening") {
                 root.transitionPhase = "idle"
+                if (root.pendingPanelId)
+                    root.openPending()
             }
         }
     }
