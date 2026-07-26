@@ -159,23 +159,41 @@ BarPanelWindow {
 
                 Item {
                     width: parent.width
-                    height: 116
+                    height: 58
 
-                    Text {
+                    Column {
                         anchors {
                             left: parent.left
+                            right: refreshButton.left
+                            rightMargin: root.luminaDesign.spacing.medium
                             verticalCenter: parent.verticalCenter
                         }
-                        width: parent.width - 104
-                        text: I18n.tr(
-                            "bar.systemMonitor.title",
-                            "System\nMonitor"
-                        )
-                        color: root.luminaDesign.color.primary
-                        lineHeight: 1.04
-                        lineHeightMode: Text.ProportionalHeight
-                        font.pixelSize: 42
-                        font.weight: Font.Bold
+                        spacing: 2
+
+                        Text {
+                            width: parent.width
+                            text: I18n.tr(
+                                "settings.bar.catalog.system-monitor.title",
+                                "System monitor"
+                            )
+                            color: root.luminaDesign.color.onSurface
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.titleLarge
+                            font.weight: Font.Bold
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: I18n.tr(
+                                "settings.bar.catalog.system-monitor.description",
+                                "Live processor, memory, graphics, storage, and network data"
+                            )
+                            color: root.luminaDesign.color.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                        }
                     }
 
                     Rectangle {
@@ -185,9 +203,9 @@ BarPanelWindow {
                             right: parent.right
                             verticalCenter: parent.verticalCenter
                         }
-                        width: 64
-                        height: 68
-                        radius: 20
+                        width: 38
+                        height: 38
+                        radius: root.luminaDesign.shape.full
                         color: refreshMouse.pressed
                             ? root.luminaDesign.color.primary
                             : refreshMouse.containsMouse
@@ -247,7 +265,7 @@ BarPanelWindow {
                             iconColor: refreshMouse.pressed
                                 ? root.luminaDesign.color.onPrimary
                                 : root.luminaDesign.color.onAccentContainer
-                            iconSize: 28
+                            iconSize: 18
 
                             RotationAnimation on rotation {
                                 running:
