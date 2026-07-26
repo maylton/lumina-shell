@@ -16,21 +16,20 @@ SettingsPage {
     readonly property string currentWallpaper:
         WallpaperService.wallpaperFor(outputName)
     readonly property var paletteOptions: [
-        { value: "auto", label: "Auto" },
-        { value: "content", label: "Content" },
-        { value: "expressive", label: "Expressive" },
-        { value: "fidelity", label: "Fidelity" },
-        { value: "fruit-salad", label: "Fruit Salad" },
-        { value: "monochrome", label: "Monochrome" },
-        { value: "neutral", label: "Neutral" },
-        { value: "rainbow", label: "Rainbow" },
-        { value: "tonal-spot", label: "Tonal Spot" }
+        { value: "auto", label: I18n.tr("settings.appearance.palette.auto", "Auto") },
+        { value: "content", label: I18n.tr("settings.appearance.palette.content", "Content") },
+        { value: "expressive", label: I18n.tr("settings.appearance.palette.expressive", "Expressive") },
+        { value: "fidelity", label: I18n.tr("settings.appearance.palette.fidelity", "Fidelity") },
+        { value: "fruit-salad", label: I18n.tr("settings.appearance.palette.fruitSalad", "Fruit Salad") },
+        { value: "monochrome", label: I18n.tr("settings.appearance.palette.monochrome", "Monochrome") },
+        { value: "neutral", label: I18n.tr("settings.appearance.palette.neutral", "Neutral") },
+        { value: "rainbow", label: I18n.tr("settings.appearance.palette.rainbow", "Rainbow") },
+        { value: "tonal-spot", label: I18n.tr("settings.appearance.palette.tonalSpot", "Tonal Spot") }
     ]
 
     function wallpaperFileName(path) {
         const value = String(path || "")
         const separator = value.lastIndexOf("/")
-
         return separator >= 0 ? value.slice(separator + 1) : value
     }
 
@@ -39,25 +38,27 @@ SettingsPage {
             if (paletteOptions[index].value === value)
                 return paletteOptions[index].label
         }
-
-        return "Auto"
+        return I18n.tr("settings.appearance.palette.auto", "Auto")
     }
 
-    title: I18n.tr(
-        "settings.category.appearance.label",
-        "Appearance"
-    )
+    title: I18n.tr("settings.category.appearance.label", "Appearance")
     description: I18n.tr(
         "settings.page.appearance.description",
         "Colors, wallpaper, and the visual language of Lumina"
     )
 
     SettingsSection {
-        title: "Theme mode"
+        title: I18n.tr("settings.appearance.theme.section", "Theme mode")
         groupedRows: false
         description: ConfigStore.themeMode === "auto"
-            ? "Auto uses Lumina's predictable dark fallback on this runtime"
-            : "Choose Lumina's complete light or dark tonal scheme"
+            ? I18n.tr(
+                "settings.appearance.theme.autoDescription",
+                "Auto uses Lumina's predictable dark fallback on this runtime"
+            )
+            : I18n.tr(
+                "settings.appearance.theme.description",
+                "Choose Lumina's complete light or dark tonal scheme"
+            )
 
         Row {
             width: parent.width
@@ -67,7 +68,7 @@ SettingsPage {
             ThemePreviewCard {
                 width: (parent.width - parent.spacing) / 2
                 height: parent.height
-                label: "Light"
+                label: I18n.tr("settings.appearance.theme.light", "Light")
                 mode: "light"
                 selected: ConfigStore.themeMode === "light"
                 onActivated: ConfigStore.setThemeMode("light")
@@ -76,7 +77,7 @@ SettingsPage {
             ThemePreviewCard {
                 width: (parent.width - parent.spacing) / 2
                 height: parent.height
-                label: "Dark"
+                label: I18n.tr("settings.appearance.theme.dark", "Dark")
                 mode: "dark"
                 selected: ConfigStore.themeMode === "dark"
                 onActivated: ConfigStore.setThemeMode("dark")
@@ -87,9 +88,9 @@ SettingsPage {
             width: parent.width
             height: 40
             options: [
-                { value: "auto", label: "Auto" },
-                { value: "light", label: "Light" },
-                { value: "dark", label: "Dark" }
+                { value: "auto", label: I18n.tr("settings.appearance.theme.auto", "Auto") },
+                { value: "light", label: I18n.tr("settings.appearance.theme.light", "Light") },
+                { value: "dark", label: I18n.tr("settings.appearance.theme.dark", "Dark") }
             ]
             currentValue: ConfigStore.themeMode
             onSelected: value => ConfigStore.setThemeMode(value)
@@ -97,24 +98,38 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Material palette"
+        title: I18n.tr("settings.appearance.material.section", "Material palette")
         groupedRows: false
         description: Theme.dynamicPaletteActive
-            ? root.paletteLabel(ConfigStore.paletteStyle)
-                + " accents and tonal surfaces from the active wallpaper"
-            : "Lumina's default semantic accent colors are active"
+            ? I18n.tr(
+                "settings.appearance.material.activeDescription",
+                "%1 accents and tonal surfaces from the active wallpaper",
+                [root.paletteLabel(ConfigStore.paletteStyle)]
+            )
+            : I18n.tr(
+                "settings.appearance.material.defaultDescription",
+                "Lumina's default semantic accent colors are active"
+            )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Wallpaper palette"
+            title: I18n.tr(
+                "settings.appearance.material.wallpaperPalette",
+                "Wallpaper palette"
+            )
             description: checked
-                ? "Dynamic Material colors enabled"
-                : "Lumina default palette"
+                ? I18n.tr(
+                    "settings.appearance.material.dynamicEnabled",
+                    "Dynamic Material colors enabled"
+                )
+                : I18n.tr(
+                    "settings.appearance.material.defaultPalette",
+                    "Lumina default palette"
+                )
             iconName: "applications-graphics-symbolic"
             symbol: "✦"
             checked: ConfigStore.dynamicTheme
-            onToggled: value =>
-                WallpaperService.setDynamicTheme(value)
+            onToggled: value => WallpaperService.setDynamicTheme(value)
         }
 
         Grid {
@@ -142,8 +157,7 @@ SettingsPage {
 
                     required property var modelData
                     readonly property bool selected:
-                        String(modelData.value)
-                            === ConfigStore.paletteStyle
+                        String(modelData.value) === ConfigStore.paletteStyle
 
                     width: paletteGrid.cellWidth
                     height: 58
@@ -161,18 +175,19 @@ SettingsPage {
 
                     Behavior on radius {
                         NumberAnimation {
-                            duration:
-                                root.luminaDesign.motion.spatialDefault
-                            easing.type:
-                                root.luminaDesign.motion.spatialEasing
+                            duration: root.luminaDesign.motion.spatialDefault
+                            easing.type: root.luminaDesign.motion.spatialEasing
                             easing.overshoot:
                                 root.luminaDesign.motion.spatialOvershoot
                         }
                     }
 
                     Accessible.role: Accessible.RadioButton
-                    Accessible.name: String(modelData.label)
-                        + " palette"
+                    Accessible.name: I18n.tr(
+                        "settings.appearance.material.paletteAccessible",
+                        "%1 palette",
+                        [String(modelData.label)]
+                    )
                     Accessible.checked: selected
                     Accessible.focusable: enabled
                     Accessible.focused: activeFocus
@@ -187,7 +202,6 @@ SettingsPage {
                         )
                         event.accepted = true
                     }
-
                     Keys.onReturnPressed: event => {
                         WallpaperService.setPaletteStyle(
                             String(modelData.value)
@@ -216,23 +230,19 @@ SettingsPage {
 
                                 delegate: Rectangle {
                                     required property var modelData
-
                                     width: 14
                                     height: 22
                                     radius: 7
                                     color: modelData
                                     border.width: 1
-                                    border.color:
-                                        root.luminaDesign.color.outline
+                                    border.color: root.luminaDesign.color.outline
                                 }
                             }
                         }
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width
-                                - 62
-                                - parent.spacing
+                            width: parent.width - 62 - parent.spacing
                             text: String(paletteOption.modelData.label)
                             color: paletteOption.selected
                                 ? root.luminaDesign.color.onAccentContainer
@@ -248,9 +258,7 @@ SettingsPage {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            paletteOption.forceActiveFocus(
-                                Qt.MouseFocusReason
-                            )
+                            paletteOption.forceActiveFocus(Qt.MouseFocusReason)
                             WallpaperService.setPaletteStyle(
                                 String(paletteOption.modelData.value)
                             )
@@ -262,9 +270,13 @@ SettingsPage {
     }
 
     SettingsSection {
-        title: "Wallpaper"
+        title: I18n.tr("settings.appearance.wallpaper.section", "Wallpaper")
         groupedRows: false
-        description: "Current image and source directory for " + root.outputName
+        description: I18n.tr(
+            "settings.appearance.wallpaper.sectionDescription",
+            "Current image and source directory for %1",
+            [root.outputName]
+        )
 
         Row {
             width: parent.width
@@ -282,9 +294,7 @@ SettingsPage {
 
                 Image {
                     anchors.fill: parent
-                    source: WallpaperService.urlForPath(
-                        root.currentWallpaper
-                    )
+                    source: WallpaperService.urlForPath(root.currentWallpaper)
                     asynchronous: true
                     fillMode: Image.PreserveAspectCrop
                 }
@@ -306,9 +316,7 @@ SettingsPage {
                             margins: root.luminaDesign.spacing.medium
                         }
                         text: root.outputName + " · "
-                            + root.wallpaperFileName(
-                                root.currentWallpaper
-                            )
+                            + root.wallpaperFileName(root.currentWallpaper)
                         color: "#FFFFFF"
                         elide: Text.ElideMiddle
                         font.pixelSize:
@@ -320,9 +328,7 @@ SettingsPage {
 
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width
-                    - wallpaperPreview.width
-                    - parent.spacing
+                width: parent.width - wallpaperPreview.width - parent.spacing
                 spacing: root.luminaDesign.spacing.medium
 
                 Column {
@@ -331,7 +337,10 @@ SettingsPage {
 
                     Text {
                         width: parent.width
-                        text: "Current wallpaper"
+                        text: I18n.tr(
+                            "settings.appearance.wallpaper.current",
+                            "Current wallpaper"
+                        )
                         color: root.luminaDesign.color.onSurface
                         font.pixelSize:
                             root.luminaDesign.typography.bodyMedium
@@ -351,20 +360,32 @@ SettingsPage {
                 SettingsActionRow {
                     width: parent.width
                     height: 72
-                    title: "Wallpaper for " + root.outputName
-                    description: "Open the image picker for this output"
+                    title: I18n.tr(
+                        "settings.appearance.wallpaper.forOutput",
+                        "Wallpaper for %1",
+                        [root.outputName]
+                    )
+                    description: I18n.tr(
+                        "settings.appearance.wallpaper.pickerDescription",
+                        "Open the image picker for this output"
+                    )
                     iconName: "preferences-desktop-wallpaper-symbolic"
                     symbol: "▧"
-                    actionLabel: "Choose"
-                    onActivated:
-                        WallpaperService.openPicker(root.outputName)
+                    actionLabel: I18n.tr(
+                        "settings.appearance.wallpaper.choose",
+                        "Choose"
+                    )
+                    onActivated: WallpaperService.openPicker(root.outputName)
                 }
             }
         }
 
         SettingsRow {
             width: parent.width
-            title: "Wallpaper directory"
+            title: I18n.tr(
+                "settings.appearance.wallpaper.directory",
+                "Wallpaper directory"
+            )
             description: ConfigStore.wallpaperDirectory
             iconName: "folder-pictures-symbolic"
             symbol: "▤"
@@ -388,8 +409,7 @@ SettingsPage {
                     }
                     text: ConfigStore.wallpaperDirectory
                     color: root.luminaDesign.color.onSurface
-                    selectionColor:
-                        root.luminaDesign.color.accentContainer
+                    selectionColor: root.luminaDesign.color.accentContainer
                     selectedTextColor:
                         root.luminaDesign.color.onAccentContainer
                     activeFocusOnTab: true
@@ -400,113 +420,164 @@ SettingsPage {
                         WallpaperService.setWallpaperDirectory(text)
 
                     Accessible.role: Accessible.EditableText
-                    Accessible.name: "Wallpaper directory"
+                    Accessible.name: I18n.tr(
+                        "settings.appearance.wallpaper.directory",
+                        "Wallpaper directory"
+                    )
                 }
             }
         }
     }
 
     SettingsSection {
-        title: "Shell style"
-        description: "Changes apply immediately to Lumina surfaces"
+        title: I18n.tr("settings.appearance.shell.section", "Shell style")
+        description: I18n.tr(
+            "settings.appearance.shell.sectionDescription",
+            "Changes apply immediately to Lumina surfaces"
+        )
 
         SettingsComboRow {
-  width: parent.width
-  title: "Surface style"
-  description: ConfigStore.shellBackgroundMode === "solid"
-      ? "Opaque tonal shell surfaces"
-      : ConfigStore.shellBackgroundMode === "blur"
-          ? "Android-inspired bounded live blur"
-          : "Blur with richer tint, highlight, and subtle texture"
-  options: [
-      { value: "solid", label: "Solid" },
-      { value: "blur", label: "Blur" },
-      { value: "frosted", label: "Frosted glass" }
-  ]
-  currentValue: ConfigStore.shellBackgroundMode
-  onSelected: value =>
-      ConfigStore.setAppearanceValue(
-          "shellBackgroundMode",
-          value
-      )
+            width: parent.width
+            title: I18n.tr(
+                "settings.appearance.shell.surfaceStyle",
+                "Surface style"
+            )
+            description: ConfigStore.shellBackgroundMode === "solid"
+                ? I18n.tr(
+                    "settings.appearance.shell.solidDescription",
+                    "Opaque tonal shell surfaces"
+                )
+                : ConfigStore.shellBackgroundMode === "blur"
+                    ? I18n.tr(
+                        "settings.appearance.shell.blurDescription",
+                        "Android-inspired bounded live blur"
+                    )
+                    : I18n.tr(
+                        "settings.appearance.shell.frostedDescription",
+                        "Blur with richer tint, highlight, and subtle texture"
+                    )
+            options: [
+                { value: "solid", label: I18n.tr("settings.appearance.shell.solid", "Solid") },
+                { value: "blur", label: I18n.tr("settings.appearance.shell.blur", "Blur") },
+                { value: "frosted", label: I18n.tr("settings.appearance.shell.frosted", "Frosted glass") }
+            ]
+            currentValue: ConfigStore.shellBackgroundMode
+            onSelected: value => ConfigStore.setAppearanceValue(
+                "shellBackgroundMode",
+                value
+            )
         }
 
         SettingsSliderRow {
-  width: parent.width
-  title: "Tint opacity"
-  description: "Controls the tonal protection above live blur"
-  available: ConfigStore.shellBackgroundMode !== "solid"
-  availabilityText: "Solid surfaces are fully opaque"
-  from: 0.55
-  to: 0.95
-  stepSize: 0.02
-  value: ConfigStore.shellSurfaceOpacity
-  valueLabel: Math.round(value * 100) + "%"
-  onValueEdited: value =>
-      ConfigStore.setAppearanceValue(
-          "shellSurfaceOpacity",
-          value
-      )
+            width: parent.width
+            title: I18n.tr(
+                "settings.appearance.shell.tintOpacity",
+                "Tint opacity"
+            )
+            description: I18n.tr(
+                "settings.appearance.shell.tintOpacityDescription",
+                "Controls the tonal protection above live blur"
+            )
+            available: ConfigStore.shellBackgroundMode !== "solid"
+            availabilityText: I18n.tr(
+                "settings.appearance.shell.tintOpacityUnavailable",
+                "Solid surfaces are fully opaque"
+            )
+            from: 0.55
+            to: 0.95
+            stepSize: 0.02
+            value: ConfigStore.shellSurfaceOpacity
+            valueLabel: Math.round(value * 100) + "%"
+            onValueEdited: value => ConfigStore.setAppearanceValue(
+                "shellSurfaceOpacity",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Animations"
+            title: I18n.tr(
+                "settings.appearance.shell.animations",
+                "Animations"
+            )
             description: checked
-                ? "Material transitions are enabled"
-                : "Transitions are nearly instant"
-            checked: ConfigStore.animationsEnabled
-            onToggled: value =>
-                ConfigStore.setAppearanceValue(
-                    "animationsEnabled",
-                    value
+                ? I18n.tr(
+                    "settings.appearance.shell.animationsEnabled",
+                    "Material transitions are enabled"
                 )
+                : I18n.tr(
+                    "settings.appearance.shell.animationsDisabledDescription",
+                    "Transitions are nearly instant"
+                )
+            checked: ConfigStore.animationsEnabled
+            onToggled: value => ConfigStore.setAppearanceValue(
+                "animationsEnabled",
+                value
+            )
         }
 
         SettingsSliderRow {
             width: parent.width
-            title: "Animation scale"
-            description: "Adjust the duration of shell transitions"
+            title: I18n.tr(
+                "settings.appearance.shell.animationScale",
+                "Animation scale"
+            )
+            description: I18n.tr(
+                "settings.appearance.shell.animationScaleDescription",
+                "Adjust the duration of shell transitions"
+            )
             available: ConfigStore.animationsEnabled
-            availabilityText: "Animations are disabled"
+            availabilityText: I18n.tr(
+                "settings.appearance.shell.animationsUnavailable",
+                "Animations are disabled"
+            )
             from: 0.5
             to: 2
             stepSize: 0.25
             value: ConfigStore.animationScale
             valueLabel: value.toFixed(2) + "×"
-            onValueEdited: value =>
-                ConfigStore.setAppearanceValue(
-                    "animationScale",
-                    value
-                )
+            onValueEdited: value => ConfigStore.setAppearanceValue(
+                "animationScale",
+                value
+            )
         }
 
         SettingsSliderRow {
             width: parent.width
-            title: "Corner radius"
-            description: "Scale Material Expressive shell shapes"
+            title: I18n.tr(
+                "settings.appearance.shell.cornerRadius",
+                "Corner radius"
+            )
+            description: I18n.tr(
+                "settings.appearance.shell.cornerRadiusDescription",
+                "Scale Material Expressive shell shapes"
+            )
             from: 0.6
             to: 1.5
             stepSize: 0.1
             value: ConfigStore.cornerRadiusScale
             valueLabel: value.toFixed(1) + "×"
-            onValueEdited: value =>
-                ConfigStore.setAppearanceValue(
-                    "cornerRadiusScale",
-                    value
-                )
+            onValueEdited: value => ConfigStore.setAppearanceValue(
+                "cornerRadiusScale",
+                value
+            )
         }
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Compact mode"
-            description: "Reduce spacing without shrinking text"
+            title: I18n.tr(
+                "settings.appearance.shell.compactMode",
+                "Compact mode"
+            )
+            description: I18n.tr(
+                "settings.appearance.shell.compactModeDescription",
+                "Reduce spacing without shrinking text"
+            )
             checked: ConfigStore.compactMode
-            onToggled: value =>
-                ConfigStore.setAppearanceValue(
-                    "compactMode",
-                    value
-                )
+            onToggled: value => ConfigStore.setAppearanceValue(
+                "compactMode",
+                value
+            )
         }
     }
 }
