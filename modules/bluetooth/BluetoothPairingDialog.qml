@@ -29,10 +29,10 @@ FloatingWindow {
     property string localError: ""
 
     visible: BluetoothManagerService.authenticationPending
-    width: 460
-    height: inputPrompt ? 350 : 330
-    minimumSize: Qt.size(width, height)
-    maximumSize: Qt.size(width, height)
+    implicitWidth: 460
+    implicitHeight: displayPrompt ? 360 : inputPrompt ? 350 : 330
+    minimumSize: Qt.size(implicitWidth, implicitHeight)
+    maximumSize: Qt.size(implicitWidth, implicitHeight)
     color: "transparent"
     title: I18n.tr(
         "bluetooth.auth.windowTitle",
@@ -152,222 +152,266 @@ FloatingWindow {
         })
     }
 
-    Keys.onEscapePressed: event => {
-        root.cancel()
-        event.accepted = true
-    }
+    FocusScope {
+        id: dialogFocus
 
-    Rectangle {
         anchors.fill: parent
-        radius: root.luminaDesign.shape.extraLarge
-        color: root.luminaDesign.color.surfaceContainer
-        border.width: 1
-        border.color: root.luminaDesign.color.outline
+        focus: root.visible
 
-        Column {
-            anchors {
-                fill: parent
-                margins: root.luminaDesign.spacing.extraLarge
-            }
-            spacing: root.luminaDesign.spacing.large
+        Keys.onEscapePressed: event => {
+            root.cancel()
+            event.accepted = true
+        }
 
-            Row {
-                width: parent.width
-                spacing: root.luminaDesign.spacing.medium
+        Rectangle {
+            anchors.fill: parent
+            radius: root.luminaDesign.shape.extraLarge
+            color: root.luminaDesign.color.surfaceContainer
+            border.width: 1
+            border.color: root.luminaDesign.color.outline
 
-                Rectangle {
-                    width: 48
-                    height: 48
-                    radius: root.luminaDesign.shape.full
-                    color: root.luminaDesign.color.accentContainer
-
-                    DashboardIcon {
-                        anchors.centerIn: parent
-                        iconName: "bluetooth-active-symbolic"
-                        fallbackSymbol: "ᛒ"
-                        iconColor: root.luminaDesign.color.onAccentContainer
-                        iconSize: 24
-                    }
+            Column {
+                anchors {
+                    fill: parent
+                    margins: root.luminaDesign.spacing.extraLarge
                 }
-
-                Column {
-                    width: parent.width - 48 - parent.spacing
-                    spacing: 3
-
-                    Text {
-                        width: parent.width
-                        text: root.heading()
-                        color: root.luminaDesign.color.onSurface
-                        wrapMode: Text.Wrap
-                        font.pixelSize: root.luminaDesign.typography.titleLarge
-                        font.weight: Font.Bold
-                    }
-
-                    Text {
-                        width: parent.width
-                        text: root.deviceName
-                        color: root.luminaDesign.color.textMuted
-                        elide: Text.ElideRight
-                        font.pixelSize: root.luminaDesign.typography.labelMedium
-                    }
-                }
-            }
-
-            Text {
-                width: parent.width
-                text: root.description()
-                color: root.luminaDesign.color.onSurface
-                wrapMode: Text.Wrap
-                font.pixelSize: root.luminaDesign.typography.bodyMedium
-            }
-
-            Rectangle {
-                visible: root.pairingCode.length > 0 && !root.inputPrompt
-                width: parent.width
-                height: 72
-                radius: root.luminaDesign.shape.large
-                color: root.luminaDesign.color.surfaceMuted
-                border.width: 1
-                border.color: root.luminaDesign.color.outlineVariant
-
-                Text {
-                    anchors.centerIn: parent
-                    text: root.pairingCode
-                    color: root.luminaDesign.color.onSurface
-                    font.pixelSize: 32
-                    font.weight: Font.Bold
-                    font.letterSpacing: 3
-                }
-            }
-
-            Rectangle {
-                visible: root.inputPrompt
-                width: parent.width
-                height: 52
-                radius: root.luminaDesign.shape.large
-                color: root.luminaDesign.color.surfaceMuted
-                border.width: authInput.activeFocus ? 2 : 1
-                border.color: authInput.activeFocus
-                    ? root.luminaDesign.color.primary
-                    : root.localError.length > 0
-                        ? root.luminaDesign.color.urgent
-                        : root.luminaDesign.color.outline
-
-                TextInput {
-                    id: authInput
-
-                    anchors {
-                        fill: parent
-                        leftMargin: root.luminaDesign.spacing.large
-                        rightMargin: root.luminaDesign.spacing.large
-                    }
-                    verticalAlignment: TextInput.AlignVCenter
-                    selectByMouse: true
-                    color: root.luminaDesign.color.onSurface
-                    font.pixelSize: root.luminaDesign.typography.bodyLarge
-                    maximumLength: root.promptType === "pin" ? 16 : 6
-                    inputMethodHints: root.promptType === "passkey"
-                        ? Qt.ImhDigitsOnly
-                        : Qt.ImhNone
-
-                    Keys.onReturnPressed: event => {
-                        root.submit()
-                        event.accepted = true
-                    }
-                }
-            }
-
-            Text {
-                visible: root.localError.length > 0
-                width: parent.width
-                text: root.localError
-                color: root.luminaDesign.color.urgent
-                wrapMode: Text.Wrap
-                font.pixelSize: root.luminaDesign.typography.labelMedium
-            }
-
-            Item {
-                width: parent.width
-                height: 44
+                spacing: root.luminaDesign.spacing.large
 
                 Row {
-                    anchors.right: parent.right
+                    width: parent.width
                     spacing: root.luminaDesign.spacing.medium
 
                     Rectangle {
-                        id: cancelButton
-
-                        width: Math.max(112, cancelText.implicitWidth + 30)
-                        height: 42
+                        width: 48
+                        height: 48
                         radius: root.luminaDesign.shape.full
-                        color: cancelMouse.containsMouse
-                            ? root.luminaDesign.color.surfaceMuted
-                            : "transparent"
-                        activeFocusOnTab: true
-                        border.width: activeFocus ? 2 : 1
-                        border.color: activeFocus
-                            ? root.luminaDesign.color.primary
-                            : root.luminaDesign.color.outline
+                        color: root.luminaDesign.color.accentContainer
 
-                        Text {
-                            id: cancelText
+                        DashboardIcon {
                             anchors.centerIn: parent
-                            text: root.decisionPrompt
-                                ? I18n.tr(
-                                    "bluetooth.auth.action.reject",
-                                    "Reject"
-                                )
-                                : I18n.tr(
-                                    "bluetooth.auth.action.cancel",
-                                    "Cancel"
-                                )
-                            color: root.luminaDesign.color.onSurface
-                            font.pixelSize: root.luminaDesign.typography.labelMedium
-                            font.weight: Font.DemiBold
-                        }
-
-                        MouseArea {
-                            id: cancelMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.cancel()
+                            iconName: "bluetooth-active-symbolic"
+                            fallbackSymbol: "ᛒ"
+                            iconColor:
+                                root.luminaDesign.color.onAccentContainer
+                            iconSize: 24
                         }
                     }
 
-                    Rectangle {
-                        visible: !root.displayPrompt
-                        width: visible ? 112 : 0
-                        height: 42
-                        radius: root.luminaDesign.shape.full
-                        color: confirmMouse.containsMouse
-                            ? root.luminaDesign.color.primary
-                            : root.luminaDesign.color.accentContainer
+                    Column {
+                        width: parent.width - 48 - parent.spacing
+                        spacing: 3
 
                         Text {
-                            anchors.centerIn: parent
-                            text: root.inputPrompt
-                                ? I18n.tr(
-                                    "bluetooth.auth.action.submit",
-                                    "Submit"
-                                )
-                                : I18n.tr(
-                                    "bluetooth.auth.action.confirm",
-                                    "Confirm"
-                                )
-                            color: confirmMouse.containsMouse
-                                ? root.luminaDesign.color.onPrimary
-                                : root.luminaDesign.color.onAccentContainer
-                            font.pixelSize: root.luminaDesign.typography.labelMedium
-                            font.weight: Font.DemiBold
+                            width: parent.width
+                            text: root.heading()
+                            color: root.luminaDesign.color.onSurface
+                            wrapMode: Text.Wrap
+                            font.pixelSize:
+                                root.luminaDesign.typography.titleLarge
+                            font.weight: Font.Bold
                         }
 
-                        MouseArea {
-                            id: confirmMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.submit()
+                        Text {
+                            width: parent.width
+                            text: root.deviceName
+                            color: root.luminaDesign.color.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                        }
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    text: root.description()
+                    color: root.luminaDesign.color.onSurface
+                    wrapMode: Text.Wrap
+                    font.pixelSize:
+                        root.luminaDesign.typography.bodyMedium
+                }
+
+                Rectangle {
+                    visible: root.pairingCode.length > 0
+                        && !root.inputPrompt
+                    width: parent.width
+                    height: 72
+                    radius: root.luminaDesign.shape.large
+                    color: root.luminaDesign.color.surfaceMuted
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outlineVariant
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.pairingCode
+                        color: root.luminaDesign.color.onSurface
+                        font.pixelSize: 32
+                        font.weight: Font.Bold
+                        font.letterSpacing: 3
+                    }
+                }
+
+                Rectangle {
+                    visible: root.inputPrompt
+                    width: parent.width
+                    height: 52
+                    radius: root.luminaDesign.shape.large
+                    color: root.luminaDesign.color.surfaceMuted
+                    border.width: authInput.activeFocus ? 2 : 1
+                    border.color: authInput.activeFocus
+                        ? root.luminaDesign.color.primary
+                        : root.localError.length > 0
+                            ? root.luminaDesign.color.urgent
+                            : root.luminaDesign.color.outline
+
+                    TextInput {
+                        id: authInput
+
+                        anchors {
+                            fill: parent
+                            leftMargin: root.luminaDesign.spacing.large
+                            rightMargin: root.luminaDesign.spacing.large
+                        }
+                        verticalAlignment: TextInput.AlignVCenter
+                        selectByMouse: true
+                        color: root.luminaDesign.color.onSurface
+                        font.pixelSize:
+                            root.luminaDesign.typography.bodyMedium + 2
+                        maximumLength: root.promptType === "pin" ? 16 : 6
+                        inputMethodHints: root.promptType === "passkey"
+                            ? Qt.ImhDigitsOnly
+                            : Qt.ImhNone
+
+                        Keys.onReturnPressed: event => {
+                            root.submit()
+                            event.accepted = true
+                        }
+                    }
+                }
+
+                Text {
+                    visible: root.localError.length > 0
+                    width: parent.width
+                    text: root.localError
+                    color: root.luminaDesign.color.urgent
+                    wrapMode: Text.Wrap
+                    font.pixelSize:
+                        root.luminaDesign.typography.labelMedium
+                }
+
+                Text {
+                    visible: root.promptType === "display-passkey"
+                        && BluetoothManagerService.authenticationEntered > 0
+                    width: parent.width
+                    text: I18n.tr(
+                        "bluetooth.auth.display.progress",
+                        "%1 of 6 digits entered on the device",
+                        [BluetoothManagerService.authenticationEntered]
+                    )
+                    color: root.luminaDesign.color.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize:
+                        root.luminaDesign.typography.labelMedium
+                }
+
+                Item {
+                    width: parent.width
+                    height: 44
+
+                    Row {
+                        anchors.right: parent.right
+                        spacing: root.luminaDesign.spacing.medium
+
+                        Rectangle {
+                            id: cancelButton
+
+                            width: Math.max(
+                                112,
+                                cancelText.implicitWidth + 30
+                            )
+                            height: 42
+                            radius: root.luminaDesign.shape.full
+                            color: cancelMouse.containsMouse
+                                ? root.luminaDesign.color.surfaceMuted
+                                : "transparent"
+                            activeFocusOnTab: true
+                            border.width: activeFocus ? 2 : 1
+                            border.color: activeFocus
+                                ? root.luminaDesign.color.primary
+                                : root.luminaDesign.color.outline
+
+                            Keys.onSpacePressed: event => {
+                                root.cancel()
+                                event.accepted = true
+                            }
+                            Keys.onReturnPressed: event => {
+                                root.cancel()
+                                event.accepted = true
+                            }
+
+                            Text {
+                                id: cancelText
+                                anchors.centerIn: parent
+                                text: root.decisionPrompt
+                                    ? I18n.tr(
+                                        "bluetooth.auth.action.reject",
+                                        "Reject"
+                                    )
+                                    : I18n.tr(
+                                        "bluetooth.auth.action.cancel",
+                                        "Cancel"
+                                    )
+                                color: root.luminaDesign.color.onSurface
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.DemiBold
+                            }
+
+                            MouseArea {
+                                id: cancelMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.cancel()
+                            }
+                        }
+
+                        Rectangle {
+                            visible: !root.displayPrompt
+                            width: visible ? 112 : 0
+                            height: 42
+                            radius: root.luminaDesign.shape.full
+                            color: confirmMouse.containsMouse
+                                ? root.luminaDesign.color.primary
+                                : root.luminaDesign.color.accentContainer
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: root.inputPrompt
+                                    ? I18n.tr(
+                                        "bluetooth.auth.action.submit",
+                                        "Submit"
+                                    )
+                                    : I18n.tr(
+                                        "bluetooth.auth.action.confirm",
+                                        "Confirm"
+                                    )
+                                color: confirmMouse.containsMouse
+                                    ? root.luminaDesign.color.onPrimary
+                                    : root.luminaDesign.color
+                                        .onAccentContainer
+                                font.pixelSize:
+                                    root.luminaDesign.typography.labelMedium
+                                font.weight: Font.DemiBold
+                            }
+
+                            MouseArea {
+                                id: confirmMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.submit()
+                            }
                         }
                     }
                 }
