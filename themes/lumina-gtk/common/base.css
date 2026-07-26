@@ -1,0 +1,205 @@
+/* Shared GTK 3/4 styling. Keep selectors conservative for compatibility. */
+
+* {
+  -GtkWidget-focus-padding: 0;
+  -GtkWidget-focus-line-width: 0;
+  outline-color: alpha(@lumina_primary, 0.76);
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+}
+
+window,
+.background {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface;
+}
+
+headerbar,
+.titlebar {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface_container;
+  border: 0;
+  box-shadow: inset 0 -1px alpha(@lumina_outline_variant, 0.42);
+  padding: 6px;
+}
+
+headerbar.titlebar,
+.titlebar {
+  border-radius: 14px 14px 0 0;
+}
+
+button {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 4px 12px;
+  color: @lumina_on_surface;
+  background-color: @lumina_surface_container_high;
+  border: 1px solid alpha(@lumina_outline_variant, 0.65);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+button:hover {
+  background-color: mix(@lumina_surface_container_high, @lumina_on_surface, 0.08);
+}
+
+button:active,
+button:checked {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
+  border-color: transparent;
+}
+
+button.suggested-action {
+  color: @lumina_on_primary;
+  background-color: @lumina_primary;
+  border-color: transparent;
+}
+
+button.destructive-action {
+  color: @lumina_on_error;
+  background-color: @lumina_error;
+  border-color: transparent;
+}
+
+entry,
+spinbutton,
+textview,
+.view {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface_container_low;
+  border: 1px solid @lumina_outline_variant;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+entry,
+spinbutton {
+  min-height: 34px;
+  padding: 3px 10px;
+}
+
+entry:focus,
+spinbutton:focus,
+textview:focus {
+  border-color: @lumina_primary;
+  box-shadow: 0 0 0 1px @lumina_primary;
+}
+
+popover,
+menu,
+.context-menu {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface_container_high;
+  border: 1px solid alpha(@lumina_outline_variant, 0.62);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px @lumina_shadow;
+  padding: 6px;
+}
+
+menuitem,
+modelbutton {
+  min-height: 34px;
+  padding: 4px 10px;
+  border-radius: 9px;
+}
+
+menuitem:hover,
+modelbutton:hover {
+  background-color: alpha(@lumina_on_surface, 0.08);
+}
+
+notebook > header {
+  background-color: @lumina_surface_container_low;
+  border: 0;
+}
+
+notebook > header > tabs > tab {
+  min-height: 36px;
+  padding: 4px 12px;
+  color: @lumina_on_surface_variant;
+  border-radius: 10px 10px 0 0;
+}
+
+notebook > header > tabs > tab:checked {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
+}
+
+scrollbar slider {
+  min-width: 6px;
+  min-height: 6px;
+  background-color: alpha(@lumina_on_surface_variant, 0.48);
+  border-radius: 999px;
+}
+
+scrollbar slider:hover {
+  background-color: alpha(@lumina_on_surface_variant, 0.72);
+}
+
+selection {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
+}
+
+separator {
+  min-width: 1px;
+  min-height: 1px;
+  background-color: alpha(@lumina_outline_variant, 0.56);
+}
+
+tooltip {
+  color: @lumina_inverse_on_surface;
+  background-color: @lumina_inverse_surface;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+switch {
+  min-width: 46px;
+  min-height: 26px;
+  background-color: @lumina_surface_container_highest;
+  border: 1px solid @lumina_outline;
+  border-radius: 999px;
+}
+
+switch:checked {
+  background-color: @lumina_primary;
+  border-color: @lumina_primary;
+}
+
+switch slider {
+  min-width: 20px;
+  min-height: 20px;
+  margin: 2px;
+  background-color: @lumina_outline;
+  border-radius: 999px;
+}
+
+switch:checked slider {
+  background-color: @lumina_on_primary;
+}
+
+progressbar trough,
+scale trough {
+  min-height: 6px;
+  background-color: @lumina_surface_container_highest;
+  border-radius: 999px;
+}
+
+progressbar progress,
+scale highlight {
+  min-height: 6px;
+  background-color: @lumina_primary;
+  border-radius: 999px;
+}
+
+.card,
+boxed-list,
+frame {
+  background-color: @lumina_surface_container_low;
+  border: 1px solid alpha(@lumina_outline_variant, 0.5);
+  border-radius: 14px;
+  box-shadow: none;
+}
