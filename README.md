@@ -13,7 +13,7 @@ Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell an
 ## Initial stack
 
 - Niri
-- Quickshell
+- Official Quickshell
 - QML / Qt Quick
 - Rust later, only where a separate backend is justified
 
@@ -22,8 +22,15 @@ Lumina Shell is a Niri-first desktop shell for Wayland, built with Quickshell an
 Install the base tools on CachyOS or Arch Linux:
 
 ```bash
-sudo pacman -S --needed git niri noctalia-qs qt6-declarative
+sudo pacman -S --needed \
+    git \
+    niri \
+    quickshell \
+    qt6-declarative \
+    python-dbus-next
 ```
+
+`python-dbus-next` is used by Lumina's BlueZ `org.bluez.Agent1` bridge for PIN, passkey, service authorization, and numeric-comparison confirmation dialogs.
 
 ## Run from a checkout
 
