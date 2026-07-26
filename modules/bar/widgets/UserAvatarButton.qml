@@ -102,21 +102,14 @@ Rectangle {
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
-        OverlayStore.prepareFor(
-            "control",
+        BarPanelCoordinator.requestToggle(
+            "dashboard",
             root.outputName,
             root.surfacePlacement,
             anchor.x,
             anchor.top,
             anchor.bottom
         )
-
-        if (expanded
-            && ControlCenterStore.activePage === "dashboard") {
-            ControlCenterStore.close()
-        } else {
-            ControlCenterStore.openFor(outputName, "dashboard")
-        }
     }
 
     Keys.onSpacePressed: event => {
@@ -127,6 +120,42 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "dashboard" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "control",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            ControlCenterStore.openFor(root.outputName, "dashboard")
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "dashboard" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                ControlCenterStore.close()
+            else
+                BarPanelCoordinator.reportClosed("dashboard", root.outputName)
+        }
     }
 
     Behavior on color {
