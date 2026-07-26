@@ -122,42 +122,6 @@ Rectangle {
         event.accepted = true
     }
 
-    Connections {
-        target: BarPanelCoordinator
-
-        function onOpenRequested(
-            panelId,
-            outputName,
-            placement,
-            anchorX,
-            anchorTop,
-            anchorBottom
-        ) {
-            if (panelId !== "dashboard" || outputName !== root.outputName)
-                return
-
-            OverlayStore.prepareFor(
-                "control",
-                root.outputName,
-                placement,
-                anchorX,
-                anchorTop,
-                anchorBottom
-            )
-            ControlCenterStore.openFor(root.outputName, "dashboard")
-        }
-
-        function onCloseRequested(panelId, outputName) {
-            if (panelId !== "dashboard" || outputName !== root.outputName)
-                return
-
-            if (root.expanded)
-                ControlCenterStore.close()
-            else
-                BarPanelCoordinator.reportClosed("dashboard", root.outputName)
-        }
-    }
-
     Behavior on color {
         ColorAnimation {
             duration: root.luminaDesign.motion.effectsFast
