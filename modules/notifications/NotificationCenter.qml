@@ -443,14 +443,14 @@ Scope {
                             spacing: root.luminaDesign.spacing.medium
                             clip: true
                             model: ScriptModel {
-                                values: NotificationService.history
+                                values: NotificationService.historyKeys
                             }
 
                             delegate: NotificationCard {
-                                required property var modelData
+                                required property string modelData
 
                                 width: historyList.width
-                                entry: modelData
+                                entryKey: modelData
                             }
 
                             Column {

@@ -156,7 +156,7 @@ Rectangle {
         UserAvatar {
             anchors.verticalCenter: parent.verticalCenter
             avatarSize: root.luminaDesign.size.barTouchTarget
-            cornerRadius: avatarSize / 2
+            cornerRadius: Math.min(avatarSize / 2, root.radius)
             useImage: root.avatarDisplay !== "initials"
             borderWidth: 0
         }

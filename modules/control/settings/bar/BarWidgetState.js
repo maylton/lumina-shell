@@ -86,3 +86,30 @@ function addAtEnd(order, widgetId, allowed) {
 
     return result
 }
+
+function moveToArea(orders, area, widgetId, allowed) {
+    var requestedArea = String(area || "")
+    var requestedId = String(widgetId || "")
+    var valid = list(allowed)
+    var areas = ["left", "center", "right"]
+    var source = orders && typeof orders === "object" ? orders : {}
+    var result = {
+        left: uniqueKnown(source.left, valid),
+        center: uniqueKnown(source.center, valid),
+        right: uniqueKnown(source.right, valid)
+    }
+
+    if (areas.indexOf(requestedArea) < 0
+        || valid.indexOf(requestedId) < 0)
+        return result
+
+    for (var index = 0; index < areas.length; ++index) {
+        var currentArea = areas[index]
+        result[currentArea] = result[currentArea].filter(function(id) {
+            return id !== requestedId
+        })
+    }
+
+    result[requestedArea].push(requestedId)
+    return result
+}

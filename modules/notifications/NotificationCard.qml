@@ -9,10 +9,12 @@ import qs.stores.config
 Rectangle {
     id: root
 
-    required property var entry
+    required property string entryKey
     property bool popupMode: false
 
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property var entry:
+        NotificationService.entryForKey(entryKey)
     readonly property int timeout: {
         const requested = Number(entry.expireTimeout)
 
@@ -176,17 +178,18 @@ Rectangle {
             Row {
                 width: parent.width
                 visible: !root.entry.closed
-                    && root.entry.actions
-                    && root.entry.actions.length > 0
+                    && root.entry.actionLabels.length > 0
                 spacing: root.luminaDesign.spacing.small
 
                 Repeater {
-                    model: root.entry.actions || []
+                    model: root.entry.actionLabels.length
 
                     delegate: Rectangle {
                         id: actionButton
 
-                        required property var modelData
+                        required property int index
+                        readonly property string label:
+                            String(root.entry.actionLabels[index] || "Open")
 
                         width: actionLabel.implicitWidth + 16
                         height: 30
@@ -200,27 +203,27 @@ Rectangle {
 
                         Accessible.role: Accessible.Button
                         Accessible.name:
-                            String(modelData.text || "Open")
+                            actionButton.label
                         Accessible.focusable: true
                         Accessible.focused: activeFocus
                         Accessible.onPressAction:
                             NotificationService.invokeAction(
-                                root.entry,
-                                modelData
+                                root.entryKey,
+                                actionButton.index
                             )
 
                         Keys.onSpacePressed: event => {
                             NotificationService.invokeAction(
-                                root.entry,
-                                modelData
+                                root.entryKey,
+                                actionButton.index
                             )
                             event.accepted = true
                         }
 
                         Keys.onReturnPressed: event => {
                             NotificationService.invokeAction(
-                                root.entry,
-                                modelData
+                                root.entryKey,
+                                actionButton.index
                             )
                             event.accepted = true
                         }
@@ -229,7 +232,7 @@ Rectangle {
                             id: actionLabel
 
                             anchors.centerIn: parent
-                            text: String(actionButton.modelData.text || "Open")
+                            text: actionButton.label
                             color: actionMouse.containsMouse
                                 ? root.luminaDesign.color.onAccentContainer
                                 : root.luminaDesign.color.onSurface
@@ -247,8 +250,8 @@ Rectangle {
                             onClicked: {
                                 actionButton.focus = false
                                 NotificationService.invokeAction(
-                                    root.entry,
-                                    actionButton.modelData
+                                    root.entryKey,
+                                    actionButton.index
                                 )
                             }
                         }
@@ -275,15 +278,15 @@ Rectangle {
             Accessible.focusable: true
             Accessible.focused: activeFocus
             Accessible.onPressAction:
-                NotificationService.dismissNotification(root.entry)
+                NotificationService.dismissNotification(root.entryKey)
 
             Keys.onSpacePressed: event => {
-                NotificationService.dismissNotification(root.entry)
+                NotificationService.dismissNotification(root.entryKey)
                 event.accepted = true
             }
 
             Keys.onReturnPressed: event => {
-                NotificationService.dismissNotification(root.entry)
+                NotificationService.dismissNotification(root.entryKey)
                 event.accepted = true
             }
 
@@ -304,7 +307,7 @@ Rectangle {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     closeButton.focus = false
-                    NotificationService.dismissNotification(root.entry)
+                    NotificationService.dismissNotification(root.entryKey)
                 }
             }
         }

@@ -2,6 +2,7 @@ module qs.modules.control.settings.bar.widgets
 LauncherWidgetSettings 1.0 LauncherWidgetSettings.qml
 AudioWidgetSettings 1.0 AudioWidgetSettings.qml
 BatteryWidgetSettings 1.0 BatteryWidgetSettings.qml
+BluetoothWidgetSettings 1.0 BluetoothWidgetSettings.qml
 OverviewWidgetSettings 1.0 OverviewWidgetSettings.qml
 WorkspacesWidgetSettings 1.0 WorkspacesWidgetSettings.qml
 DateTimeWidgetSettings 1.0 DateTimeWidgetSettings.qml

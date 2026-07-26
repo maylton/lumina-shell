@@ -45,6 +45,7 @@ Controls.Popup {
         workspaces: workspacesSettings,
         datetime: dateTimeSettings,
         context: contextSettings,
+        bluetooth: bluetoothSettings,
         tray: traySettings,
         notifications: notificationsSettings,
         network: networkSettings,
@@ -371,6 +372,11 @@ Controls.Popup {
     Component {
         id: contextSettings
         ContextWidgetSettings {}
+    }
+
+    Component {
+        id: bluetoothSettings
+        BluetoothWidgetSettings {}
     }
 
     Component {

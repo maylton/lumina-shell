@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema10IndividualSystemWidgets() {
+    function test_defaultsUseSchema12FlexibleWidgetAreas() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 10)
+        compare(state.schemaVersion, 12)
         compare(state.themeMode, "auto")
         compare(state.shellBackgroundMode, "solid")
         compare(state.shellSurfaceOpacity, 0.82)
@@ -48,8 +48,16 @@ TestCase {
         compare(state.barPanelGap, 8)
         compare(state.barShowWallpaperButton, false)
         compare(state.barShowSessionButton, false)
+        compare(state.barShowBluetooth, true)
         compare(state.barLeftWidgetOrder.length, 4)
-        compare(state.barRightWidgetOrder.length, 6)
+        compare(state.barCenterWidgetOrder.length, 1)
+        compare(state.barCenterWidgetOrder[0], "context")
+        compare(state.barRightWidgetOrder.length, 9)
+        compare(state.barRightWidgetOrder[0], "bluetooth")
+        compare(
+            state.barWidgetSettings.bluetooth.surfacePlacement,
+            "near-widget"
+        )
         compare(state.notificationPopupMaximum, 3)
         compare(state.osdDuration, 1800)
         verify(state.dashboardCardOrder.length > 0)
@@ -65,7 +73,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -86,7 +94,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -142,12 +150,15 @@ TestCase {
         compare(
             JSON.stringify(migrated.barRightWidgetOrder),
             JSON.stringify([
+                "bluetooth",
                 "dashboard",
                 "tray",
                 "notifications",
                 "network",
                 "audio",
-                "battery"
+                "battery",
+                "wallpaper",
+                "session"
             ])
         )
     }
@@ -165,7 +176,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
         compare(migrated.shellBackgroundMode, "blur")
@@ -206,7 +217,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -268,7 +279,7 @@ TestCase {
             barBackgroundMode: "frosted"
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.shellBackgroundMode, "blur")
         compare(migrated.shellSurfaceOpacity, 0.74)
         compare(migrated.barBackgroundMode, "frosted")
@@ -282,7 +293,7 @@ TestCase {
             barHeight: 64
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.barHeight, 64)
         compare(migrated.barPanelGap, 8)
     }
@@ -314,16 +325,19 @@ TestCase {
             barShowSystemStatus: false
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(
             JSON.stringify(migrated.barRightWidgetOrder),
             JSON.stringify([
+                "bluetooth",
                 "tray",
                 "network",
                 "audio",
                 "battery",
                 "notifications",
-                "dashboard"
+                "dashboard",
+                "wallpaper",
+                "session"
             ])
         )
         compare(migrated.barShowNetworkStatus, false)
@@ -338,6 +352,133 @@ TestCase {
         compare(hiddenWithoutSettings.barShowNetworkStatus, false)
         compare(hiddenWithoutSettings.barShowAudioStatus, false)
         compare(hiddenWithoutSettings.barShowBatteryStatus, false)
+    }
+
+    function test_schema10AddsBluetoothWithoutMovingExistingWidgets() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 10,
+            barShowTray: false,
+            barRightWidgetOrder: [
+                "tray",
+                "notifications",
+                "network",
+                "audio",
+                "battery",
+                "dashboard"
+            ]
+        })
+
+        compare(migrated.schemaVersion, 12)
+        compare(migrated.barShowBluetooth, true)
+        compare(
+            JSON.stringify(migrated.barRightWidgetOrder),
+            JSON.stringify([
+                "bluetooth",
+                "tray",
+                "notifications",
+                "network",
+                "audio",
+                "battery",
+                "dashboard",
+                "wallpaper",
+                "session"
+            ])
+        )
+        compare(migrated.barShowTray, false)
+        compare(
+            migrated.barWidgetSettings.bluetooth.surfacePlacement,
+            "near-widget"
+        )
+    }
+
+    function test_schema11AddsCenterWithoutMovingExistingSides() {
+        const migrated = ConfigSchema.migrate({
+            schemaVersion: 11,
+            barLeftWidgetOrder: [
+                "datetime",
+                "launcher",
+                "overview",
+                "workspaces"
+            ],
+            barRightWidgetOrder: [
+                "dashboard",
+                "bluetooth",
+                "tray",
+                "notifications",
+                "network",
+                "audio",
+                "battery"
+            ]
+        })
+
+        compare(migrated.schemaVersion, 12)
+        compare(
+            JSON.stringify(migrated.barLeftWidgetOrder),
+            JSON.stringify([
+                "datetime",
+                "launcher",
+                "overview",
+                "workspaces"
+            ])
+        )
+        compare(
+            JSON.stringify(migrated.barCenterWidgetOrder),
+            JSON.stringify(["context"])
+        )
+        compare(
+            JSON.stringify(migrated.barRightWidgetOrder),
+            JSON.stringify([
+                "dashboard",
+                "bluetooth",
+                "tray",
+                "notifications",
+                "network",
+                "audio",
+                "battery",
+                "wallpaper",
+                "session"
+            ])
+        )
+    }
+
+    function test_widgetsCanBeAssignedToAnyArea() {
+        const state = ConfigSchema.normalize({
+            schemaVersion: 12,
+            barLeftWidgetOrder: [
+                "network",
+                "context"
+            ],
+            barCenterWidgetOrder: [
+                "launcher",
+                "audio"
+            ],
+            barRightWidgetOrder: [
+                "workspaces",
+                "datetime",
+                "dashboard"
+            ]
+        })
+
+        compare(
+            JSON.stringify(state.barLeftWidgetOrder.slice(0, 2)),
+            JSON.stringify(["network", "context"])
+        )
+        compare(
+            JSON.stringify(state.barCenterWidgetOrder),
+            JSON.stringify(["launcher", "audio"])
+        )
+        compare(
+            JSON.stringify(state.barRightWidgetOrder.slice(0, 3)),
+            JSON.stringify(["workspaces", "datetime", "dashboard"])
+        )
+
+        const combined = state.barLeftWidgetOrder
+            .concat(
+                state.barCenterWidgetOrder,
+                state.barRightWidgetOrder
+            )
+        compare(combined.length, 14)
+        compare(new Set(combined).size, combined.length)
     }
 
     function test_widgetSurfacePlacementNormalization() {
@@ -493,7 +634,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 10)
+        compare(migrated.schemaVersion, 12)
         compare(migrated.barBackgroundMode, "blur")
     }
 
@@ -527,11 +668,13 @@ TestCase {
             JSON.stringify([
                 "dashboard",
                 "session",
+                "bluetooth",
                 "tray",
                 "notifications",
                 "network",
                 "audio",
-                "battery"
+                "battery",
+                "wallpaper"
             ])
         )
     }
@@ -590,7 +733,10 @@ TestCase {
                 "audio",
                 "network",
                 "notifications",
-                "tray"
+                "tray",
+                "bluetooth",
+                "wallpaper",
+                "session"
             ])
         )
     }
@@ -617,7 +763,8 @@ TestCase {
         compare(bar.barWidgetSettings.context.mode, "contextual")
         compare(bar.barWidgetSettings.tray.mode, "grouped")
         compare(bar.barShowDashboardButton, true)
-        compare(bar.barRightWidgetOrder.length, 6)
+        compare(bar.barCenterWidgetOrder.length, 1)
+        compare(bar.barRightWidgetOrder.length, 9)
         verify(bar.themeMode === undefined)
         compare(dashboard.dashboardUseUserAvatarImage, true)
         compare(dashboard.dashboardUserAvatarPath, "")

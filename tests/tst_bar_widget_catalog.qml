@@ -10,8 +10,9 @@ TestCase {
         const entries = BarWidgetCatalog.all()
         const ids = entries.map(entry => entry.id)
 
-        compare(entries.length, 13)
+        compare(entries.length, 14)
         compare(new Set(ids).size, entries.length)
+        verify(ids.indexOf("bluetooth") >= 0)
         verify(ids.indexOf("network") >= 0)
         verify(ids.indexOf("audio") >= 0)
         verify(ids.indexOf("battery") >= 0)
@@ -30,17 +31,35 @@ TestCase {
             verify(entry.description.length > 0)
             verify(entry.icon.length > 0)
             verify(["left", "center", "right"]
-                .indexOf(entry.side) >= 0)
+                .indexOf(entry.defaultArea) >= 0)
             verify(entry.component.length > 0)
             verify(Object.keys(entry.defaults).length > 0)
         }
     }
 
-    function test_contextIsTheOnlyCenterWidget() {
-        compare(
-            JSON.stringify(BarWidgetCatalog.idsForSide("center")),
-            JSON.stringify(["context"])
-        )
+    function test_everyWidgetSupportsEveryArea() {
+        const allIds = BarWidgetCatalog.all().map(entry => entry.id)
+        const areas = ["left", "center", "right"]
+
+        for (var index = 0; index < areas.length; ++index) {
+            const area = areas[index]
+
+            compare(
+                JSON.stringify(BarWidgetCatalog.idsForArea(area)),
+                JSON.stringify(allIds)
+            )
+
+            for (var widgetIndex = 0;
+                widgetIndex < allIds.length;
+                ++widgetIndex) {
+                verify(BarWidgetCatalog.supportsArea(
+                    allIds[widgetIndex],
+                    area
+                ))
+            }
+        }
+
+        verify(!BarWidgetCatalog.supportsArea("launcher", "invalid"))
     }
 
     function test_surfacePlacementDefaultsPreserveCurrentBehavior() {
@@ -48,6 +67,7 @@ TestCase {
 
         compare(settings.launcher.surfacePlacement, "centered")
         compare(settings.datetime.surfacePlacement, "near-widget")
+        compare(settings.bluetooth.surfacePlacement, "near-widget")
         compare(settings.tray.surfacePlacement, "near-widget")
         compare(settings.notifications.surfacePlacement, "near-widget")
         compare(settings.network.surfacePlacement, "near-widget")

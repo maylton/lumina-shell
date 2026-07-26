@@ -5,6 +5,7 @@ import qs.design
 import qs.modules.control
 import qs.services.connectivity
 import qs.services.i18n
+import qs.stores.config
 import qs.stores.shell
 
 Item {
@@ -23,6 +24,20 @@ Item {
         ConnectivityService.bluetoothEnabled
     readonly property bool available:
         ConnectivityService.bluetoothAvailable
+    readonly property bool showBackground: Boolean(
+        ConfigStore.widgetSetting(
+            "bluetooth",
+            "showBackground",
+            false
+        )
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "bluetooth",
+            "surfacePlacement",
+            "near-widget"
+        )
+    )
 
     implicitWidth: luminaDesign.size.barTouchTarget
     implicitHeight: luminaDesign.size.barTouchTarget
@@ -59,7 +74,7 @@ Item {
         BarPanelCoordinator.requestToggle(
             "bluetooth",
             root.outputName,
-            "near-widget",
+            root.surfacePlacement,
             anchor.x,
             anchor.top,
             anchor.bottom
@@ -75,7 +90,7 @@ Item {
             : height / 2
         color: bluetoothPanel.visible || buttonMouse.containsMouse
             ? root.luminaDesign.color.accentContainer
-            : root.connectedCount > 0
+            : root.connectedCount > 0 || root.showBackground
                 ? root.luminaDesign.color.surfaceMuted
                 : "transparent"
         opacity: root.available ? 1 : 0.45

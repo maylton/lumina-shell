@@ -76,16 +76,16 @@ SettingsPage {
         return result
     }
 
-    function removedEntries(side) {
+    function availableEntries(side) {
         const activeIds = ConfigStore.activeBarWidgets(side)
-        const removedIds = BarWidgetState.removedIds(
-            BarWidgetCatalog.idsForSide(side),
+        const availableIds = BarWidgetState.removedIds(
+            BarWidgetCatalog.idsForArea(side),
             activeIds
         )
         const result = []
 
-        for (var index = 0; index < removedIds.length; ++index) {
-            const entry = BarWidgetCatalog.find(removedIds[index])
+        for (var index = 0; index < availableIds.length; ++index) {
+            const entry = BarWidgetCatalog.find(availableIds[index])
 
             if (entry && entry.available)
                 result.push(localizedEntry(entry))
@@ -496,7 +496,7 @@ SettingsPage {
 
         AddBarWidgetRow {
             width: parent.width
-            widgets: root.removedEntries("left")
+            widgets: root.availableEntries("left")
             onAddWidget: widgetId =>
                 ConfigStore.addBarWidget("left", widgetId)
         }
@@ -505,11 +505,11 @@ SettingsPage {
     SettingsSection {
         title: I18n.tr(
             "settings.bar.widgets.center",
-            "Center widget"
+            "Center widgets"
         )
         description: I18n.tr(
             "settings.bar.widgets.centerDescription",
-            "Context stays centered without overlapping side clusters"
+            "Widgets centered as a group"
         )
         groupedRows: false
 
@@ -518,11 +518,21 @@ SettingsPage {
 
             delegate: ActiveBarWidgetRow {
                 required property var modelData
+                required property int index
 
                 width: parent.width
                 widget: modelData
+                canMoveUp: index > 0
+                canMoveDown:
+                    index < root.activeEntries("center").length - 1
                 onConfigure: sourceItem =>
                     widgetDialog.openFor(modelData.id, sourceItem)
+                onMoveUp: ConfigStore.moveActiveBarWidget(
+                    "center", modelData.id, -1
+                )
+                onMoveDown: ConfigStore.moveActiveBarWidget(
+                    "center", modelData.id, 1
+                )
                 onRemove:
                     ConfigStore.removeBarWidget(modelData.id)
             }
@@ -530,7 +540,7 @@ SettingsPage {
 
         AddBarWidgetRow {
             width: parent.width
-            widgets: root.removedEntries("center")
+            widgets: root.availableEntries("center")
             onAddWidget: widgetId =>
                 ConfigStore.addBarWidget("center", widgetId)
         }
@@ -574,7 +584,7 @@ SettingsPage {
 
         AddBarWidgetRow {
             width: parent.width
-            widgets: root.removedEntries("right")
+            widgets: root.availableEntries("right")
             onAddWidget: widgetId =>
                 ConfigStore.addBarWidget("right", widgetId)
         }

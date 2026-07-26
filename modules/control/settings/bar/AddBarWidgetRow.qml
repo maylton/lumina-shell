@@ -30,16 +30,16 @@ Rectangle {
     Accessible.role: Accessible.Button
     Accessible.name: I18n.tr(
         "settings.bar.widget.add",
-        "Add widgets"
+        "Add or move widgets"
     )
     Accessible.description: hasWidgets
         ? I18n.tr(
             "settings.bar.widget.addDescription",
-            "Choose a removed widget for this region"
+            "Choose a widget to add or move to this area"
         )
         : I18n.tr(
             "settings.bar.widget.addEmpty",
-            "All widgets for this region are active"
+            "All widgets are already in this area"
         )
     Accessible.focusable: true
     Accessible.focused: activeFocus
@@ -90,7 +90,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: I18n.tr(
                 "settings.bar.widget.add",
-                "Add widgets"
+                "Add or move widgets"
             )
             color: root.luminaDesign.color.onSurface
             font.pixelSize:
@@ -195,7 +195,7 @@ Rectangle {
                     visible: !root.hasWidgets
                     text: I18n.tr(
                         "settings.bar.widget.addEmpty",
-                        "All widgets for this region are active"
+                        "All widgets are already in this area"
                     )
                     color: root.luminaDesign.color.textMuted
                     horizontalAlignment: Text.AlignHCenter
@@ -232,7 +232,7 @@ Rectangle {
                         Accessible.role: Accessible.Button
                         Accessible.name: I18n.tr(
                             "settings.bar.widget.addNamed",
-                            "Add %1",
+                            "Add or move %1 here",
                             [String(modelData.title)]
                         )
                         Accessible.description:

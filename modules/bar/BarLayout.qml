@@ -40,13 +40,19 @@ Item {
             width - rightArea.x,
             luminaDesign.spacing.barClusterGap
         )
-    readonly property var leftRegistry: ({
+    readonly property real sideContextAvailableWidth: Math.max(
+        0,
+        width / 2
+            - luminaDesign.spacing.barContentInset
+            - luminaDesign.spacing.barClusterGap
+    )
+    readonly property var widgetRegistry: ({
         launcher: launcherComponent,
         overview: overviewComponent,
         workspaces: workspacesComponent,
-        datetime: dateTimeComponent
-    })
-    readonly property var rightRegistry: ({
+        datetime: dateTimeComponent,
+        context: contextComponent,
+        bluetooth: bluetoothComponent,
         privacy: privacyComponent,
         keyboard: keyboardComponent,
         tray: trayComponent,
@@ -63,6 +69,8 @@ Item {
         overview: ConfigStore.barShowOverview && !narrowLayout,
         workspaces: ConfigStore.barShowWorkspaces,
         datetime: ConfigStore.barShowClock,
+        context: ConfigStore.barWidgetVisible("context"),
+        bluetooth: ConfigStore.barShowBluetooth,
         privacy: ConfigStore.barShowPrivacyIndicators,
         keyboard: ConfigStore.barShowKeyboardLayout,
         tray: ConfigStore.barShowTray && width >= 1040,
@@ -134,26 +142,35 @@ Item {
 
             delegate: Loader {
                 required property var modelData
+                readonly property string widgetArea: "left"
 
                 active: root.widgetEnabled(String(modelData))
                 visible: BarLayoutPolicy.loadedWidgetVisible(active, item)
                 sourceComponent:
-                    root.leftRegistry[String(modelData)] || null
+                    root.widgetRegistry[String(modelData)] || null
             }
         }
     }
 
-    ContextCapsule {
-        id: contextCapsule
-
+    BarCluster {
+        id: centerArea
         anchors.centerIn: parent
-        availableWidth: root.centerAvailableWidth
-        activeWindowTitle: root.activeWindowTitle
-        activeWindowAppId: root.activeWindowAppId
-        columnLabel: root.columnLabel
-        workspaceLabel: root.workspaceLabel
-        showActionError: root.showActionError
-        actionError: NiriService.lastActionError
+        clusterSpacing:
+            root.luminaDesign.spacing.barConfiguredWidgetGap
+
+        Repeater {
+            model: ConfigStore.barCenterWidgetOrder
+
+            delegate: Loader {
+                required property var modelData
+                readonly property string widgetArea: "center"
+
+                active: root.widgetEnabled(String(modelData))
+                visible: BarLayoutPolicy.loadedWidgetVisible(active, item)
+                sourceComponent:
+                    root.widgetRegistry[String(modelData)] || null
+            }
+        }
     }
 
     BarCluster {
@@ -173,21 +190,17 @@ Item {
             )
         )
 
-        BluetoothWidget {
-            outputName: root.outputName
-            panelWindow: root.panelWindow
-        }
-
         Repeater {
             model: ConfigStore.barRightWidgetOrder
 
             delegate: Loader {
                 required property var modelData
+                readonly property string widgetArea: "right"
 
                 active: root.widgetEnabled(String(modelData))
                 visible: BarLayoutPolicy.loadedWidgetVisible(active, item)
                 sourceComponent:
-                    root.rightRegistry[String(modelData)] || null
+                    root.widgetRegistry[String(modelData)] || null
             }
         }
     }
@@ -226,6 +239,32 @@ Item {
             outputName: root.outputName.length > 0
                 ? root.outputName
                 : "screen"
+        }
+    }
+
+    Component {
+        id: contextComponent
+
+        ContextCapsule {
+            availableWidth: parent
+                && parent.widgetArea === "center"
+                ? root.centerAvailableWidth
+                : root.sideContextAvailableWidth
+            activeWindowTitle: root.activeWindowTitle
+            activeWindowAppId: root.activeWindowAppId
+            columnLabel: root.columnLabel
+            workspaceLabel: root.workspaceLabel
+            showActionError: root.showActionError
+            actionError: NiriService.lastActionError
+        }
+    }
+
+    Component {
+        id: bluetoothComponent
+
+        BluetoothWidget {
+            outputName: root.outputName
+            panelWindow: root.panelWindow
         }
     }
 
