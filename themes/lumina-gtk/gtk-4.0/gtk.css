@@ -97,8 +97,13 @@ actionbar {
   border-color: alpha(@lumina_outline_variant, 0.30);
 }
 
+/* Android desktop mode: a flatter, lighter top app bar. */
 headerbar {
-  padding: 6px 10px;
+  min-height: 48px;
+  padding: 4px 8px;
+  background-color: @lumina_surface_container_low;
+  border: 0;
+  box-shadow: inset 0 -1px alpha(@lumina_outline_variant, 0.34);
 }
 
 headerbar > box,
@@ -110,15 +115,17 @@ headerbar box.end {
 headerbar label.title {
   min-width: 72px;
   margin: 0 6px;
+  font-weight: 600;
 }
 
 headerbar entry,
 headerbar spinbutton,
 headerbar .path-bar {
-  min-height: 40px;
-  background-color: @lumina_surface_container_high;
-  border-color: transparent;
+  min-height: 38px;
+  background-color: @lumina_surface_container;
+  border: 1px solid transparent;
   border-radius: 12px;
+  box-shadow: none;
 }
 
 headerbar entry,
@@ -130,27 +137,27 @@ headerbar spinbutton {
 headerbar entry:hover,
 headerbar spinbutton:hover,
 headerbar .path-bar:hover {
-  background-color: mix(@lumina_surface_container_high, @lumina_on_surface, 0.05);
+  background-color: mix(@lumina_surface_container, @lumina_on_surface, 0.045);
 }
 
 headerbar entry:focus,
 headerbar spinbutton:focus,
 headerbar .path-bar:focus-within {
-  border-color: @lumina_primary;
-  box-shadow: 0 0 0 1px alpha(@lumina_primary, 0.72);
+  border-color: alpha(@lumina_primary, 0.76);
+  box-shadow: 0 0 0 1px alpha(@lumina_primary, 0.36);
 }
 
 headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton) {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 38px;
+  min-height: 38px;
   padding: 0;
   background-color: transparent;
   border-color: transparent;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton):hover {
-  background-color: alpha(@lumina_on_surface, 0.08);
+  background-color: alpha(@lumina_on_surface, 0.07);
 }
 
 headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton):active,
@@ -161,10 +168,10 @@ headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutto
 
 headerbar .linked,
 headerbar box.linked {
-  border-spacing: 2px;
-  padding: 2px;
-  background-color: alpha(@lumina_surface_container_highest, 0.55);
-  border-radius: 14px;
+  border-spacing: 1px;
+  padding: 1px;
+  background-color: transparent;
+  border-radius: 12px;
 }
 
 headerbar .linked > button,
@@ -174,7 +181,7 @@ headerbar box.linked > button {
 
 headerbar separator {
   margin: 10px 4px;
-  background-color: alpha(@lumina_outline_variant, 0.28);
+  background-color: alpha(@lumina_outline_variant, 0.22);
 }
 
 /* Nautilus composition: keep the path control visually central and bounded. */
@@ -195,12 +202,9 @@ headerbar separator {
   max-width: 152px;
 }
 
-/*
- * Keep the boundary below Nautilus' split headerbar continuous. The divider is
- * owned by the top bar; content surfaces must not add a second rounded edge.
- */
+/* Keep the split-header divider continuous across sidebar and content. */
 .nautilus-window headerbar {
-  border-bottom: 1px solid alpha(@lumina_outline_variant, 0.42);
+  border-bottom: 1px solid alpha(@lumina_outline_variant, 0.34);
   box-shadow: none;
 }
 
@@ -225,11 +229,11 @@ statuspage > scrolledwindow > viewport {
   background-color: @lumina_surface;
 }
 
-/* Window controls keep the full hit target transparent; the icon owns the state layer. */
+/* Android desktop-style window controls. */
 headerbar windowcontrols {
-  padding: 0;
+  padding: 0 2px;
   margin: 0;
-  border-spacing: 4px;
+  border-spacing: 2px;
   background-color: transparent;
 }
 
@@ -237,33 +241,52 @@ headerbar windowcontrols button,
 headerbar windowcontrols button:hover,
 headerbar windowcontrols button:active,
 headerbar windowcontrols button:checked {
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 0;
   border: 0;
+  border-radius: 8px;
   background-color: transparent;
   box-shadow: none;
+}
+
+headerbar windowcontrols button:hover {
+  background-color: alpha(@lumina_on_surface, 0.065);
+}
+
+headerbar windowcontrols button:active {
+  background-color: alpha(@lumina_on_surface, 0.11);
 }
 
 headerbar windowcontrols button > image {
   min-width: 16px;
   min-height: 16px;
-  padding: 6px;
-  border-radius: 999px;
+  padding: 0;
+  color: @lumina_on_surface_variant;
   background-color: transparent;
 }
 
-headerbar windowcontrols button:hover > image {
-  color: @lumina_on_surface;
-  background-color: alpha(@lumina_on_surface, 0.075);
+headerbar windowcontrols button.minimize > image {
+  -gtk-icon-source: url("../assets/window-minimize-symbolic.svg");
 }
 
-headerbar windowcontrols button:active > image {
-  color: @lumina_on_surface;
-  background-color: alpha(@lumina_on_surface, 0.12);
+headerbar windowcontrols button.maximize > image {
+  -gtk-icon-source: url("../assets/window-maximize-symbolic.svg");
+}
+
+headerbar windowcontrols button.restore > image {
+  -gtk-icon-source: url("../assets/window-restore-symbolic.svg");
+}
+
+headerbar windowcontrols button.close > image {
+  -gtk-icon-source: url("../assets/window-close-symbolic.svg");
+}
+
+headerbar windowcontrols button.close:hover {
+  color: @lumina_on_error_container;
+  background-color: alpha(@lumina_error, 0.72);
 }
 
 headerbar windowcontrols button.close:hover > image {
   color: @lumina_on_error_container;
-  background-color: alpha(@lumina_error, 0.78);
 }
