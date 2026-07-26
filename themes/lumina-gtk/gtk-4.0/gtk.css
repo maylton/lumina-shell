@@ -7,8 +7,25 @@ window.csd {
   box-shadow: 0 12px 34px @lumina_shadow;
 }
 
+.navigation-sidebar,
+.sidebar,
+placessidebar,
 .navigation-sidebar row,
 .sidebar row,
+placessidebar row,
+listview row {
+  color: @lumina_on_surface;
+}
+
+.navigation-sidebar,
+.sidebar,
+placessidebar {
+  background-color: @lumina_surface_container_low;
+}
+
+.navigation-sidebar row,
+.sidebar row,
+placessidebar row,
 listview row {
   min-height: 38px;
   margin: 2px 6px;
@@ -18,25 +35,78 @@ listview row {
 
 .navigation-sidebar row:hover,
 .sidebar row:hover,
+placessidebar row:hover,
 listview row:hover {
   background-color: alpha(@lumina_on_surface, 0.07);
 }
 
 .navigation-sidebar row:selected,
 .sidebar row:selected,
+placessidebar row:selected,
 listview row:selected {
   color: @lumina_on_primary_container;
   background-color: @lumina_primary_container;
 }
 
+toolbarview,
+.navigation-view,
+.navigation-page,
+.content-view,
+.view,
+gridview,
+columnview,
+listview {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface;
+}
+
+gridview child,
+flowboxchild {
+  border-radius: 12px;
+}
+
+gridview child:hover,
+flowboxchild:hover {
+  background-color: alpha(@lumina_on_surface, 0.065);
+}
+
+gridview child:selected,
+flowboxchild:selected {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
+}
+
+searchbar,
+actionbar {
+  background-color: @lumina_surface_container;
+  border-color: alpha(@lumina_outline_variant, 0.45);
+}
+
+statuspage,
+statuspage > scrolledwindow > viewport {
+  color: @lumina_on_surface;
+  background-color: @lumina_surface;
+}
+
 windowcontrols button {
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 26px;
+  min-height: 26px;
   padding: 0;
   border-color: transparent;
+  border-radius: 999px;
   background-color: transparent;
+  box-shadow: none;
 }
 
 windowcontrols button:hover {
-  background-color: alpha(@lumina_on_surface, 0.09);
+  background-color: alpha(@lumina_on_surface, 0.075);
+}
+
+windowcontrols button:active {
+  background-color: alpha(@lumina_on_surface, 0.12);
+}
+
+windowcontrols button.close:hover {
+  color: @lumina_on_error_container;
+  background-color: alpha(@lumina_error, 0.78);
 }
