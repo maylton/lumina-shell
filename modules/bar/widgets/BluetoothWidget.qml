@@ -12,7 +12,6 @@ Item {
 
     required property string outputName
     property var panelWindow: null
-    property bool tooltipVisible: false
 
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property var connectedDevices:
@@ -201,52 +200,11 @@ Item {
             cursorShape: enabled
                 ? Qt.PointingHandCursor
                 : Qt.ArrowCursor
-            onEntered: tooltipTimer.restart()
-            onExited: {
-                tooltipTimer.stop()
-                root.tooltipVisible = false
-            }
-            onPressed: {
-                tooltipTimer.stop()
-                root.tooltipVisible = false
-            }
             onClicked: mouse => {
                 bluetoothButton.focus = false
                 root.togglePopup(mouse.x)
             }
         }
-    }
-
-    Timer {
-        id: tooltipTimer
-
-        interval: 450
-        repeat: false
-        onTriggered: root.tooltipVisible = buttonMouse.containsMouse
-    }
-
-    TrayTooltip {
-        anchorItem: bluetoothButton
-        title: I18n.tr(
-            "bar.bluetooth.tooltip.title",
-            "Bluetooth"
-        )
-        description: root.connectedCount > 0
-            ? I18n.tr(
-                "bar.bluetooth.connectedCount",
-                "%1 connected",
-                [root.connectedCount]
-            )
-            : root.bluetoothEnabled
-                ? I18n.tr(
-                    "settings.connectivity.bluetooth.status.on",
-                    "On"
-                )
-                : I18n.tr(
-                    "dashboard.status.disabled",
-                    "Disabled"
-                )
-        shown: root.tooltipVisible && !bluetoothPanel.visible
     }
 
     BluetoothPanel {

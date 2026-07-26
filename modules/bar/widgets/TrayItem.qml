@@ -28,14 +28,10 @@ Rectangle {
     readonly property real circleDiameter:
         luminaDesign.size.barTouchTarget
 
-    property bool tooltipVisible: false
-
     function showMenu() {
         if (!trayItem || !trayItem.hasMenu)
             return
 
-        tooltipTimer.stop()
-        tooltipVisible = false
         trayMenu.show()
     }
 
@@ -179,18 +175,6 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: tooltipTimer.restart()
-
-        onExited: {
-            tooltipTimer.stop()
-            root.tooltipVisible = false
-        }
-
-        onPressed: {
-            tooltipTimer.stop()
-            root.tooltipVisible = false
-        }
-
         onClicked: mouse => {
             if (!root.trayItem)
                 return
@@ -215,21 +199,6 @@ Rectangle {
             else if (wheel.angleDelta.x !== 0)
                 root.trayItem.scroll(wheel.angleDelta.x, true)
         }
-    }
-
-    Timer {
-        id: tooltipTimer
-
-        interval: 450
-        repeat: false
-        onTriggered: root.tooltipVisible = itemMouse.containsMouse
-    }
-
-    TrayTooltip {
-        anchorItem: root
-        title: root.itemTitle
-        description: root.itemDescription
-        shown: root.tooltipVisible && !trayMenu.visible
     }
 
     TrayMenu {

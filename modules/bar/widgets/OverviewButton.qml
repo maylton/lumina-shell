@@ -132,12 +132,4 @@ Rectangle {
         }
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: NiriService.overviewOpen
-            ? "Close overview"
-            : "Open overview"
-        description: "Niri workspace and window overview"
-        shown: overviewMouse.containsMouse
-    }
 }

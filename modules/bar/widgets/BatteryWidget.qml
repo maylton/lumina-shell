@@ -87,14 +87,4 @@ SystemStatusItem {
         )
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: I18n.tr("bar.battery.tooltip.title", "Battery")
-        description: PowerService.batteryState
-        shown: root.hovered
-            && !(
-                ControlCenterStore.activeOutputName === root.outputName
-                && ControlCenterStore.activePage === "dashboard"
-            )
-    }
 }

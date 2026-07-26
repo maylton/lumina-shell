@@ -113,13 +113,6 @@ SystemStatusItem {
         )
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: I18n.tr("bar.audio.tooltip.title", "Audio")
-        description: statusLabel
-        shown: root.hovered && !audioPanel.visible
-    }
-
     AudioPanel {
         id: audioPanel
 

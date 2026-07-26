@@ -22,7 +22,6 @@ TrayItem 1.0 TrayItem.qml
 TrayMenu 1.0 TrayMenu.qml
 TrayMenuEntry 1.0 TrayMenuEntry.qml
 TrayPanel 1.0 TrayPanel.qml
-TrayTooltip 1.0 TrayTooltip.qml
 TrayWidget 1.0 TrayWidget.qml
 WorkspacePill 1.0 WorkspacePill.qml
 WorkspaceStrip 1.0 WorkspaceStrip.qml

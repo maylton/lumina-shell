@@ -97,13 +97,6 @@ SystemStatusItem {
         )
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: I18n.tr("bar.network.tooltip.title", "Network")
-        description: ConnectivityService.networkSummary
-        shown: root.hovered && !networkPanel.visible
-    }
-
     NetworkPanel {
         id: networkPanel
 

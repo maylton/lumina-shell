@@ -197,16 +197,4 @@ Rectangle {
         }
     }
 
-    TrayTooltip {
-        anchorItem: root
-        title: "Workspace " + WorkspaceStore.labelFor(root.workspace)
-        description: root.workspace.is_urgent
-            ? "Requests attention"
-            : root.selected
-                ? "Focused on this output"
-                : root.active
-                    ? "Active on this output"
-                    : "Switch workspace"
-        shown: workspaceMouse.containsMouse
-    }
 }
