@@ -52,3 +52,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Add per-widget surface placement"
           git push --force-with-lease origin HEAD:agent/widget-surface-placement
+
+# Trigger base-branch rebuild workflow.
