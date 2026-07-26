@@ -10,8 +10,8 @@ Controls.Popup {
     id: root
 
     property var network: null
-    property real availableWidth: parent ? parent.width : 560
-    property real availableHeight: parent ? parent.height : 360
+    property real availableWidth: parent ? parent.width : 580
+    property real availableHeight: parent ? parent.height : 400
     property bool passwordVisible: false
     property string localError: ""
 
@@ -51,8 +51,8 @@ Controls.Popup {
 
     x: parent ? Math.max(16, (parent.width - width) / 2) : 0
     y: parent ? Math.max(16, (parent.height - height) / 2) : 0
-    width: Math.max(300, Math.min(560, availableWidth - 32))
-    height: Math.max(300, Math.min(340, availableHeight - 32))
+    width: Math.max(320, Math.min(580, availableWidth - 32))
+    height: Math.max(360, Math.min(400, availableHeight - 32))
     padding: 0
     modal: true
     focus: true
