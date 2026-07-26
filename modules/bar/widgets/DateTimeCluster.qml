@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.design
 import qs.modules.calendar
 import qs.stores.config
+import qs.stores.shell
 import qs.stores.time
 
 Rectangle {
@@ -61,11 +62,12 @@ Rectangle {
         if (style === "weekday")
             return Qt.formatDate(CalendarStore.currentDate, "ddd, d MMM")
 
-        if (style === "full")
+        if (style === "full") {
             return CalendarStore.locale.toString(
                 CalendarStore.currentDate,
                 Locale.LongFormat
             )
+        }
 
         return Qt.formatDate(CalendarStore.currentDate, "d MMM")
     }
@@ -73,6 +75,7 @@ Rectangle {
         CalendarStore.currentDate,
         Locale.LongFormat
     )
+
     implicitWidth: dateTimeContent.implicitWidth
         + (luminaDesign.spacing.barHorizontalPadding * 2)
     implicitHeight: luminaDesign.size.barTouchTarget
@@ -100,18 +103,42 @@ Rectangle {
     Accessible.focused: activeFocus
     Accessible.onPressAction: root.activate(root.width / 2)
 
-    function mappedAnchorX(localX) {
-        const point = root.mapToItem(
+    onExpandedChanged: BarPanelCoordinator.synchronizeIndependentPanel(
+        "calendar",
+        root.outputName,
+        root.expanded
+    )
+
+    function mappedAnchorGeometry(localX) {
+        const top = root.mapToItem(
             null,
             Number(localX),
-            root.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = root.mapToItem(
+            null,
+            Number(localX),
+            root.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function activate(localX) {
-        calendarPopup.anchorX = mappedAnchorX(localX)
-        CalendarStore.toggle(outputName)
+        const anchor = mappedAnchorGeometry(localX)
+
+        BarPanelCoordinator.requestToggle(
+            "calendar",
+            root.outputName,
+            root.surfacePlacement,
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     Keys.onSpacePressed: event => {
@@ -122,6 +149,36 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "calendar" || outputName !== root.outputName)
+                return
+
+            calendarPopup.placement = placement
+            calendarPopup.anchorX = anchorX
+            CalendarStore.openFor(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "calendar" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                CalendarStore.dismiss(root.outputName)
+            else
+                BarPanelCoordinator.reportClosed("calendar", root.outputName)
+        }
     }
 
     Behavior on color {
