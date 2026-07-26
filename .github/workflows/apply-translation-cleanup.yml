@@ -1,0 +1,37 @@
+name: Apply translation cleanup
+
+on:
+  push:
+    branches:
+      - agent/notification-anchor-geometry
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/notification-anchor-geometry
+          fetch-depth: 0
+
+      - name: Apply guarded notification translations
+        run: python3 scripts/apply-notification-center-i18n.py
+
+      - name: Validate translation catalogs
+        run: bash scripts/check-translations.sh
+
+      - name: Commit generated cleanup
+        run: |
+          if git diff --quiet; then
+            echo "No generated changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modules/notifications/NotificationCenter.qml
+          git commit -m "Translate notification center runtime text"
+          git push origin HEAD:agent/notification-anchor-geometry
