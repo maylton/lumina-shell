@@ -1,25 +1,24 @@
 name: Apply widget surface placement
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
-    types:
-      - opened
+      - agent/widget-surface-placement
+    paths:
+      - .github/workflows/apply-widget-surface-placement.yml
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the feature branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: agent/widget-surface-placement
           fetch-depth: 0
 
       - name: Decode the migration
@@ -30,7 +29,26 @@ jobs:
           chmod +x scripts/apply-widget-surface-placement.py
 
       - name: Apply the implementation
-        run: python scripts/apply-widget-surface-placement.py
+        run: |
+          set +e
+          python scripts/apply-widget-surface-placement.py \
+            > /tmp/widget-surface-placement.log 2>&1
+          status=$?
+          cat /tmp/widget-surface-placement.log
+
+          if [ "$status" -ne 0 ]; then
+            git reset --hard HEAD
+            git clean -fd
+            cp /tmp/widget-surface-placement.log \
+              scripts/widget-surface-placement-error.log
+            git config user.name "github-actions[bot]"
+            git config user.email \
+              "41898282+github-actions[bot]@users.noreply.github.com"
+            git add scripts/widget-surface-placement-error.log
+            git commit -m "Record widget placement migration failure"
+            git push origin HEAD:agent/widget-surface-placement
+            exit "$status"
+          fi
 
       - name: Validate the generated implementation
         run: |
@@ -41,6 +59,7 @@ jobs:
       - name: Commit and push the implementation
         run: |
           rm scripts/apply-widget-surface-placement.py
+          rm -f scripts/widget-surface-placement-error.log
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
@@ -51,4 +70,4 @@ jobs:
           fi
 
           git commit -m "Add per-widget surface placement"
-          git push origin "HEAD:${{ github.head_ref }}"
+          git push origin HEAD:agent/widget-surface-placement
