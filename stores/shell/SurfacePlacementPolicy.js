@@ -3,6 +3,8 @@
 var NEAR_WIDGET = "near-widget"
 var CENTERED = "centered"
 var MAX_NEAR_WIDGET_GAP = 8
+var capturedAnchorTop = -1
+var capturedAnchorBottom = -1
 
 function finiteNumber(value, fallback) {
     var numeric = Number(value)
@@ -24,6 +26,31 @@ function normalize(value, fallback) {
     return String(fallback || "") === NEAR_WIDGET
         ? NEAR_WIDGET
         : CENTERED
+}
+
+function captureAnchorGeometry(anchorTop, anchorBottom) {
+    var top = Number(anchorTop)
+    var bottom = Number(anchorBottom)
+
+    if (!isFinite(top) || !isFinite(bottom) || bottom < top) {
+        clearAnchorGeometry()
+        return
+    }
+
+    capturedAnchorTop = top
+    capturedAnchorBottom = bottom
+}
+
+function clearAnchorGeometry() {
+    capturedAnchorTop = -1
+    capturedAnchorBottom = -1
+}
+
+function hasCapturedAnchorGeometry() {
+    return isFinite(Number(capturedAnchorTop))
+        && isFinite(Number(capturedAnchorBottom))
+        && Number(capturedAnchorTop) >= 0
+        && Number(capturedAnchorBottom) >= Number(capturedAnchorTop)
 }
 
 function barWindowHeight(barHeight, surfaceMode, margin) {
@@ -80,13 +107,21 @@ function verticalY(
         MAX_NEAR_WIDGET_GAP,
         Math.max(0, finiteNumber(gap, 0))
     )
-    var adjacent = String(barPosition) === "bottom"
-        ? viewport
-            - Math.max(0, finiteNumber(barHeight, 0))
-            - adjacentGap
-            - height
-        : Math.max(0, finiteNumber(barHeight, 0))
-            + adjacentGap
+    var adjacent
+
+    if (hasCapturedAnchorGeometry()) {
+        adjacent = String(barPosition) === "bottom"
+            ? Number(capturedAnchorTop) - adjacentGap - height
+            : Number(capturedAnchorBottom) + adjacentGap
+    } else {
+        adjacent = String(barPosition) === "bottom"
+            ? viewport
+                - Math.max(0, finiteNumber(barHeight, 0))
+                - adjacentGap
+                - height
+            : Math.max(0, finiteNumber(barHeight, 0))
+                + adjacentGap
+    }
 
     return clamp(adjacent, inset, maximum)
 }
