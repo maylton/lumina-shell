@@ -1,7 +1,7 @@
 .pragma library
 .import "../../modules/control/settings/bar/BarWidgetCatalog.js" as BarWidgetCatalog
 
-var CURRENT_VERSION = 9
+var CURRENT_VERSION = 10
 
 function defaults() {
     return {
@@ -42,7 +42,9 @@ function defaults() {
         barShowTray: true,
         barShowNotifications: true,
         barShowDashboardButton: true,
-        barShowSystemStatus: true,
+        barShowNetworkStatus: true,
+        barShowAudioStatus: true,
+        barShowBatteryStatus: true,
         barShowWallpaperButton: false,
         barShowSessionButton: false,
         barShowClock: true,
@@ -55,7 +57,9 @@ function defaults() {
         barRightWidgetOrder: [
             "tray",
             "notifications",
-            "system-status",
+            "network",
+            "audio",
+            "battery",
             "dashboard"
         ],
         barWidgetSettings: BarWidgetCatalog.defaultSettings(),
@@ -213,6 +217,9 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
         "datetime",
         "tray",
         "notifications",
+        "network",
+        "audio",
+        "battery",
         "dashboard",
         "wallpaper",
         "session"
@@ -258,21 +265,19 @@ function normalizeWidgetEntry(widgetId, value, fallback) {
     } else if (widgetId === "notifications") {
         bool("showUnreadBadge")
         bool("showDoNotDisturbState")
-    } else if (widgetId === "system-status") {
-        enumValue("layout", ["grouped", "individual"])
-        bool("showNetwork")
+    } else if (widgetId === "network") {
         enumValue(
-            "networkTextMode",
+            "textMode",
             ["icon", "summary", "name", "type"]
         )
-        bool("showAudio")
+    } else if (widgetId === "audio") {
         enumValue(
-            "audioTextMode",
+            "textMode",
             ["icon", "percentage", "state"]
         )
-        bool("showBattery")
+    } else if (widgetId === "battery") {
         enumValue(
-            "batteryTextMode",
+            "textMode",
             ["icon", "percentage", "state"]
         )
     } else if (widgetId === "dashboard") {
@@ -535,7 +540,9 @@ function normalize(source) {
         "barShowTray",
         "barShowNotifications",
         "barShowDashboardButton",
-        "barShowSystemStatus",
+        "barShowNetworkStatus",
+        "barShowAudioStatus",
+        "barShowBatteryStatus",
         "barShowWallpaperButton",
         "barShowSessionButton",
         "barShowClock",
@@ -643,7 +650,9 @@ function migrate(source) {
             "context",
             "tray",
             "notifications",
-            "system-status",
+            "network",
+            "audio",
+            "battery",
             "dashboard",
             "wallpaper",
             "session"
@@ -705,40 +714,31 @@ function migrate(source) {
             ["grouped", "inline"],
             widgetSettings.tray.mode
         )
-        widgetSettings["system-status"].layout = choice(
-            input.barStatusLayout,
-            ["grouped", "individual"],
-            widgetSettings["system-status"].layout
-        )
-        widgetSettings["system-status"].showNetwork = booleanValue(
-            input.barShowNetworkStatus,
-            widgetSettings["system-status"].showNetwork
-        )
-        widgetSettings["system-status"].networkTextMode =
+        widgetSettings.network.textMode =
             booleanValue(input.barShowNetworkLabel, true)
                 ? "summary"
                 : "icon"
-        widgetSettings["system-status"].showAudio = booleanValue(
-            input.barShowAudioStatus,
-            widgetSettings["system-status"].showAudio
-        )
-        widgetSettings["system-status"].audioTextMode =
+        widgetSettings.audio.textMode =
             booleanValue(input.barShowAudioLabel, true)
                 ? "percentage"
                 : "icon"
-        widgetSettings["system-status"].showBattery = booleanValue(
-            input.barShowBatteryStatus,
-            widgetSettings["system-status"].showBattery
-        )
         widgetSettings.dashboard.avatarDisplay = booleanValue(
             input.dashboardUseUserAvatarImage,
             true
         ) ? "image" : "initials"
 
-        input.barShowSystemStatus =
-            booleanValue(input.barShowNetworkStatus, true)
-            || booleanValue(input.barShowAudioStatus, true)
-            || booleanValue(input.barShowBatteryStatus, true)
+        input.barShowNetworkStatus = booleanValue(
+            input.barShowNetworkStatus,
+            true
+        )
+        input.barShowAudioStatus = booleanValue(
+            input.barShowAudioStatus,
+            true
+        )
+        input.barShowBatteryStatus = booleanValue(
+            input.barShowBatteryStatus,
+            true
+        )
         input.barWidgetSettings = widgetSettings
     }
 
@@ -759,6 +759,87 @@ function migrate(source) {
 
     if (version < 9 && input.barPanelGap === undefined)
         input.barPanelGap = defaults().barPanelGap
+
+    if (version < 10) {
+        var existingWidgetSettings = input.barWidgetSettings
+            && !Array.isArray(input.barWidgetSettings)
+            && typeof input.barWidgetSettings === "object"
+                ? clone(input.barWidgetSettings)
+                : {}
+        var legacyStatus = existingWidgetSettings["system-status"]
+            && !Array.isArray(existingWidgetSettings["system-status"])
+            && typeof existingWidgetSettings["system-status"] === "object"
+                ? existingWidgetSettings["system-status"]
+                : null
+
+        if (legacyStatus) {
+            var legacyBackground = booleanValue(
+                legacyStatus.showBackground,
+                true
+            )
+            existingWidgetSettings.network = {
+                showBackground: legacyBackground,
+                surfacePlacement: "near-widget",
+                textMode: choice(
+                    legacyStatus.networkTextMode,
+                    ["icon", "summary", "name", "type"],
+                    "summary"
+                )
+            }
+            existingWidgetSettings.audio = {
+                showBackground: legacyBackground,
+                surfacePlacement: "near-widget",
+                textMode: choice(
+                    legacyStatus.audioTextMode,
+                    ["icon", "percentage", "state"],
+                    "percentage"
+                )
+            }
+            existingWidgetSettings.battery = {
+                showBackground: legacyBackground,
+                surfacePlacement: "near-widget",
+                textMode: choice(
+                    legacyStatus.batteryTextMode,
+                    ["icon", "percentage", "state"],
+                    "percentage"
+                )
+            }
+        }
+
+        if (legacyStatus || input.barShowSystemStatus !== undefined) {
+            var legacyVisibility = legacyStatus || {}
+            var legacyVisible = booleanValue(input.barShowSystemStatus, true)
+            input.barShowNetworkStatus = legacyVisible
+                && booleanValue(legacyVisibility.showNetwork, true)
+            input.barShowAudioStatus = legacyVisible
+                && booleanValue(legacyVisibility.showAudio, true)
+            input.barShowBatteryStatus = legacyVisible
+                && booleanValue(legacyVisibility.showBattery, true)
+        }
+
+        delete existingWidgetSettings["system-status"]
+        input.barWidgetSettings = existingWidgetSettings
+
+        var oldRightOrder = arrayValue(input.barRightWidgetOrder)
+        var splitRightOrder = []
+
+        for (var orderIndex = 0;
+            orderIndex < oldRightOrder.length;
+            ++orderIndex) {
+            var orderedId = String(oldRightOrder[orderIndex] || "")
+
+            if (orderedId === "system-status") {
+                splitRightOrder.push("network")
+                splitRightOrder.push("audio")
+                splitRightOrder.push("battery")
+            } else {
+                splitRightOrder.push(orderedId)
+            }
+        }
+
+        input.barRightWidgetOrder = splitRightOrder
+        delete input.barShowSystemStatus
+    }
 
     return normalize(input)
 }
@@ -800,7 +881,9 @@ function defaultsForCategory(categoryName) {
             "barShowTray",
             "barShowNotifications",
             "barShowDashboardButton",
-            "barShowSystemStatus",
+            "barShowNetworkStatus",
+            "barShowAudioStatus",
+            "barShowBatteryStatus",
             "barShowWallpaperButton",
             "barShowSessionButton",
             "barShowClock",

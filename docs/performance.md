@@ -43,6 +43,7 @@ qs -p . ipc call control performanceSettingsSlider DP-1 0 0.5
 qs -p . ipc call control performanceDashboardSlider DP-1 0 0.5
 qs -p . ipc call control performancePopup DP-1 0
 qs -p . ipc call control performanceDialog DP-1
+qs -p . ipc call control performanceWidgetDialog DP-1 network
 ```
 
 Slider calls use a normalized value from `0` to `1` and change the real

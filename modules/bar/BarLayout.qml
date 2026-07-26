@@ -51,7 +51,9 @@ Item {
         keyboard: keyboardComponent,
         tray: trayComponent,
         notifications: notificationsComponent,
-        "system-status": systemStatusComponent,
+        network: networkComponent,
+        audio: audioComponent,
+        battery: batteryComponent,
         dashboard: dashboardComponent,
         wallpaper: wallpaperComponent,
         session: sessionComponent
@@ -65,7 +67,9 @@ Item {
         keyboard: ConfigStore.barShowKeyboardLayout,
         tray: ConfigStore.barShowTray && width >= 1040,
         notifications: ConfigStore.barShowNotifications,
-        "system-status": ConfigStore.barShowSystemStatus,
+        network: ConfigStore.barShowNetworkStatus,
+        audio: ConfigStore.barShowAudioStatus,
+        battery: ConfigStore.barShowBatteryStatus,
         dashboard: ConfigStore.barShowDashboardButton,
         wallpaper: ConfigStore.barShowWallpaperButton
             && wideLayout,
@@ -255,12 +259,31 @@ Item {
     }
 
     Component {
-        id: systemStatusComponent
+        id: networkComponent
 
-        SystemStatusCluster {
+        NetworkWidget {
             compact: !root.wideLayout
             outputName: root.outputName
             panelWindow: root.panelWindow
+        }
+    }
+
+    Component {
+        id: audioComponent
+
+        AudioWidget {
+            compact: !root.wideLayout
+            outputName: root.outputName
+            panelWindow: root.panelWindow
+        }
+    }
+
+    Component {
+        id: batteryComponent
+
+        BatteryWidget {
+            compact: !root.wideLayout
+            outputName: root.outputName
         }
     }
 

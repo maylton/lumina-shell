@@ -20,11 +20,11 @@ SettingsPage {
             ConfigStore.compactMode
         )
 
-    function togglePerformanceWidgetDialog() {
+    function togglePerformanceWidgetDialog(widgetId) {
         if (widgetDialog.opened)
             widgetDialog.close()
         else
-            widgetDialog.openFor("launcher", null)
+            widgetDialog.openFor(String(widgetId || "launcher"), null)
     }
     readonly property string backgroundModeDescription: {
         switch (ConfigStore.barBackgroundMode) {

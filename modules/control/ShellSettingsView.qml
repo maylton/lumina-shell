@@ -278,13 +278,16 @@ FocusScope {
             controls[requested].togglePopup()
     }
 
-    function togglePerformanceDialog() {
+    function togglePerformanceDialog(widgetId) {
         const controls = activeControls(
             "togglePerformanceWidgetDialog"
         )
 
-        if (controls.length > 0)
-            controls[0].togglePerformanceWidgetDialog()
+        if (controls.length > 0) {
+            controls[0].togglePerformanceWidgetDialog(
+                String(widgetId || "launcher")
+            )
+        }
     }
 
     focus: active

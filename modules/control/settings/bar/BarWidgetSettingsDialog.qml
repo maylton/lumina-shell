@@ -45,7 +45,9 @@ Controls.Popup {
         context: contextSettings,
         tray: traySettings,
         notifications: notificationsSettings,
-        "system-status": systemStatusSettings,
+        network: networkSettings,
+        audio: audioSettings,
+        battery: batterySettings,
         dashboard: userAvatarSettings,
         wallpaper: wallpaperSettings,
         session: sessionSettings
@@ -354,8 +356,18 @@ Controls.Popup {
     }
 
     Component {
-        id: systemStatusSettings
-        SystemStatusWidgetSettings {}
+        id: networkSettings
+        NetworkWidgetSettings {}
+    }
+
+    Component {
+        id: audioSettings
+        AudioWidgetSettings {}
+    }
+
+    Component {
+        id: batterySettings
+        BatteryWidgetSettings {}
     }
 
     Component {

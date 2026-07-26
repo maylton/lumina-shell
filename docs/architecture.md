@@ -160,14 +160,14 @@ asymmetric clusters from overlapping it. Date/time continues to use the shared
 `CalendarStore`, while its popup anchors below a top bar and above a bottom
 bar.
 
-`SystemStatusCluster` reads `AudioService`, `ConnectivityService`, and
-`PowerService` directly and opens the existing Dashboard through
-`ControlCenterStore`. Missing capabilities are omitted. It never creates a
-second quick-controls popup. Per-widget network, audio, and battery text modes
-choose icon-only, real summary/percentage, or a service-backed state; icons,
-service state, tooltips, accessibility, and activation remain intact.
-Responsive compaction takes precedence when the available width cannot safely
-retain secondary labels.
+`NetworkWidget`, `AudioWidget`, and `BatteryWidget` are independent right-side
+bar widgets backed by `ConnectivityService`, `AudioService`, and `PowerService`.
+Each has its own order, visibility, background, text mode, and panel placement.
+Network and audio retain their dedicated panels; battery retains the existing
+Dashboard action. Missing capabilities are omitted. Schema 10 replaces a
+saved `system-status` slot with the three widgets in place and transfers its
+visibility, background, and text preferences. Responsive compaction takes
+precedence when the available width cannot safely retain secondary labels.
 
 `UserAvatarButton` is the final right-side Dashboard entry point. It retains
 the existing `dashboard` widget identifier and `ControlCenterStore` action so

@@ -138,6 +138,15 @@ Scope {
             if (windowObject)
                 windowObject.togglePerformanceDialog()
         }
+
+        function performanceWidgetDialog(
+            outputName: string,
+            widgetId: string
+        ): void {
+            const windowObject = root.controlWindowFor(outputName)
+            if (windowObject)
+                windowObject.togglePerformanceDialog(widgetId)
+        }
     }
 
     Variants {
@@ -203,8 +212,8 @@ Scope {
                     settingsView.togglePerformancePopup(index)
                 }
 
-                function togglePerformanceDialog() {
-                    settingsView.togglePerformanceDialog()
+                function togglePerformanceDialog(widgetId) {
+                    settingsView.togglePerformanceDialog(widgetId)
                 }
 
                 Component.onCompleted:
