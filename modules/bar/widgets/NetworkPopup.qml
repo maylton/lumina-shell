@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as Controls
 import Quickshell
 import qs.design
 import qs.modules.control
@@ -24,6 +25,10 @@ PopupWindow {
         ConnectivityManagerService.wiredProfiles()
     readonly property var wiredDevices:
         ConnectivityManagerService.wiredDevices()
+    readonly property bool showSyntheticWired:
+        ConnectivityService.wiredConnected
+        && wiredProfiles.length === 0
+        && wiredDevices.length === 0
     readonly property var wifiNetworks: {
         const values = ConnectivityManagerService.wifiNetworks.slice()
         values.sort(function(first, second) {
@@ -106,6 +111,25 @@ PopupWindow {
         )
     }
 
+    function statusDescription() {
+        if (ConnectivityManagerService.lastError)
+            return ConnectivityManagerService.lastError
+        if (ConnectivityManagerService.statusMessage)
+            return ConnectivityManagerService.statusMessage
+        if (ConnectivityService.wifiConnected)
+            return ConnectivityService.wifiName
+        if (ConnectivityService.wiredConnected) {
+            return I18n.tr(
+                "bar.network.section.wired",
+                "Wired network"
+            )
+        }
+        return I18n.tr(
+            "settings.connectivity.wired.state.disconnected",
+            "Disconnected"
+        )
+    }
+
     visible: requestedVisible
         && anchorItem !== null
         && panelWindow !== null
@@ -158,6 +182,7 @@ PopupWindow {
         color: root.luminaDesign.color.surfaceContainer
         border.width: 1
         border.color: root.luminaDesign.color.outline
+        clip: true
 
         Column {
             anchors {
@@ -190,9 +215,7 @@ PopupWindow {
 
                     Text {
                         width: parent.width
-                        text: ConnectivityManagerService.lastError
-                            || ConnectivityManagerService.statusMessage
-                            || ConnectivityService.networkSummary
+                        text: root.statusDescription()
                         color: ConnectivityManagerService.lastError
                             ? root.luminaDesign.color.urgent
                             : root.luminaDesign.color.textMuted
@@ -203,6 +226,7 @@ PopupWindow {
 
                 Row {
                     id: headerActions
+
                     anchors {
                         right: parent.right
                         verticalCenter: parent.verticalCenter
@@ -210,7 +234,7 @@ PopupWindow {
                     spacing: root.luminaDesign.spacing.small
 
                     Rectangle {
-                        width: 84
+                        width: 96
                         height: 38
                         radius: root.luminaDesign.shape.full
                         color: ConnectivityService.wifiEnabled
@@ -277,6 +301,7 @@ PopupWindow {
 
                         MouseArea {
                             id: scanMouse
+
                             anchors.fill: parent
                             hoverEnabled: true
                             enabled: ConnectivityService.wifiEnabled
@@ -297,6 +322,8 @@ PopupWindow {
             }
 
             Flickable {
+                id: networkFlickable
+
                 width: parent.width
                 height: parent.height - 58 - parent.spacing * 2 - 1
                 contentWidth: width
@@ -305,14 +332,23 @@ PopupWindow {
                 boundsBehavior: Flickable.StopAtBounds
                 flickDeceleration: 2600
 
+                Controls.ScrollBar.vertical: Controls.ScrollBar {
+                    policy: networkFlickable.contentHeight > networkFlickable.height
+                        ? Controls.ScrollBar.AsNeeded
+                        : Controls.ScrollBar.AlwaysOff
+                }
+
                 Column {
                     id: networkColumn
-                    width: parent.width
+
+                    width: networkFlickable.width
+                        - (networkFlickable.contentHeight > networkFlickable.height ? 12 : 0)
                     spacing: root.luminaDesign.spacing.large
 
                     Column {
                         width: parent.width
-                        visible: root.wiredDevices.length > 0
+                        visible: ConnectivityService.wiredConnected
+                            || root.wiredDevices.length > 0
                             || root.wiredProfiles.length > 0
                         spacing: root.luminaDesign.spacing.small
 
@@ -326,11 +362,29 @@ PopupWindow {
                             font.weight: Font.DemiBold
                         }
 
+                        NetworkConnectionRow {
+                            width: parent.width
+                            visible: root.showSyntheticWired
+                            title: I18n.tr(
+                                "bar.network.section.wired",
+                                "Wired network"
+                            )
+                            description: I18n.tr(
+                                "settings.connectivity.connected",
+                                "Connected"
+                            )
+                            iconName: "network-wired-symbolic"
+                            fallbackSymbol: "↔"
+                            connected: true
+                            available: false
+                        }
+
                         Repeater {
                             model: root.wiredProfiles
 
                             delegate: NetworkConnectionRow {
                                 required property var modelData
+
                                 width: networkColumn.width
                                 title: modelData.name
                                 description: modelData.active
@@ -376,6 +430,7 @@ PopupWindow {
 
                             delegate: NetworkConnectionRow {
                                 required property var modelData
+
                                 width: networkColumn.width
                                 title: modelData.connection
                                     && modelData.connection !== "--"
@@ -410,6 +465,7 @@ PopupWindow {
 
                             delegate: NetworkConnectionRow {
                                 required property var modelData
+
                                 width: networkColumn.width
                                 title: modelData.ssid
                                 description: modelData.active
@@ -502,12 +558,18 @@ PopupWindow {
                             }
                         }
                     }
+
+                    Item {
+                        width: parent.width
+                        height: root.luminaDesign.spacing.large
+                    }
                 }
             }
         }
 
         ConnectivityViews.WifiPasswordDialog {
             id: passwordDialog
+
             parent: root.contentItem
             availableWidth: root.width
             availableHeight: root.height
