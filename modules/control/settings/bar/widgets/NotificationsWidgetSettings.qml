@@ -1,17 +1,30 @@
 import QtQuick
 import qs.modules.control.settings
+import qs.services.i18n
 import qs.stores.config
 
 Column {
     width: parent ? parent.width : 0
     SettingsSection {
-        title: "Notification state"
-        description: "Information shown by the bar button"
+        title: I18n.tr(
+            "settings.widget.notifications.section",
+            "Notification state"
+        )
+        description: I18n.tr(
+            "settings.widget.notifications.description",
+            "Information shown by the bar button"
+        )
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Background"
-            description: "Show a resting tonal surface"
+            title: I18n.tr(
+                "settings.widget.common.background",
+                "Background"
+            )
+            description: I18n.tr(
+                "settings.widget.common.backgroundResting",
+                "Show a resting tonal surface"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "notifications", "showBackground", false
             ))
@@ -22,8 +35,14 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Unread badge"
-            description: "Show the unread notification count"
+            title: I18n.tr(
+                "settings.widget.notifications.unreadBadge",
+                "Unread badge"
+            )
+            description: I18n.tr(
+                "settings.widget.notifications.unreadBadgeDescription",
+                "Show the unread notification count"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "notifications", "showUnreadBadge", true
             ))
@@ -34,8 +53,14 @@ Column {
 
         SettingsSwitchRow {
             width: parent.width
-            title: "Do Not Disturb state"
-            description: "Show when interruptions are muted"
+            title: I18n.tr(
+                "settings.widget.notifications.dndState",
+                "Do Not Disturb state"
+            )
+            description: I18n.tr(
+                "settings.widget.notifications.dndStateDescription",
+                "Show when interruptions are muted"
+            )
             checked: Boolean(ConfigStore.widgetSetting(
                 "notifications", "showDoNotDisturbState", true
             ))
@@ -46,11 +71,29 @@ Column {
 
         SettingsComboRow {
             width: parent.width
-            title: "Open position"
-            description: "Open beside the widget or centered on the screen"
+            title: I18n.tr(
+                "settings.widget.common.openPosition",
+                "Open position"
+            )
+            description: I18n.tr(
+                "settings.widget.common.openPositionDescription",
+                "Open beside the widget or centered on the screen"
+            )
             options: [
-                { value: "near-widget", label: "Near the widget" },
-                { value: "centered", label: "Centered" }
+                {
+                    value: "near-widget",
+                    label: I18n.tr(
+                        "settings.widget.common.nearWidget",
+                        "Near the widget"
+                    )
+                },
+                {
+                    value: "centered",
+                    label: I18n.tr(
+                        "settings.widget.common.centered",
+                        "Centered"
+                    )
+                }
             ]
             currentValue: String(ConfigStore.widgetSetting(
                 "notifications", "surfacePlacement", "near-widget"
