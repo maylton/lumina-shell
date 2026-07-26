@@ -120,7 +120,7 @@ Item {
                     root.candidates[root.candidateIndex]
                 )
                 : ""
-            asynchronous: true
+            asynchronous: false
             cache: true
             fillMode: Image.PreserveAspectCrop
             visible: root.imageReady
