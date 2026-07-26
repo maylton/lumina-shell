@@ -38,58 +38,62 @@ jobs:
           path = Path("scripts/apply-widget-surface-placement.py")
           source = path.read_text()
 
-          wallpaper_old = '''        text = replace_once(
-              text,
-              "                    anchors.centerIn: parent\\n",
-              fullscreen_position_block("pickerWindow", "pickerSurface", "root.luminaDesign.spacing.extraLarge"),
-              "Wallpaper surface position",
+          wallpaper_old = (
+              "        text = replace_once(\n"
+              "            text,\n"
+              '            "                    anchors.centerIn: parent\\n",\n'
+              '            fullscreen_position_block("pickerWindow", "pickerSurface", "root.luminaDesign.spacing.extraLarge"),\n'
+              '            "Wallpaper surface position",\n'
+              "        )\n"
           )
-          '''
-          wallpaper_new = '''        text = replace_once(
-              text,
-              """                Rectangle {
-                      id: pickerSurface
-
-                      anchors.centerIn: parent
-          """,
-              """                Rectangle {
-                      id: pickerSurface
-
-          """
-              + fullscreen_position_block(
-                  "pickerWindow",
-                  "pickerSurface",
-                  "root.luminaDesign.spacing.extraLarge"
-              ),
-              "Wallpaper surface position",
+          wallpaper_new = (
+              "        text = replace_once(\n"
+              "            text,\n"
+              '            """                Rectangle {\n'
+              "                    id: pickerSurface\n"
+              "\n"
+              "                    anchors.centerIn: parent\n"
+              '""",\n'
+              '            """                Rectangle {\n'
+              "                    id: pickerSurface\n"
+              "\n"
+              '"""\n'
+              "            + fullscreen_position_block(\n"
+              '                "pickerWindow",\n'
+              '                "pickerSurface",\n'
+              '                "root.luminaDesign.spacing.extraLarge"\n'
+              "            ),\n"
+              '            "Wallpaper surface position",\n'
+              "        )\n"
           )
-          '''
-          session_old = '''        text = replace_once(
-              text,
-              "                    anchors.centerIn: parent\\n",
-              fullscreen_position_block("sessionWindow", "menuSurface", "root.luminaDesign.spacing.extraLarge"),
-              "Session surface position",
+          session_old = (
+              "        text = replace_once(\n"
+              "            text,\n"
+              '            "                    anchors.centerIn: parent\\n",\n'
+              '            fullscreen_position_block("sessionWindow", "menuSurface", "root.luminaDesign.spacing.extraLarge"),\n'
+              '            "Session surface position",\n'
+              "        )\n"
           )
-          '''
-          session_new = '''        text = replace_once(
-              text,
-              """                Rectangle {
-                      id: menuSurface
-
-                      anchors.centerIn: parent
-          """,
-              """                Rectangle {
-                      id: menuSurface
-
-          """
-              + fullscreen_position_block(
-                  "sessionWindow",
-                  "menuSurface",
-                  "root.luminaDesign.spacing.extraLarge"
-              ),
-              "Session surface position",
+          session_new = (
+              "        text = replace_once(\n"
+              "            text,\n"
+              '            """                Rectangle {\n'
+              "                    id: menuSurface\n"
+              "\n"
+              "                    anchors.centerIn: parent\n"
+              '""",\n'
+              '            """                Rectangle {\n'
+              "                    id: menuSurface\n"
+              "\n"
+              '"""\n'
+              "            + fullscreen_position_block(\n"
+              '                "sessionWindow",\n'
+              '                "menuSurface",\n'
+              '                "root.luminaDesign.spacing.extraLarge"\n'
+              "            ),\n"
+              '            "Session surface position",\n'
+              "        )\n"
           )
-          '''
 
           if source.count(wallpaper_old) != 1:
               raise SystemExit("wallpaper migration block was not unique")
