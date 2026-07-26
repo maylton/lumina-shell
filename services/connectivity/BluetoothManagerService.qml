@@ -202,12 +202,22 @@ Singleton {
         if (!pairAgentProcess.running)
             return
 
-        cancellationReason = String(reason || "user")
-        sendAgentCommand({
-            action: "cancel",
-            reason: cancellationReason
-        })
+        const timedOut = String(reason || "user") === "timeout"
+        pairingAgentCompleted = true
         clearAuthentication()
+        pairAgentProcess.signal(2)
+
+        if (timedOut) {
+            fail(
+                "pair-failed",
+                "Pairing confirmation timed out"
+            )
+        } else {
+            statusCode = ""
+            diagnostic = ""
+            clearFlow()
+            refresh()
+        }
     }
 
     function handlePairingAgentEvent(data) {
@@ -259,17 +269,10 @@ Singleton {
 
         if (type === "cancelled") {
             pairingAgentCompleted = true
-            if (cancellationReason === "timeout") {
-                fail(
-                    "pair-failed",
-                    "Pairing confirmation timed out"
-                )
-            } else {
-                statusCode = ""
-                diagnostic = ""
-                clearFlow()
-                refresh()
-            }
+            statusCode = ""
+            diagnostic = ""
+            clearFlow()
+            refresh()
             return
         }
 
