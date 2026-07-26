@@ -1,0 +1,42 @@
+@import url("../common/colors-dark.css");
+@import url("../common/base.css");
+
+/* GTK 4 and libadwaita-friendly additions */
+window.csd {
+  border-radius: 14px;
+  box-shadow: 0 12px 34px @lumina_shadow;
+}
+
+.navigation-sidebar row,
+.sidebar row,
+listview row {
+  min-height: 38px;
+  margin: 2px 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.navigation-sidebar row:hover,
+.sidebar row:hover,
+listview row:hover {
+  background-color: alpha(@lumina_on_surface, 0.07);
+}
+
+.navigation-sidebar row:selected,
+.sidebar row:selected,
+listview row:selected {
+  color: @lumina_on_primary_container;
+  background-color: @lumina_primary_container;
+}
+
+windowcontrols button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+windowcontrols button:hover {
+  background-color: alpha(@lumina_on_surface, 0.09);
+}
