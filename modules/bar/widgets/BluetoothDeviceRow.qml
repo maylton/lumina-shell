@@ -160,7 +160,7 @@ Rectangle {
             height: 36
             radius: root.luminaDesign.shape.full
             color: forgetMouse.containsMouse
-                ? root.luminaDesign.color.urgentContainer
+                ? root.luminaDesign.color.errorContainer
                 : "transparent"
             activeFocusOnTab: visible && !root.busy
             border.width: activeFocus ? 2 : 0
@@ -190,7 +190,7 @@ Rectangle {
                 iconName: "edit-delete-symbolic"
                 fallbackSymbol: "×"
                 iconColor: forgetMouse.containsMouse
-                    ? root.luminaDesign.color.onUrgentContainer
+                    ? root.luminaDesign.color.onErrorContainer
                     : root.luminaDesign.color.textMuted
                 iconSize: 17
             }
