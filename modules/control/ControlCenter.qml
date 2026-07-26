@@ -173,7 +173,7 @@ Scope {
                         height,
                         controlWindow.height,
                         controlWindow.barWindowHeight,
-                        root.luminaDesign.spacing.barPanelGap,
+                        4,
                         controlWindow.safeMargin
                     )
                     width: Math.min(
