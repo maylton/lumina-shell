@@ -6,6 +6,7 @@ repository_dir="$(cd -- "${script_dir}/.." && pwd)"
 catalog_dir="${repository_dir}/i18n"
 source_catalog="${catalog_dir}/en-US.json"
 pt_br_catalog="${catalog_dir}/pt-BR.json"
+appearance_messages="${repository_dir}/services/i18n/AppearanceMessages.js"
 
 command -v jq >/dev/null 2>&1 || {
     printf 'jq is required to validate translation catalogs.\n' >&2
@@ -25,6 +26,12 @@ command -v perl >/dev/null 2>&1 || {
 [[ -f "${pt_br_catalog}" ]] || {
     printf 'Missing maintained Brazilian Portuguese catalog: %s\n' \
         "${pt_br_catalog}" >&2
+    exit 1
+}
+
+[[ -f "${appearance_messages}" ]] || {
+    printf 'Missing supplemental appearance translations: %s\n' \
+        "${appearance_messages}" >&2
     exit 1
 }
 
@@ -84,6 +91,11 @@ jq -e '
     exit 1
 }
 
+supplemental_has_key() {
+    local message_id="$1"
+    grep -Fq "\"${message_id}\"" "${appearance_messages}"
+}
+
 missing_source_keys="$(
     mapfile -t qml_files < <(
         rg --files "${repository_dir}" --glob '*.qml'
@@ -98,12 +110,13 @@ missing_source_keys="$(
         | while IFS= read -r message_id; do
             jq -e --arg key "${message_id}" \
                 'has($key)' "${source_catalog}" >/dev/null \
+                || supplemental_has_key "${message_id}" \
                 || printf '%s\n' "${message_id}"
         done
 )"
 
 if [[ -n "${missing_source_keys}" ]]; then
-    printf 'Translation keys missing from en-US.json:\n%s\n' \
+    printf 'Translation keys missing from en-US.json or supplemental catalogs:\n%s\n' \
         "${missing_source_keys}" >&2
     exit 1
 fi
