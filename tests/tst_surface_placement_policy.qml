@@ -5,6 +5,10 @@ import "../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 TestCase {
     name: "SurfacePlacementPolicy"
 
+    function cleanup() {
+        SurfacePlacementPolicy.clearAnchorGeometry()
+    }
+
     function test_normalizeUsesCenteredFallback() {
         compare(
             SurfacePlacementPolicy.normalize("near-widget"),
@@ -80,6 +84,34 @@ TestCase {
                 "centered", "top", 300, 900, 64, 8, 16
             ),
             300
+        )
+    }
+
+    function test_verticalPositionUsesCapturedWidgetBounds() {
+        SurfacePlacementPolicy.captureAnchorGeometry(12, 52)
+
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 68, 8, 16
+            ),
+            60
+        )
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "bottom", 300, 900, 68, 8, 16
+            ),
+            16
+        )
+    }
+
+    function test_invalidCapturedGeometryFallsBackToBarEdge() {
+        SurfacePlacementPolicy.captureAnchorGeometry(60, 40)
+
+        compare(
+            SurfacePlacementPolicy.verticalY(
+                "near-widget", "top", 300, 900, 64, 8, 16
+            ),
+            72
         )
     }
 
