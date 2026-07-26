@@ -21,10 +21,15 @@ FloatingWindow {
         flow ? Boolean(flow.supplementaryIsError) : false
 
     property string localError: ""
+    property bool detailsExpanded: false
 
     visible: agent.isActive
     implicitWidth: 520
-    implicitHeight: 470
+    implicitHeight: Math.max(
+        410,
+        dialogContent.implicitHeight
+            + root.luminaDesign.spacing.extraLarge * 2
+    )
     minimumSize: Qt.size(implicitWidth, implicitHeight)
     maximumSize: Qt.size(implicitWidth, implicitHeight)
     color: "transparent"
@@ -52,6 +57,20 @@ FloatingWindow {
         }
 
         return text
+    }
+
+    function inputPromptText() {
+        if (!root.flow)
+            return PolkitStrings.text(I18n.locale, "passwordFallback")
+
+        const prompt = String(root.flow.inputPrompt || "").trim()
+        if (prompt.length === 0)
+            return PolkitStrings.text(I18n.locale, "passwordFallback")
+
+        if (/^(password|passphrase)\s*:?\s*$/i.test(prompt))
+            return PolkitStrings.text(I18n.locale, "passwordFallback")
+
+        return prompt
     }
 
     function focusResponse() {
@@ -86,6 +105,7 @@ FloatingWindow {
     onFlowChanged: {
         responseInput.text = ""
         localError = ""
+        detailsExpanded = false
         focusResponse()
     }
 
@@ -93,6 +113,7 @@ FloatingWindow {
         if (!visible) {
             responseInput.text = ""
             localError = ""
+            detailsExpanded = false
             return
         }
 
@@ -164,11 +185,15 @@ FloatingWindow {
             border.color: root.luminaDesign.color.outline
 
             Column {
+                id: dialogContent
+
                 anchors {
-                    fill: parent
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
                     margins: root.luminaDesign.spacing.extraLarge
                 }
-                spacing: root.luminaDesign.spacing.large
+                spacing: root.luminaDesign.spacing.medium
 
                 Row {
                     width: parent.width
@@ -242,20 +267,27 @@ FloatingWindow {
                     spacing: root.luminaDesign.spacing.small
 
                     Text {
+                        width: parent.width
                         text: PolkitStrings.text(
                             I18n.locale,
                             "identityLabel"
                         )
                         color: root.luminaDesign.color.textMuted
+                        horizontalAlignment: Text.AlignHCenter
                         font.pixelSize:
                             root.luminaDesign.typography.labelSmall
                         font.weight: Font.DemiBold
                     }
 
                     Flickable {
+                        id: identityFlick
+
                         width: parent.width
                         height: 42
-                        contentWidth: identityRow.implicitWidth
+                        contentWidth: Math.max(
+                            width,
+                            identityRow.implicitWidth
+                        )
                         contentHeight: height
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
@@ -263,12 +295,19 @@ FloatingWindow {
 
                         Row {
                             id: identityRow
+
+                            x: Math.max(
+                                0,
+                                (identityFlick.width - implicitWidth) / 2
+                            )
                             spacing: root.luminaDesign.spacing.small
 
                             Repeater {
                                 model: root.flow ? root.flow.identities : []
 
                                 delegate: Rectangle {
+                                    id: identityChip
+
                                     required property var modelData
 
                                     readonly property bool selected:
@@ -297,9 +336,9 @@ FloatingWindow {
                                         id: identityText
                                         anchors.centerIn: parent
                                         text: root.identityText(
-                                            parent.modelData
+                                            identityChip.modelData
                                         )
-                                        color: parent.selected
+                                        color: identityChip.selected
                                             ? root.luminaDesign.color
                                                 .onAccentContainer
                                             : root.luminaDesign.color.onSurface
@@ -315,8 +354,10 @@ FloatingWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
-                                            if (root.flow)
-                                                root.flow.selectedIdentity = parent.modelData
+                                            if (root.flow) {
+                                                root.flow.selectedIdentity =
+                                                    identityChip.modelData
+                                            }
                                         }
                                     }
                                 }
@@ -327,6 +368,41 @@ FloatingWindow {
 
                 Rectangle {
                     visible: root.flow
+                        && String(root.flow.actionId || "").length > 0
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: Math.max(116, detailsText.implicitWidth + 34)
+                    height: 32
+                    radius: root.luminaDesign.shape.full
+                    color: detailsMouse.containsMouse
+                        ? root.luminaDesign.color.surfaceMuted
+                        : "transparent"
+                    border.width: 1
+                    border.color: root.luminaDesign.color.outlineVariant
+
+                    Text {
+                        id: detailsText
+                        anchors.centerIn: parent
+                        text: root.detailsExpanded
+                            ? PolkitStrings.text(I18n.locale, "hideDetails")
+                            : PolkitStrings.text(I18n.locale, "showDetails")
+                        color: root.luminaDesign.color.textMuted
+                        font.pixelSize:
+                            root.luminaDesign.typography.labelMedium
+                        font.weight: Font.DemiBold
+                    }
+
+                    MouseArea {
+                        id: detailsMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.detailsExpanded = !root.detailsExpanded
+                    }
+                }
+
+                Rectangle {
+                    visible: root.detailsExpanded
+                        && root.flow
                         && String(root.flow.actionId || "").length > 0
                     width: parent.width
                     height: 50
@@ -414,13 +490,7 @@ FloatingWindow {
                         }
                         visible: responseInput.text.length === 0
                             && !responseInput.activeFocus
-                        text: root.flow
-                            && String(root.flow.inputPrompt || "").length > 0
-                                ? String(root.flow.inputPrompt)
-                                : PolkitStrings.text(
-                                    I18n.locale,
-                                    "passwordFallback"
-                                )
+                        text: root.inputPromptText()
                         color: root.luminaDesign.color.textMuted
                         font.pixelSize:
                             root.luminaDesign.typography.bodyMedium
