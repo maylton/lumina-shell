@@ -53,7 +53,21 @@ Rectangle {
         event.accepted = true
     }
 
+    MouseArea {
+        id: rowMouse
+        anchors.fill: parent
+        z: 0
+        hoverEnabled: true
+        enabled: root.actionable
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onClicked: {
+            root.focus = false
+            root.activated()
+        }
+    }
+
     Row {
+        z: 1
         anchors {
             fill: parent
             leftMargin: root.luminaDesign.spacing.medium
@@ -144,19 +158,6 @@ Rectangle {
                     root.activated()
                 }
             }
-        }
-    }
-
-    MouseArea {
-        id: rowMouse
-        anchors.fill: parent
-        z: -1
-        hoverEnabled: true
-        enabled: root.actionable
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: {
-            root.focus = false
-            root.activated()
         }
     }
 }
