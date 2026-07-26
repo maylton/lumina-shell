@@ -12,6 +12,8 @@ Rectangle {
 
     property var widgets: []
     property double openRequestedAt: 0
+    property bool openPending: false
+    property int openRequestGeneration: 0
 
     signal addWidget(string widgetId)
 
@@ -46,12 +48,37 @@ Rectangle {
     Accessible.onPressAction: togglePopup()
 
     function togglePopup() {
-        if (addPopup.opened) {
-            addPopup.close()
-        } else {
-            openRequestedAt = Date.now()
-            addPopup.open()
+        if (addPopup.opened || addPopup.visible || openPending) {
+            dismissPopup()
+            return
         }
+
+        const generation = ++openRequestGeneration
+        openRequestedAt = Date.now()
+        openPending = true
+        PerformanceTrace.recordInstant(
+            "popup",
+            "add-bar-widget",
+            "requested",
+            { optionCount: root.widgets.length }
+        )
+
+        Qt.callLater(function() {
+            if (!root.openPending
+                || generation !== root.openRequestGeneration) {
+                return
+            }
+
+            root.openPending = false
+            addPopup.open()
+        })
+    }
+
+    function dismissPopup() {
+        ++openRequestGeneration
+        openPending = false
+        openRequestedAt = 0
+        addPopup.close()
     }
 
     function toggleFromPointer() {
@@ -152,6 +179,8 @@ Rectangle {
             Controls.Popup.CloseOnEscape
                 | Controls.Popup.CloseOnPressOutside
         onOpened: {
+            root.openPending = false
+
             if (root.openRequestedAt > 0) {
                 PerformanceTrace.record(
                     "popup",
@@ -169,6 +198,10 @@ Rectangle {
                 firstItem.forceActiveFocus(
                     Qt.PopupFocusReason
                 )
+        }
+        onClosed: {
+            root.openPending = false
+            root.openRequestedAt = 0
         }
 
         background: Rectangle {
