@@ -25,16 +25,6 @@ function normalize(value, fallback) {
         : CENTERED
 }
 
-function hasAnchorGeometry(anchorTop, anchorBottom) {
-    var top = Number(anchorTop)
-    var bottom = Number(anchorBottom)
-
-    return isFinite(top)
-        && isFinite(bottom)
-        && top >= 0
-        && bottom >= top
-}
-
 function barWindowHeight(barHeight, surfaceMode, margin) {
     return Math.max(
         0,
@@ -72,32 +62,23 @@ function verticalY(
     barPosition,
     surfaceHeight,
     viewportHeight,
-    barHeight,
+    _barHeight,
     gap,
-    margin,
-    anchorTop,
-    anchorBottom
+    _margin,
+    _anchorTop,
+    _anchorBottom
 ) {
     var height = Math.max(0, finiteNumber(surfaceHeight, 0))
     var viewport = Math.max(height, finiteNumber(viewportHeight, height))
-    var inset = Math.max(0, finiteNumber(margin, 0))
-    var maximum = Math.max(inset, viewport - height - inset)
+    var maximum = Math.max(0, viewport - height)
     var adjacentGap = Math.max(0, finiteNumber(gap, 0))
-    var adjacent
 
-    if (hasAnchorGeometry(anchorTop, anchorBottom)) {
-        adjacent = String(barPosition) === "bottom"
-            ? Number(anchorTop) - adjacentGap - height
-            : Number(anchorBottom) + adjacentGap
-    } else {
-        adjacent = String(barPosition) === "bottom"
-            ? viewport
-                - Math.max(0, finiteNumber(barHeight, 0))
-                - adjacentGap
-                - height
-            : Math.max(0, finiteNumber(barHeight, 0))
-                + adjacentGap
-    }
+    // A layer-shell viewport with exclusiveZone 0 already starts after the
+    // bar's reserved area. Widget Y coordinates belong to the bar's window,
+    // so adding either them or the bar height here reserves the bar twice.
+    var adjacent = String(barPosition) === "bottom"
+        ? viewport - height - adjacentGap
+        : adjacentGap
 
-    return clamp(adjacent, inset, maximum)
+    return clamp(adjacent, 0, maximum)
 }
