@@ -20,7 +20,7 @@ listview row {
 .navigation-sidebar,
 .sidebar,
 placessidebar {
-  padding: 8px 0;
+  padding: 10px 0 12px;
   background-color: @lumina_surface_container_low;
 }
 
@@ -52,7 +52,8 @@ listview row:selected {
 .navigation-sidebar separator,
 .sidebar separator,
 placessidebar separator {
-  margin: 8px 16px;
+  margin: 12px 16px;
+  background-color: alpha(@lumina_outline_variant, 0.42);
 }
 
 toolbarview,
@@ -68,12 +69,13 @@ listview {
 }
 
 gridview {
-  padding: 16px;
+  padding: 16px 18px 20px;
 }
 
 gridview child,
 flowboxchild {
-  padding: 8px;
+  min-width: 120px;
+  padding: 10px 8px;
   border-radius: 16px;
 }
 
@@ -90,31 +92,61 @@ flowboxchild:selected {
 
 searchbar,
 actionbar {
-  padding: 8px;
+  padding: 8px 12px;
   background-color: @lumina_surface_container;
-  border-color: alpha(@lumina_outline_variant, 0.36);
+  border-color: alpha(@lumina_outline_variant, 0.30);
+}
+
+headerbar {
+  padding: 6px 10px;
+}
+
+headerbar > box,
+headerbar box.start,
+headerbar box.end {
+  border-spacing: 6px;
+}
+
+headerbar label.title {
+  min-width: 72px;
+  margin: 0 6px;
+}
+
+headerbar entry,
+headerbar spinbutton,
+headerbar .path-bar {
+  min-height: 40px;
+  background-color: @lumina_surface_container_high;
+  border-color: transparent;
+  border-radius: 12px;
 }
 
 headerbar entry,
 headerbar spinbutton {
-  min-height: 40px;
-  background-color: @lumina_surface_container_high;
-  border-color: transparent;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 
 headerbar entry:hover,
-headerbar spinbutton:hover {
+headerbar spinbutton:hover,
+headerbar .path-bar:hover {
   background-color: mix(@lumina_surface_container_high, @lumina_on_surface, 0.05);
 }
 
 headerbar entry:focus,
-headerbar spinbutton:focus {
+headerbar spinbutton:focus,
+headerbar .path-bar:focus-within {
   border-color: @lumina_primary;
+  box-shadow: 0 0 0 1px alpha(@lumina_primary, 0.72);
 }
 
 headerbar button:not(.suggested-action):not(.destructive-action) {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
   background-color: transparent;
   border-color: transparent;
+  border-radius: 12px;
 }
 
 headerbar button:not(.suggested-action):not(.destructive-action):hover {
@@ -125,6 +157,42 @@ headerbar button:not(.suggested-action):not(.destructive-action):active,
 headerbar button:not(.suggested-action):not(.destructive-action):checked {
   color: @lumina_on_primary_container;
   background-color: @lumina_primary_container;
+}
+
+headerbar .linked,
+headerbar box.linked {
+  border-spacing: 2px;
+  padding: 2px;
+  background-color: alpha(@lumina_surface_container_highest, 0.55);
+  border-radius: 14px;
+}
+
+headerbar .linked > button,
+headerbar box.linked > button {
+  border-radius: 10px;
+}
+
+headerbar separator {
+  margin: 10px 4px;
+  background-color: alpha(@lumina_outline_variant, 0.28);
+}
+
+/* Nautilus composition: keep the path control visually central and bounded. */
+.nautilus-window headerbar .path-bar,
+.nautilus-window headerbar entry {
+  min-width: 360px;
+  max-width: 760px;
+}
+
+.nautilus-window headerbar .view-switcher,
+.nautilus-window headerbar .linked {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.nautilus-window gridview child {
+  min-width: 128px;
+  max-width: 152px;
 }
 
 statuspage,
