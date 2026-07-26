@@ -39,6 +39,21 @@ TestCase {
         )
     }
 
+    function test_surfacePlacementDefaultsPreserveCurrentBehavior() {
+        const settings = BarWidgetCatalog.defaultSettings()
+
+        compare(settings.launcher.surfacePlacement, "centered")
+        compare(settings.datetime.surfacePlacement, "near-widget")
+        compare(settings.tray.surfacePlacement, "near-widget")
+        compare(settings.notifications.surfacePlacement, "near-widget")
+        compare(settings.dashboard.surfacePlacement, "centered")
+        compare(settings.wallpaper.surfacePlacement, "centered")
+        compare(settings.session.surfacePlacement, "centered")
+        verify(settings.overview.surfacePlacement === undefined)
+        verify(settings.workspaces.surfacePlacement === undefined)
+        verify(settings.context.surfacePlacement === undefined)
+    }
+
     function test_individualResetPreservesOtherWidgets() {
         const configured = BarWidgetCatalog.defaultSettings()
         configured.context.timeout = 12000

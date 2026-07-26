@@ -5,10 +5,10 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema7WidgetSettings() {
+    function test_defaultsUseSchema8WidgetSettings() {
         const state = ConfigSchema.defaults()
 
-        compare(state.schemaVersion, 7)
+        compare(state.schemaVersion, 8)
         compare(state.themeMode, "auto")
         compare(state.paletteStyle, "auto")
         verify(state.barVisualStyle === undefined)
@@ -29,6 +29,14 @@ TestCase {
             "24"
         )
         compare(state.barWidgetSettings.launcher.showBackground, false)
+        compare(
+            state.barWidgetSettings.launcher.surfacePlacement,
+            "centered"
+        )
+        compare(
+            state.barWidgetSettings.datetime.surfacePlacement,
+            "near-widget"
+        )
         compare(state.dashboardUseUserAvatarImage, true)
         compare(state.dashboardUserAvatarPath, "")
         compare(state.barWidgetSettings.context.timeout, 3500)
@@ -52,7 +60,7 @@ TestCase {
             showStatusDetails: false
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.doNotDisturb, true)
         compare(migrated.dynamicTheme, false)
         compare(migrated.wallpaperDirectory, "/tmp/wallpapers")
@@ -73,7 +81,7 @@ TestCase {
             barWidgetOrder: ["clock", "tray"]
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barPosition, "bottom")
         compare(migrated.barHeight, 56)
         compare(migrated.barMargin, 9)
@@ -150,7 +158,7 @@ TestCase {
             ]
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.transparencyEnabled, true)
         compare(migrated.surfaceOpacity, 0.78)
         compare(migrated.barBackgroundMode, "blur")
@@ -189,7 +197,7 @@ TestCase {
             barShowDashboardButton: false
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barWidgetSettings.launcher.showBackground, false)
         compare(migrated.barWidgetSettings.context.mode, "always")
         compare(migrated.barWidgetSettings.context.timeout, 8000)
@@ -251,6 +259,27 @@ TestCase {
         compare(
             state.barWidgetSettings["system-status"].networkTextMode,
             "summary"
+        )
+    }
+
+    function test_widgetSurfacePlacementNormalization() {
+        const state = ConfigSchema.normalize({
+            barWidgetSettings: {
+                launcher: { surfacePlacement: "near-widget" },
+                datetime: { surfacePlacement: "follow-pointer" }
+            }
+        })
+
+        compare(
+            state.barWidgetSettings.launcher.surfacePlacement,
+            "near-widget"
+        )
+        compare(
+            state.barWidgetSettings.datetime.surfacePlacement,
+            "near-widget"
+        )
+        verify(
+            state.barWidgetSettings.context.surfacePlacement === undefined
         )
     }
 
@@ -380,7 +409,7 @@ TestCase {
             barBackgroundMode: "translucent"
         })
 
-        compare(migrated.schemaVersion, 7)
+        compare(migrated.schemaVersion, 8)
         compare(migrated.barBackgroundMode, "blur")
     }
 

@@ -13,6 +13,7 @@ Item {
     id: root
 
     required property string outputName
+    property var panelWindow: null
     required property var visibleWorkspaces
     required property string activeWindowTitle
     required property string activeWindowAppId
@@ -170,6 +171,7 @@ Item {
         id: dateTimeComponent
 
         DateTimeCluster {
+            panelWindow: root.panelWindow
             compact: root.compactLayout
             barPosition: ConfigStore.barPosition
             outputName: root.outputName.length > 0
@@ -193,7 +195,9 @@ Item {
     Component {
         id: trayComponent
 
-        TrayWidget {}
+        TrayWidget {
+            panelWindow: root.panelWindow
+        }
     }
 
     Component {

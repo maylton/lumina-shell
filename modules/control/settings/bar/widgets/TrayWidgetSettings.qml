@@ -50,5 +50,21 @@ Column {
                 "tray", "showCount", value
             )
         }
+
+        SettingsComboRow {
+            width: parent.width
+            title: "Open position"
+            description: "Open beside the widget or centered on the screen"
+            options: [
+                { value: "near-widget", label: "Near the widget" },
+                { value: "centered", label: "Centered" }
+            ]
+            currentValue: String(ConfigStore.widgetSetting(
+                "tray", "surfacePlacement", "near-widget"
+            ))
+            onSelected: value => ConfigStore.setBarWidgetSetting(
+                "tray", "surfacePlacement", value
+            )
+        }
     }
 }

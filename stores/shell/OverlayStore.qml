@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import "SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Singleton {
     id: root
@@ -10,9 +11,39 @@ Singleton {
 
     property string activeSurface: ""
     property string activeOutputName: ""
+    property string activePlacement: SurfacePlacementPolicy.CENTERED
+    property real activeAnchorX: -1
+
+    property string pendingSurface: ""
+    property string pendingOutputName: ""
+    property string pendingPlacement: SurfacePlacementPolicy.CENTERED
+    property real pendingAnchorX: -1
 
     signal surfaceOpened(string surfaceName, string outputName)
     signal surfaceClosed(string surfaceName)
+
+    function clearPending() {
+        pendingSurface = ""
+        pendingOutputName = ""
+        pendingPlacement = SurfacePlacementPolicy.CENTERED
+        pendingAnchorX = -1
+    }
+
+    function prepareFor(surfaceName, outputName, placement, anchorX) {
+        const surface = String(surfaceName || "")
+        const output = resolvedOutputName(outputName)
+        const numericAnchor = Number(anchorX)
+
+        if (!surface || !output) {
+            clearPending()
+            return
+        }
+
+        pendingSurface = surface
+        pendingOutputName = output
+        pendingPlacement = SurfacePlacementPolicy.normalize(placement)
+        pendingAnchorX = isFinite(numericAnchor) ? numericAnchor : -1
+    }
 
     function outputExists(outputName) {
         const name = String(outputName || "")
@@ -47,9 +78,19 @@ Singleton {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
 
-        if (!surface || !output)
+        if (!surface || !output) {
+            clearPending()
             return
+        }
 
+        const prepared = pendingSurface === surface
+            && pendingOutputName === output
+
+        activePlacement = prepared
+            ? SurfacePlacementPolicy.normalize(pendingPlacement)
+            : SurfacePlacementPolicy.CENTERED
+        activeAnchorX = prepared ? pendingAnchorX : -1
+        clearPending()
         activeSurface = surface
         activeOutputName = output
         surfaceOpened(surface, output)
@@ -65,6 +106,9 @@ Singleton {
 
         activeSurface = ""
         activeOutputName = ""
+        activePlacement = SurfacePlacementPolicy.CENTERED
+        activeAnchorX = -1
+        clearPending()
 
         if (closedSurface)
             surfaceClosed(closedSurface)

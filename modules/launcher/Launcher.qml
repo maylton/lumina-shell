@@ -6,6 +6,9 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.design
 import qs.stores.launcher
+import qs.stores.config
+import qs.stores.shell
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -51,6 +54,12 @@ Scope {
                     : ""
                 readonly property bool launcherVisible: LauncherStore.open
                     && LauncherStore.activeOutputName === outputName
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
 
                 screen: modelData
                 visible: launcherVisible
@@ -92,14 +101,22 @@ Scope {
                 Rectangle {
                     id: launcherSurface
 
-                    anchors {
-                        horizontalCenter: parent.horizontalCenter
-                        top: parent.top
-                        topMargin: Math.max(
-                            root.luminaDesign.spacing.extraLarge * 4,
-                            parent.height * 0.12
-                        )
-                    }
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        launcherWindow.width,
+                        root.luminaDesign.spacing.extraLarge
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        launcherWindow.height,
+                        launcherWindow.barWindowHeight,
+                        root.luminaDesign.spacing.barPanelGap,
+                        root.luminaDesign.spacing.extraLarge
+                    )
 
                     width: Math.min(
                         root.luminaDesign.size.launcherWidth,

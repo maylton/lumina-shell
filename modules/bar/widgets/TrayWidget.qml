@@ -9,6 +9,8 @@ import qs.stores.config
 Item {
     id: root
 
+    property var panelWindow: null
+
     readonly property var luminaDesign: Theme.luminaTokens
     readonly property var activeItems: {
         const items = []
@@ -39,8 +41,29 @@ Item {
     readonly property bool showCount: Boolean(
         ConfigStore.widgetSetting("tray", "showCount", false)
     )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "tray",
+            "surfacePlacement",
+            "near-widget"
+        )
+    )
 
     property bool tooltipVisible: false
+
+    function mappedAnchorX(localX) {
+        const point = groupButton.mapToItem(
+            null,
+            Number(localX),
+            groupButton.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function togglePopup(localX) {
+        trayPopup.anchorX = mappedAnchorX(localX)
+        root.togglePopup(groupButton.width / 2)
+    }
 
     visible: itemCount > 0
     implicitWidth: visible ? trayRow.implicitWidth : 0
@@ -79,10 +102,10 @@ Item {
             )
             Accessible.focusable: visible
             Accessible.focused: activeFocus
-            Accessible.onPressAction: trayPopup.toggle()
+            Accessible.onPressAction: root.togglePopup(groupButton.width / 2)
 
             Keys.onSpacePressed: event => {
-                trayPopup.toggle()
+                root.togglePopup(groupButton.width / 2)
                 event.accepted = true
             }
 
@@ -166,9 +189,9 @@ Item {
                     tooltipTimer.stop()
                     root.tooltipVisible = false
                 }
-                onClicked: {
+                onClicked: mouse => {
                     groupButton.focus = false
-                    trayPopup.toggle()
+                    root.togglePopup(mouse.x)
                 }
             }
         }
@@ -203,6 +226,8 @@ Item {
         id: trayPopup
 
         anchorItem: groupButton
+        panelWindow: root.panelWindow
+        placement: root.surfacePlacement
         items: root.activeItems
     }
 

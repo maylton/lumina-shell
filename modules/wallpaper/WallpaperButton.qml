@@ -5,6 +5,7 @@ import qs.design
 import qs.modules.control
 import qs.services.wallpaper
 import qs.stores.config
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -23,6 +24,13 @@ Rectangle {
     )
     readonly property bool showLabel: Boolean(
         ConfigStore.widgetSetting("wallpaper", "showLabel", false)
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "wallpaper",
+            "surfacePlacement",
+            "centered"
+        )
     )
 
     implicitWidth: showLabel
@@ -49,16 +57,34 @@ Rectangle {
     Accessible.name: "Open wallpaper picker"
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction:
+    Accessible.onPressAction: root.activate(root.width / 2)
+
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        OverlayStore.prepareFor(
+            "wallpaper",
+            root.outputName,
+            root.surfacePlacement,
+            mappedAnchorX(localX)
+        )
         WallpaperService.togglePicker(root.outputName)
+    }
 
     Keys.onSpacePressed: event => {
-        WallpaperService.togglePicker(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        WallpaperService.togglePicker(root.outputName)
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
@@ -122,9 +148,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            WallpaperService.togglePicker(root.outputName)
+            root.activate(mouse.x)
         }
     }
 }

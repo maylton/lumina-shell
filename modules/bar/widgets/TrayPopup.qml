@@ -4,11 +4,15 @@ import QtQuick
 import Quickshell
 import qs.design
 import qs.stores.config
+import "../../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 PopupWindow {
     id: root
 
     property var anchorItem: null
+    property var panelWindow: null
+    property string placement: "near-widget"
+    property real anchorX: -1
     property var items: []
     property bool requestedVisible: false
 
@@ -24,7 +28,10 @@ PopupWindow {
         requestedVisible = false
     }
 
-    visible: requestedVisible && itemCount > 0 && anchorItem !== null
+    visible: requestedVisible
+        && itemCount > 0
+        && anchorItem !== null
+        && panelWindow !== null
     implicitWidth: trayGrid.implicitWidth
         + luminaDesign.spacing.medium * 2
     implicitHeight: trayGrid.implicitHeight
@@ -32,19 +39,29 @@ PopupWindow {
     color: "transparent"
     grabFocus: true
 
-    anchor.item: root.anchorItem
-    anchor.edges: ConfigStore.barPosition === "top"
-        ? Edges.Bottom | Edges.Right
-        : Edges.Top | Edges.Right
-    anchor.gravity: ConfigStore.barPosition === "top"
-        ? Edges.Bottom | Edges.Left
-        : Edges.Top | Edges.Left
-    anchor.margins.top: ConfigStore.barPosition === "top"
-        ? luminaDesign.spacing.barPanelGap
-        : 0
-    anchor.margins.bottom: ConfigStore.barPosition === "bottom"
-        ? luminaDesign.spacing.barPanelGap
-        : 0
+    anchor.window: root.panelWindow
+    anchor.rect.x: SurfacePlacementPolicy.horizontalX(
+        root.placement,
+        root.anchorX,
+        root.implicitWidth,
+        root.panelWindow && root.panelWindow.screen
+            ? root.panelWindow.screen.width
+            : 0,
+        root.luminaDesign.spacing.medium
+    )
+    anchor.rect.y: SurfacePlacementPolicy.popupY(
+        root.placement,
+        ConfigStore.barPosition,
+        root.implicitHeight,
+        root.panelWindow && root.panelWindow.screen
+            ? root.panelWindow.screen.height
+            : 0,
+        root.panelWindow ? root.panelWindow.height : 0,
+        root.luminaDesign.spacing.barPanelGap,
+        root.luminaDesign.spacing.medium
+    )
+    anchor.edges: Edges.Top | Edges.Left
+    anchor.gravity: Edges.Bottom | Edges.Right
     anchor.adjustment: PopupAdjustment.All
 
     onClosed: dismiss()

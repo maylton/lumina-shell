@@ -8,6 +8,8 @@ import qs.design
 import qs.modules.control
 import qs.services.notifications
 import qs.stores.config
+import qs.stores.shell
+import "../../stores/shell/SurfacePlacementPolicy.js" as SurfacePlacementPolicy
 
 Scope {
     id: root
@@ -47,6 +49,12 @@ Scope {
                     : ""
                 readonly property bool centerVisible:
                     NotificationService.centerOutputName === outputName
+                readonly property real barWindowHeight:
+                    SurfacePlacementPolicy.barWindowHeight(
+                        ConfigStore.barHeight,
+                        ConfigStore.barSurfaceMode,
+                        ConfigStore.barMargin
+                    )
 
                 screen: modelData
                 visible: centerVisible
@@ -98,7 +106,7 @@ Scope {
                     readonly property real availableHeight: Math.max(
                         0,
                         centerWindow.height
-                            - root.luminaDesign.size.barWindowHeight
+                            - centerWindow.barWindowHeight
                             - root.luminaDesign.spacing.barPanelGap * 2
                     )
                     readonly property real desiredContentHeight:
@@ -107,26 +115,22 @@ Scope {
                         + notificationColumn.spacing
                         + historyList.contentHeight
 
-                    anchors {
-                        top: ConfigStore.barPosition === "top"
-                            ? parent.top
-                            : undefined
-                        bottom: ConfigStore.barPosition === "bottom"
-                            ? parent.bottom
-                            : undefined
-                        right: parent.right
-                        topMargin:
-                            ConfigStore.barPosition === "top"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : 0
-                        rightMargin: root.luminaDesign.spacing.medium
-                        bottomMargin:
-                            ConfigStore.barPosition === "bottom"
-                                ? root.luminaDesign.size.barWindowHeight
-                                    + root.luminaDesign.spacing.barPanelGap
-                                : 0
-                    }
+                    x: SurfacePlacementPolicy.horizontalX(
+                        OverlayStore.activePlacement,
+                        OverlayStore.activeAnchorX,
+                        width,
+                        centerWindow.width,
+                        root.luminaDesign.spacing.medium
+                    )
+                    y: SurfacePlacementPolicy.verticalY(
+                        OverlayStore.activePlacement,
+                        ConfigStore.barPosition,
+                        height,
+                        centerWindow.height,
+                        centerWindow.barWindowHeight,
+                        root.luminaDesign.spacing.barPanelGap,
+                        root.luminaDesign.spacing.medium
+                    )
 
                     width: Math.min(
                         root.luminaDesign.size.notificationCenterWidth,

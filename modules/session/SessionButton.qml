@@ -6,6 +6,7 @@ import qs.modules.control
 import qs.services.session
 import qs.stores.config
 import qs.stores.session
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -24,6 +25,13 @@ Rectangle {
     )
     readonly property bool showLabel: Boolean(
         ConfigStore.widgetSetting("session", "showLabel", false)
+    )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "session",
+            "surfacePlacement",
+            "centered"
+        )
     )
 
     implicitWidth: showLabel
@@ -50,19 +58,35 @@ Rectangle {
     Accessible.name: "Open session and layout controls"
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activate()
+    Accessible.onPressAction: root.activate(root.width / 2)
 
     Keys.onSpacePressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
-    function activate() {
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        OverlayStore.prepareFor(
+            "session",
+            root.outputName,
+            root.surfacePlacement,
+            mappedAnchorX(localX)
+        )
+
         if (expanded) {
             SessionService.cancel()
             SessionMenuStore.close()
@@ -131,9 +155,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            root.activate()
+            root.activate(mouse.x)
         }
     }
 }

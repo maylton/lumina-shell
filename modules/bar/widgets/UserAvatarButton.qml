@@ -4,6 +4,7 @@ import qs.modules.control
 import qs.stores.config
 import qs.stores.control
 import qs.stores.system
+import qs.stores.shell
 
 Rectangle {
     id: root
@@ -36,6 +37,13 @@ Rectangle {
             false
         )
     )
+    readonly property string surfacePlacement: String(
+        ConfigStore.widgetSetting(
+            "dashboard",
+            "surfacePlacement",
+            "centered"
+        )
+    )
 
     width: showUserName
         ? avatarContent.implicitWidth
@@ -63,9 +71,25 @@ Rectangle {
     Accessible.description: "Quick controls and session actions"
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction: root.activate()
+    Accessible.onPressAction: root.activate(root.width / 2)
 
-    function activate() {
+    function mappedAnchorX(localX) {
+        const point = root.mapToItem(
+            null,
+            Number(localX),
+            root.height / 2
+        )
+        return Number(point.x)
+    }
+
+    function activate(localX) {
+        OverlayStore.prepareFor(
+            "control",
+            root.outputName,
+            root.surfacePlacement,
+            mappedAnchorX(localX)
+        )
+
         if (expanded
             && ControlCenterStore.activePage === "dashboard") {
             ControlCenterStore.close()
@@ -75,12 +99,12 @@ Rectangle {
     }
 
     Keys.onSpacePressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        activate()
+        root.activate(root.width / 2)
         event.accepted = true
     }
 
@@ -142,9 +166,9 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: mouse => {
             root.focus = false
-            root.activate()
+            root.activate(mouse.x)
         }
     }
 
