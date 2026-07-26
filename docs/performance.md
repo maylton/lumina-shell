@@ -105,6 +105,14 @@ layer-shell window at a stable maximum height reduced its p95 from 257 ms to
 111 ms and removed all event-loop delays. Dashboard audio sliders, Settings
 popups, and the widget-settings dialog completed without overruns.
 
+A later interactive smoke test showed that the remaining perceived delay was
+mostly the configured motion budget rather than runtime overrun. The responsive
+motion pass reduced page transitions from 360 to 280 ms, dropdowns from 180 to
+140 ms, and spatial popups from 300 to 240 ms. A controlled runtime check
+measured 139 ms for a dropdown, 231 ms for the widget-settings dialog, and
+271–296 ms for page transitions. The first cold category creation added 16 ms;
+no operation reached the 120 ms overrun threshold.
+
 ## Focused summary
 
 This command shows only slow events, transition timeouts, and process
