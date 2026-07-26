@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Lumina
+Comment=Material 3 Expressive application theme for Lumina Shell
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Lumina-Dark
+MetacityTheme=Lumina-Dark
+IconTheme=Papirus-Dark
+CursorTheme=Adwaita
+ButtonLayout=menu:minimize,maximize,close
