@@ -4,6 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 THEMES_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/themes"
 LEGACY_THEMES_DIR="$HOME/.themes"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+compile_css() {
+  local target="$1"
+  local gtk_version="$2"
+
+  {
+    cat "$target/common/colors.css"
+    printf '\n'
+    cat "$target/common/base.css"
+    printf '\n'
+    sed '1,2d' "$target/$gtk_version/gtk.css"
+  } > "$target/$gtk_version/lumina-user.css"
+}
 
 install_variant() {
   local variant="$1"
@@ -22,12 +36,15 @@ install_variant() {
   sed 's#../common/colors-dark.css#../common/colors.css#' \
     "$ROOT_DIR/gtk-4.0/gtk.css" > "$target/gtk-4.0/gtk.css"
 
+  compile_css "$target" "gtk-3.0"
+  compile_css "$target" "gtk-4.0"
+
   sed -i "s/^Name=.*/Name=$variant/" "$target/index.theme"
   sed -i "s/^GtkTheme=.*/GtkTheme=$variant/" "$target/index.theme"
   sed -i "s/^MetacityTheme=.*/MetacityTheme=$variant/" "$target/index.theme"
 }
 
-mkdir -p "$THEMES_DIR" "$LEGACY_THEMES_DIR"
+mkdir -p "$THEMES_DIR" "$LEGACY_THEMES_DIR" "$CONFIG_DIR/lumina-gtk"
 install_variant "Lumina-Dark" "colors-dark.css"
 install_variant "Lumina-Light" "colors-light.css"
 
@@ -38,6 +55,9 @@ done
 if command -v flatpak >/dev/null 2>&1; then
   flatpak override --user --filesystem="$THEMES_DIR:ro"
   flatpak override --user --filesystem="$LEGACY_THEMES_DIR:ro"
+  flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+  flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+  flatpak override --user --filesystem=xdg-config/lumina-gtk:ro
 fi
 
 printf 'Installed Lumina-Dark and Lumina-Light in %s\n' "$THEMES_DIR"
