@@ -29,82 +29,14 @@ jobs:
             | gzip --decompress \
             > scripts/apply-widget-surface-placement.py
           chmod +x scripts/apply-widget-surface-placement.py
+          sed -n '1030,1115p' scripts/apply-widget-surface-placement.py \
+            > /tmp/tray-migration-source.log
 
-      - name: Patch precise surface roots
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("scripts/apply-widget-surface-placement.py")
-          source = path.read_text()
-
-          wallpaper_old = (
-              "        text = replace_once(\n"
-              "            text,\n"
-              '            "                    anchors.centerIn: parent\\n",\n'
-              '            fullscreen_position_block("pickerWindow", "pickerSurface", "root.luminaDesign.spacing.extraLarge"),\n'
-              '            "Wallpaper surface position",\n'
-              "        )\n"
-          )
-          wallpaper_new = (
-              "        text = replace_once(\n"
-              "            text,\n"
-              '            """                Rectangle {\n'
-              "                    id: pickerSurface\n"
-              "\n"
-              "                    anchors.centerIn: parent\n"
-              '""",\n'
-              '            """                Rectangle {\n'
-              "                    id: pickerSurface\n"
-              "\n"
-              '"""\n'
-              "            + fullscreen_position_block(\n"
-              '                "pickerWindow",\n'
-              '                "pickerSurface",\n'
-              '                "root.luminaDesign.spacing.extraLarge"\n'
-              "            ),\n"
-              '            "Wallpaper surface position",\n'
-              "        )\n"
-          )
-          session_old = (
-              "        text = replace_once(\n"
-              "            text,\n"
-              '            "                    anchors.centerIn: parent\\n",\n'
-              '            fullscreen_position_block("sessionWindow", "menuSurface", "root.luminaDesign.spacing.extraLarge"),\n'
-              '            "Session surface position",\n'
-              "        )\n"
-          )
-          session_new = (
-              "        text = replace_once(\n"
-              "            text,\n"
-              '            """                Rectangle {\n'
-              "                    id: menuSurface\n"
-              "\n"
-              "                    anchors.centerIn: parent\n"
-              '""",\n'
-              '            """                Rectangle {\n'
-              "                    id: menuSurface\n"
-              "\n"
-              '"""\n'
-              "            + fullscreen_position_block(\n"
-              '                "sessionWindow",\n'
-              '                "menuSurface",\n'
-              '                "root.luminaDesign.spacing.extraLarge"\n'
-              "            ),\n"
-              '            "Session surface position",\n'
-              "        )\n"
-          )
-
-          if source.count(wallpaper_old) != 1:
-              raise SystemExit("wallpaper migration block was not unique")
-          if source.count(session_old) != 1:
-              raise SystemExit("session migration block was not unique")
-
-          source = source.replace(wallpaper_old, wallpaper_new, 1)
-          source = source.replace(session_old, session_new, 1)
-          path.write_text(source)
-          PY
-          python -m py_compile scripts/apply-widget-surface-placement.py
+      - name: Upload tray migration source
+        uses: actions/upload-artifact@v4
+        with:
+          name: tray-migration-source
+          path: /tmp/tray-migration-source.log
 
       - name: Apply the implementation
         id: migration
@@ -120,7 +52,6 @@ jobs:
         with:
           name: widget-surface-placement-diagnostics
           path: /tmp/widget-surface-placement.log
-          if-no-files-found: error
 
       - name: Stop after migration failure
         if: steps.migration.outcome == 'failure'
@@ -137,15 +68,8 @@ jobs:
         if: steps.migration.outcome == 'success'
         run: |
           rm scripts/apply-widget-surface-placement.py
-          rm -f scripts/widget-surface-placement-error.log
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-
-          if git diff --cached --quiet; then
-            echo "No generated changes to commit."
-            exit 0
-          fi
-
           git commit -m "Add per-widget surface placement"
           git push origin "HEAD:${{ github.head_ref }}"
