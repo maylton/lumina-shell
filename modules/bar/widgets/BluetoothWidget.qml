@@ -10,6 +10,7 @@ import qs.stores.shell
 Item {
     id: root
 
+    required property string outputName
     property var panelWindow: null
     property bool tooltipVisible: false
 
@@ -34,32 +35,36 @@ Item {
         BluetoothManagerService.refresh()
     }
 
-    function mappedAnchorX(localX) {
-        const point = bluetoothButton.mapToItem(
+    function mappedAnchorGeometry(localX) {
+        const top = bluetoothButton.mapToItem(
             null,
             Number(localX),
-            bluetoothButton.height / 2
+            0
         )
-        return Number(point.x)
+        const bottom = bluetoothButton.mapToItem(
+            null,
+            Number(localX),
+            bluetoothButton.height
+        )
+
+        return {
+            x: Number(top.x),
+            top: Number(top.y),
+            bottom: Number(bottom.y)
+        }
     }
 
     function togglePopup(localX) {
-        const opening = !bluetoothPopup.requestedVisible
+        const anchor = mappedAnchorGeometry(localX)
 
-        if (opening)
-            OverlayStore.close()
-
-        bluetoothPopup.anchorX = mappedAnchorX(localX)
-        bluetoothPopup.toggle()
-    }
-
-    Connections {
-        target: OverlayStore
-
-        function onActiveSurfaceChanged() {
-            if (OverlayStore.activeSurface.length > 0)
-                bluetoothPopup.dismiss()
-        }
+        BarPanelCoordinator.requestToggle(
+            "bluetooth",
+            root.outputName,
+            "near-widget",
+            anchor.x,
+            anchor.top,
+            anchor.bottom
+        )
     }
 
     Rectangle {
@@ -249,5 +254,51 @@ Item {
 
         anchorItem: bluetoothButton
         panelWindow: root.panelWindow
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "bluetooth" || outputName !== root.outputName)
+                return
+
+            bluetoothPopup.placement = placement
+            bluetoothPopup.anchorX = anchorX
+            if (!bluetoothPopup.requestedVisible)
+                bluetoothPopup.toggle()
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "bluetooth" || outputName !== root.outputName)
+                return
+
+            if (bluetoothPopup.requestedVisible)
+                bluetoothPopup.dismiss()
+            else
+                BarPanelCoordinator.reportClosed(
+                    "bluetooth",
+                    root.outputName
+                )
+        }
+    }
+
+    Connections {
+        target: bluetoothPopup
+
+        function onRequestedVisibleChanged() {
+            BarPanelCoordinator.synchronizeIndependentPanel(
+                "bluetooth",
+                root.outputName,
+                bluetoothPopup.requestedVisible
+            )
+        }
     }
 }
