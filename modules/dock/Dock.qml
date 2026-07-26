@@ -353,24 +353,32 @@ Scope {
                                         launcherButton.width / 2,
                                         0
                                     )
-                                    const globalTop = launcherButton.mapToGlobal(
-                                        Qt.point(
+                                    const surfaceTop =
+                                        launcherButton.mapToItem(
+                                            dockSurface,
                                             launcherButton.width / 2,
                                             0
                                         )
-                                    )
-                                    const globalBottom =
-                                        launcherButton.mapToGlobal(
-                                            Qt.point(
-                                                launcherButton.width / 2,
-                                                launcherButton.height
-                                            )
+                                    const surfaceBottom =
+                                        launcherButton.mapToItem(
+                                            dockSurface,
+                                            launcherButton.width / 2,
+                                            launcherButton.height
                                         )
+                                    const outputSurfaceTop =
+                                        panel.modelData.height
+                                        - panel.bottomBarOffset
+                                        - panel.effectiveMargin
+                                        - dockSurface.height
 
                                     return {
                                         x: Number(horizontal.x),
-                                        top: Number(globalTop.y),
-                                        bottom: Number(globalBottom.y)
+                                        top: Number(
+                                            outputSurfaceTop + surfaceTop.y
+                                        ),
+                                        bottom: Number(
+                                            outputSurfaceTop + surfaceBottom.y
+                                        )
                                     }
                                 }
 

@@ -42,12 +42,17 @@ PanelWindow {
         if (surfaceAnchorEdge !== "above" || surfaceAnchorTop < 0)
             return adjacentSurfaceY(surfaceHeight)
 
-        const localAnchor = panelLayer.mapFromGlobal(
-            Qt.point(0, surfaceAnchorTop)
-        )
+        const viewportAnchorTop =
+            SurfacePlacementPolicy.outputYToViewportY(
+                surfaceAnchorTop,
+                ConfigStore.barPosition,
+                ConfigStore.barHeight,
+                ConfigStore.barSurfaceMode,
+                ConfigStore.barMargin
+            )
 
         return SurfacePlacementPolicy.aboveAnchorY(
-            localAnchor.y,
+            viewportAnchorTop,
             surfaceHeight,
             root.height,
             ConfigStore.barPanelGap

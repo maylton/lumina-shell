@@ -35,6 +35,49 @@ TestCase {
         )
     }
 
+    function test_barReservedHeightIncludesBothFloatingMargins() {
+        compare(
+            SurfacePlacementPolicy.barReservedHeight(
+                56, "edge-to-edge", 12
+            ),
+            56
+        )
+        compare(
+            SurfacePlacementPolicy.barReservedHeight(56, "floating", 12),
+            80
+        )
+    }
+
+    function test_outputYConvertsToTopBarViewportCoordinates() {
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "top", 56, "edge-to-edge", 12
+            ),
+            1324
+        )
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "top", 56, "floating", 12
+            ),
+            1300
+        )
+    }
+
+    function test_outputYPreservesBottomBarViewportCoordinates() {
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                1380, "bottom", 56, "edge-to-edge", 12
+            ),
+            1380
+        )
+        compare(
+            SurfacePlacementPolicy.outputYToViewportY(
+                -1, "top", 56, "edge-to-edge", 12
+            ),
+            -1
+        )
+    }
+
     function test_horizontalPositionFollowsAndClampsAnchor() {
         compare(
             SurfacePlacementPolicy.horizontalX(

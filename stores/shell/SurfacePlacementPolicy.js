@@ -35,6 +35,33 @@ function barWindowHeight(barHeight, surfaceMode, margin) {
     )
 }
 
+function barReservedHeight(barHeight, surfaceMode, margin) {
+    return Math.max(
+        0,
+        finiteNumber(barHeight, 0)
+            + (String(surfaceMode) === "floating"
+                ? finiteNumber(margin, 0) * 2
+                : 0)
+    )
+}
+
+function outputYToViewportY(
+    outputY,
+    barPosition,
+    barHeight,
+    surfaceMode,
+    margin
+) {
+    var y = Number(outputY)
+
+    if (!isFinite(y) || y < 0)
+        return -1
+
+    return y - (String(barPosition) === "top"
+        ? barReservedHeight(barHeight, surfaceMode, margin)
+        : 0)
+}
+
 function horizontalX(
     placement,
     anchorX,
