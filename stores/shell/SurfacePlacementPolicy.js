@@ -30,7 +30,7 @@ function barWindowHeight(barHeight, surfaceMode, margin) {
         0,
         finiteNumber(barHeight, 0)
             + (String(surfaceMode) === "floating"
-                ? finiteNumber(margin, 0) * 2
+                ? finiteNumber(margin, 0)
                 : 0)
     )
 }
