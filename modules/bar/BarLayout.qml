@@ -218,6 +218,7 @@ Item {
         SystemStatusCluster {
             compact: !root.wideLayout
             outputName: root.outputName
+            panelWindow: root.panelWindow
         }
     }
 
