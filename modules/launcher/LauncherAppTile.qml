@@ -69,7 +69,7 @@ Rectangle {
         )
         sourceSize.width: width
         sourceSize.height: height
-        asynchronous: true
+        asynchronous: false
         fillMode: Image.PreserveAspectFit
         smooth: true
 
