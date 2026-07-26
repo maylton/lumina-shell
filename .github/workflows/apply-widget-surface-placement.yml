@@ -1,24 +1,26 @@
 name: Apply widget surface placement
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/widget-surface-placement
-    paths:
-      - .github/workflows/apply-widget-surface-placement.yml
+      - main
+    types:
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the feature branch
         uses: actions/checkout@v4
         with:
-          ref: agent/widget-surface-placement
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Decode the migration
@@ -46,7 +48,7 @@ jobs:
               "41898282+github-actions[bot]@users.noreply.github.com"
             git add scripts/widget-surface-placement-error.log
             git commit -m "Record widget placement migration failure"
-            git push origin HEAD:agent/widget-surface-placement
+            git push origin "HEAD:${{ github.head_ref }}"
             exit "$status"
           fi
 
@@ -70,4 +72,4 @@ jobs:
           fi
 
           git commit -m "Add per-widget surface placement"
-          git push origin HEAD:agent/widget-surface-placement
+          git push origin "HEAD:${{ github.head_ref }}"
