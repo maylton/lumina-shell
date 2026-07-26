@@ -15,20 +15,48 @@ Rectangle {
 
     signal activated
 
+    function mixColors(baseColor, tintColor, tintAmount) {
+        const amount = Math.max(0, Math.min(1, Number(tintAmount)))
+        return Qt.rgba(
+            baseColor.r + (tintColor.r - baseColor.r) * amount,
+            baseColor.g + (tintColor.g - baseColor.g) * amount,
+            baseColor.b + (tintColor.b - baseColor.b) * amount,
+            1
+        )
+    }
+
     readonly property var luminaDesign: Theme.luminaTokens
+    readonly property color destructiveBackgroundColor: mixColors(
+        luminaDesign.color.surfaceMuted,
+        luminaDesign.color.errorContainer,
+        0.34
+    )
+    readonly property color destructiveHoverColor: mixColors(
+        luminaDesign.color.surfaceMuted,
+        luminaDesign.color.errorContainer,
+        0.54
+    )
+    readonly property color destructiveBorderColor: Qt.rgba(
+        luminaDesign.color.urgent.r,
+        luminaDesign.color.urgent.g,
+        luminaDesign.color.urgent.b,
+        actionMouse.containsMouse ? 0.84 : 0.62
+    )
 
     implicitHeight: 82
     activeFocusOnTab: true
     radius: root.luminaDesign.shape.large
-    color: actionMouse.containsMouse
-        ? destructive
-            ? root.luminaDesign.color.errorContainer
-            : root.luminaDesign.color.accentContainer
-        : root.luminaDesign.color.surfaceMuted
+    color: destructive
+        ? actionMouse.containsMouse
+            ? root.destructiveHoverColor
+            : root.destructiveBackgroundColor
+        : actionMouse.containsMouse
+            ? root.luminaDesign.color.accentContainer
+            : root.luminaDesign.color.surfaceMuted
     border.width: activeFocus ? 2 : destructive ? 1 : 0
     border.color: activeFocus
         ? root.luminaDesign.color.primary
-        : root.luminaDesign.color.urgent
+        : root.destructiveBorderColor
     scale: actionMouse.pressed ? 0.97 : 1.0
 
     Accessible.role: Accessible.Button
@@ -109,11 +137,9 @@ Rectangle {
         Text {
             width: parent.width
             text: root.title
-            color: actionMouse.containsMouse
-                ? root.destructive
-                    ? root.luminaDesign.color.onErrorContainer
-                    : root.luminaDesign.color.onAccentContainer
-                : root.luminaDesign.color.onSurface
+            color: !root.destructive && actionMouse.containsMouse
+                    ? root.luminaDesign.color.onAccentContainer
+                    : root.luminaDesign.color.onSurface
             elide: Text.ElideRight
             font.pixelSize: root.luminaDesign.typography.bodyMedium
             font.weight: Font.DemiBold
@@ -122,9 +148,7 @@ Rectangle {
         Text {
             width: parent.width
             text: root.description
-            color: actionMouse.containsMouse && root.destructive
-                ? root.luminaDesign.color.onErrorContainer
-                : root.luminaDesign.color.textMuted
+            color: root.luminaDesign.color.textMuted
             elide: Text.ElideRight
             font.pixelSize: root.luminaDesign.typography.labelSmall
         }
