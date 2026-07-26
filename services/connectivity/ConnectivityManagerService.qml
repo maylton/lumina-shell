@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.connectivity
+import qs.stores.shell
 import "ConnectivityParsing.js" as Parsing
 
 Singleton {
@@ -31,6 +32,14 @@ Singleton {
     property string pendingWifiSsid: ""
     property bool pendingWifiSaved: false
     property bool clearSecretAfterAction: false
+    property bool snapshotIncludesWifi: false
+    property bool snapshotQueued: false
+    property bool queuedSnapshotIncludesWifi: false
+
+    readonly property bool snapshotRunning:
+        deviceListProcess.running
+            || profileListProcess.running
+            || wifiListProcess.running
 
     function normalizedSection(value) {
         const requested = String(value || "")
@@ -57,8 +66,13 @@ Singleton {
         }
 
         activeSection = nextSection
-        if (activeSection)
+        if (activeSection) {
             refreshAll()
+        } else {
+            delayedRefresh.stop()
+            snapshotQueued = false
+            queuedSnapshotIncludesWifi = false
+        }
     }
 
     function profileTypeMatches(profile, kind) {
@@ -110,38 +124,58 @@ Singleton {
         return null
     }
 
-    function refreshNetworkMetadata() {
-        if (!deviceListProcess.running) {
-            deviceListProcess.exec([
-                "nmcli", "-t", "--escape", "yes",
-                "-f", "DEVICE,TYPE,STATE,CONNECTION",
-                "device", "status"
-            ])
+    function requestNetworkSnapshot(includeWifi) {
+        const wantsWifi = Boolean(includeWifi)
+            && ConnectivityService.wifiEnabled
+
+        if (snapshotRunning) {
+            snapshotQueued = true
+            queuedSnapshotIncludesWifi =
+                queuedSnapshotIncludesWifi || wantsWifi
+            return
         }
 
-        if (!profileListProcess.running) {
-            profileListProcess.exec([
-                "nmcli", "-t", "--escape", "yes",
-                "-f", "NAME,UUID,TYPE,DEVICE,AUTOCONNECT",
-                "connection", "show"
-            ])
+        snapshotIncludesWifi = wantsWifi
+        deviceListProcess.exec([
+            "nmcli", "-t", "--escape", "yes",
+            "-f", "DEVICE,TYPE,STATE,CONNECTION",
+            "device", "status"
+        ])
+    }
+
+    function finishNetworkSnapshot() {
+        snapshotIncludesWifi = false
+
+        if (!active) {
+            snapshotQueued = false
+            queuedSnapshotIncludesWifi = false
+            return
         }
+
+        if (!snapshotQueued)
+            return
+
+        const includeWifi = queuedSnapshotIncludesWifi
+        snapshotQueued = false
+        queuedSnapshotIncludesWifi = false
+        Qt.callLater(function() {
+            root.requestNetworkSnapshot(includeWifi)
+        })
+    }
+
+    function refreshNetworkMetadata() {
+        requestNetworkSnapshot(false)
     }
 
     function refreshWifi() {
         if (!sectionAllows("wifi"))
             return
 
-        refreshNetworkMetadata()
-
-        if (ConnectivityService.wifiEnabled && !wifiListProcess.running) {
-            wifiListProcess.exec([
-                "nmcli", "-t", "--escape", "yes",
-                "-f", "IN-USE,SSID,SIGNAL,SECURITY,BARS",
-                "device", "wifi", "list", "--rescan", "no"
-            ])
-        } else if (!ConnectivityService.wifiEnabled) {
+        if (ConnectivityService.wifiEnabled) {
+            requestNetworkSnapshot(true)
+        } else {
             wifiNetworks = []
+            requestNetworkSnapshot(false)
         }
     }
 
@@ -155,7 +189,7 @@ Singleton {
     function refreshNetwork() {
         if (sectionAllows("wifi"))
             refreshWifi()
-        if (sectionAllows("wired"))
+        else if (sectionAllows("wired"))
             refreshWired()
     }
 
@@ -469,6 +503,12 @@ Singleton {
 
     Process {
         id: deviceListProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("network.devices")
+            else
+                PerformanceTrace.processFinished("network.devices")
+        }
         stdout: StdioCollector { id: deviceListOutput }
         stderr: StdioCollector { id: deviceListError }
         onExited: (exitCode, exitStatus) => {
@@ -476,11 +516,23 @@ Singleton {
                 root.networkDevices = Parsing.parseDevices(deviceListOutput.text)
             else
                 root.lastError = String(deviceListError.text || "").trim()
+
+            profileListProcess.exec([
+                "nmcli", "-t", "--escape", "yes",
+                "-f", "NAME,UUID,TYPE,DEVICE,AUTOCONNECT",
+                "connection", "show"
+            ])
         }
     }
 
     Process {
         id: profileListProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("network.profiles")
+            else
+                PerformanceTrace.processFinished("network.profiles")
+        }
         stdout: StdioCollector { id: profileListOutput }
         stderr: StdioCollector { id: profileListError }
         onExited: (exitCode, exitStatus) => {
@@ -488,11 +540,28 @@ Singleton {
                 root.networkProfiles = Parsing.parseConnections(profileListOutput.text)
             else
                 root.lastError = String(profileListError.text || "").trim()
+
+            if (root.snapshotIncludesWifi
+                && ConnectivityService.wifiEnabled) {
+                wifiListProcess.exec([
+                    "nmcli", "-t", "--escape", "yes",
+                    "-f", "IN-USE,SSID,SIGNAL,SECURITY,BARS",
+                    "device", "wifi", "list", "--rescan", "no"
+                ])
+            } else {
+                root.finishNetworkSnapshot()
+            }
         }
     }
 
     Process {
         id: wifiListProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("network.wifi")
+            else
+                PerformanceTrace.processFinished("network.wifi")
+        }
         stdout: StdioCollector { id: wifiListOutput }
         stderr: StdioCollector { id: wifiListError }
         onExited: (exitCode, exitStatus) => {
@@ -500,6 +569,8 @@ Singleton {
                 root.wifiNetworks = Parsing.parseWifiNetworks(wifiListOutput.text)
             else
                 root.lastError = String(wifiListError.text || "").trim()
+
+            root.finishNetworkSnapshot()
         }
     }
 

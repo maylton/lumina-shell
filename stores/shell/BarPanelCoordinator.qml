@@ -79,6 +79,18 @@ QtObject {
         if (!panel || !output)
             return
 
+        PerformanceTrace.recordInstant(
+            "coordinator",
+            panel,
+            "toggle",
+            {
+                output: output,
+                phase: transitionPhase,
+                activePanel: activePanelId,
+                pendingPanel: pendingPanelId
+            }
+        )
+
         if (transitionPhase === "closing") {
             if (activePanelId === panel && activeOutputName === output) {
                 clearPending()
@@ -236,6 +248,20 @@ QtObject {
         interval: 350
         repeat: false
         onTriggered: {
+            PerformanceTrace.record(
+                "coordinator",
+                root.transitionPhase === "closing"
+                    ? root.activePanelId
+                    : root.pendingPanelId,
+                "timeout",
+                interval,
+                {
+                    phase: root.transitionPhase,
+                    activePanel: root.activePanelId,
+                    pendingPanel: root.pendingPanelId
+                }
+            )
+
             if (root.transitionPhase === "closing") {
                 root.activePanelId = ""
                 root.activeOutputName = ""

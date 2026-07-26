@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.connectivity
+import qs.stores.shell
 import "ConnectivityParsing.js" as Parsing
 
 Singleton {
@@ -47,6 +48,7 @@ Singleton {
     property string allText: ""
     property string pairedText: ""
     property string connectedText: ""
+    property int backgroundRefreshInterval: 60000
 
     function normalizedAddress(value) {
         const address = String(value || "").trim().toUpperCase()
@@ -67,8 +69,10 @@ Singleton {
 
     function setActive(value) {
         active = Boolean(value)
-        if (active)
-            refresh()
+        if (!active) {
+            delayedRefresh.stop()
+            refreshQueued = false
+        }
     }
 
     function setEnabled(value) {
@@ -95,8 +99,6 @@ Singleton {
         pairedReady = false
         connectedReady = false
         allProcess.exec(["bluetoothctl", "devices"])
-        pairedProcess.exec(["bluetoothctl", "devices", "Paired"])
-        connectedProcess.exec(["bluetoothctl", "devices", "Connected"])
     }
 
     function maybeRebuild() {
@@ -433,6 +435,12 @@ Singleton {
 
     Process {
         id: allProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("bluetooth.devices")
+            else
+                PerformanceTrace.processFinished("bluetooth.devices")
+        }
         stdout: StdioCollector { id: allOutput }
         stderr: StdioCollector { id: allError }
         onExited: (exitCode, exitStatus) => {
@@ -442,12 +450,18 @@ Singleton {
             root.allReady = true
             if (exitCode !== 0 && !root.diagnostic)
                 root.diagnostic = Parsing.bluetoothCommandSummary(allError.text)
-            root.maybeRebuild()
+            pairedProcess.exec(["bluetoothctl", "devices", "Paired"])
         }
     }
 
     Process {
         id: pairedProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("bluetooth.paired")
+            else
+                PerformanceTrace.processFinished("bluetooth.paired")
+        }
         stdout: StdioCollector { id: pairedOutput }
         stderr: StdioCollector { id: pairedError }
         onExited: (exitCode, exitStatus) => {
@@ -457,12 +471,20 @@ Singleton {
             root.pairedReady = true
             if (exitCode !== 0 && !root.diagnostic)
                 root.diagnostic = Parsing.bluetoothCommandSummary(pairedError.text)
-            root.maybeRebuild()
+            connectedProcess.exec([
+                "bluetoothctl", "devices", "Connected"
+            ])
         }
     }
 
     Process {
         id: connectedProcess
+        onRunningChanged: {
+            if (running)
+                PerformanceTrace.processStarted("bluetooth.connected")
+            else
+                PerformanceTrace.processFinished("bluetooth.connected")
+        }
         stdout: StdioCollector { id: connectedOutput }
         stderr: StdioCollector { id: connectedError }
         onExited: (exitCode, exitStatus) => {
@@ -616,7 +638,7 @@ Singleton {
     }
 
     Timer {
-        interval: 15000
+        interval: root.backgroundRefreshInterval
         running: root.active
         repeat: true
         onTriggered: root.refresh()

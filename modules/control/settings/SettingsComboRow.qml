@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls as Controls
 import qs.design
+import qs.stores.shell
 import "SettingsDropdownLogic.js" as DropdownLogic
 
 SettingsRow {
@@ -10,6 +11,7 @@ SettingsRow {
 
     property var options: []
     property string currentValue: ""
+    property double openRequestedAt: 0
 
     signal selected(string value)
 
@@ -81,6 +83,10 @@ SettingsRow {
                 currentIndex(),
                 options.length
             )
+        const position = popupPosition()
+        dropdownPopup.x = position.x
+        dropdownPopup.y = position.y
+        openRequestedAt = Date.now()
         dropdownPopup.open()
     }
 
@@ -171,8 +177,8 @@ SettingsRow {
         property int highlightedIndex: -1
 
         parent: root
-        x: root.popupPosition().x
-        y: root.popupPosition().y
+        x: 0
+        y: 0
         width: root.controlWidth
         height: root.popupHeight
         padding: root.luminaDesign.spacing.small
@@ -203,6 +209,30 @@ SettingsRow {
         }
 
         onOpened: {
+            if (root.openRequestedAt > 0) {
+                const requestedAt = root.openRequestedAt
+                PerformanceTrace.record(
+                    "dropdown",
+                    root.title,
+                    "opened",
+                    Date.now() - root.openRequestedAt,
+                    { optionCount: root.options.length }
+                )
+                root.openRequestedAt = 0
+                Qt.callLater(function() {
+                    if (!dropdownPopup.opened)
+                        return
+
+                    PerformanceTrace.record(
+                        "dropdown",
+                        root.title,
+                        "settled",
+                        Date.now() - requestedAt,
+                        { optionCount: root.options.length }
+                    )
+                })
+            }
+
             highlightedIndex = DropdownLogic.initialIndex(
                 root.currentIndex(),
                 root.options.length

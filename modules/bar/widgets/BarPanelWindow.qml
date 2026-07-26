@@ -17,6 +17,9 @@ PanelWindow {
     property color scrimColor: "transparent"
     property Item surfaceItem: null
     property real surfaceRadius: 0
+    property double visibilityRequestedAt: 0
+    property double hidingRequestedAt: 0
+    property double settleRequestedAt: 0
 
     default property alias panelData: panelLayer.data
 
@@ -51,6 +54,20 @@ PanelWindow {
         ? WlrKeyboardFocus.Exclusive
         : WlrKeyboardFocus.None
 
+    onPanelVisibleChanged: {
+        if (panelVisible) {
+            visibilityRequestedAt = Date.now()
+            PerformanceTrace.recordInstant(
+                "panel",
+                panelId,
+                "requested",
+                { output: panelOutputName }
+            )
+        } else {
+            hidingRequestedAt = Date.now()
+        }
+    }
+
     BackgroundEffect.blurRegion:
         surfaceItem
         && ShellSurfacePolicy.requestsBackdropBlur(
@@ -60,6 +77,41 @@ PanelWindow {
             : null
 
     onBackingWindowVisibleChanged: {
+        if (backingWindowVisible && visibilityRequestedAt > 0) {
+            settleRequestedAt = visibilityRequestedAt
+            PerformanceTrace.record(
+                "panel",
+                panelId,
+                "visible",
+                Date.now() - visibilityRequestedAt,
+                { output: panelOutputName }
+            )
+            visibilityRequestedAt = 0
+            Qt.callLater(function() {
+                if (!root.panelVisible || root.settleRequestedAt <= 0)
+                    return
+
+                PerformanceTrace.record(
+                    "panel",
+                    root.panelId,
+                    "settled",
+                    Date.now() - root.settleRequestedAt,
+                    { output: root.panelOutputName }
+                )
+                root.settleRequestedAt = 0
+            })
+        } else if (!backingWindowVisible && hidingRequestedAt > 0) {
+            PerformanceTrace.record(
+                "panel",
+                panelId,
+                "hidden",
+                Date.now() - hidingRequestedAt,
+                { output: panelOutputName }
+            )
+            hidingRequestedAt = 0
+            settleRequestedAt = 0
+        }
+
         BarPanelCoordinator.reportPanelWindowVisibility(
             panelId,
             panelOutputName,
