@@ -29,7 +29,23 @@ var MESSAGES = {
         "settings.connectivity.bluetooth.status.invalidAddress": "The Bluetooth device address is invalid",
         "settings.connectivity.bluetooth.action.pairing": "Pairing",
         "settings.connectivity.bluetooth.action.connecting": "Connecting",
-        "settings.connectivity.bluetooth.action.disconnecting": "Disconnecting"
+        "settings.connectivity.bluetooth.action.disconnecting": "Disconnecting",
+        "bar.bluetooth.accessible.open": "Open Bluetooth panel",
+        "bar.bluetooth.accessible.close": "Close Bluetooth panel",
+        "bar.bluetooth.connectedCount": "%1 connected",
+        "bar.bluetooth.forgetNamed": "Forget %1",
+        "bar.bluetooth.tooltip.title": "Bluetooth",
+        "bar.bluetooth.panel.title": "Bluetooth",
+        "bar.bluetooth.panel.toggle": "Toggle Bluetooth",
+        "bar.bluetooth.panel.on": "On",
+        "bar.bluetooth.panel.off": "Off",
+        "bar.bluetooth.section.connected": "Connected",
+        "bar.bluetooth.section.paired": "Paired",
+        "bar.bluetooth.section.available": "Available devices",
+        "bar.bluetooth.empty.title": "No Bluetooth devices found",
+        "bar.bluetooth.empty.description": "Run a search to find nearby devices",
+        "bar.bluetooth.empty.disabledTitle": "Bluetooth is turned off",
+        "bar.bluetooth.empty.disabledDescription": "Turn Bluetooth on to manage devices"
     },
     "pt-BR": {
         "settings.connectivity.wired.state.connected": "Conectada",
@@ -59,7 +75,23 @@ var MESSAGES = {
         "settings.connectivity.bluetooth.status.invalidAddress": "O endereço do dispositivo Bluetooth é inválido",
         "settings.connectivity.bluetooth.action.pairing": "Pareando",
         "settings.connectivity.bluetooth.action.connecting": "Conectando",
-        "settings.connectivity.bluetooth.action.disconnecting": "Desconectando"
+        "settings.connectivity.bluetooth.action.disconnecting": "Desconectando",
+        "bar.bluetooth.accessible.open": "Abrir painel Bluetooth",
+        "bar.bluetooth.accessible.close": "Fechar painel Bluetooth",
+        "bar.bluetooth.connectedCount": "%1 conectado(s)",
+        "bar.bluetooth.forgetNamed": "Esquecer %1",
+        "bar.bluetooth.tooltip.title": "Bluetooth",
+        "bar.bluetooth.panel.title": "Bluetooth",
+        "bar.bluetooth.panel.toggle": "Ativar ou desativar Bluetooth",
+        "bar.bluetooth.panel.on": "Ligado",
+        "bar.bluetooth.panel.off": "Desligado",
+        "bar.bluetooth.section.connected": "Conectados",
+        "bar.bluetooth.section.paired": "Pareados",
+        "bar.bluetooth.section.available": "Dispositivos disponíveis",
+        "bar.bluetooth.empty.title": "Nenhum dispositivo Bluetooth encontrado",
+        "bar.bluetooth.empty.description": "Inicie uma busca para encontrar dispositivos próximos",
+        "bar.bluetooth.empty.disabledTitle": "O Bluetooth está desligado",
+        "bar.bluetooth.empty.disabledDescription": "Ligue o Bluetooth para gerenciar dispositivos"
     }
 }
 
