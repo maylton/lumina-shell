@@ -24,12 +24,12 @@ Rectangle {
 
     implicitHeight: 64
     radius: luminaDesign.shape.large
-    color: rowMouse.containsMouse
-        ? luminaDesign.color.surfaceMuted
-        : connected
-            ? luminaDesign.color.accentContainer
-            : luminaDesign.color.surfaceContainerHigh
-    opacity: available ? 1 : 0.5
+    color: connected
+        ? luminaDesign.color.accentContainer
+        : rowMouse.containsMouse
+            ? luminaDesign.color.surfaceMuted
+            : luminaDesign.color.surfaceHigh
+    opacity: available ? 1 : 0.72
     activeFocusOnTab: actionable
     border.width: activeFocus ? 2 : connected ? 1 : 0
     border.color: activeFocus
@@ -51,6 +51,7 @@ Rectangle {
             root.activated()
         event.accepted = true
     }
+
     Keys.onReturnPressed: event => {
         if (root.actionable)
             root.activated()
@@ -59,6 +60,7 @@ Rectangle {
 
     MouseArea {
         id: rowMouse
+
         anchors.fill: parent
         z: 0
         hoverEnabled: true
@@ -72,6 +74,7 @@ Rectangle {
 
     Row {
         z: 1
+
         anchors {
             fill: parent
             leftMargin: root.luminaDesign.spacing.medium
@@ -119,7 +122,10 @@ Rectangle {
             Text {
                 width: parent.width
                 text: root.description
-                color: root.luminaDesign.color.textMuted
+                color: root.connected
+                    ? root.luminaDesign.color.onAccentContainer
+                    : root.luminaDesign.color.textMuted
+                opacity: root.connected ? 0.78 : 1
                 elide: Text.ElideRight
                 font.pixelSize: root.luminaDesign.typography.labelSmall
             }
@@ -143,6 +149,7 @@ Rectangle {
 
             Text {
                 id: actionText
+
                 anchors.centerIn: parent
                 text: root.busy ? "…" : root.actionLabel
                 color: actionMouse.containsMouse && root.actionable
@@ -154,6 +161,7 @@ Rectangle {
 
             MouseArea {
                 id: actionMouse
+
                 anchors.fill: parent
                 hoverEnabled: true
                 enabled: root.actionable
