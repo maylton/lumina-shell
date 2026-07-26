@@ -28,6 +28,13 @@ class BluetoothPairingAgentPatterns(unittest.TestCase):
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), "123456")
 
+    def test_pairing_code_wording_is_detected(self):
+        match = AGENT.CONFIRM_RE.search(
+            "Confirm pairing code 420042 (yes/no):"
+        )
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), "420042")
+
     def test_pin_and_passkey_prompts_are_distinct(self):
         self.assertIsNotNone(
             AGENT.PIN_RE.search("[agent] Enter PIN code:")
@@ -59,11 +66,24 @@ class BluetoothPairingAgentPatterns(unittest.TestCase):
         self.assertEqual(passkey.group(1), "654321")
         self.assertEqual(passkey.group(2), "3")
 
-    def test_ansi_output_is_cleaned(self):
-        self.assertEqual(
-            AGENT.cleaned("\x1b[0;94mPairing successful\x1b[0m\r\n"),
-            "Pairing successful\n",
+    def test_agent_registration_is_detected(self):
+        self.assertIsNotNone(
+            AGENT.AGENT_READY_RE.search("Agent registered")
         )
+
+    def test_terminal_sequences_are_cleaned(self):
+        raw = (
+            "\x1b]0;bluetoothctl\x07"
+            "\x1b[0;94m[agent]\x1b[0m Confirm passkey 123456 "
+            "(yes/no):\r\n"
+        )
+        self.assertEqual(
+            AGENT.cleaned(raw),
+            "[agent] Confirm passkey 123456 (yes/no):\n",
+        )
+
+    def test_backspaces_are_collapsed(self):
+        self.assertEqual(AGENT.cleaned("PairX\bing"), "Pairing")
 
 
 if __name__ == "__main__":
