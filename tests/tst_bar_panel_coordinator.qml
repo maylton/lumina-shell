@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../stores/shell"
+import qs.stores.shell
 
 TestCase {
     id: testCase
