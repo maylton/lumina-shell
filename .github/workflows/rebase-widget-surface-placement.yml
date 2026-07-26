@@ -1,16 +1,14 @@
 name: Rebase widget surface placement
 
 on:
-  pull_request:
-    branches: [main]
-    types: [synchronize]
+  push:
+    branches: [agent/widget-surface-placement]
 
 permissions:
   contents: write
 
 jobs:
   rebuild:
-    if: github.event.pull_request.head.ref == 'agent/widget-surface-placement'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
