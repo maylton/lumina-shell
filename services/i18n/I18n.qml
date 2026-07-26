@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import "I18n.js" as I18nLogic
 import "AppearanceMessages.js" as AppearanceMessages
+import "BarMessages.js" as BarMessages
 
 Singleton {
     id: root
@@ -51,6 +52,7 @@ Singleton {
             ? messages[key]
             : ""
         const supplementalValue = AppearanceMessages.message(locale, key)
+            || BarMessages.message(locale, key)
         const sourceValue = catalogValue
             || supplementalValue
             || String(fallback || key)
