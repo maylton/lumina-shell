@@ -29,9 +29,17 @@ SettingsPage {
     )
 
     function updateManagerSection() {
-        ConnectivityManagerService.setActiveSection(
-            managementActive ? activeSection : ""
-        )
+        const legacySection = managementActive
+            && activeSection !== "bluetooth"
+            ? activeSection
+            : ""
+
+        ConnectivityManagerService.setActiveSection(legacySection)
+
+        if (managementActive && activeSection === "bluetooth") {
+            BluetoothManagerService.setActive(true)
+            BluetoothManagerService.refresh()
+        }
     }
 
     function openPassword(network) {
