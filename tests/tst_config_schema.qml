@@ -5,7 +5,7 @@ import "../stores/config/ConfigSchema.js" as ConfigSchema
 TestCase {
     name: "ConfigSchema"
 
-    function test_defaultsUseSchema7WidgetSettings() {
+    function test_defaultsUseSchema8WidgetSettings() {
         const state = ConfigSchema.defaults()
 
         compare(state.schemaVersion, 8)
@@ -33,6 +33,14 @@ TestCase {
             "24"
         )
         compare(state.barWidgetSettings.launcher.showBackground, false)
+        compare(
+            state.barWidgetSettings.launcher.surfacePlacement,
+            "centered"
+        )
+        compare(
+            state.barWidgetSettings.datetime.surfacePlacement,
+            "near-widget"
+        )
         compare(state.dashboardUseUserAvatarImage, true)
         compare(state.dashboardUserAvatarPath, "")
         compare(state.barWidgetSettings.context.timeout, 3500)
@@ -262,10 +270,10 @@ TestCase {
 
     function test_schema7TransparencyMigratesToShellSurfaceStyle() {
         const migrated = ConfigSchema.migrate({
-  schemaVersion: 7,
-  transparencyEnabled: true,
-  surfaceOpacity: 0.74,
-  barBackgroundMode: "frosted"
+            schemaVersion: 7,
+            transparencyEnabled: true,
+            surfaceOpacity: 0.74,
+            barBackgroundMode: "frosted"
         })
 
         compare(migrated.schemaVersion, 8)
@@ -274,6 +282,27 @@ TestCase {
         compare(migrated.barBackgroundMode, "frosted")
         verify(migrated.transparencyEnabled === undefined)
         verify(migrated.surfaceOpacity === undefined)
+    }
+
+    function test_widgetSurfacePlacementNormalization() {
+        const state = ConfigSchema.normalize({
+            barWidgetSettings: {
+                launcher: { surfacePlacement: "near-widget" },
+                datetime: { surfacePlacement: "follow-pointer" }
+            }
+        })
+
+        compare(
+            state.barWidgetSettings.launcher.surfacePlacement,
+            "near-widget"
+        )
+        compare(
+            state.barWidgetSettings.datetime.surfacePlacement,
+            "near-widget"
+        )
+        verify(
+            state.barWidgetSettings.context.surfacePlacement === undefined
+        )
     }
 
     function test_paletteStyleNormalization() {
