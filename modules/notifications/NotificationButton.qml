@@ -117,7 +117,7 @@ Rectangle {
     function activate(localX) {
         const anchor = mappedAnchorGeometry(localX)
 
-        OverlayStore.prepareFor(
+        BarPanelCoordinator.requestToggle(
             "notifications",
             root.outputName,
             root.surfacePlacement,
@@ -125,7 +125,6 @@ Rectangle {
             anchor.top,
             anchor.bottom
         )
-        NotificationService.toggleCenter(root.outputName)
     }
 
     Keys.onSpacePressed: event => {
@@ -136,6 +135,45 @@ Rectangle {
     Keys.onReturnPressed: event => {
         root.activate(root.width / 2)
         event.accepted = true
+    }
+
+    Connections {
+        target: BarPanelCoordinator
+
+        function onOpenRequested(
+            panelId,
+            outputName,
+            placement,
+            anchorX,
+            anchorTop,
+            anchorBottom
+        ) {
+            if (panelId !== "notifications" || outputName !== root.outputName)
+                return
+
+            OverlayStore.prepareFor(
+                "notifications",
+                root.outputName,
+                placement,
+                anchorX,
+                anchorTop,
+                anchorBottom
+            )
+            NotificationService.openCenter(root.outputName)
+        }
+
+        function onCloseRequested(panelId, outputName) {
+            if (panelId !== "notifications" || outputName !== root.outputName)
+                return
+
+            if (root.expanded)
+                NotificationService.closeCenter()
+            else
+                BarPanelCoordinator.reportClosed(
+                    "notifications",
+                    root.outputName
+                )
+        }
     }
 
     Behavior on color {
