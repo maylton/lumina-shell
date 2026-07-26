@@ -140,7 +140,7 @@ headerbar .path-bar:focus-within {
   box-shadow: 0 0 0 1px alpha(@lumina_primary, 0.72);
 }
 
-headerbar button:not(.suggested-action):not(.destructive-action) {
+headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton) {
   min-width: 40px;
   min-height: 40px;
   padding: 0;
@@ -149,12 +149,12 @@ headerbar button:not(.suggested-action):not(.destructive-action) {
   border-radius: 12px;
 }
 
-headerbar button:not(.suggested-action):not(.destructive-action):hover {
+headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton):hover {
   background-color: alpha(@lumina_on_surface, 0.08);
 }
 
-headerbar button:not(.suggested-action):not(.destructive-action):active,
-headerbar button:not(.suggested-action):not(.destructive-action):checked {
+headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton):active,
+headerbar button:not(.suggested-action):not(.destructive-action):not(.titlebutton):checked {
   color: @lumina_on_primary_container;
   background-color: @lumina_primary_container;
 }
@@ -225,7 +225,7 @@ statuspage > scrolledwindow > viewport {
   background-color: @lumina_surface;
 }
 
-/* Window controls use their own compact circular state layer. */
+/* Window controls keep the full hit target transparent; the icon owns the state layer. */
 headerbar windowcontrols {
   padding: 0;
   margin: 0;
@@ -233,27 +233,37 @@ headerbar windowcontrols {
   background-color: transparent;
 }
 
-headerbar windowcontrols button:not(.suggested-action):not(.destructive-action) {
+headerbar windowcontrols button,
+headerbar windowcontrols button:hover,
+headerbar windowcontrols button:active,
+headerbar windowcontrols button:checked {
   min-width: 28px;
   min-height: 28px;
   padding: 0;
   border: 0;
-  border-radius: 999px;
   background-color: transparent;
   box-shadow: none;
 }
 
-headerbar windowcontrols button:not(.suggested-action):not(.destructive-action):hover {
+headerbar windowcontrols button > image {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 6px;
+  border-radius: 999px;
+  background-color: transparent;
+}
+
+headerbar windowcontrols button:hover > image {
   color: @lumina_on_surface;
   background-color: alpha(@lumina_on_surface, 0.075);
 }
 
-headerbar windowcontrols button:not(.suggested-action):not(.destructive-action):active {
+headerbar windowcontrols button:active > image {
   color: @lumina_on_surface;
   background-color: alpha(@lumina_on_surface, 0.12);
 }
 
-headerbar windowcontrols button.close:not(.suggested-action):not(.destructive-action):hover {
+headerbar windowcontrols button.close:hover > image {
   color: @lumina_on_error_container;
   background-color: alpha(@lumina_error, 0.78);
 }
