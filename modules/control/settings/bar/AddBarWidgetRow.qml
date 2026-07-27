@@ -138,40 +138,50 @@ Rectangle {
     Controls.Popup {
         id: addPopup
 
-        readonly property point anchorOrigin: parent
-            ? root.mapToItem(parent, 0, 0)
-            : Qt.point(0, 0)
+        readonly property point anchorTopLeft:
+            root.mapToItem(null, 0, 0)
+        readonly property point anchorBottomRight:
+            root.mapToItem(null, root.width, root.height)
+        readonly property real edgeMargin:
+            root.luminaDesign.spacing.medium
         readonly property real preferredBelow:
-            anchorOrigin.y + root.height
-                + root.luminaDesign.spacing.small
+            anchorBottomRight.y + root.luminaDesign.spacing.small
+        readonly property real preferredAbove:
+            anchorTopLeft.y - height - root.luminaDesign.spacing.small
+        readonly property real maximumHeight: parent
+            ? Math.max(
+                160,
+                Math.min(460, parent.height - edgeMargin * 2)
+            )
+            : 460
 
         parent: Controls.Overlay.overlay
         x: parent
             ? Math.max(
-                root.luminaDesign.spacing.medium,
+                edgeMargin,
                 Math.min(
-                    parent.width - width
-                        - root.luminaDesign.spacing.medium,
-                    anchorOrigin.x + root.width - width
+                    parent.width - width - edgeMargin,
+                    anchorBottomRight.x - width
                 )
             )
             : 0
         y: parent
             ? preferredBelow + height
-                <= parent.height
-                    - root.luminaDesign.spacing.medium
-                ? preferredBelow
-                : Math.max(
-                    root.luminaDesign.spacing.medium,
-                    anchorOrigin.y - height
-                        - root.luminaDesign.spacing.small
-                )
+                <= parent.height - edgeMargin
+                    ? preferredBelow
+                    : Math.max(
+                        edgeMargin,
+                        Math.min(
+                            parent.height - height - edgeMargin,
+                            preferredAbove
+                        )
+                    )
             : 0
-        width: Math.min(360, root.width)
+        width: Math.min(380, Math.max(320, root.width))
         height: Math.min(
             Math.max(96, root.widgets.length * 66)
                 + root.luminaDesign.spacing.medium * 2,
-            340
+            maximumHeight
         )
         padding: root.luminaDesign.spacing.medium
         focus: true
@@ -212,15 +222,27 @@ Rectangle {
         }
 
         contentItem: Flickable {
+            id: addFlickable
+
             contentWidth: width
             contentHeight: addList.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            flickDeceleration: 2600
+
+            Controls.ScrollBar.vertical: Controls.ScrollBar {
+                policy: addFlickable.contentHeight > addFlickable.height
+                    ? Controls.ScrollBar.AlwaysOn
+                    : Controls.ScrollBar.AlwaysOff
+            }
 
             Column {
                 id: addList
 
-                width: parent.width
+                width: addFlickable.width
+                    - (addFlickable.contentHeight > addFlickable.height
+                        ? 12
+                        : 0)
                 spacing: root.luminaDesign.spacing.small
 
                 Text {
