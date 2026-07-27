@@ -7,6 +7,8 @@ QtObject {
     id: root
 
     readonly property bool open: activeSurface.length > 0
+    readonly property bool backdropActive:
+        open && activeUsesBackdrop
 
     property string activeSurface: ""
     property string activeOutputName: ""
@@ -15,6 +17,7 @@ QtObject {
     property real activeAnchorTop: -1
     property real activeAnchorBottom: -1
     property string activeAnchorEdge: ""
+    property bool activeUsesBackdrop: false
 
     property string pendingSurface: ""
     property string pendingOutputName: ""
@@ -90,7 +93,12 @@ QtObject {
             && activeOutputName === String(outputName)
     }
 
-    function openFor(surfaceName, outputName) {
+    function isBackdropActiveFor(outputName) {
+        return backdropActive
+            && activeOutputName === resolvedOutputName(outputName)
+    }
+
+    function openFor(surfaceName, outputName, usesBackdrop) {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
 
@@ -113,6 +121,7 @@ QtObject {
         clearPending()
         activeSurface = surface
         activeOutputName = output
+        activeUsesBackdrop = Boolean(usesBackdrop)
         surfaceOpened(surface, output)
     }
 
@@ -131,20 +140,20 @@ QtObject {
         activeAnchorTop = -1
         activeAnchorBottom = -1
         activeAnchorEdge = ""
+        activeUsesBackdrop = false
         clearPending()
 
         if (closedSurface)
             surfaceClosed(closedSurface)
     }
 
-    function toggle(surfaceName, outputName) {
+    function toggle(surfaceName, outputName, usesBackdrop) {
         const surface = String(surfaceName || "")
         const output = resolvedOutputName(outputName)
 
         if (isOpenFor(surface, output))
             close(surface)
         else
-            openFor(surface, output)
+            openFor(surface, output, usesBackdrop)
     }
-
 }
