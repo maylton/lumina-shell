@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQml.Models
 import qs.design
 import qs.modules.control
 import qs.services.i18n
@@ -45,11 +46,11 @@ Rectangle {
         )
     Accessible.focusable: true
     Accessible.focused: activeFocus
-    Accessible.onPressAction: togglePopup()
+    Accessible.onPressAction: toggleMenu()
 
-    function togglePopup() {
-        if (addPopup.opened || addPopup.visible || openPending) {
-            dismissPopup()
+    function toggleMenu() {
+        if (addMenu.opened || addMenu.visible || openPending) {
+            dismissMenu()
             return
         }
 
@@ -70,30 +71,30 @@ Rectangle {
             }
 
             root.openPending = false
-            addPopup.open()
+            addMenu.open()
         })
     }
 
-    function dismissPopup() {
+    function dismissMenu() {
         ++openRequestGeneration
         openPending = false
         openRequestedAt = 0
-        addPopup.close()
+        addMenu.close()
     }
 
     function toggleFromPointer() {
         root.forceActiveFocus()
         root.focus = false
-        root.togglePopup()
+        root.toggleMenu()
     }
 
     Keys.onSpacePressed: event => {
-        togglePopup()
+        toggleMenu()
         event.accepted = true
     }
 
     Keys.onReturnPressed: event => {
-        togglePopup()
+        toggleMenu()
         event.accepted = true
     }
 
@@ -135,49 +136,47 @@ Rectangle {
         onClicked: root.toggleFromPointer()
     }
 
-    Controls.Popup {
-        id: addPopup
+    Controls.Menu {
+        id: addMenu
 
-        readonly property point anchorOrigin: parent
-            ? root.mapToItem(parent, 0, 0)
-            : Qt.point(0, 0)
-        readonly property real preferredBelow:
-            anchorOrigin.y + root.height
-                + root.luminaDesign.spacing.small
-
-        parent: Controls.Overlay.overlay
-        x: parent
-            ? Math.max(
-                root.luminaDesign.spacing.medium,
-                Math.min(
-                    parent.width - width
-                        - root.luminaDesign.spacing.medium,
-                    anchorOrigin.x + root.width - width
-                )
-            )
-            : 0
-        y: parent
-            ? preferredBelow + height
-                <= parent.height
-                    - root.luminaDesign.spacing.medium
-                ? preferredBelow
-                : Math.max(
-                    root.luminaDesign.spacing.medium,
-                    anchorOrigin.y - height
-                        - root.luminaDesign.spacing.small
-                )
-            : 0
-        width: Math.min(360, root.width)
-        height: Math.min(
-            Math.max(96, root.widgets.length * 66)
-                + root.luminaDesign.spacing.medium * 2,
-            340
-        )
-        padding: root.luminaDesign.spacing.medium
+        parent: root
+        x: 0
+        y: root.height + root.luminaDesign.spacing.small
+        width: Math.min(420, root.width)
+        padding: root.luminaDesign.spacing.small
+        cascade: false
         focus: true
         closePolicy:
             Controls.Popup.CloseOnEscape
                 | Controls.Popup.CloseOnPressOutside
+
+        enter: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+
+        exit: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+
+        background: Rectangle {
+            radius: root.luminaDesign.shape.large
+            color: root.luminaDesign.color.surfaceContainer
+            border.width: 1
+            border.color: root.luminaDesign.color.outline
+        }
+
         onOpened: {
             root.openPending = false
 
@@ -191,168 +190,126 @@ Rectangle {
                 )
                 root.openRequestedAt = 0
             }
-
-            const firstItem = addRepeater.itemAt(0)
-
-            if (firstItem)
-                firstItem.forceActiveFocus(
-                    Qt.PopupFocusReason
-                )
         }
+
         onClosed: {
             root.openPending = false
             root.openRequestedAt = 0
         }
 
-        background: Rectangle {
-            radius: root.luminaDesign.shape.extraLarge
-            color: root.luminaDesign.color.surfaceContainer
-            border.width: 1
-            border.color: root.luminaDesign.color.outline
+        Controls.MenuItem {
+            visible: !root.hasWidgets
+            enabled: false
+            implicitHeight:
+                root.luminaDesign.size.settingsMenuItemHeight
+            leftPadding: root.luminaDesign.spacing.large
+            rightPadding: root.luminaDesign.spacing.large
+
+            background: Rectangle {
+                radius: root.luminaDesign.shape.medium
+                color: "transparent"
+            }
+
+            contentItem: Text {
+                text: I18n.tr(
+                    "settings.bar.widget.addEmpty",
+                    "All widgets are already in this area"
+                )
+                color: root.luminaDesign.color.textMuted
+                elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize:
+                    root.luminaDesign.typography.labelMedium
+                font.weight: Font.Medium
+            }
         }
 
-        contentItem: Flickable {
-            contentWidth: width
-            contentHeight: addList.implicitHeight
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
+        Instantiator {
+            model: root.widgets
 
-            Column {
-                id: addList
+            delegate: Controls.MenuItem {
+                id: widgetMenuItem
 
-                width: parent.width
-                spacing: root.luminaDesign.spacing.small
+                required property var modelData
 
-                Text {
-                    width: parent.width
-                    visible: !root.hasWidgets
-                    text: I18n.tr(
-                        "settings.bar.widget.addEmpty",
-                        "All widgets are already in this area"
-                    )
-                    color: root.luminaDesign.color.textMuted
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    wrapMode: Text.WordWrap
-                    font.pixelSize:
-                        root.luminaDesign.typography.labelMedium
-                    topPadding:
-                        root.luminaDesign.spacing.controlItemGap
-                    bottomPadding:
-                        root.luminaDesign.spacing.controlItemGap
-                }
+                implicitHeight: Math.max(
+                    root.luminaDesign.size.settingsMenuItemHeight,
+                    52
+                )
+                leftPadding: root.luminaDesign.spacing.medium
+                rightPadding: root.luminaDesign.spacing.medium
 
-                Repeater {
-                    id: addRepeater
+                Accessible.name: String(modelData.title)
+                Accessible.description:
+                    String(modelData.description)
 
-                    model: root.widgets
+                background: Rectangle {
+                    radius: root.luminaDesign.shape.medium
+                    color: widgetMenuItem.highlighted
+                        ? root.luminaDesign.color.surfaceMuted
+                        : "transparent"
 
-                    delegate: Rectangle {
-                        id: option
-
-                        required property var modelData
-
-                        width: addList.width
-                        height: 58
-                        radius:
-                            root.luminaDesign.shape.largeIncreased
-                        color: optionMouse.containsMouse
-                            || activeFocus
-                            ? root.luminaDesign.color.accentContainer
-                            : root.luminaDesign.color.surfaceMuted
-                        activeFocusOnTab: true
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: I18n.tr(
-                            "settings.bar.widget.addNamed",
-                            "Add or move %1 here",
-                            [String(modelData.title)]
-                        )
-                        Accessible.description:
-                            String(modelData.description)
-                        Accessible.onPressAction: activate()
-
-                        function activate() {
-                            root.addWidget(String(modelData.id))
-                            addPopup.close()
-                        }
-
-                        Keys.onSpacePressed: event => {
-                            activate()
-                            event.accepted = true
-                        }
-
-                        Keys.onReturnPressed: event => {
-                            activate()
-                            event.accepted = true
-                        }
-
-                        Row {
-                            anchors {
-                                fill: parent
-                                leftMargin:
-                                    root.luminaDesign.spacing.medium
-                                rightMargin:
-                                    root.luminaDesign.spacing.medium
-                            }
-                            spacing:
-                                root.luminaDesign.spacing.medium
-
-                            DashboardIcon {
-                                anchors.verticalCenter:
-                                    parent.verticalCenter
-                                iconName:
-                                    String(option.modelData.icon)
-                                fallbackSymbol: "+"
-                                iconColor:
-                                    root.luminaDesign.color.primary
-                                iconSize: 20
-                            }
-
-                            Column {
-                                anchors.verticalCenter:
-                                    parent.verticalCenter
-                                width: parent.width
-                                    - root.luminaDesign.spacing.medium
-                                    - 24
-                                spacing: 2
-
-                                Text {
-                                    width: parent.width
-                                    text: String(
-                                        option.modelData.title
-                                    )
-                                    color: root.luminaDesign.color.onSurface
-                                    elide: Text.ElideRight
-                                    font.pixelSize:
-                                        root.luminaDesign.typography.bodyMedium
-                                    font.weight: Font.DemiBold
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text: String(
-                                        option.modelData.description
-                                    )
-                                    color: root.luminaDesign.color.textMuted
-                                    elide: Text.ElideRight
-                                    font.pixelSize:
-                                        root.luminaDesign.typography.labelSmall
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            id: optionMouse
-
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: option.activate()
+                    Behavior on color {
+                        ColorAnimation {
+                            duration:
+                                root.luminaDesign.motion.effectsFast
+                            easing.type:
+                                root.luminaDesign.motion.effectsEasing
                         }
                     }
                 }
+
+                contentItem: Row {
+                    spacing: root.luminaDesign.spacing.medium
+
+                    DashboardIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        iconName: String(widgetMenuItem.modelData.icon)
+                        fallbackSymbol: "+"
+                        iconColor: root.luminaDesign.color.primary
+                        iconSize: 18
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                            - root.luminaDesign.spacing.medium
+                            - 22
+                        spacing: 1
+
+                        Text {
+                            width: parent.width
+                            text: String(widgetMenuItem.modelData.title)
+                            color: root.luminaDesign.color.onSurface
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: String(
+                                widgetMenuItem.modelData.description
+                            )
+                            color: root.luminaDesign.color.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelSmall
+                        }
+                    }
+                }
+
+                onTriggered: {
+                    root.addWidget(String(modelData.id))
+                    addMenu.close()
+                }
             }
+
+            onObjectAdded: (index, object) =>
+                addMenu.insertItem(index, object)
+            onObjectRemoved: (index, object) =>
+                addMenu.removeItem(object)
         }
     }
 }
