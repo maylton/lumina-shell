@@ -3,9 +3,11 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.design
 import qs.services.niri
 import qs.stores.config
 import qs.stores.niri
+import qs.stores.shell
 import "BarSurfacePolicy.js" as BarSurfacePolicy
 
 Scope {
@@ -19,6 +21,7 @@ Scope {
                 id: panel
 
                 required property var modelData
+                readonly property var luminaDesign: Theme.luminaTokens
                 readonly property string outputName: modelData && modelData.name
                     ? String(modelData.name)
                     : ""
@@ -35,6 +38,8 @@ Scope {
                     : WindowStore.focusedWindow
                 readonly property bool showActionError: NiriService.actionFeedbackVisible
                     && NiriService.lastActionError.length > 0
+                readonly property bool backdropActive:
+                    OverlayStore.isBackdropActiveFor(outputName)
                 readonly property string effectiveSurfaceMode:
                     ConfigStore.barSurfaceMode
                 readonly property int effectiveMargin:
@@ -127,6 +132,26 @@ Scope {
                         columnLabel: panel.columnLabel
                         workspaceLabel: panel.activeWorkspaceLabel
                         showActionError: panel.showActionError
+                    }
+                }
+
+                Rectangle {
+                    id: backdropLayer
+
+                    anchors.fill: barSurface
+                    z: 10
+                    visible: opacity > 0
+                    opacity: panel.backdropActive ? 1 : 0
+                    radius: barSurface.radius
+                    color: panel.luminaDesign.color.scrim
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration:
+                                panel.luminaDesign.motion.effectsDefault
+                            easing.type:
+                                panel.luminaDesign.motion.effectsEasing
+                        }
                     }
                 }
             }
