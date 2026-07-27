@@ -32,7 +32,11 @@ Singleton {
     }
 
     function openFor(outputName) {
-        OverlayStore.openFor("session", resolvedOutputName(outputName))
+        OverlayStore.openFor(
+            "session",
+            resolvedOutputName(outputName),
+            true
+        )
     }
 
     function close() {
