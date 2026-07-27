@@ -138,22 +138,53 @@ Rectangle {
     Controls.Popup {
         id: addPopup
 
-        readonly property point anchorTopLeft:
+        readonly property point overlaySceneOrigin: parent
+            ? parent.mapToItem(null, 0, 0)
+            : Qt.point(0, 0)
+        readonly property point anchorTopLeftScene:
             root.mapToItem(null, 0, 0)
-        readonly property point anchorBottomRight:
+        readonly property point anchorBottomRightScene:
             root.mapToItem(null, root.width, root.height)
+        readonly property point anchorTopLeft: Qt.point(
+            anchorTopLeftScene.x - overlaySceneOrigin.x,
+            anchorTopLeftScene.y - overlaySceneOrigin.y
+        )
+        readonly property point anchorBottomRight: Qt.point(
+            anchorBottomRightScene.x - overlaySceneOrigin.x,
+            anchorBottomRightScene.y - overlaySceneOrigin.y
+        )
         readonly property real edgeMargin:
             root.luminaDesign.spacing.medium
-        readonly property real preferredBelow:
-            anchorBottomRight.y + root.luminaDesign.spacing.small
-        readonly property real preferredAbove:
-            anchorTopLeft.y - height - root.luminaDesign.spacing.small
-        readonly property real maximumHeight: parent
+        readonly property real popupGap:
+            root.luminaDesign.spacing.small
+        readonly property real naturalHeight:
+            Math.max(96, root.widgets.length * 66)
+                + root.luminaDesign.spacing.medium * 2
+        readonly property real availableBelow: parent
             ? Math.max(
-                160,
-                Math.min(460, parent.height - edgeMargin * 2)
+                0,
+                parent.height - edgeMargin
+                    - anchorBottomRight.y - popupGap
             )
-            : 460
+            : 0
+        readonly property real availableAbove: parent
+            ? Math.max(
+                0,
+                anchorTopLeft.y - edgeMargin - popupGap
+            )
+            : 0
+        readonly property bool openBelow:
+            availableBelow >= Math.min(220, naturalHeight)
+                || availableBelow >= availableAbove
+        readonly property real maximumHeight: Math.max(
+            96,
+            Math.min(
+                400,
+                openBelow ? availableBelow : availableAbove
+            )
+        )
+        readonly property real anchorCenterX:
+            (anchorTopLeft.x + anchorBottomRight.x) / 2
 
         parent: Controls.Overlay.overlay
         x: parent
@@ -161,28 +192,23 @@ Rectangle {
                 edgeMargin,
                 Math.min(
                     parent.width - width - edgeMargin,
-                    anchorBottomRight.x - width
+                    anchorCenterX - width / 2
                 )
             )
             : 0
         y: parent
-            ? preferredBelow + height
-                <= parent.height - edgeMargin
-                    ? preferredBelow
-                    : Math.max(
-                        edgeMargin,
-                        Math.min(
-                            parent.height - height - edgeMargin,
-                            preferredAbove
-                        )
-                    )
+            ? Math.max(
+                edgeMargin,
+                Math.min(
+                    parent.height - height - edgeMargin,
+                    openBelow
+                        ? anchorBottomRight.y + popupGap
+                        : anchorTopLeft.y - height - popupGap
+                )
+            )
             : 0
         width: Math.min(380, Math.max(320, root.width))
-        height: Math.min(
-            Math.max(96, root.widgets.length * 66)
-                + root.luminaDesign.spacing.medium * 2,
-            maximumHeight
-        )
+        height: Math.min(naturalHeight, maximumHeight)
         padding: root.luminaDesign.spacing.medium
         focus: true
         closePolicy:
