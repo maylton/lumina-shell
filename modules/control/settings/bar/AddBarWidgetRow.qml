@@ -143,11 +143,39 @@ Rectangle {
         x: 0
         y: root.height + root.luminaDesign.spacing.small
         width: Math.min(420, root.width)
+        padding: root.luminaDesign.spacing.small
         cascade: false
         focus: true
         closePolicy:
             Controls.Popup.CloseOnEscape
                 | Controls.Popup.CloseOnPressOutside
+
+        enter: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: root.luminaDesign.motion.effectsDefault
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+
+        exit: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: root.luminaDesign.motion.effectsFast
+                easing.type: root.luminaDesign.motion.effectsEasing
+            }
+        }
+
+        background: Rectangle {
+            radius: root.luminaDesign.shape.large
+            color: root.luminaDesign.color.surfaceContainer
+            border.width: 1
+            border.color: root.luminaDesign.color.outline
+        }
 
         onOpened: {
             root.openPending = false
@@ -172,21 +200,106 @@ Rectangle {
         Controls.MenuItem {
             visible: !root.hasWidgets
             enabled: false
-            text: I18n.tr(
-                "settings.bar.widget.addEmpty",
-                "All widgets are already in this area"
-            )
+            implicitHeight:
+                root.luminaDesign.size.settingsMenuItemHeight
+            leftPadding: root.luminaDesign.spacing.large
+            rightPadding: root.luminaDesign.spacing.large
+
+            background: Rectangle {
+                radius: root.luminaDesign.shape.medium
+                color: "transparent"
+            }
+
+            contentItem: Text {
+                text: I18n.tr(
+                    "settings.bar.widget.addEmpty",
+                    "All widgets are already in this area"
+                )
+                color: root.luminaDesign.color.textMuted
+                elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize:
+                    root.luminaDesign.typography.labelMedium
+                font.weight: Font.Medium
+            }
         }
 
         Instantiator {
             model: root.widgets
 
             delegate: Controls.MenuItem {
+                id: widgetMenuItem
+
                 required property var modelData
 
-                text: String(modelData.title)
+                implicitHeight: Math.max(
+                    root.luminaDesign.size.settingsMenuItemHeight,
+                    52
+                )
+                leftPadding: root.luminaDesign.spacing.medium
+                rightPadding: root.luminaDesign.spacing.medium
+
+                Accessible.name: String(modelData.title)
                 Accessible.description:
                     String(modelData.description)
+
+                background: Rectangle {
+                    radius: root.luminaDesign.shape.medium
+                    color: widgetMenuItem.highlighted
+                        ? root.luminaDesign.color.surfaceMuted
+                        : "transparent"
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration:
+                                root.luminaDesign.motion.effectsFast
+                            easing.type:
+                                root.luminaDesign.motion.effectsEasing
+                        }
+                    }
+                }
+
+                contentItem: Row {
+                    spacing: root.luminaDesign.spacing.medium
+
+                    DashboardIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        iconName: String(widgetMenuItem.modelData.icon)
+                        fallbackSymbol: "+"
+                        iconColor: root.luminaDesign.color.primary
+                        iconSize: 18
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                            - root.luminaDesign.spacing.medium
+                            - 22
+                        spacing: 1
+
+                        Text {
+                            width: parent.width
+                            text: String(widgetMenuItem.modelData.title)
+                            color: root.luminaDesign.color.onSurface
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelMedium
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: String(
+                                widgetMenuItem.modelData.description
+                            )
+                            color: root.luminaDesign.color.textMuted
+                            elide: Text.ElideRight
+                            font.pixelSize:
+                                root.luminaDesign.typography.labelSmall
+                        }
+                    }
+                }
+
                 onTriggered: {
                     root.addWidget(String(modelData.id))
                     addMenu.close()
