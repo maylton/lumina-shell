@@ -112,7 +112,7 @@ Singleton {
             settingsCategory = "appearance"
         }
 
-        OverlayStore.openFor("control", outputName)
+        OverlayStore.openFor("control", outputName, true)
     }
 
     function close() {
